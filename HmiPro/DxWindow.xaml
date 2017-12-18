@@ -17,7 +17,6 @@
     <dx:DXWindow.DataContext>
         <viewModels:DxWindowViewModel/>
     </dx:DXWindow.DataContext>
-
     <dxmvvm:Interaction.Triggers>
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnViewLoadedCommand}" />
     </dxmvvm:Interaction.Triggers>
@@ -43,4 +42,5 @@
         </Grid.RowDefinitions>
         <dxwui:NavigationFrame Grid.Row="1"  x:Name="frame" AnimationType="SlideHorizontal" BackNavigationMode="Root" />
     </Grid>
+
 </dx:DXWindow>

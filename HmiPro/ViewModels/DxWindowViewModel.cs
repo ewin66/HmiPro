@@ -32,6 +32,7 @@ namespace HmiPro.ViewModels {
                     JumpAppSettingView("程序设置");
                 }
             });
+
         }
 
         /// <summary>
@@ -69,6 +70,18 @@ namespace HmiPro.ViewModels {
         /// </summary>
         public void OnViewLoaded() {
             Navigate("HomeView");
+            using (var ctx = SqliteHelper.CreateSqliteService()) {
+                var setting = ctx.Settings.ToList().LastOrDefault();
+                if (setting == null) {
+                    Store.Dispatch(new SysActions.ShowSettingView());
+                } else {
+                    try {
+                        MachineConfig.Load(setting.MachineXlsPath);
+                    } catch (Exception e) {
+                        Store.Dispatch(new SysActions.ShowSettingView());
+                    }
+                }
+            }
         }
 
         /// <summary>

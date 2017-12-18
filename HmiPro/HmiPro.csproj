@@ -144,6 +144,7 @@
     <Compile Include="Config\MachineConfig.cs" />
     <Compile Include="Config\Models\Machine.cs" />
     <Compile Include="Config\Models\Setting.cs" />
+    <Compile Include="Converts\CoefConvert.cs" />
     <Compile Include="DxWindow.xaml.cs">
       <DependentUpon>DxWindow.xaml</DependentUpon>
     </Compile>
@@ -167,6 +168,8 @@
     <Compile Include="Redux\ReduxIoc.cs" />
     <Compile Include="Redux\Reducers\CpmReducer.cs" />
     <Compile Include="Redux\Services\CpmService.cs" />
+    <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
+    <Compile Include="ViewModels\DMes\Tab\CpmsTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />
     <Compile Include="Views\DMes\DMesManuView.xaml.cs">
       <DependentUpon>DMesManuView.xaml</DependentUpon>

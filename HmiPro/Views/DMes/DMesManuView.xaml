@@ -5,9 +5,56 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
              xmlns:dMes="clr-namespace:HmiPro.ViewModels.DMes"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:converts="clr-namespace:HmiPro.Converts"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:Model="clr-namespace:HmiPro.ViewModels.DMes.Tab"
              mc:Ignorable="d"
              DataContext="{dxmvvm:ViewModelSource Type=dMes:DMesManuViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-    </Grid>
+    <UserControl.Resources>
+        <converts:CoefConverter x:Key="ConverterCoef"/>
+    </UserControl.Resources>
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:DispatcherService />
+        <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
+        <dxmvvm:EventToCommand EventName="ContentRendered" Command="{Binding OnContentRenderedCommand}"/>
+    </dxmvvm:Interaction.Behaviors>
+    <dxwui:PageAdornerControl  Header="实时监控" ShowBackButton="True">
+        <Grid>
+            <Grid.Resources>
+                <DataTemplate x:Key="TabHeader">
+                    <TextBlock Text="{Binding Path=Header}" FontWeight="Medium"/>
+                </DataTemplate>
+            </Grid.Resources>
+            <dx:DXTabControl ItemsSource="{Binding Path=ViewSource}" ItemHeaderTemplate="{StaticResource TabHeader}" >
+                <dx:DXTabControl.Resources>
+                    <!--采集参数页面-->
+                    <DataTemplate DataType="{x:Type Model:CpmsTab}">
+                        <dxlc:FlowLayoutControl ItemsSource="{Binding Path=Cpms}" x:Name="CtrlInstParam" Orientation="Horizontal">
+                            <dxlc:FlowLayoutControl.ItemTemplate>
+                                <DataTemplate>
+                                    <materialDesign:Card
+                                        Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type dxlc:FlowLayoutControl}},Path=ActualWidth,
+                                Converter={StaticResource ConverterCoef},ConverterParameter=0.23}"
+                                                                            Margin="4,4,0,0"
+                                        Padding="8"
+                                        Background="{DynamicResource MaterialDesignDarkBackground}"
+                                        Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+                                        UniformCornerRadius="6">
+                                        <StackPanel>
+                                            <TextBlock  TextWrapping="Wrap"><Run Text="{Binding Path=Name}"/>: <Run Foreground="Yellow" Text="{Binding Path=Value}"></Run></TextBlock>
+                                        </StackPanel>
+                                    </materialDesign:Card>
+                                </DataTemplate>
+                            </dxlc:FlowLayoutControl.ItemTemplate>
+                        </dxlc:FlowLayoutControl>
+
+                    </DataTemplate>
+                </dx:DXTabControl.Resources>
+            </dx:DXTabControl>
+        </Grid>
+    </dxwui:PageAdornerControl>
 </UserControl>

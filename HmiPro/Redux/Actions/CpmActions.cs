@@ -67,8 +67,14 @@ namespace HmiPro.Redux.Actions {
         /// </summary>
         public struct CpmUpdatedAll : IAction {
             public List<Cpm> Cpms;
+            public string MachineCode;
             public string Type() {
                 return CPMS_UPDATED_ALL;
+            }
+
+            public CpmUpdatedAll(string code, List<Cpm> cpms) {
+                MachineCode = code;
+                Cpms = cpms;
             }
         }
 
@@ -78,6 +84,14 @@ namespace HmiPro.Redux.Actions {
         public struct CpmUpdateDiff : IAction {
             public string Type() {
                 return CPMS_UPDATED_DIFF;
+            }
+
+            public List<Cpm> Cpms;
+            public string MachineCode;
+
+            public CpmUpdateDiff(string code, List<Cpm> cpms) {
+                Cpms = cpms;
+                MachineCode = code;
             }
         }
 

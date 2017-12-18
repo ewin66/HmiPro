@@ -36,8 +36,8 @@ namespace HmiPro.Config.Models {
         /// <param name="sheetName"></param>
         public void InitCodeAndIp(string path, string sheetName) {
             var propDict = xlsToMachine(path, sheetName);
-            Code = propDict[nameof(Code)].ToString();
-            CpmIps = propDict[nameof(CpmIps)].ToString().Split('|');
+            Code = propDict["MachineCode"].ToString();
+            CpmIps = propDict["CpmIps"].ToString().Split('|');
         }
 
         IDictionary<string, object> xlsToMachine(string xlsPath, string sheetName) {

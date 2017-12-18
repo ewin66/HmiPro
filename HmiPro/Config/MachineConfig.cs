@@ -20,6 +20,7 @@ namespace HmiPro.Config {
         /// 所有机台字典，键为机台编码
         /// </summary>
         public static IDictionary<string, Machine> MachineDict;
+        public static IDictionary<string, string> IpToMachineCodeDict;
 
         /// <summary>
         /// 每个机台的报警ip字典
@@ -28,13 +29,16 @@ namespace HmiPro.Config {
 
         public static void Load(string path) {
             MachineDict = new Dictionary<string, Machine>();
+            IpToMachineCodeDict = new Dictionary<string, string>();
             var codes = Path.GetFileNameWithoutExtension(path).Split('_');
-            IDictionary<string, Machine> machineDict = new Dictionary<string, Machine>();
             foreach (var code in codes) {
                 var machine = new Machine();
                 machine.InitCpmDict(path, $"{code}_采集参数");
                 machine.InitCodeAndIp(path, $"{code}_机台属性");
-                machineDict[code] = machine;
+                MachineDict[code] = machine;
+                foreach (var ip in machine.CpmIps) {
+                    IpToMachineCodeDict[ip] = code;
+                }
             }
         }
     }

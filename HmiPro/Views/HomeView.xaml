@@ -13,12 +13,21 @@
              DataContext="{dxmvvm:ViewModelSource Type={x:Type viewModels:HomeViewModel}}"
              d:DesignHeight="600" d:DesignWidth="800">
     <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:ApplicationJumpListService ShowFrequentCategory="True" ShowRecentCategory="True"/>
+        <dx:DialogService DialogWindowStartupLocation="CenterScreen">
+            <dx:DialogService.DialogStyle>
+                <Style TargetType="Window">
+                    <Setter Property="SizeToContent" Value="WidthAndHeight" />
+                    <Setter Property="ResizeMode" Value="CanMinimize" />
+                </Style>
+            </dx:DialogService.DialogStyle>
+        </dx:DialogService>
         <dx:DXMessageBoxService />
         <dxmvvm:DispatcherService />
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
     </dxmvvm:Interaction.Behaviors>
 
-    <dxwui:PageAdornerControl  Padding="-32,-30,-32,-42" ShowBackButton="False" Header="启东车间电子看板" >
+    <dxwui:PageAdornerControl  Padding="-32,-30,-32,-42" ShowBackButton="False" Header="DMes 系统 v3.0" >
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -26,7 +35,7 @@
             </Grid.RowDefinitions>
 
             <dxlc:TileLayoutControl Grid.Row="1" Padding="32,50,30,10" >
-                <dxlc:Tile Header="DMes系统" Size="ExtraLarge" Style="{StaticResource HorizontalTile}" Background="#FF54AF0E"  Command="{Binding NavigateCommand}" CommandParameter="DMesManuView">
+                <dxlc:Tile Header="生产管理" Size="ExtraLarge" Style="{StaticResource HorizontalTile}" Background="#FF54AF0E"  Command="{Binding NavigateCommand}" CommandParameter="DMesManuView">
                     <BitmapImage UriSource="{Binding Assets.IconMonitor}" />
                 </dxlc:Tile>
                 <dxlc:Tile Header="呼叫管理" Style="{StaticResource HorizontalTile}" Background="#00b8d4"  Command="{Binding NavigateCommand}" CommandParameter="CallView">

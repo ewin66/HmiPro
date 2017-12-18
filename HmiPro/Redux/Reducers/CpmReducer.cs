@@ -29,6 +29,8 @@ namespace HmiPro.Redux.Reducers {
             /// </summary>
             public List<Cpm> UpdatedCpmsDiff;
 
+            public string MachineCode;
+
         }
 
 
@@ -47,6 +49,14 @@ namespace HmiPro.Redux.Reducers {
             }).When<CpmActions.StartServerFailed>((state, action) => {
                 state.UpdatedCpmsAll.Clear();
                 state.UpdatedCpmsDiff.Clear();
+                return state;
+            }).When<CpmActions.CpmUpdateDiff>((state, action) => {
+                state.UpdatedCpmsDiff = action.Cpms;
+                state.MachineCode = action.MachineCode;
+                return state;
+            }).When<CpmActions.CpmUpdatedAll>((state, action) => {
+                state.UpdatedCpmsAll = action.Cpms;
+                state.MachineCode = action.MachineCode;
                 return state;
             });
         }
