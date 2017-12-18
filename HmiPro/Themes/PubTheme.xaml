@@ -1,0 +1,14 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol">
+    <Style TargetType="{x:Type dxlc:Tile}">
+        <Setter Property="FontFamily" Value="微软雅黑" />
+    </Style>
+    <Style TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="微软雅黑"></Setter>
+    </Style>
+    <Style TargetType="Run">
+        <Setter Property="FontFamily" Value="微软雅黑"></Setter>
+        <Setter Property="FontSize" Value="15"></Setter>
+    </Style>
+</ResourceDictionary>

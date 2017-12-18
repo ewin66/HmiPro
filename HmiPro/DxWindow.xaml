@@ -1,0 +1,46 @@
+﻿<dx:DXWindow
+    x:Class="HmiPro.DxWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+    xmlns:navigation="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
+    xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+    xmlns:viewModels="clr-namespace:HmiPro.ViewModels"
+    xmlns:View="clr-namespace:HmiPro.Views.Dx"
+    ShowIcon="False"
+    ShowTitle="False"
+    dx:ThemeManager.ThemeName="TouchlineDark"
+    Title="Hmi Pro Dev By Ychost"
+    >
+
+    <dx:DXWindow.DataContext>
+        <viewModels:DxWindowViewModel/>
+    </dx:DXWindow.DataContext>
+
+    <dxmvvm:Interaction.Triggers>
+        <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnViewLoadedCommand}" />
+    </dxmvvm:Interaction.Triggers>
+
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:ApplicationJumpListService ShowFrequentCategory="True" ShowRecentCategory="True"/>
+        <dx:DialogService DialogWindowStartupLocation="CenterScreen">
+            <dx:DialogService.DialogStyle>
+                <Style TargetType="Window">
+                    <Setter Property="SizeToContent" Value="WidthAndHeight" />
+                    <Setter Property="ResizeMode" Value="CanMinimize" />
+                </Style>
+            </dx:DialogService.DialogStyle>
+        </dx:DialogService>
+        <dxwui:WinUIMessageBoxService/>
+        <navigation:FrameNavigationService Frame="{Binding ElementName=frame}" />
+        <dx:DXSplashScreenService SplashScreenType="{x:Type View:LoadingWindow}" />
+    </dxmvvm:Interaction.Behaviors>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <dxwui:NavigationFrame Grid.Row="1"  x:Name="frame" AnimationType="SlideHorizontal" BackNavigationMode="Root" />
+    </Grid>
+</dx:DXWindow>
