@@ -18,8 +18,7 @@ namespace HmiPro.Config.Models {
         public int Code;
         public string Name;
         public string Unit;
-        public bool IsShow = true;
-        public bool IsToInfluxhDb = true;
+        public string[] AlarmBomKey;
 
         private CpmInfoMethodName? methodName;
         public CpmInfoMethodName? MethodName {
@@ -230,17 +229,18 @@ namespace HmiPro.Config.Models {
     }
 
     public enum CpmInfoLogic {
+        //速度导数，只要有速度，则这个存在
+        //非配置类型
+        SpeedDerivative = -1,
+        SpeedStdDev = -2,
         //默认
         Default = 0,
         //记米
         NoteMeter = 1,
         //生产速度，比如线速度等等
         Speed = 2,
-        //速度导数，只要有速度，则这个存在
-        //非配置类型
-        SpeedDerivative = -1,
-        SpeedStdDev = -2,
-        WireDiameter = 3,
+        //Od值
+        Od = 3,
         //放线
         StartRfid = 4,
         //收线
@@ -340,10 +340,12 @@ namespace HmiPro.Config.Models {
                     cpmInfo.MethodName = string.IsNullOrEmpty(cpmStr.MethodName) ? default(CpmInfoMethodName?) : (CpmInfoMethodName)int.Parse(cpmStr.MethodName);
                     //算法参数（字符串）
                     cpmInfo.MethodParamStrs = string.IsNullOrEmpty(cpmStr.MethodParams) ? null : cpmStr.MethodParams.Split(new string[] { methodParamSplitor }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                    //是否显示
-                    cpmInfo.IsShow = string.IsNullOrEmpty(cpmStr.IsShow) ? true : bool.Parse(cpmStr.IsShow);
-                    //是否放入InfluxDb
-                    cpmInfo.IsToInfluxhDb = string.IsNullOrEmpty(cpmStr.IsToInfluxDb) ? false : bool.Parse(cpmStr.IsToInfluxDb);
+                    //报警的Bom内容的Key
+                    //cpmInfo.AlarmBomKey = cpmStr.Alarm;
+                    if (!string.IsNullOrEmpty(cpmStr.Alarm)) {
+                        cpmInfo.AlarmBomKey = cpmStr.Alarm.Trim().Split('|');
+                    }
+
                     //算法参数（计算型）
                     if (IsRelateMethod(cpmInfo.MethodName)) {
                         cpmInfo.MethodParamInts = new List<int>(cpmInfo.MethodParamStrs.Count);
@@ -372,9 +374,7 @@ namespace HmiPro.Config.Models {
                 MethodName = row["算法"].ToString(),
                 MethodParams = row["算法参数"].ToString(),
                 Logic = row["逻辑类型"].ToString(),
-                IsShow = row["是否显示"].ToString(),
-                IsToInfluxDb = row["是否放入InfluxDb"].ToString()
-
+                Alarm = row["报警配置"].ToString(),
             };
         }
 
@@ -390,9 +390,6 @@ namespace HmiPro.Config.Models {
             dt.Columns.Add("算法参数");
             dt.Columns.Add("算法");
             dt.Columns.Add("逻辑类型");
-            dt.Columns.Add("是否显示");
-            dt.Columns.Add("是否放入InfluxDb");
-
             return dt;
         }
     }
@@ -407,7 +404,6 @@ namespace HmiPro.Config.Models {
         public string MethodName;
         public string MethodParams;
         public string Logic;
-        public string IsShow;
-        public string IsToInfluxDb;
+        public string Alarm;
     }
 }

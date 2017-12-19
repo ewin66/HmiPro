@@ -30,7 +30,17 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public string totalPower { get; set; }
 
+        /// <summary>
+        /// 电流
+        /// </summary>
+        public string currentA { get; set; }
+        public string currentB { get; set; }
+        public string currentC { get; set; }
 
+        /// <summary>
+        /// 直径
+        /// </summary>
+        public string diameter { get; set; }
     }
     /// <summary>
     /// 单个参数信息

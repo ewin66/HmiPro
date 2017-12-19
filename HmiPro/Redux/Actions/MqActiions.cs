@@ -19,29 +19,46 @@ namespace HmiPro.Redux.Actions {
         public static readonly string START_LISTEN_SCH_TASK_SUCCESS = "[Mq] Start Listen Schedule Task Success";
         public static readonly string START_LISTEN_SCH_TASK_FAILED = "[Mq] Start Listen Schedule Task Failed";
         public static readonly string SCH_TASK_ACCEPT = "[Mq] Schedule Task Accept";
+
+        //监听来料信息
+        public static readonly string SCAN_MATERIAL_ACCEPT = "[Mq] Scan Material Accept";
+        public static readonly string START_LISTEN_SCAN_MATERIAL = "[Mq] Start Scan Material";
+        public static readonly string START_LISTEN_SCAN_MATERIAL_SUCCESS = "[Mq] Start Scan Material Success";
+        public static readonly string START_LISTEN_SCAN_MATERIAL_FAILED = "[Mq] Start Scan Material Failed";
+
         //上传采集参数
-        public static readonly string UPLOAD_CPMS = "[Mq] Upload Cpms";
-        public static readonly string UPLOAD_CPMS_SUCCESS = "[Mq] Upload Cpms Success";
-        public static readonly string UPLOAD_CPMS_FAILED = "[Mq] Upload Cpms Failed";
-        public static readonly string START_UPLOAD_CPMS_INTERVAL = "[Mq] Upload Cpms Interval";
+        public static readonly string UPLOAD_CPMS = "[Mq] Upload Cpms To Mq";
+        public static readonly string UPLOAD_CPMS_SUCCESS = "[Mq] Upload Cpms To Mq Success";
+        public static readonly string UPLOAD_CPMS_FAILED = "[Mq] Upload Cpms To Mq Failed";
+        public static readonly string START_UPLOAD_CPMS_INTERVAL = "[Mq] Start Upload Cpms Interval";
+
+
 
         public struct StartListenSchTask : IAction {
             public string Type() => START_LISTEN_SCH_TASK;
             public string QueueName;
+            public string MachineCode;
 
-            public StartListenSchTask(string queueName) {
+            public StartListenSchTask(string machineCode, string queueName) {
                 QueueName = queueName;
+                MachineCode = machineCode;
             }
 
         }
 
         public struct StartListenSchTaskSuccess : IAction {
             public string Type() => START_LISTEN_SCH_TASK_SUCCESS;
+            public string MachineCode;
+
+            public StartListenSchTaskSuccess(string machineCode) {
+                MachineCode = machineCode;
+            }
         }
 
         public struct StartListenSchTaskFailed : IAction {
             public string Type() => START_LISTEN_SCH_TASK_FAILED;
             public Exception Exp;
+            public string MachineCode;
         }
 
         public struct SchTaskAccept : IAction {
@@ -83,5 +100,41 @@ namespace HmiPro.Redux.Actions {
                 Interval = interval;
             }
         }
+
+        public struct StartListenScanMaterial : IAction {
+            public string Type() => START_LISTEN_SCAN_MATERIAL;
+            public string MachineCode;
+            public string QueueName;
+
+            public StartListenScanMaterial(string machineCode, string queueName) {
+                MachineCode = machineCode;
+                QueueName = queueName;
+            }
+        }
+
+        public struct StartListenScanMaterialSuccess : IAction {
+            public string Type() => START_LISTEN_SCAN_MATERIAL_SUCCESS;
+            public string MachineCode;
+
+            public StartListenScanMaterialSuccess(string machineCode) {
+                MachineCode = machineCode;
+            }
+        }
+
+        public struct StartListenScanMaterialFailed : IAction {
+            public string Type() => START_LISTEN_SCAN_MATERIAL_FAILED;
+            public Exception Exp;
+            public string MachineCode;
+        }
+
+        public struct ScanMaterialAccpet : IAction {
+            public string Type() => SCAN_MATERIAL_ACCEPT;
+            public MqScanMaterial ScanMaterial;
+
+            public ScanMaterialAccpet(MqScanMaterial material) {
+                ScanMaterial = material;
+            }
+        }
+
     }
 }

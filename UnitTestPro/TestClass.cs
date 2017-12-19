@@ -11,6 +11,7 @@ namespace UnitTestPro {
 
     public struct TestStruct {
         public string Name;
+        public TestClass TestClass;
     }
 
 }

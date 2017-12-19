@@ -31,6 +31,7 @@ namespace HmiPro.Config {
         public static void Load(string path) {
             MachineDict = new Dictionary<string, Machine>();
             IpToMachineCodeDict = new Dictionary<string, string>();
+            AlarmIpDict = new Dictionary<string, string>();
             var codes = Path.GetFileNameWithoutExtension(path).Split('_');
             AllMachineName = Path.GetFileNameWithoutExtension(path);
             foreach (var code in codes) {
@@ -40,6 +41,9 @@ namespace HmiPro.Config {
                 MachineDict[code] = machine;
                 foreach (var ip in machine.CpmIps) {
                     IpToMachineCodeDict[ip] = code;
+                    if (ip.EndsWith("100")) {
+                        AlarmIpDict[code] = ip;
+                    }
                 }
             }
         }

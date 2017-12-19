@@ -51,7 +51,7 @@ namespace HmiPro {
                         Logger.Debug("Redux Current Action: " + s.Type);
                     }
                     AppState.ExectedActions[s.Type] = DateTime.Now;
-                }
+                } 
             });
 
             Console.WriteLine("Welcom To DMes V3.0");

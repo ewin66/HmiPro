@@ -40,5 +40,9 @@ namespace HmiPro.Redux.Services {
 
             App.Store.Dispatch(new MqActiions.SchTaskAccept(schTask));
         }
+
+        public void ScanMaterialAccept(string json) {
+
+        }
     }
 }

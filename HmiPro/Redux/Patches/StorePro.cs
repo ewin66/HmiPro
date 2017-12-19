@@ -91,7 +91,9 @@ namespace HmiPro.Redux.Patches {
         public new Unsubscribe Subscribe(StateChangedSubscriber<T> subscription) {
             subscriptions.Add(subscription);
             //立即返回存储的状态
-            subscription(state);
+            if (state.Type != null) {
+                subscription(state);
+            }
             return () => { subscriptions.Remove(subscription); };
         }
 

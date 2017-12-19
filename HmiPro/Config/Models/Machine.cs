@@ -26,8 +26,8 @@ namespace HmiPro.Config.Models {
         public IDictionary<int, CpmInfoLogic> CodeToLogicDict = new Dictionary<int, CpmInfoLogic>();
         //编码：[算法参数编码]
         public IDictionary<int, List<int>> CodeMethodDict = new Dictionary<int, List<int>>();
-        //需要输送到 InfluxDb 中德参数
-        public IDictionary<int, CpmInfo> ToInfluxDict = new Dictionary<int, CpmInfo>();
+        //需要报警的参数
+        public IDictionary<int, CpmInfo> CodeToAlarmCpmDict = new Dictionary<int, CpmInfo>();
 
         /// <summary>
         /// 初始化机台属性，如机台编码，底层ip等等
@@ -91,8 +91,11 @@ namespace HmiPro.Config.Models {
                         codeList.Add(code);
                     });
                 }
-                //所有数据都保存
-                ToInfluxDict[cpm.Code] = cpm;
+                //需要报警参数
+                if (cpm.AlarmBomKey != null) {
+                    CodeToAlarmCpmDict[cpm.Code] = cpm;
+                }
+
             });
             validCodeMethodDict();
             buildLogicDict();

@@ -11,6 +11,7 @@ using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
 using HmiPro.Redux.Services;
 using Newtonsoft.Json;
+using Reducto;
 using YCsharp.Service;
 using YCsharp.Util;
 
@@ -25,6 +26,8 @@ namespace HmiPro.Redux.Effects {
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartListenSchTask> StartListenSchTask;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadCpms> UploadCpms;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartUploadCpmsInterval> StartUploadCpmsInterval;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartListenScanMaterial> StartListenScanMaterial;
+
 
         public MqEffects(MqService mqService) {
             UnityIocService.AssertIsFirstInject(GetType());
@@ -34,6 +37,23 @@ namespace HmiPro.Redux.Effects {
             initSchTaskEffect();
             initUploadCpmsEffect();
             initStartUploadCpmsIntervalEffect();
+            initStartListenScanMaterial();
+        }
+
+        void initStartListenScanMaterial() {
+            StartListenScanMaterial =
+                App.Store.asyncActionVoid<MqActiions.StartListenScanMaterial>(async (dispatch, getState, instance) => {
+                    await Task.Run(() => {
+                        dispatch(instance);
+                        try {
+                            activeMq.ListenP2PMessage(instance.QueueName, mqService.ScanMaterialAccept);
+                            App.Store.Dispatch(new MqActiions.StartListenScanMaterialSuccess(instance.MachineCode));
+                        } catch (Exception e) {
+                            App.Store.Dispatch(new MqActiions.StartListenScanMaterialFailed() { Exp = e, MachineCode = instance.MachineCode });
+
+                        }
+                    });
+                });
         }
 
         void initSchTaskEffect() {
@@ -43,9 +63,9 @@ namespace HmiPro.Redux.Effects {
                         dispatch(instance);
                         try {
                             activeMq.ListenP2PMessage(instance.QueueName, this.mqService.SchTaskAccept);
-                            dispatch(new MqActiions.StartListenSchTaskSuccess());
+                            dispatch(new MqActiions.StartListenSchTaskSuccess(instance.MachineCode));
                         } catch (Exception e) {
-                            dispatch(new MqActiions.StartListenSchTaskFailed() { Exp = e });
+                            dispatch(new MqActiions.StartListenSchTaskFailed() { Exp = e, MachineCode = instance.MachineCode });
                         }
                     });
                 });

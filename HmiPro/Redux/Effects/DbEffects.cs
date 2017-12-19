@@ -30,7 +30,12 @@ namespace HmiPro.Redux.Effects {
               async (dispatch, getState, instance) => {
                   await Task.Run(() => {
                       dispatch(instance);
-                      InfluxDbHelper.GetInfluxDbService().WriteCpms(instance.MachineCode, instance.Cpms.ToArray());
+                      bool success = InfluxDbHelper.GetInfluxDbService().WriteCpms(instance.MachineCode, instance.Cpms.ToArray());
+                      if (success) {
+                          App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbSuccess());
+                      } else {
+                          App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbFailed());
+                      }
                   });
               });
         }

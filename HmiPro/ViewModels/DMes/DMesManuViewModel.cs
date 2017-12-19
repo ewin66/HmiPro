@@ -19,17 +19,24 @@ namespace HmiPro.ViewModels.DMes {
         public virtual ObservableCollection<BaseTab> ViewSource { get; set; } = new ObservableCollection<BaseTab>();
         public virtual IDispatcherService DispatcherService => null;
         public readonly IDictionary<string, CpmsTab> CpmsTabDict = new Dictionary<string, CpmsTab>();
-
+        public readonly IDictionary<string, SchTaskTab> SchTaskTabDict = new Dictionary<string, SchTaskTab>();
+     
         public DMesManuViewModel() {
             foreach (var pair in MachineConfig.MachineDict) {
                 var cpmsTab = new CpmsTab() { Header = pair.Key + "_参数" };
+                var schTaskTab = new SchTaskTab() { Header = pair.Key + "_任务" };
                 //视图显示
                 ViewSource.Add(cpmsTab);
+                ViewSource.Add(schTaskTab);
                 //用字典提高查找效率
                 CpmsTabDict[pair.Key] = cpmsTab;
+                SchTaskTabDict[pair.Key] = schTaskTab;
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
             initSubscribes();
@@ -39,10 +46,29 @@ namespace HmiPro.ViewModels.DMes {
                 var code = pair.Key;
                 CpmsTabDict[code].BindSource(onlineCpmsDict[code]);
             }
+            var mqSchTask = App.Store.GetState().MqState.MqSchTaskDict;
+            foreach (var pair in mqSchTask) {
+                if (SchTaskTabDict.TryGetValue(pair.Key, out var tab)) {
+                    tab.Update(pair.Value);
+                }
+            }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private void initSubscribes() {
-
+            var sub1 = App.Store.Subscribe(s => {
+                if (s.Type == DMesActions.DMES_SCH_TASK_ASSIGN) {
+                    foreach (var pair in s.DMesState.MqSchTaskDict) {
+                        var machineCode = pair.Key;
+                        if (SchTaskTabDict.TryGetValue(machineCode, out var tab)) {
+                            tab.Update(pair.Value);
+                        }
+                    }
+                }
+            });
+            subscribes.Add(sub1);
         }
 
         public void OnClose(CancelEventArgs e) {

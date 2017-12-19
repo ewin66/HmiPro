@@ -5,10 +5,10 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Redux.Actions;
+using HmiPro.Redux.Cores;
 using HmiPro.Redux.Effects;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
-using HmiPro.Redux.Sbuscribers;
 using HmiPro.Redux.Services;
 using Reducto;
 using YCsharp.Service;
@@ -22,7 +22,8 @@ namespace HmiPro.Redux {
             var reducer = new CompositeReducer<AppState>()
                 .Part(s => s.CpmState, CpmReducer.Create())
                 .Part(s => s.SysState, SysReducer.Create())
-                .Part(s => s.MqState, MqReducer.Create());
+                .Part(s => s.MqState, MqReducer.Create())
+                .Part(s => s.AlarmState, AlarmReducer.Create())
             ;
 
 
@@ -30,7 +31,7 @@ namespace HmiPro.Redux {
 
             //== 设置依赖注入
             UnityIocService.RegisterGlobalDepend(storePro);
-            UnityIocService.RegisterGlobalDepend<CpmService>();
+            UnityIocService.RegisterGlobalDepend<CpmCore>();
             UnityIocService.RegisterGlobalDepend<CpmEffects>();
             UnityIocService.RegisterGlobalDepend<SysService>();
             UnityIocService.RegisterGlobalDepend<SysEffects>();
@@ -38,7 +39,7 @@ namespace HmiPro.Redux {
             UnityIocService.RegisterGlobalDepend<MqEffects>();
             UnityIocService.RegisterGlobalDepend<MockEffects>();
             UnityIocService.RegisterGlobalDepend<DbEffects>();
-            UnityIocService.RegisterGlobalDepend<CpmSubscribers>();
+            UnityIocService.RegisterGlobalDepend<DMesCore>();
         }
 
     }

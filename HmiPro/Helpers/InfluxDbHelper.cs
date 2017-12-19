@@ -64,6 +64,7 @@ namespace HmiPro.Helpers {
                 //fixed:不能插入时间
                 postData += YUtil.GetUtcTimestampMs(dateTime.Value) + "000000";
             }
+            postData = postData.Replace("/", "");
             var httpUri = $"{DbAddr}/write?db={DbName}";
             try {
                 using (var webClient = new WebClient()) {
@@ -82,6 +83,8 @@ namespace HmiPro.Helpers {
         /// <returns></returns>
         public byte[] WriteMulti(params string[] data) {
             var postData = string.Join("\n", data);
+            //fixed：字符异常
+            postData = postData.Replace("/", "");
             var httpUri = $"{DbAddr}/write?db={DbName}";
             try {
                 using (var webClient = new WebClient()) {

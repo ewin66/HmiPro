@@ -21,6 +21,9 @@ namespace HmiPro.Redux.Actions {
         public static readonly string STOP_SERVER = "[Cpm] Stop Server";
         public static readonly string STOP_SERVER_SUCCESS = "[Cpm] Stop Server Success";
         public static readonly string STOP_SERVER_FAILED = "[Cpm] Stop Server Failed";
+        public static readonly string NOTE_METER_DIFF_ACCEPT = "[Cpm] Note Meter Diff Accept";
+        public static readonly string NOTE_METER_ACCEPT = "[Cpm] Note Meter Accpet";
+        public static readonly string SPEED_ACCEPT = "[Cpm] Speed Accept";
 
         /// <summary>
         /// 初始化
@@ -44,6 +47,19 @@ namespace HmiPro.Redux.Actions {
             public StartServer(string ip, int port) {
                 Ip = ip;
                 Port = port;
+            }
+        }
+
+        /// <summary>
+        /// 某个ip有活动
+        /// </summary>
+        public struct CpmIpActivted : IAction {
+            public string Type() => CPMS_IP_ACTIVED;
+            public DateTime ActivedTime;
+            public string Ip;
+            public CpmIpActivted(string ip, DateTime time) {
+                ActivedTime = time;
+                Ip = ip;
             }
         }
 
@@ -127,5 +143,29 @@ namespace HmiPro.Redux.Actions {
             }
         }
 
+        /// <summary>
+        /// 记米变更
+        /// </summary>
+        public struct NoteMeterDiffAccept : IAction {
+            public string Type() => NOTE_METER_DIFF_ACCEPT;
+            public float Meter;
+            public string MachineCode;
+
+            public NoteMeterDiffAccept(string machineCode, float meter) {
+                Meter = meter;
+                MachineCode = machineCode;
+            }
+        }
+
+        public struct NoteMeterAccept : IAction {
+            public string Type() => NOTE_METER_ACCEPT;
+            public float Meter;
+            public string MachineCode;
+
+            public NoteMeterAccept(string machineCode, float meter) {
+                Meter = meter;
+                MachineCode = machineCode;
+            }
+        }
     }
 }

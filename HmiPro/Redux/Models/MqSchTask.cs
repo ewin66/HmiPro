@@ -63,9 +63,6 @@ namespace HmiPro.Redux.Models {
         /// bom 表信息
         /// </summary>
         public List<Dictionary<string, object>> bom { get; set; }
-
-
-
         /// <summary>
         /// 交货日期
         /// </summary>

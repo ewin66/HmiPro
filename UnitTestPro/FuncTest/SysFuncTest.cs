@@ -19,15 +19,16 @@ namespace UnitTestPro.FuncTest {
             string appleRef = apple;
             apple = "苹果";
             Console.WriteLine(appleRef);
-            TestClass test = new TestClass(){Name = "origin struct"};
+            TestClass test = new TestClass() { Name = "origin struct" };
             var testRef = test;
-            test = new TestClass(){Name = "changed struct"};
+            test = new TestClass() { Name = "changed struct" };
             Console.WriteLine(testRef.Name);
 
-            TestStruct tStruct = new TestStruct(){Name = "origin struct"};
+            TestStruct tStruct = new TestStruct() { Name = "origin struct", TestClass = new TestClass() };
             var refStruct = tStruct;
             refStruct.Name = "changed struct";
-            Console.WriteLine(tStruct.Name);
+            refStruct.TestClass = new TestClass();
+            Console.WriteLine(tStruct.TestClass.Name);
         }
     }
 }

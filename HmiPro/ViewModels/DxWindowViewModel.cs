@@ -10,11 +10,11 @@ using HmiPro.Config;
 using HmiPro.Config.Models;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
+using HmiPro.Redux.Cores;
 using HmiPro.Redux.Effects;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
-using HmiPro.Redux.Sbuscribers;
 using HmiPro.ViewModels.Sys;
 using HmiPro.Views.Sys;
 using Newtonsoft.Json;
@@ -97,13 +97,16 @@ namespace HmiPro.ViewModels {
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
             var mockEffects = UnityIocService.ResolveDepend<MockEffects>();
-            var cpmSubs = UnityIocService.ResolveDepend<CpmSubscribers>();
+            var cpmSubs = UnityIocService.ResolveDepend<DMesCore>();
             Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
             Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
-            //监听排产任务
             foreach (var pair in MachineConfig.MachineDict) {
-                var queName = @"QUEUE_" + pair.Key;
-                Store.Dispatch(mqEffects.StartListenSchTask(new MqActiions.StartListenSchTask(queName)));
+                //监听排产任务
+                var stQueueName = @"QUEUE_" + pair.Key;
+                Store.Dispatch(mqEffects.StartListenSchTask(new MqActiions.StartListenSchTask(stQueueName, pair.Key)));
+                //监听扫描物料信息
+                var smQueueName = $@"JUDGE_MATER_{pair.Key}";
+                Store.Dispatch(mqEffects.StartListenScanMaterial(new MqActiions.StartListenScanMaterial(pair.Key, smQueueName)));
             }
             Store.Dispatch(mqEffects.StartUploadCpmsInterval(new MqActiions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
             var task = YUtil.GetJsonObjectFromFile<MqSchTask>(AssetsHelper.GetAssets().MockMqSchTaskJson);

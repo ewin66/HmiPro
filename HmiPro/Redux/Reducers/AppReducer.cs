@@ -12,6 +12,8 @@ namespace HmiPro.Redux.Reducers {
         public CpmReducer.State CpmState;
         public SysReducer.State SysState;
         public MqReducer.State MqState;
+        public DMesReducer.State DMesState;
+        public AlarmReducer.State AlarmState;
         /// <summary>
         /// 保存所有执行的动作，
         /// Actions:ExectedTime

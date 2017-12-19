@@ -160,33 +160,41 @@
     <Compile Include="Helpers\MongoHelper.cs" />
     <Compile Include="Helpers\SqliteHelper.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Redux\Actions\AlarmActions.cs" />
     <Compile Include="Redux\Actions\AppActions.cs" />
     <Compile Include="Redux\Actions\CpmActions.cs" />
     <Compile Include="Redux\Actions\DbActions.cs" />
+    <Compile Include="Redux\Actions\DMesActions.cs" />
     <Compile Include="Redux\Actions\MockActions.cs" />
     <Compile Include="Redux\Actions\MqActiions.cs" />
     <Compile Include="Redux\Actions\SysActions.cs" />
+    <Compile Include="Redux\Effects\AlarmEffects.cs" />
     <Compile Include="Redux\Effects\CpmEffects.cs" />
     <Compile Include="Redux\Effects\DbEffects.cs" />
     <Compile Include="Redux\Effects\MockEffects.cs" />
     <Compile Include="Redux\Effects\MqEffects.cs" />
     <Compile Include="Redux\Effects\SysEffects.cs" />
     <Compile Include="Redux\Models\Cpm.cs" />
+    <Compile Include="Redux\Models\MqScanMaterial.cs" />
     <Compile Include="Redux\Models\MqSchTask.cs" />
     <Compile Include="Redux\Models\MqUploadCpms.cs" />
     <Compile Include="Redux\Models\Sys.cs" />
     <Compile Include="Redux\Patches\StorePro.cs" />
+    <Compile Include="Redux\Reducers\AlarmReducer.cs" />
     <Compile Include="Redux\Reducers\AppReducer.cs" />
+    <Compile Include="Redux\Reducers\DMesReducer.cs" />
     <Compile Include="Redux\Reducers\MqReducer.cs" />
     <Compile Include="Redux\Reducers\SysReducer.cs" />
     <Compile Include="Redux\ReduxIoc.cs" />
     <Compile Include="Redux\Reducers\CpmReducer.cs" />
-    <Compile Include="Redux\Sbuscribers\CpmSubscribers.cs" />
-    <Compile Include="Redux\Services\CpmService.cs" />
+    <Compile Include="Redux\Cores\DMesCore.cs" />
+    <Compile Include="Redux\Cores\CpmCore.cs" />
     <Compile Include="Redux\Services\MqService.cs" />
     <Compile Include="Redux\Services\SysService.cs" />
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\CpmsTab.cs" />
+    <Compile Include="ViewModels\DMes\Tab\SchTaskList.cs" />
+    <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />
     <Compile Include="Views\DMes\DMesManuView.xaml.cs">
       <DependentUpon>DMesManuView.xaml</DependentUpon>
@@ -522,7 +530,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

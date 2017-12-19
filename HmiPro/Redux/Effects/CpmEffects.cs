@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Redux.Actions;
+using HmiPro.Redux.Cores;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
 using HmiPro.Redux.Services;
@@ -16,15 +17,15 @@ namespace HmiPro.Redux.Effects {
         /// 异步启动服务
         /// </summary>
         public readonly StorePro<AppState>.AsyncActionNeedsParam<CpmActions.StartServer> StartServer;
-        public readonly CpmService CpmService;
+        public readonly CpmCore CpmCore;
 
-        public CpmEffects(StorePro<AppState> store, CpmService cpmService) {
-            CpmService = cpmService;
+        public CpmEffects(StorePro<AppState> store, CpmCore cpmCore) {
+            CpmCore = cpmCore;
             StorePro = store;
             StartServer = store.asyncActionVoid<CpmActions.StartServer>(async (dispatch, getState, startServer) => {
                 dispatch(startServer);
                 try {
-                    await cpmService.StartAsync(startServer.Ip,startServer.Port);
+                    await cpmCore.StartAsync(startServer.Ip,startServer.Port);
                     dispatch(new CpmActions.StartServerSuccess());
                 } catch (Exception e) {
                     dispatch(new CpmActions.StartServerFailed() { Exception = e });
