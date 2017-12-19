@@ -223,8 +223,8 @@ namespace YCsharp.Model.Procotol {
             }
             using (ActionLock.Lock()) {
                 try {
-                    if (ActionClientDict.ContainsKey(e.State.TcpClientIP)) {
-                        ActionClientDict.Remove(e.State.TcpClientIP);
+                    if (ActionClientDict.ContainsKey(e.Msg)) {
+                        ActionClientDict.Remove(e.Msg);
                     }
                 } catch (Exception ex) {
                     Console.WriteLine("移除命令客户端异常" + ex);

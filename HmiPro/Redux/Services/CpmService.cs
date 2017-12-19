@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
@@ -15,6 +17,7 @@ using YCsharp.Model.Procotol;
 using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
 using DevExpress.XtraPrinting.Native;
+using HmiPro.Redux.Effects;
 
 namespace HmiPro.Redux.Services {
     /// <summary>
@@ -25,20 +28,21 @@ namespace HmiPro.Redux.Services {
     public class CpmService {
 
         public YSmParamTcp SmParamTcp;
-        public readonly StorePro<AppState> Store;
         public LoggerService Logger;
         //编码：值（在线数据）
         //加float增加算法参数计算效率
         //计算相关参数的时候需要使用
-        readonly IDictionary<string, IDictionary<int, float>> onlineFloatDict = new ConcurrentDictionary<string, IDictionary<int, float>>();
+        IDictionary<string, IDictionary<int, float>> onlineFloatDict = new ConcurrentDictionary<string, IDictionary<int, float>>();
 
         //编码：采集参数
         //外部可能会对此进行采样
-        public readonly IDictionary<string, IDictionary<int, Cpm>> OnlineCpmDict = new ConcurrentDictionary<string, IDictionary<int, Cpm>>();
+        public IDictionary<string, IDictionary<int, Cpm>> OnlineCpmDict;
 
-        public CpmService(StorePro<AppState> store) {
-            Store = store;
+        public CpmService() {
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
+            foreach (var pair in MachineConfig.MachineDict) {
+                onlineFloatDict[pair.Key] = new ConcurrentDictionary<int, float>();
+            }
         }
 
         public Task StartAsync(string ip, int port) {
@@ -48,6 +52,7 @@ namespace HmiPro.Redux.Services {
                     SmParamTcp.OnDataReceivedAction += smModelsHandler;
                 }
                 SmParamTcp.Start();
+                OnlineCpmDict = App.Store.GetState().CpmState.OnlineCpmsDict;
             });
         }
 
@@ -56,11 +61,7 @@ namespace HmiPro.Redux.Services {
         }
 
         void smModelsHandler(string ip, List<SmModel> smModels) {
-            List<Cpm> cpms = new List<Cpm>();
-            string machineCode = "";
-            if (MachineConfig.IpToMachineCodeDict.TryGetValue(ip, out var code)) {
-                machineCode = code;
-            } else {
+            if (!MachineConfig.IpToMachineCodeDict.TryGetValue(ip, out var code)) {
                 Logger.Error($"ip {ip} 未注册");
                 return;
             }
@@ -75,16 +76,17 @@ namespace HmiPro.Redux.Services {
             });
         }
 
-        void paramPkgHandler(string code, SmModel sm) {
-            var cpmsDirect = Cpm.ConvertBySmModel(code, sm);
+        void paramPkgHandler(string machineCode, SmModel sm) {
+            var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm);
             var cpmsRelate = new List<Cpm>();
             var cpms = new List<Cpm>();
+            IDictionary<int, Cpm> updatedCpmsDiffDict = new Dictionary<int, Cpm>();
             //简洁算法计算出来的参数
             cpmsDirect?.ForEach(cpm => {
                 if (cpm.ValueType == SmParamType.Signal) {
                     var floatVal = (float)cpm.Value;
-                    onlineFloatDict[code][cpm.Code] = floatVal;
-                    var relateCpms = calcRelateCpm(code, cpm.Code);
+                    onlineFloatDict[machineCode][cpm.Code] = floatVal;
+                    var relateCpms = calcRelateCpm(machineCode, cpm.Code);
                     cpmsRelate.AddRange(relateCpms);
                 }
             });
@@ -93,35 +95,37 @@ namespace HmiPro.Redux.Services {
                 cpms.AddRange(cpmsRelate);
             }
             //更新参数字典
-            var changedCpms = new List<Cpm>();
             //fixed:2017-10-20
             //      一包参数的时间应该一致
             var pickTime = DateTime.Now;
 
             void update(Cpm cpm) {
                 cpm.PickTime = pickTime;
-                OnlineCpmDict[code][cpm.Code] = cpm;
-                changedCpms.Add(cpm);
+                //直接更新，会更新界面的数据
+                if (OnlineCpmDict[machineCode].TryGetValue(cpm.Code, out var oldCpm)) {
+                    oldCpm.Update(cpm.Value, cpm.ValueType, pickTime);
+                } else {
+                    OnlineCpmDict[machineCode][cpm.Code] = cpm;
+                }
+                updatedCpmsDiffDict[cpm.Code] = cpm;
             }
 
             //差异更新，使用linq 2017-11-13
             (from c in cpms
              where (
                  c.Value != null
-                 && (!OnlineCpmDict[code].ContainsKey(c.Code) ||
-                     OnlineCpmDict[code][c.Code].ToString() != c.Value.ToString())
+                 && (!OnlineCpmDict[machineCode].ContainsKey(c.Code) ||
+                     OnlineCpmDict[machineCode][c.Code].ToString() != c.Value.ToString())
              )
              select c
             ).ForEach(update);
 
-            //推送采集参数数据
-            if (changedCpms.Count > 0) {
-                Store.Dispatch(new CpmActions.CpmUpdateDiff(code, changedCpms));
+            if (updatedCpmsDiffDict.Count > 0) {
+                App.Store.Dispatch(new CpmActions.CpmUpdateDiff(machineCode, updatedCpmsDiffDict));
             }
             if (cpms.Count > 0) {
-                Store.Dispatch(new CpmActions.CpmUpdatedAll(code, cpms));
+                App.Store.Dispatch(new CpmActions.CpmUpdatedAll(machineCode, cpms));
             }
-
         }
 
 

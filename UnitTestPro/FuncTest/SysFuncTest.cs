@@ -13,6 +13,21 @@ namespace UnitTestPro.FuncTest {
     /// </summary>
     [TestClass]
     public class SysFuncTest {
-       
+        [TestMethod]
+        public void RefTest() {
+            string apple = "apple";
+            string appleRef = apple;
+            apple = "苹果";
+            Console.WriteLine(appleRef);
+            TestClass test = new TestClass(){Name = "origin struct"};
+            var testRef = test;
+            test = new TestClass(){Name = "changed struct"};
+            Console.WriteLine(testRef.Name);
+
+            TestStruct tStruct = new TestStruct(){Name = "origin struct"};
+            var refStruct = tStruct;
+            refStruct.Name = "changed struct";
+            Console.WriteLine(tStruct.Name);
+        }
     }
 }

@@ -19,39 +19,14 @@ namespace HmiPro.ViewModels.DMes.Tab {
     /// <author>ychost</author>
     /// </summary>
     public class CpmsTab : BaseTab {
-
         public ObservableCollection<Cpm> Cpms { get; set; } = new ObservableCollection<Cpm>();
-        public IDictionary<int, Cpm> cpmsDict = new Dictionary<int, Cpm>();
-
-        public void Init(Machine machine) {
-            foreach (var cpmPair in machine.CodeToAllCpmDict) {
-                if (cpmPair.Value.IsShow) {
-                    var cpm = new Cpm() {
-                        Name = cpmPair.Value.Name,
-                        Code = cpmPair.Value.Code,
-                        Unit = cpmPair.Value.Unit,
-                        Value = "暂无"
-                    };
-                    cpmsDict[cpm.Code] = cpm;
-                    Cpms.Add(cpm);
-                }
-            }
-        }
 
         /// <summary>
-        /// 实时更新显示参数
+        /// 绑定实时参数的数据源，数据源的Cpm触发NotifyProperityChanged直接会更新界面
         /// </summary>
-        public void Update(IDictionary<int, Cpm> onlineCpmDict) {
-            foreach (var pair in onlineCpmDict) {
-                if (cpmsDict.ContainsKey(pair.Key)) {
-                    var cpm = cpmsDict[pair.Key];
-                    if (pair.Value.ValueType == SmParamType.Signal) {
-                        var val = (float)pair.Value.Value;
-                        cpm.Value = val.ToString("0.##");
-                    } else {
-                        cpm.Value = pair.Value.Value;
-                    }
-                }
+        public void BindSource(IDictionary<int, Cpm> sourceDict) {
+            foreach (var pair in sourceDict) {
+                Cpms.Add(pair.Value);
             }
         }
     }

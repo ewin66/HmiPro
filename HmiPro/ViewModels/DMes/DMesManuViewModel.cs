@@ -15,16 +15,14 @@ using YCsharp.Service;
 namespace HmiPro.ViewModels.DMes {
     [POCOViewModel]
     public class DMesManuViewModel : IDocumentContent {
-        private readonly StorePro<AppState> store;
-        private readonly List<Unsubscribe> unsubscribes = new List<Unsubscribe>();
+        private readonly List<Unsubscribe> subscribes = new List<Unsubscribe>();
         public virtual ObservableCollection<BaseTab> ViewSource { get; set; } = new ObservableCollection<BaseTab>();
+        public virtual IDispatcherService DispatcherService => null;
         public readonly IDictionary<string, CpmsTab> CpmsTabDict = new Dictionary<string, CpmsTab>();
 
         public DMesManuViewModel() {
-            store = UnityIocService.ResolveDepend<StorePro<AppState>>();
             foreach (var pair in MachineConfig.MachineDict) {
                 var cpmsTab = new CpmsTab() { Header = pair.Key + "_参数" };
-                cpmsTab.Init(pair.Value);
                 //视图显示
                 ViewSource.Add(cpmsTab);
                 //用字典提高查找效率
@@ -35,22 +33,21 @@ namespace HmiPro.ViewModels.DMes {
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
             initSubscribes();
+            //将最新的所有参数更新到显示
+            var onlineCpmsDict = App.Store.GetState().CpmState.OnlineCpmsDict;
+            foreach (var pair in onlineCpmsDict) {
+                var code = pair.Key;
+                CpmsTabDict[code].BindSource(onlineCpmsDict[code]);
+            }
         }
 
         private void initSubscribes() {
-            var sub1 = store.Subscribe(s => {
-                if (s.Type == CpmActions.CPMS_UPDATED_DIFF) {
-                    var updatedCpms = s.CpmState.UpdatedCpmsDiff;
-                    var tab = CpmsTabDict[s.CpmState.MachineCode];
 
-                }
-            });
-            unsubscribes.Add(sub1);
         }
 
         public void OnClose(CancelEventArgs e) {
             //取消订阅
-            unsubscribes.ForEach(cancel => cancel());
+            subscribes.ForEach(cancel => cancel());
         }
 
         public void OnDestroy() {

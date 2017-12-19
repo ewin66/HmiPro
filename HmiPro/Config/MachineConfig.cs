@@ -21,6 +21,7 @@ namespace HmiPro.Config {
         /// </summary>
         public static IDictionary<string, Machine> MachineDict;
         public static IDictionary<string, string> IpToMachineCodeDict;
+        public static string AllMachineName;
 
         /// <summary>
         /// 每个机台的报警ip字典
@@ -31,6 +32,7 @@ namespace HmiPro.Config {
             MachineDict = new Dictionary<string, Machine>();
             IpToMachineCodeDict = new Dictionary<string, string>();
             var codes = Path.GetFileNameWithoutExtension(path).Split('_');
+            AllMachineName = Path.GetFileNameWithoutExtension(path);
             foreach (var code in codes) {
                 var machine = new Machine();
                 machine.InitCpmDict(path, $"{code}_采集参数");

@@ -6,7 +6,7 @@
   //None
   "WindowStyle": "SingleBorderWindow",
   //更新地址
-  "UpdateUrl": "http://192.168.88.14:8899/updater/{0}",
+  "UpdateUrl": "http://192.168.88.14:8899/HmiPro-Updater/{0}",
 
   //---------底层采集参数相关---------
   //采集参数监控ip

@@ -8,6 +8,7 @@ using HmiPro.Redux.Actions;
 using HmiPro.Redux.Effects;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
+using HmiPro.Redux.Sbuscribers;
 using HmiPro.Redux.Services;
 using Reducto;
 using YCsharp.Service;
@@ -20,7 +21,10 @@ namespace HmiPro.Redux {
             //== 注入 redux 相关数据
             var reducer = new CompositeReducer<AppState>()
                 .Part(s => s.CpmState, CpmReducer.Create())
-                .Part(s => s.SysState, SysReducer.Create());
+                .Part(s => s.SysState, SysReducer.Create())
+                .Part(s => s.MqState, MqReducer.Create());
+            ;
+
 
             var storePro = new StorePro<AppState>(reducer);
 
@@ -28,9 +32,13 @@ namespace HmiPro.Redux {
             UnityIocService.RegisterGlobalDepend(storePro);
             UnityIocService.RegisterGlobalDepend<CpmService>();
             UnityIocService.RegisterGlobalDepend<CpmEffects>();
-
-            //== 初始化部分State
-            storePro.Dispatch(new CpmActions.Init());
+            UnityIocService.RegisterGlobalDepend<SysService>();
+            UnityIocService.RegisterGlobalDepend<SysEffects>();
+            UnityIocService.RegisterGlobalDepend<MqService>();
+            UnityIocService.RegisterGlobalDepend<MqEffects>();
+            UnityIocService.RegisterGlobalDepend<MockEffects>();
+            UnityIocService.RegisterGlobalDepend<DbEffects>();
+            UnityIocService.RegisterGlobalDepend<CpmSubscribers>();
         }
 
     }

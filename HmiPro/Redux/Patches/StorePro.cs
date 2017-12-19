@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Redux.Actions;
+using HmiPro.Redux.Reducers;
 using Reducto;
 using YCsharp.Util;
 
@@ -52,6 +54,7 @@ namespace HmiPro.Redux.Patches {
                 foreach (var subscribtion in subscriptions) {
                     subscribtion(state);
                 }
+
             }
         }
 
@@ -68,6 +71,9 @@ namespace HmiPro.Redux.Patches {
             }
         }
 
+        public new T GetState() {
+            return state;
+        }
         /// <summary>
         /// 派遣异步action
         /// </summary>

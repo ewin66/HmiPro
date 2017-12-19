@@ -106,7 +106,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                              DataType == (byte)EmsocketDataType.Int ||
                              DataType == (byte)EmsocketDataType.Float ||
                              DataType == (byte)EmsocketDataType.Float3412 ||
-                             DataType == (byte)EmsocketDataType.Int3412||
+                             DataType == (byte)EmsocketDataType.Int3412 ||
                              DataType == (byte)EmsocketDataType.Float2143
                              );
             return typeCheck;
@@ -305,6 +305,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                 val = BitConverter.ToSingle(this.Data, 0);
             }
             singleData = (Single)val;
+          
             //复位Data
             Data = dataCopy;
             return (float)Math.Round(val, mathRound);

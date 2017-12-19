@@ -40,6 +40,11 @@ namespace HmiPro.Redux.Actions {
             }
             public string Ip;
             public int Port;
+
+            public StartServer(string ip, int port) {
+                Ip = ip;
+                Port = port;
+            }
         }
 
         /// <summary>
@@ -86,11 +91,11 @@ namespace HmiPro.Redux.Actions {
                 return CPMS_UPDATED_DIFF;
             }
 
-            public List<Cpm> Cpms;
+            public IDictionary<int, Cpm> CpmsDict;
             public string MachineCode;
 
-            public CpmUpdateDiff(string code, List<Cpm> cpms) {
-                Cpms = cpms;
+            public CpmUpdateDiff(string code, IDictionary<int, Cpm> cpmsDict) {
+                CpmsDict = cpmsDict;
                 MachineCode = code;
             }
         }

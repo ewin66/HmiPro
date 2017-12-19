@@ -12,14 +12,11 @@ using YCsharp.Util;
 namespace HmiPro.ViewModels {
     [POCOViewModel]
     public class HomeViewModel {
-        public readonly StorePro<AppState> Store;
         public virtual Assets Assets { get; set; } = AssetsHelper.GetAssets();
         public virtual INavigationService NavigationSerivce => null;
 
 
         public HomeViewModel() {
-            Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
-
         }
 
         /// <summary>
@@ -29,6 +26,11 @@ namespace HmiPro.ViewModels {
         [Command(Name = "NavigateCommand")]
         public void Navigate(string viewName) {
             NavigationSerivce.Navigate(viewName);
+        }
+
+        [Command(Name = "JumpAppSettingViewCommand")]
+        public void JumpAppSetting() {
+            App.Store.Dispatch(new SysActions.ShowSettingView());
         }
     }
 }

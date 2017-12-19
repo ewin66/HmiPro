@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -25,10 +26,10 @@ namespace HmiPro {
     /// </summary>
     public partial class App : Application {
         public LoggerService Logger;
+        public static StorePro<AppState> Store;
 
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
-
             //== 各项初始化 ==
             ExceptionHelper.Init();
             configInit(e);
@@ -39,8 +40,21 @@ namespace HmiPro {
             InfluxDbHelper.Init($"http://{HmiConfig.InfluxDbIp}:8086", HmiConfig.InfluxCpmDbName);
             AssetsHelper.Init(YUtil.GetAbsolutePath(@".\Profiles\Assets\"));
             ReduxIoc.Init();
+            Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+
             //===============
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
+            Store.Subscribe(s => {
+                //忽略掉采集参数的事件
+                if (s.Type != null) {
+                    if (!s.Type.ToLower().Contains("[cpm]")) {
+                        Logger.Debug("Redux Current Action: " + s.Type);
+                    }
+                    AppState.ExectedActions[s.Type] = DateTime.Now;
+                }
+            });
+
+            Console.WriteLine("Welcom To DMes V3.0");
         }
 
 

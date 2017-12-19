@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Unity;
 using Unity.Lifetime;
+using YCsharp.Util;
 
 namespace YCsharp.Service {
     /// <summary>
@@ -58,7 +59,9 @@ namespace YCsharp.Service {
                 injectOnceCheckDictionary[type] = true;
             } else {
                 injectOnceCheckDictionary[type] = false;
-                throw new Exception(type + "已经被注入了，请勿重复注入此全局依赖");
+                var lineNum = YUtil.GetCurCodeLineNum(2);
+                throw new Exception(type + $"已经被注入了，请勿重复注入此全局依赖 [{lineNum}] 行");
+
             }
             return injectOnceCheckDictionary[type];
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Redux.Models;
 using YCsharp.Util;
 
 namespace HmiPro.Helpers {
@@ -91,5 +92,28 @@ namespace HmiPro.Helpers {
                 return Encoding.UTF8.GetBytes(ex.ToString());
             }
         }
+
+        /// <summary>
+        /// 写入大量的采集参数到influxDb
+        /// </summary>
+        /// <param name="measurement"></param>
+        /// <param name="cpms"></param>
+        public bool WriteCpms(string measurement, params Cpm[] cpms) {
+            List<string> paramList = new List<string>();
+            foreach (var cpm in cpms) {
+                var timeStamp = "";
+                //fixed:不能插入时间
+                timeStamp = YUtil.GetUtcTimestampMs(cpm.PickTime) + "000000";
+                var param = $"{measurement},param={cpm.Name} value={cpm.Value} {timeStamp}";
+                paramList.Add(param);
+            }
+            var resp = WriteMulti(paramList.ToArray());
+            if (resp.Length > 0) {
+                Console.WriteLine(Encoding.UTF8.GetString(resp));
+                return false;
+            }
+            return true;
+        }
+
     }
 }

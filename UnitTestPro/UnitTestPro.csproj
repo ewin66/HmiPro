@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="FuncTest\ReflectTest.cs" />
     <Compile Include="FuncTest\SysFuncTest.cs" />
+    <Compile Include="TestClass.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -66,6 +66,13 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public bool IsException { get; set; } = false;
 
+        public void Update(object value, SmParamType valueType, DateTime pickTime) {
+            this.Value = value;
+            this.ValueType = valueType;
+            this.PickTime = pickTime;
+        }
+
+
         public Cpm() {
 
         }

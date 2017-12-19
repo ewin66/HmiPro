@@ -10,11 +10,16 @@ using HmiPro.Config;
 using HmiPro.Config.Models;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
+using HmiPro.Redux.Effects;
+using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
+using HmiPro.Redux.Sbuscribers;
 using HmiPro.ViewModels.Sys;
 using HmiPro.Views.Sys;
+using Newtonsoft.Json;
 using YCsharp.Service;
+using YCsharp.Util;
 
 namespace HmiPro.ViewModels {
     public class DxWindowViewModel : ViewModelBase {
@@ -77,12 +82,37 @@ namespace HmiPro.ViewModels {
                 } else {
                     try {
                         MachineConfig.Load(setting.MachineXlsPath);
+                        dispatchActions();
                     } catch (Exception e) {
                         Store.Dispatch(new SysActions.ShowSettingView());
                     }
                 }
             }
         }
+
+        void dispatchActions() {
+            //== 初始化部分State
+            App.Store.Dispatch(new CpmActions.Init());
+            var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
+            var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
+            var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
+            var mockEffects = UnityIocService.ResolveDepend<MockEffects>();
+            var cpmSubs = UnityIocService.ResolveDepend<CpmSubscribers>();
+            Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
+            Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
+            //监听排产任务
+            foreach (var pair in MachineConfig.MachineDict) {
+                var queName = @"QUEUE_" + pair.Key;
+                Store.Dispatch(mqEffects.StartListenSchTask(new MqActiions.StartListenSchTask(queName)));
+            }
+            Store.Dispatch(mqEffects.StartUploadCpmsInterval(new MqActiions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
+            var task = YUtil.GetJsonObjectFromFile<MqSchTask>(AssetsHelper.GetAssets().MockMqSchTaskJson);
+            //Store.Dispatch(mockEffects.MockSchTaskAccept(new MockActions.MockSchTaskAccpet(task)));
+            cpmSubs.Init();
+
+        }
+
+
 
         /// <summary>
         /// 跳转到程序设置界面

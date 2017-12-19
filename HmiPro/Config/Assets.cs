@@ -16,6 +16,7 @@ namespace HmiPro.Config {
         public readonly string AssetsFolder;
         public string ImagesFolder => AssetsFolder + @"\Images";
         public string DictsFoler => AssetsFolder + @"\Dicts";
+        public string MocksFolder => AssetsFolder + @"\Mocks";
 
         public string IconConfigAdmin => ImagesFolder + "\\config-admin.ico";
         public string IconJson => ImagesFolder + "\\json.ico";
@@ -53,7 +54,8 @@ namespace HmiPro.Config {
         public string IconSim => ImagesFolder + "\\sim.ico";
         public string IconStatsLines => ImagesFolder + "\\stats-lines.ico";
 
-        public string CraftsBom => DictsFoler + "\\工艺Bom.xls";
+        public string CraftsBomXls => DictsFoler + "\\工艺Bom.xls";
+        public string MockMqSchTaskJson => MocksFolder + "\\MqSchTask.json";
 
         private static Assets assets;
     }

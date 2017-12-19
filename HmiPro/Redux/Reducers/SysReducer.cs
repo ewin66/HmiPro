@@ -7,13 +7,22 @@ using HmiPro.Redux.Actions;
 using Reducto;
 
 namespace HmiPro.Redux.Reducers {
-    public struct SysReducer {
-        public struct SysState {
-
+    public static class SysReducer {
+        public struct State {
+            public bool HttpSystemIsStarted;
         }
 
-        public static SimpleReducer<SysState> Create() {
-            return new SimpleReducer<SysState>().When<SysActions.ShowSettingView>((state, action) => {
+        public static SimpleReducer<State> Create() {
+            return new SimpleReducer<State>().When<SysActions.ShowSettingView>((state, action) => {
+                return state;
+            }).When<SysActions.StartHttpSystemSuccess>((state, action) => {
+                state.HttpSystemIsStarted = true;
+                return state;
+            }).When<SysActions.StartHttpSystemFailed>((state, action) => {
+                state.HttpSystemIsStarted = false;
+                return state;
+            }).When<SysActions.StartHttpSystem>((state, action) => {
+                state.HttpSystemIsStarted = false;
                 return state;
             });
         }
