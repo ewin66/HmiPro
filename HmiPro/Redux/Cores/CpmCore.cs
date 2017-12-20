@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
+using DevExpress.Xpf.WindowsUI;
 using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
@@ -44,11 +45,23 @@ namespace HmiPro.Redux.Cores {
 
         public CpmCore() {
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
+        }
+
+        /// <summary>
+        /// 只有配置文件加载完成才能调用此初始化
+        /// </summary>
+        public void Init() {
             foreach (var pair in MachineConfig.MachineDict) {
                 onlineFloatDict[pair.Key] = new ConcurrentDictionary<int, float>();
             }
             actionExecDict[AlarmActions.OPEN_ALARM_LIGHTS] = openAlarmLights;
             actionExecDict[AlarmActions.CLOSE_ALARM_LIGHTS] = closeAlarmLights;
+            App.Store.Subscribe(s => {
+                if (actionExecDict.TryGetValue(s.Type, out var exec)) {
+                    exec(s);
+                }
+            });
+           
         }
 
         /// <summary>
@@ -63,14 +76,9 @@ namespace HmiPro.Redux.Cores {
                     SmParamTcp = new YSmParamTcp(ip, port);
                     SmParamTcp.OnDataReceivedAction += smModelsHandler;
                     OnlineCpmDict = App.Store.GetState().CpmState.OnlineCpmsDict;
-                    App.Store.Subscribe(s => {
-                        if (actionExecDict.TryGetValue(s.Type, out var exec)) {
-                            exec(s);
-                        }
-                    });
+
                 }
                 SmParamTcp.Start();
-
             });
         }
 
@@ -80,7 +88,6 @@ namespace HmiPro.Redux.Cores {
         public void Stop() {
             SmParamTcp?.StopSoft();
         }
-
 
         /// <summary>
         /// 打开报警灯，报警Ip必须配置
@@ -107,7 +114,6 @@ namespace HmiPro.Redux.Cores {
                 Logger.Error($"机台 {machineCode} 没有报警 ip");
             }
         }
-
 
         /// <summary>
         /// 来自底层数据处理
@@ -179,49 +185,84 @@ namespace HmiPro.Redux.Cores {
             //一定要先派遣所有更新，再派遣部分更新
             //这样就保证了reducer里面数据的唯一性
             if (cpms.Count > 0) {
+                //派发所有接受到的参数
                 App.Store.Dispatch(new CpmActions.CpmUpdatedAll(machineCode, cpms));
-                dispatchNoteMeter(machineCode, cpms, (meter) => {
-                    App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, meter));
+                //不断更新记米值
+                dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.NoteMeter, (cpm) => {
+                    App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, (float)cpm.Value));
                 });
+
+                ;
             }
             if (updatedCpmsDiffDict.Count > 0) {
+                var diffCpms = updatedCpmsDiffDict.Values.ToList();
+                //所有变化的参数
                 App.Store.Dispatch(new CpmActions.CpmUpdateDiff(machineCode, updatedCpmsDiffDict));
-                dispatchNoteMeter(machineCode, updatedCpmsDiffDict.Values.ToList(), (meter) => {
-                    App.Store.Dispatch(new CpmActions.NoteMeterDiffAccept(machineCode, meter));
+                //记米发生变化
+                dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.NoteMeter, (cpm) => {
+                    App.Store.Dispatch(new CpmActions.NoteMeterDiffAccept(machineCode, (float)cpm.Value));
+                });
+                //火花值发生变化
+                dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.Spark, (cpm) => {
+                    App.Store.Dispatch(new CpmActions.SparkDiffAccept(machineCode, cpm));
+                });
+                //速度发生变化
+                dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.Speed, cpm => {
+
                 });
             }
             //检查报警
-            dispatchCheckCpm(machineCode, cpms);
+            dispatchCheckBomAlarm(machineCode, cpms);
         }
+
 
         /// <summary>
         /// 将需要报警检查的Cpm发送出去
         /// </summary>
         /// <param name="machineCode"></param>
         /// <param name="cpms"></param>
-        void dispatchCheckCpm(string machineCode, List<Cpm> cpms) {
+        void dispatchCheckBomAlarm(string machineCode, List<Cpm> cpms) {
             cpms?.ForEach(cpm => {
-                if (MachineConfig.MachineDict[machineCode].CodeToAlarmCpmDict.TryGetValue(cpm.Code, out var alarmCpm)) {
-                    App.Store.Dispatch(new AlarmActions.CheckCpm(cpm));
+                if (MachineConfig.MachineDict[machineCode].CodeToBomAlarmCpmDict.TryGetValue(cpm.Code, out var alarmCpm)) {
+                    if (cpm.ValueType != SmParamType.Signal) {
+                        Logger.Error($"机台 {machineCode} 参数 {cpm.Name} 的值不是浮点类型，不能报警");
+                        return;
+                    }
+                    var bomKeys = alarmCpm.AlarmBomKey;
+                    if (bomKeys?.Length != 2) {
+                        Logger.Error($"机台 {machineCode} 参数 {cpm.Name} 的报警配置有误，长度不为 2 ");
+                        return;
+                    }
+                    string max = null;
+                    string min = null;
+                    string std = null;
+                    foreach (var key in bomKeys) {
+                        if (key.ToLower().Contains("max")) {
+                            max = key;
+                        } else if (key.ToLower().Contains("min")) {
+                            min = key;
+                        } else {
+                            std = key;
+                        }
+                    }
+                    var alarmCheck = new AlarmBomCheck() { Cpm = cpm, MaxBomKey = max, MinBomKey = min, StdBomKey = std };
+                    App.Store.Dispatch(new AlarmActions.CheckCpmBomAlarm(machineCode, alarmCheck));
                 }
             });
         }
 
         /// <summary>
-        /// 派遣记米相关指令
+        /// 派遣逻辑参数相关指令
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="Cpms"></param>
-        /// <param name="dispatch"></param>
-        void dispatchNoteMeter(string machineCode, List<Cpm> Cpms, Action<float> dispatch) {
-            Cpms?.ForEach(cpm => {
+        void dispatchLogicCpm(string machineCode, List<Cpm> cpms, CpmInfoLogic logic, Action<Cpm> dispatch) {
+            cpms?.ForEach(cpm => {
                 if (MachineConfig.MachineDict[machineCode].CodeToLogicDict.TryGetValue(cpm.Code, out var logicCpm)) {
-                    if (logicCpm == CpmInfoLogic.NoteMeter) {
-                        if (cpm.ValueType == SmParamType.Signal) {
-                            dispatch((float)cpm.Value);
-                        } else {
-                            Logger.Error($"记米参数 {cpm.Name} 的值不是浮点，值为：{cpm.Value}");
+                    if (cpm.ValueType == SmParamType.Signal) {
+                        if (logicCpm == logic) {
+                            dispatch(cpm);
                         }
+                    } else {
+                        Logger.Error($"参数 {cpm.Name} 的值不是浮点，值为：{cpm.Value}");
                     }
                 }
             });

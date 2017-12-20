@@ -27,7 +27,7 @@ namespace HmiPro.Config.Models {
         //编码：[算法参数编码]
         public IDictionary<int, List<int>> CodeMethodDict = new Dictionary<int, List<int>>();
         //需要报警的参数
-        public IDictionary<int, CpmInfo> CodeToAlarmCpmDict = new Dictionary<int, CpmInfo>();
+        public IDictionary<int, CpmInfo> CodeToBomAlarmCpmDict = new Dictionary<int, CpmInfo>();
 
         /// <summary>
         /// 初始化机台属性，如机台编码，底层ip等等
@@ -93,7 +93,7 @@ namespace HmiPro.Config.Models {
                 }
                 //需要报警参数
                 if (cpm.AlarmBomKey != null) {
-                    CodeToAlarmCpmDict[cpm.Code] = cpm;
+                    CodeToBomAlarmCpmDict[cpm.Code] = cpm;
                 }
 
             });

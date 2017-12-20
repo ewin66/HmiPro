@@ -31,7 +31,9 @@
                 </Style>
             </dx:DialogService.DialogStyle>
         </dx:DialogService>
-        <dxwui:WinUIMessageBoxService/>
+        <!--<dxwui:WinUIMessageBoxService/>-->
+        <dxmvvm:NotificationService x:Name="AppNotificationService" UseWin8NotificationsIfAvailable="False" PredefinedNotificationDuration="Long" PredefinedNotificationTemplate="ShortHeaderAndLongText"   />
+        <dxmvvm:DispatcherService />
         <navigation:FrameNavigationService Frame="{Binding ElementName=frame}" />
         <dx:DXSplashScreenService SplashScreenType="{x:Type View:LoadingWindow}" />
     </dxmvvm:Interaction.Behaviors>

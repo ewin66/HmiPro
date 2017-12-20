@@ -57,7 +57,7 @@ namespace YCsharp.Util {
         /// 计算导数，横坐标的增量为1
         /// </summary>
         class YExecDer {
-            public double LatestVal;
+            public double LatestVal=0;
         }
 
         public static Func<double, double> CreateExecDerFunc() {

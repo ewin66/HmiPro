@@ -246,7 +246,9 @@ namespace HmiPro.Config.Models {
         //收线
         EndRfid = 5,
         //指纹
-        Fingerprint = 6
+        Fingerprint = 6,
+        //火花报警
+        Spark = 7
     }
 
     public enum CpmInfoMethodName {

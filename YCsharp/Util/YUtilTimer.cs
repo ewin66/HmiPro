@@ -142,7 +142,7 @@ namespace YCsharp.Util {
         /// <param name="ms"></param>
         /// <returns></returns>
         public static DateTime TimeStampToUtcTime(long ms) {
-            DateTime startTime = new DateTime(1970,1,1);
+            DateTime startTime = new DateTime(1970, 1, 1);
             DateTime dt = startTime.AddMilliseconds(ms);
             return dt;
         }
@@ -295,6 +295,40 @@ namespace YCsharp.Util {
         /// <param name="task"></param>
         public static void DisposeTask(Task task) {
             task?.Dispose();
+        }
+
+        /// <summary>
+        /// 获取工作时间点，比如早8点，晚20点对应当前的公历时间
+        /// </summary>
+        /// <param name="whiteHour">白班时间点</param>
+        /// <param name="darkHour">晚班时间点</param>
+        /// <returns></returns>
+        public static DateTime GetWorkTime(int whiteHour, int darkHour) {
+            if (whiteHour > darkHour) {
+                throw new Exception("白班时间点不能大于晚班时间点");
+            }
+            var now = DateTime.Now;
+            DateTime startTime;
+            if (now.Hour >= whiteHour && now.Hour < darkHour) {
+                //白班开始时间为早上8点
+                startTime = new DateTime(now.Year, now.Month, now.Day, whiteHour, 0, 0, 0);
+            } else {
+                //夜班开始时间为晚上20点
+                //如果是凌晨则时间为昨天的20点
+                if (now.Hour < whiteHour) {
+                    now = now.AddDays(-1);
+                }
+                startTime = new DateTime(now.Year, now.Month, now.Day, darkHour, 0, 0, 0);
+            }
+            return startTime;
+        }
+
+        /// <summary>
+        /// 获取启东的上班时间
+        /// </summary>
+        /// <returns></returns>
+        public static DateTime GetKeystoneWorkTime() {
+            return GetWorkTime(8, 20);
         }
     }
 }

@@ -119,6 +119,8 @@ namespace HmiPro.Config {
         //InfluxDb采集参数数据库名称
         [Required] public static readonly string InfluxCpmDbName;
 
+        [Required] public static readonly int CloseScreenInterval;
+
         //== 来自外部命令行和约定配置
         public static string SqlitePath;
         public static readonly string LogFolder = @"C:\HmiPro\Log\";

@@ -24,6 +24,7 @@ namespace HmiPro.Redux {
                 .Part(s => s.SysState, SysReducer.Create())
                 .Part(s => s.MqState, MqReducer.Create())
                 .Part(s => s.AlarmState, AlarmReducer.Create())
+                .Part(s => s.OeeState, OeeReducer.Create())
             ;
 
 
@@ -40,6 +41,9 @@ namespace HmiPro.Redux {
             UnityIocService.RegisterGlobalDepend<MockEffects>();
             UnityIocService.RegisterGlobalDepend<DbEffects>();
             UnityIocService.RegisterGlobalDepend<DMesCore>();
+            UnityIocService.RegisterGlobalDepend<SchCore>();
+            UnityIocService.RegisterGlobalDepend<OeeService>();
+            UnityIocService.RegisterGlobalDepend<OeeEffects>();
         }
 
     }

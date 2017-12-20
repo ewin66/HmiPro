@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
+using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
 using YCsharp.Service;
@@ -16,10 +17,25 @@ namespace HmiPro.Redux.Effects {
     /// </summary>
     public class DbEffects {
         public StorePro<AppState>.AsyncActionNeedsParam<DbActions.UploadCpmsInfluxDb> UploadCpmsInfluxDb;
+        public StorePro<AppState>.AsyncActionNeedsParam<DbActions.UploadAlarmsMongo> UploadAlarmsMongo;
 
         public DbEffects() {
             UnityIocService.AssertIsFirstInject(GetType());
             initUploadCpmsInfluxDb();
+            initUploadAlarmsMongo();
+        }
+
+
+        /// <summary>
+        /// 保存报警数据
+        /// </summary>
+        void initUploadAlarmsMongo() {
+            UploadAlarmsMongo = App.Store.asyncActionVoid<DbActions.UploadAlarmsMongo>(
+                async (dispatch, getState, instance) => {
+                    await Task.Run(() => {
+                        MongoHelper.GetMongoService().GetDatabase(instance.MachineCode).GetCollection<MqAlarm>(instance.Collection).InsertOne(instance.MqAlarm);
+                    });
+                });
         }
 
         /// <summary>

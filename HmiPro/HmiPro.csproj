@@ -45,6 +45,12 @@
     <Reference Include="CommandLine, Version=2.0.275.0, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
       <HintPath>..\packages\CommandLineParser.2.1.1-beta\lib\net45\CommandLine.dll</HintPath>
     </Reference>
+    <Reference Include="Common.Logging, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.3.3.1\lib\net40\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Common.Logging.Core, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Common.Logging.Core.3.3.1\lib\net40\Common.Logging.Core.dll</HintPath>
+    </Reference>
     <Reference Include="DevExpress.Data.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Mvvm.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -61,6 +67,9 @@
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentScheduler, Version=5.3.0.0, Culture=neutral, PublicKeyToken=b76503528a14ebd1, processorArchitecture=MSIL">
+      <HintPath>..\packages\FluentScheduler.5.3.0\lib\net40\FluentScheduler.dll</HintPath>
     </Reference>
     <Reference Include="MaterialDesignColors, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignColors.1.1.2\lib\net45\MaterialDesignColors.dll</HintPath>
@@ -167,30 +176,43 @@
     <Compile Include="Redux\Actions\DMesActions.cs" />
     <Compile Include="Redux\Actions\MockActions.cs" />
     <Compile Include="Redux\Actions\MqActiions.cs" />
+    <Compile Include="Redux\Actions\OeeActions.cs" />
     <Compile Include="Redux\Actions\SysActions.cs" />
+    <Compile Include="Redux\Cores\DbCore.cs" />
+    <Compile Include="Redux\Cores\SchCore.cs" />
     <Compile Include="Redux\Effects\AlarmEffects.cs" />
     <Compile Include="Redux\Effects\CpmEffects.cs" />
     <Compile Include="Redux\Effects\DbEffects.cs" />
     <Compile Include="Redux\Effects\MockEffects.cs" />
     <Compile Include="Redux\Effects\MqEffects.cs" />
+    <Compile Include="Redux\Effects\OeeEffects.cs" />
     <Compile Include="Redux\Effects\SysEffects.cs" />
+    <Compile Include="Redux\Models\AlarmBomCheck.cs" />
     <Compile Include="Redux\Models\Cpm.cs" />
+    <Compile Include="Redux\Models\MachineState.cs" />
+    <Compile Include="Redux\Models\MqAlarm.cs" />
     <Compile Include="Redux\Models\MqScanMaterial.cs" />
     <Compile Include="Redux\Models\MqSchTask.cs" />
     <Compile Include="Redux\Models\MqUploadCpms.cs" />
+    <Compile Include="Redux\Models\Oee.cs" />
+    <Compile Include="Redux\Models\SchTaskDoing.cs" />
     <Compile Include="Redux\Models\Sys.cs" />
+    <Compile Include="Redux\Models\SysNotificationMsg.cs" />
     <Compile Include="Redux\Patches\StorePro.cs" />
     <Compile Include="Redux\Reducers\AlarmReducer.cs" />
     <Compile Include="Redux\Reducers\AppReducer.cs" />
     <Compile Include="Redux\Reducers\DMesReducer.cs" />
     <Compile Include="Redux\Reducers\MqReducer.cs" />
+    <Compile Include="Redux\Reducers\OeeReducer.cs" />
     <Compile Include="Redux\Reducers\SysReducer.cs" />
     <Compile Include="Redux\ReduxIoc.cs" />
     <Compile Include="Redux\Reducers\CpmReducer.cs" />
     <Compile Include="Redux\Cores\DMesCore.cs" />
     <Compile Include="Redux\Cores\CpmCore.cs" />
     <Compile Include="Redux\Services\MqService.cs" />
+    <Compile Include="Redux\Services\OeeService.cs" />
     <Compile Include="Redux\Services\SysService.cs" />
+    <Compile Include="ViewModels\DMes\Tab\AlarmTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\CpmsTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\SchTaskList.cs" />

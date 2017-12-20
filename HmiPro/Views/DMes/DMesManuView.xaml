@@ -22,7 +22,7 @@
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
         <dxmvvm:EventToCommand EventName="ContentRendered" Command="{Binding OnContentRenderedCommand}"/>
     </dxmvvm:Interaction.Behaviors>
-    <dxwui:PageAdornerControl  Header="实时监控" ShowBackButton="True">
+    <dxwui:PageAdornerControl  Header="DE: Pr:0.86 Qr:0.49 Or:0.33 Oee:0.85" ShowBackButton="True">
         <Grid>
             <Grid.Resources>
                 <DataTemplate x:Key="TabHeader">

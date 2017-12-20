@@ -238,8 +238,12 @@ namespace YCsharp.Model.Tcp {
         /// </summary>  
         /// <param name="ar">目标客户端Socket</param>  
         private void SendDataEnd(IAsyncResult ar) {
-            ((TcpClient)ar.AsyncState).GetStream().EndWrite(ar);
-            RaiseCompletedSend(null);
+            try {
+                ((TcpClient)ar.AsyncState).GetStream().EndWrite(ar);
+                RaiseCompletedSend(null);
+            } catch (Exception e) {
+                Console.WriteLine("[Tcp] 发送数据异常");
+            }
         }
 
         #endregion

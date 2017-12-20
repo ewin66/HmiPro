@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using DevExpress.Mvvm;
+using DevExpress.Mvvm.UI;
 using HmiPro.Config;
 using HmiPro.Config.Models;
 using HmiPro.Helpers;
@@ -19,6 +22,7 @@ using HmiPro.ViewModels.Sys;
 using HmiPro.Views.Sys;
 using Newtonsoft.Json;
 using YCsharp.Service;
+using FluentScheduler;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels {
@@ -35,6 +39,15 @@ namespace HmiPro.ViewModels {
             Store.Subscribe(s => {
                 if (s.Type == SysActions.SHOW_SETTING_VIEW) {
                     JumpAppSettingView("程序设置");
+                    //显示系统通知消息
+                } else if (s.Type == SysActions.SHOW_NOTIFICATION) {
+                    var msg = s.SysState.NotificationMsg;
+                    DispatcherService.BeginInvoke(() => {
+                        INotification notification = NotifyNotificationService.CreatePredefinedNotification(msg.Title, msg.Content, null);
+                        SystemSounds.Exclamation.Play();
+                        notification.ShowAsync();
+                    });
+
                 }
             });
 
@@ -56,6 +69,8 @@ namespace HmiPro.ViewModels {
 
         }
 
+        public virtual IDispatcherService DispatcherService => GetService<IDispatcherService>();
+        public virtual INotificationService NotifyNotificationService => GetService<INotificationService>();
         /// <summary>
         /// 导航服务，注册在 MainWindows.xaml中
         /// </summary>
@@ -75,47 +90,8 @@ namespace HmiPro.ViewModels {
         /// </summary>
         public void OnViewLoaded() {
             Navigate("HomeView");
-            using (var ctx = SqliteHelper.CreateSqliteService()) {
-                var setting = ctx.Settings.ToList().LastOrDefault();
-                if (setting == null) {
-                    Store.Dispatch(new SysActions.ShowSettingView());
-                } else {
-                    try {
-                        MachineConfig.Load(setting.MachineXlsPath);
-                        dispatchActions();
-                    } catch (Exception e) {
-                        Store.Dispatch(new SysActions.ShowSettingView());
-                    }
-                }
-            }
+    
         }
-
-        void dispatchActions() {
-            //== 初始化部分State
-            App.Store.Dispatch(new CpmActions.Init());
-            var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
-            var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
-            var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
-            var mockEffects = UnityIocService.ResolveDepend<MockEffects>();
-            var cpmSubs = UnityIocService.ResolveDepend<DMesCore>();
-            Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
-            Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
-            foreach (var pair in MachineConfig.MachineDict) {
-                //监听排产任务
-                var stQueueName = @"QUEUE_" + pair.Key;
-                Store.Dispatch(mqEffects.StartListenSchTask(new MqActiions.StartListenSchTask(stQueueName, pair.Key)));
-                //监听扫描物料信息
-                var smQueueName = $@"JUDGE_MATER_{pair.Key}";
-                Store.Dispatch(mqEffects.StartListenScanMaterial(new MqActiions.StartListenScanMaterial(pair.Key, smQueueName)));
-            }
-            Store.Dispatch(mqEffects.StartUploadCpmsInterval(new MqActiions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
-            var task = YUtil.GetJsonObjectFromFile<MqSchTask>(AssetsHelper.GetAssets().MockMqSchTaskJson);
-            //Store.Dispatch(mockEffects.MockSchTaskAccept(new MockActions.MockSchTaskAccpet(task)));
-            cpmSubs.Init();
-
-        }
-
-
 
         /// <summary>
         /// 跳转到程序设置界面

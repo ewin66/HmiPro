@@ -14,14 +14,8 @@ namespace HmiPro.Redux.Effects {
     /// <author>ychost</author>
     /// </summary>
     public class AlarmEffects {
-        public readonly StorePro<AppState>.AsyncActionNeedsParam<AlarmActions.CheckCpm> CheckCpm;
 
-        public AlarmEffects() {
-            CheckCpm = App.Store.asyncActionVoid<AlarmActions.CheckCpm>(async (dispatch, getState, instance) => {
-                dispatch(instance);
 
-            });
-        }
 
     }
 }

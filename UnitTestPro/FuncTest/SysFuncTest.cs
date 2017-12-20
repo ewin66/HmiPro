@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +30,24 @@ namespace UnitTestPro.FuncTest {
             refStruct.Name = "changed struct";
             refStruct.TestClass = new TestClass();
             Console.WriteLine(tStruct.TestClass.Name);
+        }
+
+        [TestMethod]
+        public void ObservableCollectionRemoveTest() {
+            ObservableCollection<TestClass> TestObs = new ObservableCollection<TestClass>();
+            for (int i = 0; i < 20; i++) {
+                TestObs.Add(new TestClass() { Name = i.ToString() });
+            }
+            var removeList = TestObs.Where(t => int.Parse(t.Name) < 7).ToList();
+            foreach (var item in removeList) {
+                TestObs.Remove(item);
+            }
+            Assert.AreEqual(TestObs.Count, 13);
+            var removeList2 = TestObs.Where(t => int.Parse(t.Name) < -1).ToList();
+            foreach (var item in removeList2) {
+                TestObs.Remove(item);
+            }
+            Assert.AreEqual(TestObs.Count,13);
         }
     }
 }

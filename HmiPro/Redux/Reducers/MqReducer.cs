@@ -13,6 +13,8 @@ namespace HmiPro.Redux.Reducers {
     public static class MqReducer {
         public struct State {
             public IDictionary<string, MqSchTask> MqSchTaskDict;
+            //当前正在做的任务
+            public IDictionary<string, SchTaskDoing> SchTaskDoing;
             public bool LsnUploadCpmsInterval;
             public string MachineCode;
             public IDictionary<string, bool> LsnScanMaterialDict;
@@ -23,7 +25,8 @@ namespace HmiPro.Redux.Reducers {
             return new SimpleReducer<State>(() => new State() {
                 MqSchTaskDict = new ConcurrentDictionary<string, MqSchTask>(),
                 LsnScanMaterialDict = new ConcurrentDictionary<string, bool>(),
-                LsnSchTaskDict = new ConcurrentDictionary<string, bool>()
+                LsnSchTaskDict = new ConcurrentDictionary<string, bool>(),
+                SchTaskDoing =  new ConcurrentDictionary<string, SchTaskDoing>()
             }).When<MqActiions.StartListenSchTaskSuccess>((state, action) => {
                 state.LsnSchTaskDict[action.MachineCode] = true;
                 return state;

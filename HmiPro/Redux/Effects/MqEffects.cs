@@ -23,8 +23,10 @@ namespace HmiPro.Redux.Effects {
     public class MqEffects {
         private readonly ActiveMqService activeMq;
         private readonly MqService mqService;
+        public readonly LoggerService Logger;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartListenSchTask> StartListenSchTask;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadCpms> UploadCpms;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadAlarm> UploadAlarm;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartUploadCpmsInterval> StartUploadCpmsInterval;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartListenScanMaterial> StartListenScanMaterial;
 
@@ -33,11 +35,29 @@ namespace HmiPro.Redux.Effects {
             UnityIocService.AssertIsFirstInject(GetType());
 
             activeMq = ActiveMqHelper.GetActiveMqService();
+            Logger = LoggerHelper.CreateLogger(GetType().ToString());
             this.mqService = mqService;
             initSchTaskEffect();
             initUploadCpmsEffect();
             initStartUploadCpmsIntervalEffect();
             initStartListenScanMaterial();
+            initUploadAlarm();
+        }
+
+        void initUploadAlarm() {
+            UploadAlarm =
+                App.Store.asyncActionVoid<MqActiions.UploadAlarm>(async (dispatch, getState, instance) => {
+                    await Task.Run(() => {
+                        dispatch(instance);
+                        try {
+                            activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(instance.MqAlarm));
+                            App.Store.Dispatch(new SimpleAction(MqActiions.UPLOAD_ALARM_SUCCESS));
+                        } catch (Exception e) {
+                            App.Store.Dispatch(new SimpleAction(MqActiions.UPLOAD_ALARM_FAILED));
+                            Logger.Error("上传报警到Mq失败", e);
+                        }
+                    });
+                });
         }
 
         void initStartListenScanMaterial() {
