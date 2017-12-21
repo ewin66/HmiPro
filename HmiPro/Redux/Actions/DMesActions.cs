@@ -16,6 +16,28 @@ namespace HmiPro.Redux.Actions {
         /// </summary>
         public static readonly string DMES_SCH_TASK_ASSIGN = "[DMes] Schedule Task Assign";
 
+        public static readonly string INIT = "[DMes] Init";
+
+        public static readonly string START_SCH_TASK_AXIS = "[DMes] Start Schedule Task Axis";
+        public static readonly string START_SCH_TASK_AXIS_SUCCESS = "[DMes] Start Schedule Task Axis Success";
+        public static readonly string START_SCH_TASK_AXIS_FAILED = "[DMes] Start Schedule Task Axis Failed";
+
+
+        public struct StartSchTaskAxis : IAction {
+            public string Type() => START_SCH_TASK_AXIS;
+            public string AxisCode;
+            public string MachineCode;
+
+            public StartSchTaskAxis(string machineCode, string axisCode) {
+                MachineCode = machineCode;
+                AxisCode = axisCode;
+            }
+        }
+
+        public struct Init : IAction {
+            public string Type() => INIT;
+        }
+
         public struct DMesSchTaskAssign : IAction {
             public string Type() => DMES_SCH_TASK_ASSIGN;
             public MqSchTask SchTask;

@@ -26,7 +26,7 @@ namespace HmiPro.Redux.Effects {
     /// <author>ychost</author>
     /// </summary>
     public class SysEffects {
-        public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StartHttpSystem> StartHttpSystem;
+        public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StartHttpSystem,bool> StartHttpSystem;
         public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StartCloseScreenTimer> StartCloseScreenTimer;
         public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StopCloseScreenTimer> StopCloseScrenTimer;
         public readonly LoggerService Logger;
@@ -36,7 +36,7 @@ namespace HmiPro.Redux.Effects {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             //启动http解析服务
-            StartHttpSystem = App.Store.asyncActionVoid<SysActions.StartHttpSystem>(
+            StartHttpSystem = App.Store.asyncAction<SysActions.StartHttpSystem,bool>(
                 async (dispatch, getState, instance) => {
                     dispatch(instance);
                     var isStarted = await sysService.StartHttpSystem(instance);
@@ -45,6 +45,7 @@ namespace HmiPro.Redux.Effects {
                     } else {
                         App.Store.Dispatch(new SysActions.StartHttpSystemFailed());
                     }
+                    return isStarted;
                 });
             //启动关闭显示器定时器
             StartCloseScreenTimer = App.Store.asyncActionVoid<SysActions.StartCloseScreenTimer>(

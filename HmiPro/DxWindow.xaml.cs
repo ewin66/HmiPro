@@ -24,6 +24,8 @@ namespace HmiPro {
             //开发电脑
             if (Environment.UserName.ToLower().Contains("ychost")) {
                 WindowStyle = WindowStyle.SingleBorderWindow;
+                WindowState = WindowState.Normal;
+                Topmost = false;
                 //生产电脑
             } else {
                 WindowStyle = WindowStyle.None;

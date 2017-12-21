@@ -25,6 +25,7 @@ namespace HmiPro.Redux {
                 .Part(s => s.MqState, MqReducer.Create())
                 .Part(s => s.AlarmState, AlarmReducer.Create())
                 .Part(s => s.OeeState, OeeReducer.Create())
+                .Part(s=>s.DMesState,DMesReducer.Create())
             ;
 
 

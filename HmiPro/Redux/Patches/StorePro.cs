@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Reducers;
 using Reducto;
+using YCsharp.Service;
 using YCsharp.Util;
 
 namespace HmiPro.Redux.Patches {
@@ -37,24 +38,32 @@ namespace HmiPro.Redux.Patches {
         //== 一些父类的私有元素
         private Reducer<T> rootReducer;
         private dynamic state;
+        //只能收到state
         private List<StateChangedSubscriber<T>> subscriptions;
+        //和subscriptions的区别就是可以收到当前的state和action数据
+        private List<Action<T, IAction>> listeners;
         private MiddlewareExecutor middlewares;
+        private IAction latestAction;
 
         /// <summary>
         /// 派遣动作的时候将动作名称赋予状态
         /// </summary>
         /// <param name="action"></param>
         public void Dispatch(IAction action) {
-            state = rootReducer(state, action);
-
+            //注意：state和action都是struct,这里的是赋值不是引用
+            //防止在subscription中更改state
             //State中必须含有Type字段
             //可能会多个线程同时dispatch，导致state发生不可预见的错误，这里给其加锁
             lock (dispatchLock) {
+                state = rootReducer(state, action);
+                latestAction = action;
                 state.Type = action.Type();
                 foreach (var subscribtion in subscriptions) {
                     subscribtion(state);
                 }
-
+                foreach (var listen in listeners) {
+                    listen(state, latestAction);
+                }
             }
         }
 
@@ -69,6 +78,10 @@ namespace HmiPro.Redux.Patches {
             } else {
                 throw new Exception($"派遣的action未继承自 IAction");
             }
+        }
+
+        public new Task<Result> Dispatch<Result>(AsyncAction<Result> action) {
+            return action(Dispatch, GetState);
         }
 
         public new T GetState() {
@@ -97,10 +110,22 @@ namespace HmiPro.Redux.Patches {
             return () => { subscriptions.Remove(subscription); };
         }
 
+        public Unsubscribe Subscribe(Action<T, IAction> effect) {
+            listeners.Add(effect);
+            if (state.Type != null && latestAction != null) {
+                effect(state, latestAction);
+            }
+            return () => { listeners.Remove(effect); };
+        }
+
+
         /// <summary>
         /// 初始化继承一些父类的私有元素
         /// </summary>
         private void init() {
+            UnityIocService.AssertIsFirstInject(GetType());
+
+            listeners = new List<Action<T, IAction>>();
             if (baseStore == null) {
                 baseStore = this.GetPrivateField<object>("store", GetType().BaseType);
             }

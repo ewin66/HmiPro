@@ -1,0 +1,91 @@
+﻿<UserControl
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
+             xmlns:sys="clr-namespace:HmiPro.ViewModels.Sys"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             x:Class="HmiPro.Views.Sys.TestView"
+             mc:Ignorable="d"
+             DataContext="{dxmvvm:ViewModelSource Type={x:Type sys:TestViewModel}}"
+             x:Name="Self"
+             d:DesignHeight="600" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </UserControl.Resources>
+    <dxwui:PageAdornerControl  Header="测试页面" ShowBackButton="True">
+        <Grid>
+            <dxlc:FlowLayoutControl BreakFlowToFit="False" Orientation="Horizontal" >
+                <materialDesign:Flipper
+            Style="{StaticResource MaterialDesignCardFlipper}">
+                    <materialDesign:Flipper.FrontContent >
+                        <Grid >
+                            <materialDesign:Card
+                             Margin="8,8,8,8"
+                        Background="{DynamicResource PrimaryHueDarkBrush}"
+                        Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}">
+                                <StackPanel >
+                                    <TextBlock Margin="16,16,12,8" FontSize="16"><Run Text="任务 GD20171127305"/></TextBlock>
+                                    <CheckBox Margin="16,4,16,0"  IsChecked="True" Style="{StaticResource MaterialDesignUserForegroundCheckBox}" Content="GD201711273053jy00"/>
+                                    <CheckBox Margin="16,4,16,0" IsChecked="True" Style="{StaticResource MaterialDesignUserForegroundCheckBox}" Content="GD201711273053jy01"/>
+                                    <CheckBox Margin="16,4,16,0" Style="{StaticResource MaterialDesignUserForegroundCheckBox}" Content="GD201711273053jy02"/>
+                                    <Separator Style="{StaticResource MaterialDesignLightSeparator}" />
+                                    <StackPanel
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal">
+                                        <Button
+                                    Width="30"
+                                    Padding="2,0,0,0"
+                                    HorizontalAlignment="Right"
+                                    materialDesign:RippleAssist.IsCentered="True"
+                                    Content="详细"
+                                    Command="{x:Static materialDesign:Flipper.FlipCommand}"
+                                    Style="{StaticResource MaterialDesignToolForegroundButton}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </Grid>
+                    </materialDesign:Flipper.FrontContent>
+                    <materialDesign:Flipper.BackContent>
+                        <Grid  Width="700"	>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"  />
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <materialDesign:ColorZone Padding="6" Mode="Accent" Grid.Row="0">
+                                <StackPanel Orientation="Horizontal">
+                                    <Button HorizontalAlignment="Left"
+                                    Command="{x:Static materialDesign:Flipper.FlipCommand}"
+                                    Style="{StaticResource MaterialDesignToolForegroundButton}">
+                                        <materialDesign:PackIcon HorizontalAlignment="Right" Kind="ArrowLeft" />
+                                    </Button>
+                                    <TextBlock Margin="8,0,0,0" VerticalAlignment="Center"><Run Text="返回"/></TextBlock>
+                                </StackPanel>
+                            </materialDesign:ColorZone>
+                            <dxg:GridControl Grid.Row="1">
+                                <dxg:GridControl.View>
+                                    <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
+                                </dxg:GridControl.View>
+                                <dxg:GridControl.Columns>
+                                    <dxg:GridColumn Width="2*" Header="轴号" FieldName="AxisNo"/>
+                                    <dxg:GridColumn Width="*" Header="长度" FieldName="Length"/>
+                                    <dxg:GridColumn Width="*" Header="颜色" FieldName="Color" />
+                                    <dxg:GridColumn Width="3*" Header="完成率" FieldName="CompletedRate"/>
+                                </dxg:GridControl.Columns>
+                            </dxg:GridControl>
+                        </Grid>
+                    </materialDesign:Flipper.BackContent>
+                </materialDesign:Flipper>
+            </dxlc:FlowLayoutControl>
+        </Grid>
+    </dxwui:PageAdornerControl>
+</UserControl>

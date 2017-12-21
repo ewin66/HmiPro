@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Config.Models;
+using HmiPro.Redux.Models;
 using Newtonsoft.Json;
 using SQLite.CodeFirst;
 
@@ -78,6 +79,10 @@ namespace HmiPro.Helpers {
 
         public DbSet<Persist> Persists { get; set; }
         public DbSet<Setting> Settings { get; set; }
+        /// <summary>
+        /// 上传失败的落轴数据
+        /// </summary>
+        public DbSet<MqUploadManu> UploadManuFailures { get; set; }
 
         public void SavePersist(Persist persist) {
             Persists.AddOrUpdate(persist);

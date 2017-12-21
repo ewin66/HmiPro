@@ -32,7 +32,7 @@ namespace HmiPro.Redux.Services {
         public Task<bool> StartHttpSystem(SysActions.StartHttpSystem startHttpSystem) {
             return Task.Run(() => {
                 HttpListener = new HttpListener();
-                Logger.Debug("http 监听地址 " + startHttpSystem.Url);
+                //Logger.Debug("http 监听地址 " + startHttpSystem.Url);
                 HttpListener.Prefixes.Add(startHttpSystem.Url);
                 return Task.Run(() => {
                     try {

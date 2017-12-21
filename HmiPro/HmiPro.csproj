@@ -58,6 +58,8 @@
     <Reference Include="DevExpress.Printing.v17.1.Core, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Xpf.Controls.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Xpf.Core.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Grid.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Grid.v17.1.Core, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Xpf.LayoutControl.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DnsClient, Version=1.0.7.0, Culture=neutral, PublicKeyToken=4574bb5573c51424, processorArchitecture=MSIL">
       <HintPath>..\packages\DnsClient.1.0.7\lib\net45\DnsClient.dll</HintPath>
@@ -194,6 +196,8 @@
     <Compile Include="Redux\Models\MqScanMaterial.cs" />
     <Compile Include="Redux\Models\MqSchTask.cs" />
     <Compile Include="Redux\Models\MqUploadCpms.cs" />
+    <Compile Include="Redux\Models\MqUploadManu.cs" />
+    <Compile Include="Redux\Models\MqUploadOee.cs" />
     <Compile Include="Redux\Models\Oee.cs" />
     <Compile Include="Redux\Models\SchTaskDoing.cs" />
     <Compile Include="Redux\Models\Sys.cs" />
@@ -215,9 +219,10 @@
     <Compile Include="ViewModels\DMes\Tab\AlarmTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\CpmsTab.cs" />
-    <Compile Include="ViewModels\DMes\Tab\SchTaskList.cs" />
+    <Compile Include="ViewModels\DMes\Tab\SchTaskViewModel.cs" />
     <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />
+    <Compile Include="ViewModels\Sys\SelectableViewModel.cs" />
     <Compile Include="Views\DMes\DMesManuView.xaml.cs">
       <DependentUpon>DMesManuView.xaml</DependentUpon>
     </Compile>
@@ -247,6 +252,10 @@
       <DependentUpon>SettingView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\Sys\SettingViewModel.cs" />
+    <Compile Include="Views\Sys\TestView.xaml.cs">
+      <DependentUpon>TestView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\Sys\TestViewModel.cs" />
     <Page Include="DxWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -284,6 +293,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Sys\SettingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Sys\TestView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -548,7 +561,11 @@
   <ItemGroup>
     <Resource Include="app.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Profiles\Assets\Images\test.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

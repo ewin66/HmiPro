@@ -6,6 +6,7 @@ using System.ComponentModel;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using HmiPro.Config;
+using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
@@ -24,9 +25,9 @@ namespace HmiPro.ViewModels.DMes {
         public readonly IDictionary<string, AlarmTab> AlarmTabDict = new Dictionary<string, AlarmTab>();
         readonly IDictionary<string, Action<AppState>> execActionDict = new ConcurrentDictionary<string, Action<AppState>>();
         public string OeeStr = "";
-
-
         private Unsubscribe unsubscribe;
+        public readonly LoggerService Logger;
+
         public DMesManuViewModel() {
             foreach (var pair in MachineConfig.MachineDict) {
                 var cpmsTab = new CpmsTab() { Header = pair.Key + "参数" };
@@ -41,12 +42,10 @@ namespace HmiPro.ViewModels.DMes {
                 SchTaskTabDict[pair.Key] = schTaskTab;
                 AlarmTabDict[pair.Key] = alarmTab;
             }
-            execActionDict[DMesActions.DMES_SCH_TASK_ASSIGN] = schTaskAssign;
+            Logger = LoggerHelper.CreateLogger(GetType().ToString());
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
+
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
             //绑定实时参数页面
@@ -64,39 +63,38 @@ namespace HmiPro.ViewModels.DMes {
             foreach (var pair in oeeDict) {
                 //OeeDict[pair.Key] = pair.Value;
             }
-
-            //更新任务页面
-            var mqSchTask = App.Store.GetState().MqState.MqSchTaskDict;
-            foreach (var pair in mqSchTask) {
+            //绑定任务页面
+            var mqTasks = App.Store.GetState().DMesState.MqSchTasksDict;
+            foreach (var pair in mqTasks) {
                 if (SchTaskTabDict.TryGetValue(pair.Key, out var tab)) {
-                    tab.Update(pair.Value);
+                    tab.BindSource(pair.Value);
                 }
             }
-
             //监听系统信息
-            unsubscribe = App.Store.Subscribe(s => {
-                if (execActionDict.TryGetValue(s.Type, out var exec)) {
-                    exec(s);
+            unsubscribe = App.Store.Subscribe((state, action) => {
+                if (execActionDict.TryGetValue(state.Type, out var exec)) {
+                    exec(state);
                 }
             });
         }
 
-
-
-        /// <summary>
-        /// 分配新的任务
-        /// </summary>
-        /// <param name="state"></param>
-        void schTaskAssign(AppState state) {
-            foreach (var pair in state.DMesState.MqSchTaskDict) {
-                var machineCode = pair.Key;
-                if (SchTaskTabDict.TryGetValue(machineCode, out var tab)) {
-                    tab.Update(pair.Value);
-                }
+        [Command(Name = "StartTaskAxisDoingCommand")]
+        public void StartTaskAxisDoing(string machineCode_axis_isStarted) {
+            if (machineCode_axis_isStarted?.Split('_')?.Length == 3) {
+                var arr = machineCode_axis_isStarted.Split('_');
+                var machineCode = arr[0];
+                var axisCode = arr[1];
+                bool.TryParse(arr[2], out var isStarted);
+                App.Store.Dispatch(new DMesActions.StartSchTaskAxis(machineCode, axisCode));
+            } else {
+                Logger.Error("派发的工单数据有误  machineCode_axis_isStarted:=" + machineCode_axis_isStarted);
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "派单系统故障",
+                    Content = "任务数据有误，请联系管理员"
+                }));
             }
+
         }
-
-
 
         public void OnClose(CancelEventArgs e) {
             //取消订阅

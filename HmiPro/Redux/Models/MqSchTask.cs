@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Annotations;
+using YCsharp.Util;
 
 namespace HmiPro.Redux.Models {
     /// <summary>
@@ -10,15 +15,31 @@ namespace HmiPro.Redux.Models {
     /// <author>ychost</author>
     /// <date>2017-12-19</date>
     /// </summary>
-    public class MqSchTask {
+    public class MqSchTask : INotifyPropertyChanged {
+        public static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
         /// <summary>
         /// 当前任务序号
         /// </summary>
         public int CurPlanIndex { get; set; }
         /// <summary>
+        /// 满载速度
+        /// </summary>
+        public float forceSpeed { get; set; }
+
+        private string _workCode;
+        /// <summary>
         /// 工单编码
         /// </summary>
-        public string workcode { get; set; }
+        public string workcode {
+            get => _workCode;
+            set {
+                if (_workCode != value) {
+                    _workCode = value;
+                    OnPropertyChanged(nameof(workcode));
+                }
+
+            }
+        }
         /// <summary>
         /// 标准速度
         /// </summary>
@@ -31,14 +52,28 @@ namespace HmiPro.Redux.Models {
         /// 物料信息
         /// </summary>
         public List<PmtmsItem> pmtms { get; set; }
+
+        private MesTime _psTime;
         /// <summary>
         /// 计划开始时间
         /// </summary>
-        public MesTime pstime { get; set; }
+        public MesTime pstime {
+            get => _psTime;
+            set {
+                if (_psTime != value) {
+                    _psTime = value;
+                    PsTimeStr = YUtil.UtcTimestampToLocalTime(_psTime.time).ToString(DateTimeFormat);
+                    OnPropertyChanged(nameof(PsTimeStr));
+                }
+            }
+        }
+        public string PsTimeStr { get; private set; }
+
+
         /// <summary>
         /// 轴号信息
         /// </summary>
-        public List<AxisParamItem> axisParam { get; set; }
+        public ObservableCollection<AxisParamItem> axisParam { get; set; }
         /// <summary>
         /// 主操作手
         /// </summary>
@@ -83,10 +118,24 @@ namespace HmiPro.Redux.Models {
         /// 轴数量统计
         /// </summary>
         public int axiscount { get; set; }
+
+        public MesTime _pdTime;
         /// <summary>
         /// 计划结束时间
         /// </summary>
-        public MesTime pdtime { get; set; }
+        public MesTime pdtime {
+            get => _pdTime;
+            set {
+                if (_pdTime != value) {
+                    _pdTime = value;
+                    PdTimeStr = YUtil.UtcTimestampToLocalTime(_pdTime.time).ToString(DateTimeFormat);
+                    OnPropertyChanged(nameof(PdTimeStr));
+                }
+            }
+        }
+
+        public string PdTimeStr { get; set; }
+
         /// <summary>
         /// 实际开始时间
         /// </summary>
@@ -107,6 +156,18 @@ namespace HmiPro.Redux.Models {
         /// 机台编码
         /// </summary>
         public string maccode { get; set; }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void StartSchTaskAxis() {
+            Console.WriteLine("开启任务" + workcode);
+        }
     }
     public class PmtmsItem {
         /// <summary>
@@ -182,7 +243,7 @@ namespace HmiPro.Redux.Models {
         public int date { get; set; }
     }
 
-    public class AxisParamItem {
+    public class AxisParamItem : INotifyPropertyChanged {
         /// <summary>
         /// 
         /// </summary>
@@ -206,7 +267,7 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 
         /// </summary>
-        public int length { get; set; }
+        public float length { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -223,6 +284,69 @@ namespace HmiPro.Redux.Models {
         /// 
         /// </summary>
         public string maccode { get; set; }
+
+        private float completeRate;
+        /// <summary>
+        /// 完成率
+        /// </summary>
+        public float CompletedRate {
+            get => completeRate;
+            set {
+                if (completeRate != value) {
+                    completeRate = value;
+                    OnPropertyChanged(nameof(CompletedRate));
+                    OnPropertyChanged(nameof(MachineCode_Axis_IsStarted));
+                }
+            }
+        }
+
+        private bool isCompleted;
+        /// <summary>
+        /// 是否完成
+        /// </summary>
+        public bool IsCompleted {
+            get => isCompleted;
+            set {
+                if (isCompleted != value) {
+                    isCompleted = value;
+                    OnPropertyChanged(nameof(IsCompleted));
+                    OnPropertyChanged(nameof(MachineCode_Axis_IsStarted));
+                }
+            }
+        }
+
+        private bool isStarted;
+
+        /// <summary>
+        /// 是否启动
+        /// </summary>
+        public bool IsStarted {
+            get { return isStarted; }
+            set {
+                if (isStarted != value) {
+                    isStarted = value;
+                    OnPropertyChanged(nameof(IsStarted));
+                    IsStoped = !isStarted;
+                    OnPropertyChanged(nameof(IsStoped));
+                    OnPropertyChanged(nameof(MachineCode_Axis_IsStarted));
+                }
+            }
+        }
+
+        public bool IsStoped { get; set; } = true;
+
+        public string MachineCode_Axis_IsStarted {
+            get { return string.Join("_", maccode, axiscode, isStarted); }
+        }
+
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
 

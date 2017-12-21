@@ -36,14 +36,16 @@ namespace HmiPro.ViewModels {
         public DxWindowViewModel() {
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
-            Store.Subscribe(s => {
-                if (s.Type == SysActions.SHOW_SETTING_VIEW) {
+            Store.Subscribe((state, aciton) => {
+                if (aciton.Type() == SysActions.SHOW_SETTING_VIEW) {
                     JumpAppSettingView("程序设置");
-                    //显示系统通知消息
-                } else if (s.Type == SysActions.SHOW_NOTIFICATION) {
-                    var msg = s.SysState.NotificationMsg;
+                    //系统通知消息
+                } else if (aciton.Type() == SysActions.SHOW_NOTIFICATION) {
+                    var msg = ((SysActions.ShowNotification)aciton).Message;
+                    //保存消息日志
+                    Logger.Notify("Title: "+msg.Title + "\t Content: " + msg.Content);
                     DispatcherService.BeginInvoke(() => {
-                        INotification notification = NotifyNotificationService.CreatePredefinedNotification(msg.Title, msg.Content, null);
+                        INotification notification = NotifyNotificationService.CreatePredefinedNotification(msg.Title, msg.Content, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                         SystemSounds.Exclamation.Play();
                         notification.ShowAsync();
                     });
@@ -90,7 +92,7 @@ namespace HmiPro.ViewModels {
         /// </summary>
         public void OnViewLoaded() {
             Navigate("HomeView");
-    
+
         }
 
         /// <summary>

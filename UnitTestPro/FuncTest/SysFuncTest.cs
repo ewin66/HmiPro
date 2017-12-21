@@ -47,7 +47,22 @@ namespace UnitTestPro.FuncTest {
             foreach (var item in removeList2) {
                 TestObs.Remove(item);
             }
-            Assert.AreEqual(TestObs.Count,13);
+            TestObs.Add(null);
+            Assert.AreEqual(TestObs.Count, 14);
+            TestObs.Remove(null);
+            TestObs.Remove(null);
+            TestObs.Remove(null);
+            TestObs.Remove(null);
+            Assert.AreEqual(TestObs.Count, 13);
+        }
+
+        [TestMethod]
+        public void FirstOrSignleTest() {
+            List<TestClass> TestObs = new List<TestClass>() { new TestClass() { Name = "1" }, new TestClass() { Name = "2" } };
+            var test = TestObs.FirstOrDefault(s => s.Name == "2");
+            Assert.AreEqual(test.Name,"2");
+            var test2 = TestObs.FirstOrDefault(s => s.Name == "3");
+            Assert.AreEqual(test2,null);
         }
     }
 }

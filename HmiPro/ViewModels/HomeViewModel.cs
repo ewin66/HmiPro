@@ -51,6 +51,8 @@ namespace HmiPro.ViewModels {
             App.Store.Dispatch(new CpmActions.Init());
             App.Store.Dispatch(new AlarmActions.Init());
             App.Store.Dispatch(new OeeActions.Init());
+            App.Store.Dispatch(new DMesActions.Init());
+
             var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
@@ -58,25 +60,44 @@ namespace HmiPro.ViewModels {
             await UnityIocService.ResolveDepend<SchCore>().Init();
             UnityIocService.ResolveDepend<CpmCore>().Init();
 
+            var id = 0;
+            //派发三个测试任务
+            YUtil.SetInterval(10000, () => {
+                dispatchMockSchTask((++id));
+            },3)();
+
             //启动Http解析系统
-            await App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
+            var isHttpSystem = await App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
+            if (!isHttpSystem) {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "启动失败", Content = $"Http {HmiConfig.CmdHttpPort} 端口服务启动失败，请检查" }));
+            }
             //启动Cpm采集服务
-            await App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
+            var isCpmServer = await App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
+            if (!isCpmServer) {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "启动失败", Content = $"参数采集服务 {HmiConfig.CpmTcpIp}:{HmiConfig.CpmTcpPort} 启动失败，请检查" }));
+            }
             foreach (var pair in MachineConfig.MachineDict) {
                 //监听排产任务
                 var stQueueName = @"QUEUE_" + pair.Key;
-                await App.Store.Dispatch(mqEffects.StartListenSchTask(new MqActiions.StartListenSchTask(stQueueName, pair.Key)));
+                var isSchTask = await App.Store.Dispatch(mqEffects.StartListenSchTask(new MqActiions.StartListenSchTask(stQueueName, pair.Key)));
+                if (!isSchTask) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq排产队列 {stQueueName} 失败，请检查" }));
+                }
                 //监听扫描物料信息
                 var smQueueName = $@"JUDGE_MATER_{pair.Key}";
-                await App.Store.Dispatch(mqEffects.StartListenScanMaterial(new MqActiions.StartListenScanMaterial(pair.Key, smQueueName)));
+                var isScanMaterial = await App.Store.Dispatch(mqEffects.StartListenScanMaterial(new MqActiions.StartListenScanMaterial(pair.Key, smQueueName)));
+                if (!isScanMaterial) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq扫描来料队列 {smQueueName} 失败，请检查" }));
+                }
             }
             var version = YUtil.GetAppVersion(Assembly.GetExecutingAssembly());
             App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "系统启动完毕", Content = $"版本:{version}" }));
         }
 
-        void dispatchMockSchTask() {
+        void dispatchMockSchTask(int id = 0) {
             var mockEffects = UnityIocService.ResolveDepend<MockEffects>();
             var task = YUtil.GetJsonObjectFromFile<MqSchTask>(AssetsHelper.GetAssets().MockMqSchTaskJson);
+            task.id = id;
             App.Store.Dispatch(mockEffects.MockSchTaskAccept(new MockActions.MockSchTaskAccpet(task)));
         }
 

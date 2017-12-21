@@ -16,20 +16,22 @@ namespace HmiPro.Redux.Effects {
         /// <summary>
         /// 异步启动服务
         /// </summary>
-        public readonly StorePro<AppState>.AsyncActionNeedsParam<CpmActions.StartServer> StartServer;
+        public readonly StorePro<AppState>.AsyncActionNeedsParam<CpmActions.StartServer,bool> StartServer;
         public readonly CpmCore CpmCore;
 
         public CpmEffects(StorePro<AppState> store, CpmCore cpmCore) {
             CpmCore = cpmCore;
             StorePro = store;
-            StartServer = store.asyncActionVoid<CpmActions.StartServer>(async (dispatch, getState, startServer) => {
+            StartServer = store.asyncAction<CpmActions.StartServer,bool>(async (dispatch, getState, startServer) => {
                 dispatch(startServer);
                 try {
                     await cpmCore.StartAsync(startServer.Ip,startServer.Port);
                     dispatch(new CpmActions.StartServerSuccess());
+                    return true;
                 } catch (Exception e) {
                     dispatch(new CpmActions.StartServerFailed() { Exception = e });
                 }
+                return false;
             });
 
           

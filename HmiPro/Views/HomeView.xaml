@@ -47,16 +47,15 @@
                 <dxlc:Tile Header="设置"  Style="{StaticResource HorizontalTile}" Background="#509688"  Command="{Binding JumpAppSettingViewCommand}" CommandParameter="设置程序信息">
                     <BitmapImage UriSource="{Binding Assets.IconSetting2}" />
                 </dxlc:Tile>
-                <!--<dxlc:Tile Header="报警管理"  Style="{StaticResource HorizontalTile}" Background="#087688"  Command="{Binding NavigateCommand}" CommandParameter="McAlertView">
-                    <BitmapImage UriSource="{Binding Assets.IconAlert}" />
-                </dxlc:Tile>
-                <dxlc:Tile Header="质量检测"  Style="{StaticResource HorizontalTile}" Background="#009608"  Command="{Binding NavigateCommand}" CommandParameter="McQualityCheckView" >
+                <!--dxlc:Tile Header="质量检测"  Style="{StaticResource HorizontalTile}" Background="#009608"  Command="{Binding NavigateCommand}" CommandParameter="McQualityCheckView" >
                     <BitmapImage UriSource="{Binding Assets.IconQualityControl}" />
-                </dxlc:Tile>-->
-                <dxlc:Tile Header="实时曲线" Size="ExtraLarge"  Style="{StaticResource HorizontalTile}" Background="#509688"  Command="{Binding NavigateCommand}" CommandParameter="OnlineGrafana">
+                </>-->
+                <dxlc:Tile Header="实时曲线"  Style="{StaticResource HorizontalTile}" Background="#509688"  Command="{Binding NavigateCommand}" CommandParameter="OnlineGrafana">
                     <BitmapImage UriSource="{Binding Assets.IconStatsLines}" />
                 </dxlc:Tile>
-
+                <dxlc:Tile Header="测试页面"  Style="{StaticResource HorizontalTile}" Size="ExtraLarge" Background="#087688"  Command="{Binding NavigateCommand}" CommandParameter="TestView">
+                    <BitmapImage UriSource="{Binding Assets.IconTest}" />
+                </dxlc:Tile>
             </dxlc:TileLayoutControl>
         </Grid>
     </dxwui:PageAdornerControl>

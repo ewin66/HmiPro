@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,8 +11,11 @@ using HmiPro.Redux.Actions;
 using HmiPro.Redux.Effects;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
+using MongoDB.Bson;
+using NeoSmart.AsyncLock;
 using Newtonsoft.Json;
 using YCsharp.Service;
+using YCsharp.Util;
 
 namespace HmiPro.Redux.Cores {
     /// <summary>
@@ -22,10 +26,26 @@ namespace HmiPro.Redux.Cores {
     public class DMesCore {
         private readonly DbEffects dbEffects;
         private readonly MqEffects mqEffects;
-        public readonly List<MqSchTask> MqSchTasks = new List<MqSchTask>();
-        public SchTaskDoing MqSchTaskDoing = new SchTaskDoing();
+        /// <summary>
+        /// 每个机台接受到的所有任务
+        /// </summary>
+        public IDictionary<string, ObservableCollection<MqSchTask>> MqSchTasksDict;
+        /// <summary>
+        /// 每个机台的当前工作任务
+        /// </summary>
+        public IDictionary<string, SchTaskDoing> SchTaskDoingDict;
+        /// <summary>
+        /// 日志辅助
+        /// </summary>
         public readonly LoggerService Logger;
-        readonly IDictionary<string, Action<AppState>> actionExecDict = new Dictionary<string, Action<AppState>>();
+        /// <summary>
+        /// 命令派发执行的动作
+        /// </summary>
+        readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
+        /// <summary>
+        /// 任务锁
+        /// </summary>
+        public static readonly IDictionary<string, AsyncLock> SchTaskDoingLockDict = new Dictionary<string, AsyncLock>();
 
         public DMesCore(DbEffects dbEffects, MqEffects mqEffects) {
             UnityIocService.AssertIsFirstInject(GetType());
@@ -43,42 +63,53 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[CpmActions.NOTE_METER_ACCEPT] = treatNoteMeter;
             actionExecDict[AlarmActions.CHECK_CPM_BOM_ALARM] = checkCpmBomAlarm;
             actionExecDict[CpmActions.SPARK_DIFF_ACCEPT] = checkSparkDiffAlarm;
-            App.Store.Subscribe(s => {
-                //保存机台数据
-                if (actionExecDict.TryGetValue(s.Type, out var exec)) {
-                    exec(s);
+            actionExecDict[DMesActions.START_SCH_TASK_AXIS] = startSchTaskDoing;
+
+            App.Store.Subscribe((state, action) => {
+                if (actionExecDict.TryGetValue(state.Type, out var exec)) {
+                    exec(state, action);
                 }
             });
+            //绑定全局的值
+            SchTaskDoingDict = App.Store.GetState().DMesState.SchTaskDoingDict;
+            MqSchTasksDict = App.Store.GetState().DMesState.MqSchTasksDict;
+            foreach (var pair in MachineConfig.MachineDict) {
+                SchTaskDoingLockDict[pair.Key] = new AsyncLock();
+            }
         }
 
         /// <summary>
         /// 推送数据到influxDb
         /// </summary>
         /// <param name="state"></param>
-        void saveCpmsToInfluxDb(AppState state) {
+        void saveCpmsToInfluxDb(AppState state, IAction action) {
             var machineCode = state.CpmState.MachineCode;
             var updatedCpms = state.CpmState.UpdatedCpmsAllDict[machineCode];
-            App.Store.Dispatch(
-                dbEffects.UploadCpmsInfluxDb(new DbActions.UploadCpmsInfluxDb(machineCode, updatedCpms)));
+            App.Store.Dispatch(dbEffects.UploadCpmsInfluxDb(new DbActions.UploadCpmsInfluxDb(machineCode, updatedCpms)));
         }
 
         /// <summary>
         /// 接受到新的任务
         /// </summary>
         /// <param name="state"></param>
-        void treatNewSchTaskAccept(AppState state) {
+        void treatNewSchTaskAccept(AppState state, IAction action) {
             var machineCode = state.MqState.MachineCode;
-            var task = state.MqState.MqSchTaskDict[machineCode];
-            foreach (var cache in MqSchTasks) {
-                if (cache.id == task.id) {
-                    Logger.Error($"任务id重复,id={cache.id}");
+            var mqTasks = MqSchTasksDict[machineCode];
+            var task = state.MqState.MqSchTaskAccpetDict[machineCode];
+            foreach (var cacheTask in mqTasks) {
+                if (cacheTask.id == task.id) {
+                    Logger.Error($"任务id重复,id={cacheTask.id}");
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "系统异常",
+                        Content = $"接收到重复任务，请联系管理员，任务Id {task.id},工单 {task.workcode}"
+                    }));
+                    return;
                 }
-                return;
             }
             //将任务添加到任务队列里面
-            MqSchTasks.Add(task);
+            mqTasks.Add(task);
             using (var ctx = SqliteHelper.CreateSqliteService()) {
-                ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(MqSchTasks)));
+                ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(mqTasks)));
             }
         }
 
@@ -86,7 +117,7 @@ namespace HmiPro.Redux.Cores {
         /// 检查火花报警
         /// </summary>
         /// <param name="state"></param>
-        void checkSparkDiffAlarm(AppState state) {
+        void checkSparkDiffAlarm(AppState state, IAction action) {
             var machineCode = state.CpmState.MachineCode;
             var sparkCpm = state.CpmState.SparkDiffDict[machineCode];
             if ((int)sparkCpm.Value == 1) {
@@ -109,39 +140,48 @@ namespace HmiPro.Redux.Cores {
             App.Store.Dispatch(new SysActions.OpenScreen());
             //通知系统报警
             App.Store.Dispatch(new AlarmActions.NotifyAlarm(machineCode, mqAlarm));
+            //显示消息通知
+            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                Title = "警报",
+                Content = machineCode + ":" + mqAlarm.alarmType
+            }));
             //上传报警到Mq
             App.Store.Dispatch(mqEffects.UploadAlarm(new MqActiions.UploadAlarm(HmiConfig.QueWebSrvException, mqAlarm)));
             //保存报警到Mongo
             App.Store.Dispatch(dbEffects.UploadAlarmsMongo(new DbActions.UploadAlarmsMongo(machineCode, "Alarms", mqAlarm)));
         }
 
-        MqAlarm createMqAlarm(string machineCode, long time, string alarmType) {
-            if (!MqSchTaskDoing.IsStarted) {
-                return null;
+        private MqAlarm createMqAlarm(string machineCode, long time, string alarmType) {
+            using (SchTaskDoingLockDict[machineCode].Lock()) {
+                var taskDoing = SchTaskDoingDict[machineCode];
+                if (!SchTaskDoingDict[machineCode].IsStarted) {
+                    return null;
+                }
+                App.Store.GetState().CpmState.NoteMeterDict.TryGetValue(machineCode, out var meter);
+                var mqAlarm = new MqAlarm() {
+                    alarmType = alarmType,
+                    axisCode = taskDoing?.MqSchAxis?.axiscode,
+                    machineCode = machineCode,
+                    meter = meter,
+                    time = time,
+                    workCode = taskDoing?.MqSchTask?.workcode,
+                };
+                return mqAlarm;
             }
-            App.Store.GetState().CpmState.NoteMeterDict.TryGetValue(machineCode, out var meter);
-            MqAlarm mqAlarm = new MqAlarm() {
-                alarmType = alarmType,
-                axisCode = MqSchTaskDoing?.MqSchAxis?.axiscode,
-                machineCode = machineCode,
-                meter = meter,
-                time = time,
-                workCode = MqSchTaskDoing?.MqSchTask?.workcode,
-            };
-            return mqAlarm;
         }
 
         /// <summary>
         /// 检查报警
         /// </summary>
         /// <param name="state"></param>
-        void checkCpmBomAlarm(AppState state) {
-            if (MqSchTaskDoing.MqSchTask == null) {
+        void checkCpmBomAlarm(AppState state, IAction action) {
+            var machineCode = state.AlarmState.MachineCode;
+            var taskDoing = SchTaskDoingDict[machineCode];
+            if (taskDoing.MqSchTask == null) {
                 return;
             }
-            var machineCode = state.AlarmState.MachineCode;
             var checkAlarm = state.AlarmState.AlarmBomCheckDict[machineCode];
-            var boms = MqSchTaskDoing.MqSchTask.bom;
+            var boms = taskDoing.MqSchTask.bom;
             float? max = null;
             float? min = null;
             float? std = null;
@@ -155,7 +195,7 @@ namespace HmiPro.Redux.Cores {
                     min = minObj != null ? (float?)minObj : null;
                     std = stdObj != null ? (float?)stdObj : null;
                 } catch (Exception e) {
-                    Logger.Error($"任务 id={MqSchTaskDoing.MqSchTaskId} 的Bom表上下限有误" +
+                    Logger.Error($"任务 id={taskDoing.MqSchTaskId} 的Bom表上下限有误" +
                                  $"{checkAlarm.MaxBomKey}: {maxObj},{checkAlarm.MinBomKey}:{minObj},{checkAlarm.StdBomKey}: {stdObj}");
                     return;
                 }
@@ -172,7 +212,7 @@ namespace HmiPro.Redux.Cores {
                     dispatchAlarmAction(machineCode, mqAlarm);
                 }
             } else {
-                Logger.Error($"未能从任务 Id={MqSchTaskDoing.MqSchTaskId}的Bom表中求出上下限，Max: {max},Min {min},Std: {std}");
+                Logger.Error($"未能从任务 Id={taskDoing.MqSchTaskId}的Bom表中求出上下限，Max: {max},Min {min},Std: {std}");
             }
         }
 
@@ -180,34 +220,147 @@ namespace HmiPro.Redux.Cores {
         /// 记米相关处理
         /// </summary>
         /// <param name="state"></param>
-        void treatNoteMeter(AppState state) {
+        void treatNoteMeter(AppState state, IAction action) {
             var machineCode = state.CpmState.MachineCode;
             var noteMeter = state.CpmState.NoteMeterDict[machineCode];
+
+
         }
 
         /// <summary>
-        /// 根据轴号设置当前任务
+        /// 根据轴号设置当前任务开始
         /// </summary>
-        /// <param name="axisCode"></param>
-        public void SetSchTaskDoing(string axisCode) {
+        public void startSchTaskDoing(AppState state, IAction action) {
+            var startParam = (DMesActions.StartSchTaskAxis)action;
+            var machineCode = startParam.MachineCode;
+            var axisCode = startParam.AxisCode;
             //搜索任务
-            foreach (var st in MqSchTasks) {
-                for (var i = 0; i < st.axisParam.Count; i++) {
-                    var axis = st.axisParam[i];
-                    if (axis.axiscode == axisCode) {
-                        MqSchTaskDoing.MqSchTask = st;
-                        MqSchTaskDoing.MqSchTaskId = st.id;
-                        MqSchTaskDoing.MqSchAxisIndex = i;
-                        MqSchTaskDoing.MqSchAxis = axis;
-                        MqSchTaskDoing.IsStarted = true;
+            using (SchTaskDoingLockDict[machineCode].Lock()) {
+                bool hasFound = false;
+                var mqTasks = MqSchTasksDict[machineCode];
+                foreach (var st in mqTasks) {
+                    for (var i = 0; i < st.axisParam.Count; i++) {
+                        var axis = st.axisParam[i];
+                        if (axis.axiscode == axisCode) {
+                            if (axis.IsStarted == true) {
+                                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                                    Title = "请勿重复启动任务",
+                                    Content = $"机台 {machineCode} 轴号： {axisCode}"
+                                }));
+                                App.Store.Dispatch(new SimpleAction(DMesActions.START_SCH_TASK_AXIS_FAILED));
+                                return;
+                            }
+                            var taskDoing = SchTaskDoingDict[machineCode];
+                            if (taskDoing.IsStarted) {
+                                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                                    Title = $"尚有任务未完成，请先完成任务再启动新任务",
+                                    Content = $"机台 {machineCode} 任务 {taskDoing.MqSchAxis.axiscode} 未完成"
+                                }));
+                                App.Store.Dispatch(new SimpleAction(DMesActions.START_SCH_TASK_AXIS_FAILED));
+                                return;
+                            }
+                            taskDoing.MqSchTask = st;
+                            taskDoing.MqSchTaskId = st.id;
+                            taskDoing.MqSchAxisIndex = i;
+                            taskDoing.MqSchAxis = axis;
+                            taskDoing.IsStarted = true;
+                            taskDoing.Step = st.step;
+                            taskDoing.WorkCode = st.workcode;
+                            hasFound = true;
+                            axis.IsStarted = true;
+                            break;
+                        }
+                    }
+                    if (hasFound) {
                         break;
                     }
                 }
-                if (MqSchTaskDoing.MqSchAxis != null) {
-                    break;
+                if (hasFound) {
+                    App.Store.Dispatch(new SimpleAction(DMesActions.START_SCH_TASK_AXIS_SUCCESS));
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "开始任务",
+                        Content = $"机台 {machineCode} 轴号： {axisCode}"
+                    }));
+                } else {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "启动任务失败，请联系管理员",
+                        Content = $"机台 {machineCode} 轴号： {axisCode}"
+                    }));
+                    App.Store.Dispatch(new SimpleAction(DMesActions.START_SCH_TASK_AXIS_FAILED));
                 }
             }
+        }
 
+        /// <summary>
+        /// 完成某轴
+        /// </summary>
+        public async void CompleteOneAxis(string machineCode, string axisCode) {
+            using (await SchTaskDoingLockDict[machineCode].LockAsync()) {
+                //显示完成消息
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = $"机台 {machineCode} 达成新任务",
+                    Content = $"轴号 {axisCode} 任务达成"
+                }));
+
+                var taskDoing = SchTaskDoingDict[machineCode];
+                if (taskDoing.MqSchTask == null) {
+                    Logger.Error($"机台 {machineCode} 没有进行中的任务");
+                    return;
+                }
+                if (taskDoing.MqSchAxis.axiscode != axisCode) {
+                    Logger.Error($"机台 {machineCode} 当前正在生产的轴号:{taskDoing.MqSchAxis?.axiscode}与设置完成轴号{axisCode}不一致");
+                    return;
+                }
+                var uManu = new MqUploadManu() {
+                    actualBeginTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
+                    actualEndTime = YUtil.GetUtcTimestampMs(taskDoing.EndTime),
+                    axisName = axisCode,
+                    macCode = machineCode,
+                    axixLen = taskDoing.Meter,
+                    courseCode = taskDoing.WorkCode,
+                    empRfid = string.Join(",", taskDoing.EmpRfids),
+                    rfids_begin = string.Join(",", taskDoing.StartRfids),
+                    rfid_end = string.Join(",", taskDoing.EndRfids),
+                    acutalDispatchTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
+                    mqType = "yes",
+                    step = taskDoing.Step,
+                    testLen = 0,
+                    testTime = 0,
+                    speed = 0,
+                };
+                var uploadResult = await App.Store.Dispatch(
+                    mqEffects.UploadSchTaskManu(new MqActiions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
+                if (uploadResult) {
+                    //一个工单任务完成
+                    if (taskDoing.MqSchAxisIndex >= taskDoing.MqSchTask.axisParam.Count - 1) {
+                        CompleteOneSchTask(machineCode, taskDoing.WorkCode);
+                    }
+                    //上传落轴数据失败，对其进行缓存
+                } else {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = $"机台 {machineCode} 上传任务达成进度失败",
+                        Content = $"轴号 {axisCode} 任务 上传服务器失败，请检查网络连接"
+                    }));
+                    using (var ctx = SqliteHelper.CreateSqliteService()) {
+                        ctx.UploadManuFailures.Add(uManu);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 完成某个工单
+        /// </summary>
+        /// <param name="machineCode"></param>
+        /// <param name="workCode"></param>
+        public void CompleteOneSchTask(string machineCode, string workCode) {
+            var mqTasks = MqSchTasksDict[machineCode];
+            var removeTask = mqTasks.FirstOrDefault(t => t.workcode == workCode);
+            mqTasks.Remove(removeTask);
+            //更新缓存
+            using (var ctx = SqliteHelper.CreateSqliteService()) {
+                ctx.SavePersist(new Persist($"task_{machineCode}", JsonConvert.SerializeObject(mqTasks)));
+            }
         }
     }
 }

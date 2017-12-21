@@ -70,6 +70,33 @@ namespace YCsharp.Service {
         }
 
         /// <summary>
+        /// 系统通知消息，会存档
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="outFile"></param>
+        /// <param name="consoleColor"></param>
+        public void Notify(string message, bool outFile = true, ConsoleColor consoleColor = ConsoleColor.White) {
+            var lineNum = YUtil.GetCurCodeLineNum(2);
+            Console.ForegroundColor = consoleColor;
+            Notify(DefaultLocation + $"[{lineNum}]行", message, outFile);
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        /// <summary>
+        /// 系统通知消息
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="message"></param>
+        /// <param name="outFile"></param>
+        public void Notify(string location, string message, bool outFile) {
+            var content = createLogContent(location, message, "notify");
+            consoleOut(content);
+            if (outFile) {
+                fileOut(content, "notify");
+            }
+        }
+
+        /// <summary>
         /// 输出错误信息
         /// </summary>
         /// <param name="location"></param>
@@ -206,7 +233,7 @@ namespace YCsharp.Service {
         /// <param name="mark"></param>
         /// <returns></returns>
         string createLogContent(string location, string message, string mark) {
-            return $"{DateTime.Now} [{mark}]: 线程：[{Thread.CurrentThread.ManagedThreadId}]  位置：{location}  信息：{message}\r\n";
+            return $"{DateTime.Now} [{mark}]: 线程：[{Thread.CurrentThread.ManagedThreadId.ToString("00")}]  位置：{location}  信息：{message}\r\n";
         }
 
     }

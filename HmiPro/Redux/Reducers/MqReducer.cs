@@ -12,7 +12,10 @@ namespace HmiPro.Redux.Reducers {
 
     public static class MqReducer {
         public struct State {
-            public IDictionary<string, MqSchTask> MqSchTaskDict;
+            /// <summary>
+            /// 当前接受到的任务
+            /// </summary>
+            public IDictionary<string, MqSchTask> MqSchTaskAccpetDict;
             //当前正在做的任务
             public IDictionary<string, SchTaskDoing> SchTaskDoing;
             public bool LsnUploadCpmsInterval;
@@ -23,7 +26,7 @@ namespace HmiPro.Redux.Reducers {
 
         public static SimpleReducer<MqReducer.State> Create() {
             return new SimpleReducer<State>(() => new State() {
-                MqSchTaskDict = new ConcurrentDictionary<string, MqSchTask>(),
+                MqSchTaskAccpetDict = new ConcurrentDictionary<string, MqSchTask>(),
                 LsnScanMaterialDict = new ConcurrentDictionary<string, bool>(),
                 LsnSchTaskDict = new ConcurrentDictionary<string, bool>(),
                 SchTaskDoing =  new ConcurrentDictionary<string, SchTaskDoing>()
@@ -42,7 +45,7 @@ namespace HmiPro.Redux.Reducers {
                 return state;
             }).When<MqActiions.SchTaskAccept>((state, action) => {
                 state.MachineCode = action.MqSchTask.maccode;
-                state.MqSchTaskDict[state.MachineCode] = action.MqSchTask;
+                state.MqSchTaskAccpetDict[state.MachineCode] = action.MqSchTask;
                 return state;
             }).When<MqActiions.StartUploadCpmsInterval>((state, action) => {
                 if (state.LsnUploadCpmsInterval) {

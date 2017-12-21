@@ -12,6 +12,7 @@
     ShowTitle="False"
     dx:ThemeManager.ThemeName="TouchlineDark"
     Title="Hmi Pro Dev By Ychost"
+    Topmost="True"
     >
 
     <dx:DXWindow.DataContext>
@@ -32,7 +33,7 @@
             </dx:DialogService.DialogStyle>
         </dx:DialogService>
         <!--<dxwui:WinUIMessageBoxService/>-->
-        <dxmvvm:NotificationService x:Name="AppNotificationService" UseWin8NotificationsIfAvailable="False" PredefinedNotificationDuration="Long" PredefinedNotificationTemplate="ShortHeaderAndLongText"   />
+        <dxmvvm:NotificationService x:Name="AppNotificationService" UseWin8NotificationsIfAvailable="False" PredefinedNotificationDuration="Long" PredefinedNotificationTemplate="ShortHeaderAndTwoTextFields"   />
         <dxmvvm:DispatcherService />
         <navigation:FrameNavigationService Frame="{Binding ElementName=frame}" />
         <dx:DXSplashScreenService SplashScreenType="{x:Type View:LoadingWindow}" />

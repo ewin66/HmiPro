@@ -37,6 +37,10 @@ namespace HmiPro.Redux.Services {
             using (var ctx = SqliteHelper.CreateSqliteService()) {
                 ctx.SavePersist(new Persist(schTask.maccode, json));
             }
+            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                Title = "接受到新任务",
+                Content = "请注意及时更新进度"
+            }));
 
             App.Store.Dispatch(new MqActiions.SchTaskAccept(schTask));
         }

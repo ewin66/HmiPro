@@ -141,7 +141,7 @@ namespace YCsharp.Util {
         /// </summary>
         /// <param name="ms"></param>
         /// <returns></returns>
-        public static DateTime TimeStampToUtcTime(long ms) {
+        public static DateTime TimestampToUtcTime(long ms) {
             DateTime startTime = new DateTime(1970, 1, 1);
             DateTime dt = startTime.AddMilliseconds(ms);
             return dt;

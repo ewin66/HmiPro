@@ -12,14 +12,17 @@ namespace HmiPro.Redux.Actions {
         string Type();
     }
 
-    public class SimpleAction : IAction {
+    public struct SimpleAction : IAction {
         private readonly string type;
         public string Type() {
             return type;
         }
-        public SimpleAction(string type) {
+        public SimpleAction(string type, object payload = null) {
             this.type = type;
+            Payload = payload;
         }
+
+        public object Payload;
     }
 
 }

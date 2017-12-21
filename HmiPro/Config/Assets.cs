@@ -53,6 +53,7 @@ namespace HmiPro.Config {
         public string IconSetting2 => ImagesFolder + "\\setting2.ico";
         public string IconSim => ImagesFolder + "\\sim.ico";
         public string IconStatsLines => ImagesFolder + "\\stats-lines.ico";
+        public string IconTest => ImagesFolder + "\\test.ico";
 
         public string CraftsBomXls => DictsFoler + "\\工艺Bom.xls";
         public string MockMqSchTaskJson => MocksFolder + "\\MqSchTask.json";

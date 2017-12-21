@@ -37,7 +37,20 @@ namespace HmiPro.Redux.Actions {
         public static readonly string UPLOAD_ALARM_SUCCESS = "[Mq] Upload Alarm To Mq Success";
         public static readonly string UPLOAD_ALARM_FAILED = "[Mq] Upload Alarm To Mq Failed";
 
+        //上传任务生产数据
+        public static readonly string UPLOAD_SCH_TASK_MANU = "[Mq] Uplaod Schedule Task Manu Data";
 
+
+        public struct UploadSchTaskManu : IAction {
+            public string Type() => UPLOAD_SCH_TASK_MANU;
+            public MqUploadManu MqUploadManu;
+            public string QueueName;
+
+            public UploadSchTaskManu(string queueName, MqUploadManu mqUploadManu) {
+                QueueName = queueName;
+                MqUploadManu = mqUploadManu;
+            }
+        }
 
 
         public struct StartListenSchTask : IAction {

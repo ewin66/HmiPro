@@ -11,6 +11,8 @@
              xmlns:converts="clr-namespace:HmiPro.Converts"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:Model="clr-namespace:HmiPro.ViewModels.DMes.Tab"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:mqModels="clr-namespace:HmiPro.Redux.Models"
              mc:Ignorable="d"
              DataContext="{dxmvvm:ViewModelSource Type=dMes:DMesManuViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -22,8 +24,8 @@
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
         <dxmvvm:EventToCommand EventName="ContentRendered" Command="{Binding OnContentRenderedCommand}"/>
     </dxmvvm:Interaction.Behaviors>
-    <dxwui:PageAdornerControl  Header="DE: Pr:0.86 Qr:0.49 Or:0.33 Oee:0.85" ShowBackButton="True">
-        <Grid>
+    <dxwui:PageAdornerControl  Header="DMes 系统 v3.0.0" ShowBackButton="True">
+        <Grid Height="Auto" x:Name="TopGird">
             <Grid.Resources>
                 <DataTemplate x:Key="TabHeader">
                     <TextBlock Text="{Binding Path=Header}" FontWeight="Medium"/>
@@ -48,6 +50,94 @@
                                             <TextBlock  TextWrapping="Wrap"><Run Text="{Binding Path=Name}"/>: <Run Foreground="Yellow" Text="{Binding Path=Value}"></Run></TextBlock>
                                         </StackPanel>
                                     </materialDesign:Card>
+                                </DataTemplate>
+                            </dxlc:FlowLayoutControl.ItemTemplate>
+                        </dxlc:FlowLayoutControl>
+                    </DataTemplate>
+                    <!--任务页面-->
+                    <DataTemplate DataType="{x:Type Model:SchTaskTab}">
+                        <dxlc:FlowLayoutControl BreakFlowToFit="False" x:Name="CpmFlowLayout" Orientation="Horizontal" ItemsSource="{Binding Path=MqSchTasks}" >
+                            <dxlc:FlowLayoutControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type mqModels:MqSchTask}">
+                                    <materialDesign:Flipper   Style="{StaticResource MaterialDesignCardFlipper}">
+                                        <materialDesign:Flipper.FrontContent >
+                                            <Grid Margin="8,8,8,8" >
+                                                <materialDesign:Card   Background="{DynamicResource PrimaryHueDarkBrush}" Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}">
+                                                    <StackPanel >
+                                                        <TextBlock Margin="16,16,12,8" FontSize="22">工单：<Run Text="{Binding Path=workcode}"/></TextBlock>
+                                                        <ListBox ItemsSource="{Binding Path=axisParam}">
+                                                            <ListBox.ItemTemplate>
+                                                                <DataTemplate DataType="{x:Type mqModels:AxisParamItem}">
+                                                                    <CheckBox Margin="16,4,16,0"  IsChecked="{Binding Path=IsCompleted}" Style="{StaticResource MaterialDesignUserForegroundCheckBox}" Content="{Binding Path=axiscode}"/>
+                                                                </DataTemplate>
+                                                            </ListBox.ItemTemplate>
+                                                        </ListBox>
+                                                        <TextBlock  Margin="16,16,12,8">开始：<Run Text="{Binding Path=PsTimeStr,Mode=OneWay}"/></TextBlock>
+                                                        <TextBlock  Margin="16,16,12,8">结束：<Run Text="{Binding Path=PdTimeStr,Mode=OneWay}"/></TextBlock>
+                                                        <Separator  Margin="16,16,12,8" FontSize="22"  Style="{StaticResource MaterialDesignLightSeparator}" />
+                                                        <StackPanel
+                                                            HorizontalAlignment="Right"
+                                                            Orientation="Horizontal">
+                                                            <Button
+                                                        Width="30"
+                                                        Padding="2,0,0,0"
+                                                        HorizontalAlignment="Right"
+                                                        materialDesign:RippleAssist.IsCentered="True"
+                                                        Content="详细"
+                                                        Command="{x:Static materialDesign:Flipper.FlipCommand}"
+                                                        Style="{StaticResource MaterialDesignToolForegroundButton}"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </materialDesign:Card>
+                                            </Grid>
+                                        </materialDesign:Flipper.FrontContent>
+                                        <materialDesign:Flipper.BackContent>
+                                            <Grid Width="800"	Height="Auto" >
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="30"  />
+                                                    <RowDefinition Height="600"/>
+                                                </Grid.RowDefinitions>
+                                                <materialDesign:ColorZone Mode="PrimaryMid" Grid.Row="0">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button HorizontalAlignment="Left"
+                                                            Command="{x:Static materialDesign:Flipper.FlipCommand}"
+                                                            Style="{StaticResource MaterialDesignToolForegroundButton}">
+                                                            <materialDesign:PackIcon HorizontalAlignment="Right" Kind="ArrowLeft" />
+                                                        </Button>
+                                                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center"><Run Text="返回"/></TextBlock>
+                                                    </StackPanel>
+                                                </materialDesign:ColorZone>
+                                                <dxg:GridControl Grid.Row="1" ItemsSource="{Binding Path=axisParam}">
+                                                    <dxg:GridControl.View>
+                                                        <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
+                                                    </dxg:GridControl.View>
+                                                    <dxg:GridControl.Columns>
+                                                        <dxg:GridColumn Width="3*" Header="轴号" FieldName="axiscode"/>
+                                                        <dxg:GridColumn Width="*" Header="长度" FieldName="length"/>
+                                                        <dxg:GridColumn Width="*" Header="颜色" FieldName="color" />
+                                                        <dxg:GridColumn Width="2*" Header="完成率" FieldName="CompletedRate"/>
+                                                        <dxg:GridColumn Header="操作" FieldName="MachineCode_Axis_IsStarted">
+                                                            <dxg:GridColumn.DisplayTemplate>
+                                                                <ControlTemplate>
+                                                                    <Grid >
+                                                                        <Grid.ColumnDefinitions>
+                                                                            <ColumnDefinition/>
+                                                                            <ColumnDefinition/>
+                                                                        </Grid.ColumnDefinitions>
+                                                                        <Button Grid.Column="0" 
+                                                                                DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}, Path=DataContext}"
+                                                                                Command="{Binding StartTaskAxisDoingCommand}"
+                                                                                CommandParameter="{Binding Path=EditValue, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                                >开始</Button>
+                                                                    </Grid>
+                                                                </ControlTemplate>
+                                                            </dxg:GridColumn.DisplayTemplate>
+                                                        </dxg:GridColumn>
+                                                    </dxg:GridControl.Columns>
+                                                </dxg:GridControl>
+                                            </Grid>
+                                        </materialDesign:Flipper.BackContent>
+                                    </materialDesign:Flipper>
                                 </DataTemplate>
                             </dxlc:FlowLayoutControl.ItemTemplate>
                         </dxlc:FlowLayoutControl>
