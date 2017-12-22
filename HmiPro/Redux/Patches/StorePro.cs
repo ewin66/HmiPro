@@ -138,9 +138,6 @@ namespace HmiPro.Redux.Patches {
             if (state == null) {
                 state = baseStore.GetPrivateField<T>("state");
             }
-            //if (subscriptions == null) {
-            //    subscriptions = baseStore.GetPrivateField<List<StateChangedSubscriber<T>>>("subscriptions");
-            //}
             if (middlewares == null) {
                 middlewares = this.GetPrivateField<MiddlewareExecutor>("middlewares");
             }

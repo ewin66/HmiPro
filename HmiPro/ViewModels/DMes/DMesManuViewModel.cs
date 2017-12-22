@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using HmiPro.Config;
@@ -49,8 +50,6 @@ namespace HmiPro.ViewModels.DMes {
 
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
-       
-
             //绑定实时参数页面
             var onlineCpmsDict = App.Store.GetState().CpmState.OnlineCpmsDict;
             foreach (var pair in onlineCpmsDict) {
@@ -95,10 +94,17 @@ namespace HmiPro.ViewModels.DMes {
         public void whenUpdateHistoryAlarms(AppState state, IAction action) {
             DispatcherService.BeginInvoke(() => {
                 var alarmAction = (AlarmActions.UpdateHistoryAlarms)action;
+
                 if (alarmAction.UpdateAction == AlarmActions.UpdateAction.Add) {
                     AlarmTabDict[alarmAction.MachineCode].Alarms.Add(alarmAction.MqAlarmAdd);
+
                 } else if (alarmAction.UpdateAction == AlarmActions.UpdateAction.Change) {
-                    AlarmTabDict[alarmAction.MachineCode].Alarms.Remove(alarmAction.MqAlarmRemove);
+                    if (!AlarmTabDict[alarmAction.MachineCode].Alarms.Remove(alarmAction.MqAlarmRemove)) {
+                        //fixed:2017-12-22
+                        // 直接remove alarmActon.MqAlarmRemove 会失败
+                        var removeItem = AlarmTabDict[alarmAction.MachineCode].Alarms.FirstOrDefault(s => s.code == alarmAction.MqAlarmRemove.code);
+                        AlarmTabDict[alarmAction.MachineCode].Alarms.Remove(removeItem);
+                    }
                     AlarmTabDict[alarmAction.MachineCode].Alarms.Add(alarmAction.MqAlarmAdd);
                 }
             });

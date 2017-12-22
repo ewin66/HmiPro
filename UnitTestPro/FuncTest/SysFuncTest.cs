@@ -93,5 +93,23 @@ namespace UnitTestPro.FuncTest {
 
         }
 
+        [TestMethod]
+        public void AddRemoveInManyListTest() {
+            TestClass o1 = new TestClass() { Name = "1" };
+            TestClass o2 = new TestClass() { Name = "2" };
+            ObservableCollection<TestClass> list1 = new ObservableCollection<TestClass>() { o1, o2 };
+            ObservableCollection<TestClass> list2 = new ObservableCollection<TestClass>();
+            foreach (var t in list1) {
+                list2.Add(t);
+            }
+            var removeItem = list1.FirstOrDefault(t => t.Name == "1");
+            list1.Remove(removeItem);
+            Assert.AreEqual(list1.Count, 1);
+            list2.Remove(removeItem);
+           
+            Assert.AreEqual(list2.Count, 1);
+
+        }
+
     }
 }

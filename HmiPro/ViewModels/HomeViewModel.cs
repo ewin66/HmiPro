@@ -64,14 +64,6 @@ namespace HmiPro.ViewModels {
             UnityIocService.ResolveDepend<DMesCore>().Init();
             UnityIocService.ResolveDepend<AlarmCore>().Init();
             UnityIocService.ResolveDepend<CpmCore>().Init();
-            var id = 0;
-            //派发三个测试任务
-            YUtil.SetInterval(10000, () => {
-                Task.Run(() => {
-                    dispatchMockSchTask((++id));
-                    dispatchMockAlarm(++id);
-                });
-            }, 1)();
             await UnityIocService.ResolveDepend<SchCore>().Init();
             //启动Http解析系统
             var isHttpSystem = await App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));

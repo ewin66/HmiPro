@@ -7,6 +7,9 @@ using HmiPro.Redux.Models;
 using YCsharp.Util;
 
 namespace HmiPro.Mocks {
+    /// <summary>
+    /// 模拟数据
+    /// </summary>
     public static class AlarmMocks {
         public static MqAlarm CreateOneAlarm(int code = -1) {
             return new MqAlarm() {
