@@ -23,8 +23,11 @@ namespace HmiPro.Redux.Actions {
         public static readonly string STOP_SERVER_FAILED = "[Cpm] Stop Server Failed";
         public static readonly string NOTE_METER_DIFF_ACCEPT = "[Cpm] Note Meter Diff Accept";
         public static readonly string NOTE_METER_ACCEPT = "[Cpm] Note Meter Accpet";
+        public static readonly string SPEED_ACCEPT = "[Cpm] Speed Accept";
         public static readonly string SPEED_DIFF_ACCEPT = "[Cpm] Speed Diff Accept";
         public static readonly string SPARK_DIFF_ACCEPT = "[Cpm] Spark Diff Accept";
+        public static readonly string SPEED_DIFF_ZERO_ACCEPT = "[Cpm] Speed Diff Zero Accept";
+
 
         /// <summary>
         /// 初始化
@@ -180,6 +183,17 @@ namespace HmiPro.Redux.Actions {
             }
         }
 
+        public struct SpeedAccept : IAction {
+            public string Type() => SPEED_ACCEPT;
+            public string MachineCode;
+            public float Speed;
+
+            public SpeedAccept(string machineCode, float speed) {
+                MachineCode = machineCode;
+                Speed = speed;
+            }
+        }
+
         public struct SpeedDiffAccpet : IAction {
             public string Type() => SPEED_DIFF_ACCEPT;
             public Cpm SpeedCpm;
@@ -188,6 +202,15 @@ namespace HmiPro.Redux.Actions {
             public SpeedDiffAccpet(string machineCode, Cpm speedCpm) {
                 MachineCode = machineCode;
                 SpeedCpm = speedCpm;
+            }
+        }
+
+        public struct SpeedDiffZeroAccept : IAction {
+            public string Type() => SPEED_DIFF_ZERO_ACCEPT;
+            public string MachineCode;
+
+            public SpeedDiffZeroAccept(string machineCode) {
+                MachineCode = machineCode;
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DevExpress.Xpf.CodeView;
 using HmiPro.Redux.Models;
 
 namespace HmiPro.ViewModels.DMes.Tab {
@@ -13,10 +14,10 @@ namespace HmiPro.ViewModels.DMes.Tab {
     /// <author>ychost</author>
     /// </summary>
     public class AlarmTab : BaseTab {
-        public ObservableCollection<MqAlarm> Alarms { get; set; }
+        public virtual ObservableCollection<MqAlarm> Alarms { get; set; } = new ObservableCollection<MqAlarm>();
 
-        public void BindSource(ObservableCollection<MqAlarm> alarms) {
-            Alarms = alarms;
+        public void Init(ObservableCollection<MqAlarm> alarms) {
+            Alarms.AddRange(alarms);
         }
     }
 }

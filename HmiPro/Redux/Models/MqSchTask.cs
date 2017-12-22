@@ -285,48 +285,48 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public string maccode { get; set; }
 
-        private float completeRate;
+        private float _completeRate;
         /// <summary>
         /// 完成率
         /// </summary>
         public float CompletedRate {
-            get => completeRate;
+            get => _completeRate;
             set {
-                if (completeRate != value) {
-                    completeRate = value;
+                if (_completeRate != value) {
+                    _completeRate = value;
                     OnPropertyChanged(nameof(CompletedRate));
                     OnPropertyChanged(nameof(MachineCode_Axis_IsStarted));
                 }
             }
         }
 
-        private bool isCompleted;
+        private bool _isCompleted;
         /// <summary>
         /// 是否完成
         /// </summary>
         public bool IsCompleted {
-            get => isCompleted;
+            get => _isCompleted;
             set {
-                if (isCompleted != value) {
-                    isCompleted = value;
+                if (_isCompleted != value) {
+                    _isCompleted = value;
                     OnPropertyChanged(nameof(IsCompleted));
                     OnPropertyChanged(nameof(MachineCode_Axis_IsStarted));
                 }
             }
         }
 
-        private bool isStarted;
+        private bool _isStarted;
 
         /// <summary>
         /// 是否启动
         /// </summary>
         public bool IsStarted {
-            get { return isStarted; }
+            get { return _isStarted; }
             set {
-                if (isStarted != value) {
-                    isStarted = value;
+                if (_isStarted != value) {
+                    _isStarted = value;
                     OnPropertyChanged(nameof(IsStarted));
-                    IsStoped = !isStarted;
+                    IsStoped = !_isStarted;
                     OnPropertyChanged(nameof(IsStoped));
                     OnPropertyChanged(nameof(MachineCode_Axis_IsStarted));
                 }
@@ -335,8 +335,23 @@ namespace HmiPro.Redux.Models {
 
         public bool IsStoped { get; set; } = true;
 
+        private string _state = MqSchTaskAxisState.WaitDoing;
+        /// <summary>
+        /// 状态
+        /// </summary>
+        public string State {
+            get { return _state; }
+            set {
+                if (_state != value) {
+                    _state = value;
+                    OnPropertyChanged(nameof(State));
+                }
+            }
+        }
+
+
         public string MachineCode_Axis_IsStarted {
-            get { return string.Join("_", maccode, axiscode, isStarted); }
+            get { return string.Join("_", maccode, axiscode, _isStarted); }
         }
 
 
@@ -349,6 +364,10 @@ namespace HmiPro.Redux.Models {
         }
     }
 
-
+    public static class MqSchTaskAxisState {
+        public static readonly string Doing = "正在生产";
+        public static readonly string Completed = "完成生产";
+        public static readonly string WaitDoing = "等待生产";
+    }
 
 }

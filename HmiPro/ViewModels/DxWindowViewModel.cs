@@ -31,29 +31,71 @@ namespace HmiPro.ViewModels {
         public readonly LoggerService Logger;
 
         public readonly StorePro<AppState> Store;
+        public readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
 
 
         public DxWindowViewModel() {
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+            actionsExecDict[SysActions.SHOW_NOTIFICATION] = doShowNotification;
+            actionsExecDict[SysActions.SHOW_SETTING_VIEW] = doShowSettingView;
             Store.Subscribe((state, aciton) => {
-                if (aciton.Type() == SysActions.SHOW_SETTING_VIEW) {
-                    JumpAppSettingView("程序设置");
-                    //系统通知消息
-                } else if (aciton.Type() == SysActions.SHOW_NOTIFICATION) {
-                    var msg = ((SysActions.ShowNotification)aciton).Message;
-                    //保存消息日志
-                    Logger.Notify("Title: "+msg.Title + "\t Content: " + msg.Content);
-                    DispatcherService.BeginInvoke(() => {
-                        INotification notification = NotifyNotificationService.CreatePredefinedNotification(msg.Title, msg.Content, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                        SystemSounds.Exclamation.Play();
-                        notification.ShowAsync();
-                    });
-
+                if (actionsExecDict.TryGetValue(aciton.Type(), out var exec)) {
+                    exec(state, aciton);
                 }
             });
-
         }
+
+        /// <summary>
+        /// 显示设置界面
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doShowSettingView(AppState state, IAction action) {
+            JumpAppSettingView("程序设置");
+        }
+
+        /// <summary>
+        /// 显示通知消息
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doShowNotification(AppState state, IAction action) {
+            var msg = ((SysActions.ShowNotification)action).Message;
+            //两次相同通知时间间隔秒数>=MinGapSec 才能显示
+            //默认都显示
+            bool canNotify = true;
+            if (msg.MinGapSec.HasValue) {
+                var key = "Title: " + msg.Title + "\t Content: " + msg.Content;
+                if (SysNotificationMsg.NotifyTimeDict.TryGetValue(key, out var lastTime)) {
+                    if ((DateTime.Now - lastTime).TotalSeconds >= msg.MinGapSec.Value) {
+                        canNotify = true;
+                    } else {
+                        canNotify = false;
+                    }
+
+                } else {
+                    SysNotificationMsg.NotifyTimeDict[key] = DateTime.Now;
+                    canNotify = true;
+                }
+            }
+            if (canNotify) {
+                //保存消息日志
+                var logDetail = "Title: " + msg.Title + "\t Content: " + msg.Content;
+                if (!string.IsNullOrEmpty(msg.LogDetail)) {
+                    logDetail = msg.LogDetail;
+                }
+                Logger.Notify(logDetail);
+                DispatcherService.BeginInvoke(() => {
+                    INotification notification =
+                        NotifyNotificationService.CreatePredefinedNotification(msg.Title, msg.Content,
+                            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    SystemSounds.Exclamation.Play();
+                    notification.ShowAsync();
+                });
+            }
+        }
+
 
         /// <summary>
         /// 页面加载事件命令

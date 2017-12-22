@@ -23,7 +23,7 @@ namespace HmiPro.ViewModels.DMes {
         public readonly IDictionary<string, CpmsTab> CpmsTabDict = new Dictionary<string, CpmsTab>();
         public readonly IDictionary<string, SchTaskTab> SchTaskTabDict = new Dictionary<string, SchTaskTab>();
         public readonly IDictionary<string, AlarmTab> AlarmTabDict = new Dictionary<string, AlarmTab>();
-        readonly IDictionary<string, Action<AppState>> execActionDict = new ConcurrentDictionary<string, Action<AppState>>();
+        readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new ConcurrentDictionary<string, Action<AppState, IAction>>();
         public string OeeStr = "";
         private Unsubscribe unsubscribe;
         public readonly LoggerService Logger;
@@ -43,27 +43,38 @@ namespace HmiPro.ViewModels.DMes {
                 AlarmTabDict[pair.Key] = alarmTab;
             }
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
+            actionsExecDict[AlarmActions.UPDATE_HISTORY_ALARMS] = whenUpdateHistoryAlarms;
         }
 
 
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
+       
+
             //绑定实时参数页面
             var onlineCpmsDict = App.Store.GetState().CpmState.OnlineCpmsDict;
             foreach (var pair in onlineCpmsDict) {
                 CpmsTabDict[pair.Key].BindSource(pair.Key, pair.Value);
             }
-            //绑定报警页面
-            var alarmDict = App.Store.GetState().AlarmState.NotifyAlarmDict;
-            foreach (var pair in alarmDict) {
-                AlarmTabDict[pair.Key].BindSource(pair.Value);
+
+            //初始化报警界面
+            //将已经产生的历史报警显示在界面上
+            var alarmsDict = App.Store.GetState().AlarmState.AlarmsDict;
+            foreach (var pair in alarmsDict) {
+                var machineCode = pair.Key;
+                if (AlarmTabDict.TryGetValue(machineCode, out var tab)) {
+                    tab.Init(pair.Value);
+                }
             }
+
             //绑定Oee
             var oeeDict = App.Store.GetState().OeeState.OeeDict;
             foreach (var pair in oeeDict) {
                 //OeeDict[pair.Key] = pair.Value;
             }
-            //绑定任务页面
+            //DataGrid不支持非UI线程add or remove
+            //但是任务页面里面的任务详细列表一旦初始化后项目就不会增加减少
+            //所以可以直接绑定
             var mqTasks = App.Store.GetState().DMesState.MqSchTasksDict;
             foreach (var pair in mqTasks) {
                 if (SchTaskTabDict.TryGetValue(pair.Key, out var tab)) {
@@ -72,12 +83,31 @@ namespace HmiPro.ViewModels.DMes {
             }
             //监听系统信息
             unsubscribe = App.Store.Subscribe((state, action) => {
-                if (execActionDict.TryGetValue(state.Type, out var exec)) {
-                    exec(state);
+                if (actionsExecDict.TryGetValue(action.Type(), out var exec)) {
+                    exec(state, action);
                 }
             });
         }
 
+        /// <summary>
+        /// 报警用的DataGrid每次都会add or remove 必须通过 UI 调度器
+        /// </summary>
+        public void whenUpdateHistoryAlarms(AppState state, IAction action) {
+            DispatcherService.BeginInvoke(() => {
+                var alarmAction = (AlarmActions.UpdateHistoryAlarms)action;
+                if (alarmAction.UpdateAction == AlarmActions.UpdateAction.Add) {
+                    AlarmTabDict[alarmAction.MachineCode].Alarms.Add(alarmAction.MqAlarmAdd);
+                } else if (alarmAction.UpdateAction == AlarmActions.UpdateAction.Change) {
+                    AlarmTabDict[alarmAction.MachineCode].Alarms.Remove(alarmAction.MqAlarmRemove);
+                    AlarmTabDict[alarmAction.MachineCode].Alarms.Add(alarmAction.MqAlarmAdd);
+                }
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="machineCode_axis_isStarted"></param>
         [Command(Name = "StartTaskAxisDoingCommand")]
         public void StartTaskAxisDoing(string machineCode_axis_isStarted) {
             if (machineCode_axis_isStarted?.Split('_')?.Length == 3) {

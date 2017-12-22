@@ -61,7 +61,7 @@ namespace HmiPro.Redux.Cores {
                     exec(s);
                 }
             });
-           
+
         }
 
         /// <summary>
@@ -191,8 +191,11 @@ namespace HmiPro.Redux.Cores {
                 dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.NoteMeter, (cpm) => {
                     App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, (float)cpm.Value));
                 });
-
-                ;
+                //不断的更新速度
+                //主要是为了计算平均速度
+                dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.Speed, cpm => {
+                    App.Store.Dispatch(new CpmActions.SpeedAccept(machineCode, (float)cpm.Value));
+                });
             }
             if (updatedCpmsDiffDict.Count > 0) {
                 var diffCpms = updatedCpmsDiffDict.Values.ToList();
@@ -208,7 +211,11 @@ namespace HmiPro.Redux.Cores {
                 });
                 //速度发生变化
                 dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.Speed, cpm => {
-
+                    App.Store.Dispatch(new CpmActions.SpeedDiffAccpet(machineCode, cpm));
+                    //速度变化为0的事件
+                    if ((float)cpm.Value == 0) {
+                        App.Store.Dispatch(new CpmActions.SpeedDiffZeroAccept(machineCode));
+                    }
                 });
             }
             //检查报警

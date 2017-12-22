@@ -11,7 +11,7 @@ namespace HmiPro.Redux.Models {
     /// <summary>
     /// 当前任务
     /// </summary>
-    public class SchTaskDoing:INotifyPropertyChanged {
+    public class SchTaskDoing : INotifyPropertyChanged {
         /// <summary>
         /// 工单任务
         /// </summary>
@@ -28,10 +28,21 @@ namespace HmiPro.Redux.Models {
         /// 轴号在当前工单任务中的索引
         /// </summary>
         public int MqSchAxisIndex;
+
+        private float completeRate;
+
         /// <summary>
         /// 完成百分比
         /// </summary>
-        public float CompletePercent;
+        public float CompleteRate {
+            get => completeRate;
+            set {
+                if (completeRate != value) {
+                    completeRate = value;
+                    MqSchAxis.CompletedRate = value;
+                }
+            }
+        }
         /// <summary>
         /// 是否开启任务
         /// </summary>
@@ -53,9 +64,21 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public HashSet<string> EndRfids = new HashSet<string>();
         /// <summary>
-        /// 当前生产长度
+        /// 计划生产长度
         /// </summary>
-        public float Meter;
+        public float MeterPlan;
+        /// <summary>
+        /// 调试长度
+        /// </summary>
+        public float MeterDebug;
+        /// <summary>
+        /// 调试时间段，毫秒级别
+        /// </summary>
+        public long DebugTimestampMs;
+        /// <summary>
+        /// 实际生产长度
+        /// </summary>
+        public float MeterWork;
         /// <summary>
         /// 工单
         /// </summary>
@@ -64,18 +87,44 @@ namespace HmiPro.Redux.Models {
         /// 操作人员
         /// </summary>
         public HashSet<string> EmpRfids = new HashSet<string>();
-
         /// <summary>
         /// 当前为工序的第几步，从工单里面可以获取
         /// </summary>
         public int Step;
+        /// <summary>
+        /// 计算平均速度
+        /// </summary>
+        public Func<double, double> CalcAvgSpeed;
+        /// <summary>
+        /// 一轴的平均速度
+        /// </summary>
+        public float SpeedAvg;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public SchTaskDoing() {
+            Init();
+        }
+
+        public void Init() {
+            MqSchTask = null;
+            MqSchAxis = null;
+            IsStarted = false;
+            CompleteRate = 0;
+            WorkCode = null;
+            Step = -1;
+            CalcAvgSpeed = null;
+            SpeedAvg = -1;
+            MeterPlan = -1;
+            MeterDebug = -1;
+            MeterWork = -1;
+            DebugTimestampMs = 0;
+            MqSchAxisIndex = -1;
         }
     }
 }

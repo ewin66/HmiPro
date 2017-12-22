@@ -115,7 +115,8 @@
                                                         <dxg:GridColumn Width="3*" Header="轴号" FieldName="axiscode"/>
                                                         <dxg:GridColumn Width="*" Header="长度" FieldName="length"/>
                                                         <dxg:GridColumn Width="*" Header="颜色" FieldName="color" />
-                                                        <dxg:GridColumn Width="2*" Header="完成率" FieldName="CompletedRate"/>
+                                                        <dxg:GridColumn Width="*" Header="完成率" FieldName="CompletedRate"/>
+                                                        <dxg:GridColumn Width="2*" Header="状态" FieldName="State"/>
                                                         <dxg:GridColumn Header="操作" FieldName="MachineCode_Axis_IsStarted">
                                                             <dxg:GridColumn.DisplayTemplate>
                                                                 <ControlTemplate>
@@ -141,7 +142,23 @@
                                 </DataTemplate>
                             </dxlc:FlowLayoutControl.ItemTemplate>
                         </dxlc:FlowLayoutControl>
-
+                    </DataTemplate>
+                    <!--报警页面-->
+                    <DataTemplate DataType="{x:Type Model:AlarmTab}">
+                        <Grid>
+                            <dxg:GridControl ItemsSource="{Binding Path=Alarms}" x:Name="AlarmGridControl">
+                                <dxg:GridControl.View>
+                                    <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
+                                </dxg:GridControl.View>
+                                <dxg:GridControl.Columns>
+                                    <dxg:GridColumn Width="2*"  Header="参数" FieldName="CpmName"/>
+                                    <dxg:GridColumn Width="3*" Header="消息" FieldName="message"/>
+                                    <dxg:GridColumn Width="*"  Header="米数" FieldName="meter" />
+                                    <dxg:GridColumn Width="3*" Header="轴号" FieldName="axisCode"/>
+                                    <dxg:GridColumn Width="2*" Header="时间" FieldName="TimeStr"/>
+                                </dxg:GridControl.Columns>
+                            </dxg:GridControl>
+                        </Grid>
                     </DataTemplate>
                 </dx:DXTabControl.Resources>
             </dx:DXTabControl>

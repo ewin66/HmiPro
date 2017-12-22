@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using HmiPro.Config;
+using HmiPro.Config.Models;
 using HmiPro.Helpers;
+using HmiPro.Mocks;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Cores;
 using HmiPro.Redux.Effects;
@@ -38,6 +42,7 @@ namespace HmiPro.ViewModels {
                 } else {
                     try {
                         MachineConfig.Load(setting.MachineXlsPath);
+                        checkConfig();
                         afterConfigLoaded();
                     } catch (Exception e) {
                         App.Store.Dispatch(new SysActions.ShowSettingView());
@@ -57,15 +62,17 @@ namespace HmiPro.ViewModels {
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
             UnityIocService.ResolveDepend<DMesCore>().Init();
-            await UnityIocService.ResolveDepend<SchCore>().Init();
+            UnityIocService.ResolveDepend<AlarmCore>().Init();
             UnityIocService.ResolveDepend<CpmCore>().Init();
-
             var id = 0;
             //派发三个测试任务
             YUtil.SetInterval(10000, () => {
-                dispatchMockSchTask((++id));
-            },3)();
-
+                Task.Run(() => {
+                    dispatchMockSchTask((++id));
+                    dispatchMockAlarm(++id);
+                });
+            }, 1)();
+            await UnityIocService.ResolveDepend<SchCore>().Init();
             //启动Http解析系统
             var isHttpSystem = await App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
             if (!isHttpSystem) {
@@ -94,11 +101,47 @@ namespace HmiPro.ViewModels {
             App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "系统启动完毕", Content = $"版本:{version}" }));
         }
 
+        /// <summary>
+        /// 检查配置
+        /// </summary>
+        void checkConfig() {
+            foreach (var pair in MachineConfig.MachineDict) {
+                var machineCode = pair.Key;
+                var machineConfig = pair.Value;
+                if (!machineConfig.LogicToCpmDict.ContainsKey(CpmInfoLogic.Speed)) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "程序配置有误",
+                        Content = $"机台 {machineCode} 未配置速度逻辑 {(int)CpmInfoLogic.Speed}",
+                        Level = NotifyLevel.Error
+                    }));
+                }
+                if (!machineConfig.LogicToCpmDict.ContainsKey(CpmInfoLogic.NoteMeter)) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "程序配置有误",
+                        Content = $"机台 {machineCode} 未配置记米逻辑 {(int)CpmInfoLogic.NoteMeter}",
+                        Level = NotifyLevel.Error
+                    }));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 派发模拟排产任务
+        /// </summary>
+        /// <param name="id">任务id</param>
         void dispatchMockSchTask(int id = 0) {
             var mockEffects = UnityIocService.ResolveDepend<MockEffects>();
             var task = YUtil.GetJsonObjectFromFile<MqSchTask>(AssetsHelper.GetAssets().MockMqSchTaskJson);
             task.id = id;
             App.Store.Dispatch(mockEffects.MockSchTaskAccept(new MockActions.MockSchTaskAccpet(task)));
+        }
+
+
+        void dispatchMockAlarm(int code) {
+            foreach (var pair in MachineConfig.MachineDict) {
+                var machineCode = pair.Key;
+                App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(machineCode, AlarmMocks.CreateOneAlarm(code)));
+            }
         }
 
         /// <summary>

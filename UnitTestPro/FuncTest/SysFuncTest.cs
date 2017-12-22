@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -48,21 +49,49 @@ namespace UnitTestPro.FuncTest {
                 TestObs.Remove(item);
             }
             TestObs.Add(null);
-            Assert.AreEqual(TestObs.Count, 14);
+            TestObs.Add(null);
+            Assert.AreEqual(TestObs.Count, 15);
+            TestObs[0] = null;
             TestObs.Remove(null);
             TestObs.Remove(null);
             TestObs.Remove(null);
             TestObs.Remove(null);
-            Assert.AreEqual(TestObs.Count, 13);
+            TestObs.Remove(null);
+
+            Assert.AreEqual(TestObs.Count, 12);
         }
 
         [TestMethod]
         public void FirstOrSignleTest() {
             List<TestClass> TestObs = new List<TestClass>() { new TestClass() { Name = "1" }, new TestClass() { Name = "2" } };
             var test = TestObs.FirstOrDefault(s => s.Name == "2");
-            Assert.AreEqual(test.Name,"2");
+            Assert.AreEqual(test.Name, "2");
             var test2 = TestObs.FirstOrDefault(s => s.Name == "3");
-            Assert.AreEqual(test2,null);
+            Assert.AreEqual(test2, null);
         }
+
+        public static object LockObj = new Object();
+        [TestMethod]
+        public void LockTest() {
+            lock (LockObj) {
+                Task.Run(() => {
+                    lock (LockObj) {
+                        Console.WriteLine("进入 New Thread LockTest");
+                        LockTestCall();
+                    }
+                });
+                Thread.Sleep(200);
+                Console.WriteLine("进入 LockTest");
+                LockTestCall();
+            }
+        }
+
+        public void LockTestCall() {
+            lock (LockObj) {
+                Console.WriteLine("进入 Lock Test Call");
+            }
+
+        }
+
     }
 }

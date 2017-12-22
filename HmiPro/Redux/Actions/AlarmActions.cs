@@ -18,8 +18,11 @@ namespace HmiPro.Redux.Actions {
         public static readonly string OPEN_ALARM_LIGHTS = "[Alarm] Open Alarm Lights";
         //关闭报警灯
         public static readonly string CLOSE_ALARM_LIGHTS = "[Alarm] Close Alarm Lights";
-        //通知报警
-        public static readonly string NOTIFY_ALARM = "[Alarm] Notify Alarm";
+
+        public static readonly string GENERATE_ONE_ALARM = "[Alarm] Generate An Alarm";
+
+        //历史报警集合发生更改
+        public static readonly string UPDATE_HISTORY_ALARMS = "[Alarm] Update History Alarms";
 
         public static readonly string INIT = "[Alarm] Init";
 
@@ -54,22 +57,46 @@ namespace HmiPro.Redux.Actions {
             }
         }
 
-        public struct NotifyAlarm : IAction {
-            public string Type() => NOTIFY_ALARM;
-            public MqAlarm MqAlarm;
-            public string MachineCode;
 
-            public NotifyAlarm(string machineCode, MqAlarm mqAlarm) {
-                MachineCode = machineCode;
-                MqAlarm = mqAlarm;
-            }
-        }
 
         public struct Init : IAction {
             public string Type() => INIT;
         }
 
+        public struct GenerateOneAlarm : IAction {
+            public string Type() => GENERATE_ONE_ALARM;
+            public string MachineCode;
+            public MqAlarm MqAlarm;
 
+            public GenerateOneAlarm(string machineCode, MqAlarm alarm) {
+                MachineCode = machineCode;
+                MqAlarm = alarm;
+            }
+        }
+
+
+        public struct UpdateHistoryAlarms : IAction {
+            public string Type() => UPDATE_HISTORY_ALARMS;
+            public UpdateAction UpdateAction;
+            public string MachineCode;
+            public MqAlarm MqAlarmAdd;
+            public MqAlarm MqAlarmRemove;
+
+
+            public UpdateHistoryAlarms(string machineCode, UpdateAction action, MqAlarm alarmAdd,MqAlarm mqAlarmRemove) {
+                MachineCode = machineCode;
+                UpdateAction = action;
+                MqAlarmAdd = alarmAdd;
+                MqAlarmRemove = mqAlarmRemove;
+            }
+
+        }
+
+        public enum UpdateAction {
+            Add,
+            Remove,
+            Change
+        }
 
     }
 }

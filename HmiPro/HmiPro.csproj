@@ -170,6 +170,7 @@
     <Compile Include="Helpers\LoggerHelper.cs" />
     <Compile Include="Helpers\MongoHelper.cs" />
     <Compile Include="Helpers\SqliteHelper.cs" />
+    <Compile Include="Mocks\AlarmMocks.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Redux\Actions\AlarmActions.cs" />
     <Compile Include="Redux\Actions\AppActions.cs" />
@@ -180,6 +181,7 @@
     <Compile Include="Redux\Actions\MqActiions.cs" />
     <Compile Include="Redux\Actions\OeeActions.cs" />
     <Compile Include="Redux\Actions\SysActions.cs" />
+    <Compile Include="Redux\Cores\AlarmCore.cs" />
     <Compile Include="Redux\Cores\DbCore.cs" />
     <Compile Include="Redux\Cores\SchCore.cs" />
     <Compile Include="Redux\Effects\AlarmEffects.cs" />
@@ -569,7 +571,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

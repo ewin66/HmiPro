@@ -2,8 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Reducers;
 using Reducto;
@@ -22,7 +24,7 @@ namespace HmiPro.Redux.Patches {
     public class StorePro<T> : Store<T> {
 
         private object baseStore;
-        readonly object dispatchLock = new object();
+        readonly object storeLock = new object();
         public StorePro(SimpleReducer<T> rootReducer) : base(rootReducer) {
             init();
         }
@@ -39,9 +41,10 @@ namespace HmiPro.Redux.Patches {
         private Reducer<T> rootReducer;
         private dynamic state;
         //只能收到state
-        private List<StateChangedSubscriber<T>> subscriptions;
+
+        private event StateChangedSubscriber<T> subscriptions;
         //和subscriptions的区别就是可以收到当前的state和action数据
-        private List<Action<T, IAction>> listeners;
+        private event Action<T, IAction> listeners;
         private MiddlewareExecutor middlewares;
         private IAction latestAction;
 
@@ -54,16 +57,12 @@ namespace HmiPro.Redux.Patches {
             //防止在subscription中更改state
             //State中必须含有Type字段
             //可能会多个线程同时dispatch，导致state发生不可预见的错误，这里给其加锁
-            lock (dispatchLock) {
+            lock (storeLock) {
                 state = rootReducer(state, action);
                 latestAction = action;
                 state.Type = action.Type();
-                foreach (var subscribtion in subscriptions) {
-                    subscribtion(state);
-                }
-                foreach (var listen in listeners) {
-                    listen(state, latestAction);
-                }
+                subscriptions?.Invoke(state);
+                listeners?.Invoke(state, latestAction);
             }
         }
 
@@ -102,20 +101,26 @@ namespace HmiPro.Redux.Patches {
         /// <param name="subscription"></param>
         /// <returns></returns>
         public new Unsubscribe Subscribe(StateChangedSubscriber<T> subscription) {
-            subscriptions.Add(subscription);
-            //立即返回存储的状态
-            if (state.Type != null) {
-                subscription(state);
+            lock (storeLock) {
+                subscriptions += subscription;
+                //立即返回存储的状态
+                if (state.Type != null) {
+                    subscription(state);
+                }
+                return () => { subscriptions -= subscription; };
             }
-            return () => { subscriptions.Remove(subscription); };
         }
 
-        public Unsubscribe Subscribe(Action<T, IAction> effect) {
-            listeners.Add(effect);
-            if (state.Type != null && latestAction != null) {
-                effect(state, latestAction);
+        public Unsubscribe Subscribe(Action<T, IAction> listener) {
+            lock (storeLock) {
+                listeners += listener;
+                if (state.Type != null && latestAction != null) {
+                    listener(state, latestAction);
+                }
+                return () => {
+                    listeners -= listener;
+                };
             }
-            return () => { listeners.Remove(effect); };
         }
 
 
@@ -124,8 +129,6 @@ namespace HmiPro.Redux.Patches {
         /// </summary>
         private void init() {
             UnityIocService.AssertIsFirstInject(GetType());
-
-            listeners = new List<Action<T, IAction>>();
             if (baseStore == null) {
                 baseStore = this.GetPrivateField<object>("store", GetType().BaseType);
             }
@@ -135,12 +138,11 @@ namespace HmiPro.Redux.Patches {
             if (state == null) {
                 state = baseStore.GetPrivateField<T>("state");
             }
-            if (subscriptions == null) {
-                subscriptions = baseStore.GetPrivateField<List<StateChangedSubscriber<T>>>("subscriptions");
-            }
+            //if (subscriptions == null) {
+            //    subscriptions = baseStore.GetPrivateField<List<StateChangedSubscriber<T>>>("subscriptions");
+            //}
             if (middlewares == null) {
                 middlewares = this.GetPrivateField<MiddlewareExecutor>("middlewares");
-
             }
         }
     }

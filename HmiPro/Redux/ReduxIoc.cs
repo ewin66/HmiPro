@@ -45,6 +45,7 @@ namespace HmiPro.Redux {
             UnityIocService.RegisterGlobalDepend<SchCore>();
             UnityIocService.RegisterGlobalDepend<OeeService>();
             UnityIocService.RegisterGlobalDepend<OeeEffects>();
+            UnityIocService.RegisterGlobalDepend<AlarmCore>();
         }
 
     }
