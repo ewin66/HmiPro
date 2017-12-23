@@ -39,11 +39,25 @@ namespace HmiPro.ViewModels {
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
             actionsExecDict[SysActions.SHOW_NOTIFICATION] = doShowNotification;
             actionsExecDict[SysActions.SHOW_SETTING_VIEW] = doShowSettingView;
+            actionsExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
             Store.Subscribe((state, aciton) => {
                 if (actionsExecDict.TryGetValue(aciton.Type(), out var exec)) {
                     exec(state, aciton);
                 }
             });
+        }
+
+
+        /// <summary>
+        /// 打印计算的Oee
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenOeeUpdated(AppState state, IAction action) {
+            var oeeAction = (OeeActions.UpdateOeePartialValue)action;
+            Logger.Debug($@"Oee 时间效率 {oeeAction.TimeEff ?? -1},
+                            速度效率：{oeeAction.SpeedEff ?? -1}，
+                            质量效率：{oeeAction.QualityEff ?? -1}", ConsoleColor.Yellow);
         }
 
         /// <summary>

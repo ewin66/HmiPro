@@ -179,19 +179,8 @@ namespace HmiPro.Redux.Cores {
                 Logger.Debug("任务未开始，报警数据无效");
                 return;
             }
-            //打开屏幕
-            App.Store.Dispatch(new SysActions.OpenScreen());
-            //通知系统报警
+            //产生一个报警
             App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(machineCode, mqAlarm));
-            //显示消息通知
-            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                Title = "警报",
-                Content = machineCode + ":" + mqAlarm.alarmType
-            }));
-            //上传报警到Mq
-            App.Store.Dispatch(mqEffects.UploadAlarm(new MqActiions.UploadAlarm(HmiConfig.QueWebSrvException, mqAlarm)));
-            //保存报警到Mongo
-            App.Store.Dispatch(dbEffects.UploadAlarmsMongo(new DbActions.UploadAlarmsMongo(machineCode, "Alarms", mqAlarm)));
         }
 
         /// <summary>
@@ -296,7 +285,7 @@ namespace HmiPro.Redux.Cores {
         /// 记米相关处理
         /// </summary>
         void whenNoteMeterAccept(AppState state, IAction action) {
-            var meterAction = (CpmActions.NoteMeterDiffAccept)action;
+            var meterAction = (CpmActions.NoteMeterAccept)action;
             var machineCode = meterAction.MachineCode;
             var noteMeter = meterAction.Meter;
             lock (SchTaskDoingDict[machineCode]) {

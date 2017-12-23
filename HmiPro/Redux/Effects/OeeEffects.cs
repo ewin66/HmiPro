@@ -9,6 +9,7 @@ using HmiPro.Config;
 using HmiPro.Config.Models;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
+using HmiPro.Redux.Cores;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
@@ -25,11 +26,11 @@ namespace HmiPro.Redux.Effects {
 
         public readonly LoggerService Logger;
         public StorePro<AppState>.AsyncActionNeedsParam<OeeActions.StartCalcOeeTimer> StartCalcOeeTimer;
-        private readonly OeeService oeeService;
-        public OeeEffects(OeeService oeeService) {
+        private readonly OeeCore oeeCore;
+        public OeeEffects(OeeCore oeeCore) {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
-            this.oeeService = oeeService;
+            this.oeeCore = oeeCore;
             initStartCalcOeeTimer();
         }
 
@@ -40,23 +41,10 @@ namespace HmiPro.Redux.Effects {
                   YUtil.SetInterval(intance.Interval, () => {
                       foreach (var pair in getState().CpmState.MachineStateDict) {
                           var machineCode = pair.Key;
-                          if (!MachineConfig.MachineDict[machineCode].LogicToCpmDict.ContainsKey(CpmInfoLogic.Speed)) {
-                              Logger.Error($"机台 {machineCode} 未配置速度逻辑，无法判断开停机，无法计算 Oee - 时间效率");
-                              return;
-                          }
-
-                          var machineStates = pair.Value;
-                          var currentSpeed = (float)getState().CpmState.SpeedDict[machineCode].Value;
-                          var runTimeSec = oeeService.GetMachineRunTimeSec(machineStates, currentSpeed);
-                          var debugTimeSec = oeeService.GetMachineDebugTimeSec();
-                          var workTime = YUtil.GetKeystoneWorkTime();
-                          //计算时间效率
-                          if (runTimeSec < 0) {
-                              Logger.Error($"计算时间效率失败，有效时间 {runTimeSec} < 0 ");
-                          } else {
-                              float timeEff = (float)((runTimeSec - debugTimeSec) / (DateTime.Now - workTime).TotalSeconds);
-                              App.Store.Dispatch(new OeeActions.NotifyOeeCacled(machineCode, timeEff,null,null));
-                          }
+                          var timeEff = oeeCore.CalcOeeTimeEff(pair.Key, pair.Value);
+                          var speedEff = oeeCore.CalcOeeSpeedEff(pair.Key, MachineConfig.MachineDict[machineCode].OeeSpeedType);
+                          var qualityEff = oeeCore.CalcOeeQualityEff(pair.Key);
+                          App.Store.Dispatch(new OeeActions.UpdateOeePartialValue(machineCode, timeEff, speedEff, qualityEff));
                       }
                   });
               });

@@ -20,6 +20,7 @@ using YCsharp.Service;
 using DevExpress.XtraPrinting.Native;
 using HmiPro.Config.Models;
 using HmiPro.Redux.Effects;
+using YCsharp.Util;
 
 namespace HmiPro.Redux.Cores {
     /// <summary>
@@ -37,7 +38,7 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 订阅指令：执行逻辑
         /// </summary>
-        readonly IDictionary<string, Action<AppState>> actionExecDict = new ConcurrentDictionary<string, Action<AppState>>();
+        readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new ConcurrentDictionary<string, Action<AppState, IAction>>();
 
         //编码：采集参数
         //外部可能会对此进行采样
@@ -54,11 +55,11 @@ namespace HmiPro.Redux.Cores {
             foreach (var pair in MachineConfig.MachineDict) {
                 onlineFloatDict[pair.Key] = new ConcurrentDictionary<int, float>();
             }
-            actionExecDict[AlarmActions.OPEN_ALARM_LIGHTS] = openAlarmLights;
-            actionExecDict[AlarmActions.CLOSE_ALARM_LIGHTS] = closeAlarmLights;
-            App.Store.Subscribe(s => {
-                if (actionExecDict.TryGetValue(s.Type, out var exec)) {
-                    exec(s);
+            actionExecDict[AlarmActions.OPEN_ALARM_LIGHTS] = doOpenAlarmLights;
+            actionExecDict[AlarmActions.CLOSE_ALARM_LIGHTS] = doCloseAlarmLights;
+            App.Store.Subscribe((state, action) => {
+                if (actionExecDict.TryGetValue(state.Type, out var exec)) {
+                    exec(state, action);
                 }
             });
 
@@ -92,26 +93,27 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 打开报警灯，报警Ip必须配置
         /// </summary>
-        /// <param name="s"></param>
-        void openAlarmLights(AppState s) {
-            var machineCode = s.AlarmState.MachineCode;
-            if (MachineConfig.AlarmIpDict.TryGetValue(machineCode, out var ip)) {
+        void doOpenAlarmLights(AppState state, IAction action) {
+            var alarmAction = (AlarmActions.OpenAlarmLights)action;
+            if (MachineConfig.AlarmIpDict.TryGetValue(alarmAction.MachineCode, out var ip)) {
                 SmParamTcp?.OpenAlarm(ip);
+                YUtil.SetTimeout(alarmAction.LightMs, () => {
+                    SmParamTcp?.CloseAlarm(ip);
+                });
             } else {
-                Logger.Error($"机台 {machineCode} 没有报警 ip");
+                Logger.Error($"机台 {alarmAction.MachineCode} 没有报警 ip");
             }
         }
 
         /// <summary>
         /// 关闭报警灯，报警Ip必须配置
         /// </summary>
-        /// <param name="s"></param>
-        void closeAlarmLights(AppState s) {
-            var machineCode = s.AlarmState.MachineCode;
-            if (MachineConfig.AlarmIpDict.TryGetValue(machineCode, out var ip)) {
+        void doCloseAlarmLights(AppState state, IAction action) {
+            var alarmAction = (AlarmActions.CloseAlarmLights)action;
+            if (MachineConfig.AlarmIpDict.TryGetValue(alarmAction.MachineCode, out var ip)) {
                 SmParamTcp?.CloseAlarm(ip);
             } else {
-                Logger.Error($"机台 {machineCode} 没有报警 ip");
+                Logger.Error($"机台 {alarmAction.MachineCode} 没有报警 ip");
             }
         }
 
@@ -193,7 +195,7 @@ namespace HmiPro.Redux.Cores {
                 });
                 //不断的更新速度
                 //主要是为了计算平均速度
-                dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.Speed, cpm => {
+                dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.OeeSpeed, cpm => {
                     App.Store.Dispatch(new CpmActions.SpeedAccept(machineCode, (float)cpm.Value));
                 });
             }
@@ -210,7 +212,7 @@ namespace HmiPro.Redux.Cores {
                     App.Store.Dispatch(new CpmActions.SparkDiffAccept(machineCode, cpm));
                 });
                 //速度发生变化
-                dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.Speed, cpm => {
+                dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.OeeSpeed, cpm => {
                     App.Store.Dispatch(new CpmActions.SpeedDiffAccpet(machineCode, cpm));
                     //速度变化为0的事件
                     if ((float)cpm.Value == 0) {

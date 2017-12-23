@@ -25,8 +25,10 @@ namespace HmiPro.ViewModels {
         public virtual Assets Assets { get; set; } = AssetsHelper.GetAssets();
         public virtual INavigationService NavigationSerivce => null;
         public static bool IsFirstEntry = true;
+        public readonly LoggerService Logger;
 
         public HomeViewModel() {
+            Logger = LoggerHelper.CreateLogger(GetType().ToString());
         }
 
         [Command(Name = "OnLoadedCommand")]
@@ -45,6 +47,11 @@ namespace HmiPro.ViewModels {
                         checkConfig();
                         afterConfigLoaded();
                     } catch (Exception e) {
+                        App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                            Title = "配置出错",
+                            Content = e.Message
+                        }));
+                        Logger.Error($"程序配置有误", e);
                         App.Store.Dispatch(new SysActions.ShowSettingView());
                     }
                 }
@@ -61,10 +68,16 @@ namespace HmiPro.ViewModels {
             var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
+            var dbEffects = UnityIocService.ResolveDepend<DbEffects>();
+
             UnityIocService.ResolveDepend<DMesCore>().Init();
             UnityIocService.ResolveDepend<AlarmCore>().Init();
             UnityIocService.ResolveDepend<CpmCore>().Init();
             await UnityIocService.ResolveDepend<SchCore>().Init();
+
+
+
+
             //启动Http解析系统
             var isHttpSystem = await App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
             if (!isHttpSystem) {
@@ -91,6 +104,23 @@ namespace HmiPro.ViewModels {
             }
             var version = YUtil.GetAppVersion(Assembly.GetExecutingAssembly());
             App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "系统启动完毕", Content = $"版本:{version}" }));
+
+            dispatchMock();
+        }
+
+        /// <summary>
+        /// 派发模拟数据
+        /// </summary>
+        void dispatchMock() {
+            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "进入模拟状态", Content = $"产生的数据都是模拟的" }));
+            int code = 0;
+            //YUtil.SetInterval(5000, () => {
+            //    dispatchMockAlarm(code++);
+            //    if (code == 10) {
+            //        code = 0;
+            //    }
+            //}, 5)();
+            App.Store.Dispatch(new SysActions.OpenScreen());
         }
 
         /// <summary>
@@ -100,10 +130,10 @@ namespace HmiPro.ViewModels {
             foreach (var pair in MachineConfig.MachineDict) {
                 var machineCode = pair.Key;
                 var machineConfig = pair.Value;
-                if (!machineConfig.LogicToCpmDict.ContainsKey(CpmInfoLogic.Speed)) {
+                if (!machineConfig.LogicToCpmDict.ContainsKey(CpmInfoLogic.OeeSpeed)) {
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "程序配置有误",
-                        Content = $"机台 {machineCode} 未配置速度逻辑 {(int)CpmInfoLogic.Speed}",
+                        Content = $"机台 {machineCode} 未配置速度逻辑 {(int)CpmInfoLogic.OeeSpeed}",
                         Level = NotifyLevel.Error
                     }));
                 }

@@ -36,7 +36,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationManifest>HmiPro.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>app.ico</ApplicationIcon>
@@ -194,6 +194,7 @@
     <Compile Include="Redux\Models\AlarmBomCheck.cs" />
     <Compile Include="Redux\Models\Cpm.cs" />
     <Compile Include="Redux\Models\MachineState.cs" />
+    <Compile Include="Redux\Models\MongoDoc.cs" />
     <Compile Include="Redux\Models\MqAlarm.cs" />
     <Compile Include="Redux\Models\MqScanMaterial.cs" />
     <Compile Include="Redux\Models\MqSchTask.cs" />
@@ -216,7 +217,7 @@
     <Compile Include="Redux\Cores\DMesCore.cs" />
     <Compile Include="Redux\Cores\CpmCore.cs" />
     <Compile Include="Redux\Services\MqService.cs" />
-    <Compile Include="Redux\Services\OeeService.cs" />
+    <Compile Include="Redux\Cores\OeeCore.cs" />
     <Compile Include="Redux\Services\SysService.cs" />
     <Compile Include="ViewModels\DMes\Tab\AlarmTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
@@ -323,6 +324,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.manifest" />
+    <None Include="HmiPro.manifest" />
     <None Include="packages.config" />
     <None Include="Profiles\Assets\Dicts\工艺Bom.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -376,7 +378,10 @@
     <None Include="Profiles\Assets\Mocks\MqSchTask.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Profiles\Prod\Hmi.Config.json">
+    <None Include="Profiles\Prod\Hmi.Config.Shop.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Profiles\Prod\Hmi.Config.Office.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Profiles\Prod\Machines\CC.xls">
@@ -571,7 +576,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

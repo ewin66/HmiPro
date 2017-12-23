@@ -26,7 +26,7 @@ namespace HmiPro.Redux.Effects {
         public readonly LoggerService Logger;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartListenSchTask, bool> StartListenSchTask;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadCpms> UploadCpms;
-        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadAlarm> UploadAlarm;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadAlarmMq> UploadAlarm;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartUploadCpmsInterval> StartUploadCpmsInterval;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartListenScanMaterial, bool> StartListenScanMaterial;
         public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadSchTaskManu, bool> UploadSchTaskManu;
@@ -63,7 +63,7 @@ namespace HmiPro.Redux.Effects {
 
         void initUploadAlarm() {
             UploadAlarm =
-                App.Store.asyncActionVoid<MqActiions.UploadAlarm>(async (dispatch, getState, instance) => {
+                App.Store.asyncActionVoid<MqActiions.UploadAlarmMq>(async (dispatch, getState, instance) => {
                     await Task.Run(() => {
                         dispatch(instance);
                         try {

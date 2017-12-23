@@ -11,7 +11,10 @@ namespace HmiPro.Redux.Actions {
     /// </summary>
     public static class OeeActions {
         public static readonly string START_CALC_OEE_TIMER = "[Oee] Start Calc Oee Timer";
-        public static readonly string NOTIFY_OEE_CACLED = "[Oee] New Oee Calced";
+        /// <summary>
+        /// 更新Oee的部分参数
+        /// </summary>
+        public static readonly string UPDATE_OEE_PARTIAL_VALUE = "[Oee] Update Oee Parital Value";
         public static readonly string INIT = "[Oee] Init";
 
         public struct Init : IAction {
@@ -27,8 +30,17 @@ namespace HmiPro.Redux.Actions {
             }
         }
 
-        public struct NotifyOeeCacled : IAction {
-            public string Type() => NOTIFY_OEE_CACLED;
+        public enum CalcOeeSpeedType {
+            //Plc的设定最大值
+            MaxSpeedPlc = 1,
+            //Mq设定最大值
+            MaxSpeedMq = 2,
+            //未知
+            Unknown = 3,
+        }
+
+        public struct UpdateOeePartialValue : IAction {
+            public string Type() => UPDATE_OEE_PARTIAL_VALUE;
             /// <summary>
             /// 时间效率
             /// </summary>
@@ -48,7 +60,7 @@ namespace HmiPro.Redux.Actions {
 
             public string MachineCode;
 
-            public NotifyOeeCacled(string machineCode, float? timeEff , float? qualityEff , float? speedEff ) {
+            public UpdateOeePartialValue(string machineCode, float? timeEff, float? speedEff, float? qualityEff) {
                 MachineCode = machineCode;
                 TimeEff = timeEff;
                 SpeedEff = speedEff;

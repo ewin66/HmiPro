@@ -33,7 +33,7 @@ namespace HmiPro.Redux.Actions {
         public static readonly string START_UPLOAD_CPMS_INTERVAL = "[Mq] Start Upload Cpms Interval";
 
         //上传报警
-        public static readonly string UPLOAD_ALARM = "[Mq] Upload Alarm To Mq";
+        public static readonly string UPLOAD_ALARM_MQ = "[Mq] Upload Alarm To Mq";
         public static readonly string UPLOAD_ALARM_SUCCESS = "[Mq] Upload Alarm To Mq Success";
         public static readonly string UPLOAD_ALARM_FAILED = "[Mq] Upload Alarm To Mq Failed";
 
@@ -155,12 +155,12 @@ namespace HmiPro.Redux.Actions {
             }
         }
 
-        public struct UploadAlarm : IAction {
-            public string Type() => UPLOAD_ALARM;
+        public struct UploadAlarmMq : IAction {
+            public string Type() => UPLOAD_ALARM_MQ;
             public MqAlarm MqAlarm;
             public string QueueName;
 
-            public UploadAlarm(string queueName, MqAlarm mqAlarm) {
+            public UploadAlarmMq(string queueName, MqAlarm mqAlarm) {
                 MqAlarm = mqAlarm;
                 QueueName = queueName;
             }

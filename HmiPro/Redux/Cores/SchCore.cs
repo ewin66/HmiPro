@@ -9,6 +9,7 @@ using HmiPro.Config.Models;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Effects;
+using HmiPro.Redux.Models;
 using Reducto;
 using YCsharp.Service;
 using YCsharp.Util;
@@ -43,24 +44,38 @@ namespace HmiPro.Redux.Cores {
             await App.Store.Dispatch(sysEffects.StartCloseScreenTimer(new SysActions.StartCloseScreenTimer(HmiConfig.CloseScreenInterval)));
             //启动定时上传Cpms到Mq定时器
             await App.Store.Dispatch(mqEffects.StartUploadCpmsInterval(new MqActiions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
+
             //每天8点打开显示器
             Schedule(() => {
                 App.Store.Dispatch(new SysActions.OpenScreen());
             }).ToRunEvery(1).Days().At(8, 0);
 
-            bool isContainSpeed = false;
             foreach (var pair in MachineConfig.MachineDict) {
-                if (pair.Value.LogicToCpmDict.ContainsKey(CpmInfoLogic.Speed)) {
-                    isContainSpeed = true;
+                var machine = pair.Value;
+                if (machine.OeeSpeedType == OeeActions.CalcOeeSpeedType.Unknown) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = $"机台 {machine.Code} 无法计算Oee-速度效率",
+                        Content = "请联系管理员配置 OeeSppedType"
+                    }));
                 }
+
             }
-            //每10分钟计算一次 Oee
-            if (isContainSpeed) {
-                var interval = 10 * 60 * 1000;
-                await App.Store.Dispatch(oeeEffects.StartCalcOeeTimer(new OeeActions.StartCalcOeeTimer(interval)));
-            } else {
-                Logger.Error($"机台 {MachineConfig.AllMachineName} 未配置速度逻辑，将不会计算 Oee - 时间效率 - 速度效率");
-            }
+
+            var interval = 1 * 60 * 1000;
+            await App.Store.Dispatch(oeeEffects.StartCalcOeeTimer(new OeeActions.StartCalcOeeTimer(interval)));
+            JobManager.Initialize(this);
+
+        }
+
+
+        void FluentSchTest() {
+            Schedule(() => {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "测试Fluent Schedule Task",
+                    Content = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                }));
+                Logger.Debug("测试Flunt Schedule");
+            }).ToRunEvery(1).Days().At(10, 40);
 
         }
     }

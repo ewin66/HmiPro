@@ -27,7 +27,7 @@ namespace HmiPro.Redux.Reducers {
                         state.OeeDict[pair.Key] = new Oee();
                     }
                     return state;
-                }).When<OeeActions.NotifyOeeCacled>((state, action) => {
+                }).When<OeeActions.UpdateOeePartialValue>((state, action) => {
                     state.MachineCode = action.MachineCode;
                     var oee = state.OeeDict[action.MachineCode];
                     //每次通知不一定oee三个数据都有值，更新其中有值项便是

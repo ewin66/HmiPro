@@ -15,7 +15,50 @@ namespace HmiPro.Redux.Actions {
         public static readonly string UPLOAD_CPMS_INFLUXDB_SUCCESS = "[Db] Upload Cpms To InfluxDb Success";
         public static readonly string UPLOAD_CPMS_INFLUXDB_FAILED = "[Db] Upload Cpms To InfluxDb Failed";
         public static readonly string UPLOAD_CPMS_MONGO = "[Db] Upload Cpms To Mongo";
+        public static readonly string UPLOAD_CPMS_MONGO_SUCCESS = "[Db] Upload Cpms To Mongo Sucess";
+        public static readonly string UPLOAD_CPMS_MONGO_FALIED = "[Db] Upload Cpms To Mongo Failed";
         public static readonly string UPLOAD_ALARMS_MONGO = "[Db] Upload Alarms To Mongo";
+        public static readonly string UPLOAD_ALARMS_MONGO_SUCCESS = "[Db] Upload Alarms To Mongo Success";
+        public static readonly string UPLOAD_ALARMS_MONGO_FAILED = "[Db] Upload Alarms To Mongo Failed";
+        public static readonly string UPLOAD_DOC_TO_MONGO = "[Db] Upload Document To Mongo";
+        public static readonly string UPLOAD_DOC_TO_MONGO_SUCCESS = "[Db] Upload Document To Mongo Success";
+        public static readonly string UPLOAD_DOC_TO_MONGO_FAILED = "[Db] Upload Document To Mongo Failed";
+        public static readonly string UPLOAD_DOC_MANY_TO_MONGO = "[Db] Upload Document Many To Mongo";
+        public static readonly string UPLOAD_DOC_MANY_TO_MONGO_SUCCESS = "[Db] Upload Document Many To Mongo Success";
+        public static readonly string UPLOAD_DOC_MANY_TO_MONGO_FAILED = "[Db] Upload Document Many To Mongo Failed";
+
+        public class UploadDocToMongo : IAction {
+            public string Type() => UPLOAD_DOC_TO_MONGO;
+            public MongoDoc Doc;
+            /// <summary>
+            /// 不能含有中文
+            /// </summary>
+            public string Collection;
+            /// <summary>
+            /// 不能含有中文
+            /// </summary>
+            public string DbName;
+
+            public UploadDocToMongo(string dbName, string collection, MongoDoc doc) {
+                DbName = dbName;
+                Collection = collection;
+                Doc = doc;
+            }
+        }
+
+
+        public class UploadDocManyToMongo : IAction {
+            public string Type() => UPLOAD_DOC_MANY_TO_MONGO;
+            public string Collection;
+            public string DbName;
+            public IList<MongoDoc> Docs;
+
+            public UploadDocManyToMongo(string dbName, string collection, IList<MongoDoc> docs) {
+                DbName = dbName;
+                Collection = collection;
+                Docs = docs;
+            }
+        }
 
         public struct UploadAlarmsMongo : IAction {
             public string Type() => UPLOAD_ALARMS_MONGO;

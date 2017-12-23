@@ -91,6 +91,7 @@ namespace HmiPro {
             Logger = LoggerHelper.CreateLogger("DMes App");
             //打印Redux系统的动作
             Store.Subscribe(logDebugActions);
+            Console.WriteLine("当前系统版本："+YUtil.GetOsVersion());
             Console.WriteLine("Welcom To DMes V3.0");
         }
 
@@ -116,7 +117,7 @@ namespace HmiPro {
                 AppState.ExectedActions[state.Type] = DateTime.Now;
             }
 
-          
+
         }
 
 
@@ -135,7 +136,13 @@ namespace HmiPro {
                     DXSplashScreen.Show<SplashScreenView>();
                     DXSplashScreen.SetState(SplashState.Default);
                 }
-                HmiConfig.Load(opt.ConfigFolder + @"\Hmi.Config.json");
+                if (Environment.UserName.ToLower().Contains("ychost")) {
+                    HmiConfig.Load(opt.ConfigFolder + @"\Hmi.Config.Office.json");
+                    Console.WriteLine("初始化配置文件: -Hmi.Config.Office.json");
+                } else {
+                    HmiConfig.Load(opt.ConfigFolder + @"\Hmi.Config.Shop.json");
+                    Console.WriteLine("初始化配置文件: -Hmi.Config.Shop.json");
+                }
                 HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);
 
 

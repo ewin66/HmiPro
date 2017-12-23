@@ -14,7 +14,7 @@ namespace HmiPro.Redux.Models {
     /// <date>2017-12-13</date>
     /// <author>ychost</author>
     /// </summary>
-    public class MqAlarm : INotifyPropertyChanged {
+    public class MqAlarm : MongoDoc, INotifyPropertyChanged {
         /// <summary>
         /// 机台编码
         /// </summary>

@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Redux.Actions;
 using YCsharp.Service;
 
 namespace HmiPro.Config.Models {
@@ -13,6 +14,10 @@ namespace HmiPro.Config.Models {
     /// </summary>
     public class Machine {
         public string Code { get; set; }
+        /// <summary>
+        /// 计算Oee速度效率方式
+        /// </summary>
+        public OeeActions.CalcOeeSpeedType OeeSpeedType = OeeActions.CalcOeeSpeedType.Unknown;
         public string[] CpmIps { get; set; }
         //编码：采集参数（所有）
         public IDictionary<int, CpmInfo> CodeToAllCpmDict = new Dictionary<int, CpmInfo>();
@@ -38,6 +43,10 @@ namespace HmiPro.Config.Models {
             var propDict = xlsToMachine(path, sheetName);
             Code = propDict["MachineCode"].ToString();
             CpmIps = propDict["CpmIps"].ToString().Split('|');
+            if (propDict.TryGetValue("OeeSpeedType", out var type)) {
+                var intVal = int.Parse(type.ToString());
+                OeeSpeedType = (OeeActions.CalcOeeSpeedType)intVal;
+            }
         }
 
         IDictionary<string, object> xlsToMachine(string xlsPath, string sheetName) {
@@ -113,11 +122,12 @@ namespace HmiPro.Config.Models {
                     }
                 });
             }
+
         }
 
         void buildLogicDict() {
-            if (LogicToCpmDict.ContainsKey(CpmInfoLogic.Speed)) {
-                var cpm = LogicToCpmDict[CpmInfoLogic.Speed];
+            if (LogicToCpmDict.ContainsKey(CpmInfoLogic.OeeSpeed)) {
+                var cpm = LogicToCpmDict[CpmInfoLogic.OeeSpeed];
                 //添加速度标准差
                 if (!LogicToCpmDict.ContainsKey(CpmInfoLogic.SpeedStdDev)) {
                     var stdDev = new CpmInfo() {
@@ -137,7 +147,12 @@ namespace HmiPro.Config.Models {
                     };
                     LogicToCpmDict[CpmInfoLogic.SpeedDerivative] = der;
                 }
+            }
 
+            if (OeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedPlc) {
+                if (!LogicToCpmDict.ContainsKey(CpmInfoLogic.MaxSpeedPlc)) {
+                    throw new Exception($"配置了OeeSpeedType为MaxSpeedPlc，请设置最大速度的参数逻辑：{CpmInfoLogic.MaxSpeedPlc}");
+                }
             }
         }
 

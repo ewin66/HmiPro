@@ -126,16 +126,24 @@ namespace YCsharp.Util {
 
         /// <summary>
         /// 关闭显示器
+        /// <fixme>在win10上面无效</fixme>
         /// </summary>
         public static void CloseScreen() {
-            SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            if (GetOsVersion() != Windows10) {
+                SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            }
         }
 
         /// <summary>
         /// 打开显示器
+        /// <fixme>在win10上面无效</fixme>
         /// </summary>
         public static void OpenScreen() {
-            SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+            if (GetOsVersion() != Windows10) {
+                SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+            }
         }
+
+
     }
 }

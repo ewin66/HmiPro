@@ -41,9 +41,14 @@ namespace HmiPro.Redux.Actions {
         public struct OpenAlarmLights : IAction {
             public string Type() => OPEN_ALARM_LIGHTS;
             public string MachineCode;
+            /// <summary>
+            /// 亮灯时间，毫秒数，时间之后关闭报警灯
+            /// </summary>
+            public int LightMs;
 
-            public OpenAlarmLights(string machineCode) {
+            public OpenAlarmLights(string machineCode, int lightMs = 10000) {
                 MachineCode = machineCode;
+                LightMs = lightMs;
             }
         }
 
@@ -83,7 +88,7 @@ namespace HmiPro.Redux.Actions {
             public MqAlarm MqAlarmRemove;
 
 
-            public UpdateHistoryAlarms(string machineCode, UpdateAction action, MqAlarm alarmAdd,MqAlarm mqAlarmRemove) {
+            public UpdateHistoryAlarms(string machineCode, UpdateAction action, MqAlarm alarmAdd, MqAlarm mqAlarmRemove) {
                 MachineCode = machineCode;
                 UpdateAction = action;
                 MqAlarmAdd = alarmAdd;

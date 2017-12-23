@@ -47,7 +47,6 @@ namespace HmiPro.ViewModels.DMes {
             actionsExecDict[AlarmActions.UPDATE_HISTORY_ALARMS] = whenUpdateHistoryAlarms;
         }
 
-
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
             //绑定实时参数页面
@@ -90,11 +89,11 @@ namespace HmiPro.ViewModels.DMes {
 
         /// <summary>
         /// 报警用的DataGrid每次都会add or remove 必须通过 UI 调度器
+        /// 这里是保持 UI 显示和 State 的报警数据一致
         /// </summary>
         public void whenUpdateHistoryAlarms(AppState state, IAction action) {
             DispatcherService.BeginInvoke(() => {
                 var alarmAction = (AlarmActions.UpdateHistoryAlarms)action;
-
                 if (alarmAction.UpdateAction == AlarmActions.UpdateAction.Add) {
                     AlarmTabDict[alarmAction.MachineCode].Alarms.Add(alarmAction.MqAlarmAdd);
 

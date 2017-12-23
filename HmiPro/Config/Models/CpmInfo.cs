@@ -237,8 +237,8 @@ namespace HmiPro.Config.Models {
         Default = 0,
         //记米
         NoteMeter = 1,
-        //生产速度，比如线速度等等
-        Speed = 2,
+        //计算Oee的速度
+        OeeSpeed = 2,
         //Od值
         Od = 3,
         //放线
@@ -248,7 +248,9 @@ namespace HmiPro.Config.Models {
         //指纹
         Fingerprint = 6,
         //火花报警
-        Spark = 7
+        Spark = 7,
+        //Plc设定的最大速度
+        MaxSpeedPlc=8
     }
 
     public enum CpmInfoMethodName {
