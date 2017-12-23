@@ -62,7 +62,7 @@
                         <dxlc:FlowLayoutControl BreakFlowToFit="False" x:Name="CpmFlowLayout" Orientation="Horizontal" ItemsSource="{Binding Path=MqSchTasks}" >
                             <dxlc:FlowLayoutControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type mqModels:MqSchTask}">
-                                    <materialDesign:Flipper   Style="{StaticResource MaterialDesignCardFlipper}">
+                                   <materialDesign:Flipper   Style="{StaticResource MaterialDesignCardFlipper}">
                                         <materialDesign:Flipper.FrontContent >
                                             <Grid Margin="8,8,8,8" >
                                                 <materialDesign:Card   Background="{DynamicResource PrimaryHueDarkBrush}" Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}">
@@ -70,7 +70,7 @@
                                                         <TextBlock Margin="16,16,12,8" FontSize="22">工单：<Run Text="{Binding Path=workcode}"/></TextBlock>
                                                         <ListBox ItemsSource="{Binding Path=axisParam}">
                                                             <ListBox.ItemTemplate>
-                                                                <DataTemplate DataType="{x:Type mqModels:AxisParamItem}">
+                                                                <DataTemplate DataType="{x:Type mqModels:MqTaskAxis}">
                                                                     <CheckBox Margin="16,4,16,0"  IsChecked="{Binding Path=IsCompleted}" Style="{StaticResource MaterialDesignUserForegroundCheckBox}" Content="{Binding Path=axiscode}"/>
                                                                 </DataTemplate>
                                                             </ListBox.ItemTemplate>
@@ -89,8 +89,15 @@
                                                         Content="详细"
                                                         Command="{x:Static materialDesign:Flipper.FlipCommand}"
                                                         Style="{StaticResource MaterialDesignToolForegroundButton}"/>
-
                                                             <Button Content="Bom" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl},Path=DataContext.NavigateToBomViewCommand}">
+                                                                <Button.CommandParameter >
+                                                                    <MultiBinding Converter="{StaticResource MultiParamsConvert}">
+                                                                        <Binding Path="maccode"></Binding>
+                                                                        <Binding Path="workcode"></Binding>
+                                                                    </MultiBinding>
+                                                                </Button.CommandParameter>
+                                                            </Button>
+                                                            <Button Content="Detail" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl},Path=DataContext.NavigateToTaskAxisViewCommand}">
                                                                 <Button.CommandParameter >
                                                                     <MultiBinding Converter="{StaticResource MultiParamsConvert}">
                                                                         <Binding Path="maccode"></Binding>

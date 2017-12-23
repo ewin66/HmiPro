@@ -105,7 +105,7 @@ namespace HmiPro.Redux.Reducers {
                     state.OnlineCpmsDict[machineCode] = cpmsDict;
                     state.MachineStateDict[machineCode] = new ObservableCollection<MachineState>();
                     state.SpeedCalcDerDict[machineCode] = YUtil.CreateExecDerFunc();
-                    state.SpeedDict[machineCode] = new Cpm() { Value = 0, ValueType = SmParamType.Signal };
+                    state.SpeedDict[machineCode] = new Cpm() { Value = 0f, ValueType = SmParamType.Signal };
                 }
                 return state;
             }).When<CpmActions.StartServerSuccess>((state, action) => {

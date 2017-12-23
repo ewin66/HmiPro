@@ -106,9 +106,14 @@ namespace UnitTestPro.FuncTest {
             list1.Remove(removeItem);
             Assert.AreEqual(list1.Count, 1);
             list2.Remove(removeItem);
-           
             Assert.AreEqual(list2.Count, 1);
+        }
 
+        [TestMethod]
+        public void ConvertTest() {
+            object zero = 0.357;
+            var zeroF = float.Parse(zero.ToString());
+            Console.WriteLine(zeroF);
         }
 
     }

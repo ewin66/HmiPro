@@ -239,6 +239,10 @@
       <DependentUpon>CraftBomView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\DMes\CraftBomViewModel.cs" />
+    <Compile Include="Views\DMes\SchTaskAxisView.xaml.cs">
+      <DependentUpon>SchTaskAxisView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\DMes\SchTaskAxisViewModel.cs" />
     <Compile Include="Views\Dx\LoadingView.xaml.cs">
       <DependentUpon>LoadingView.xaml</DependentUpon>
     </Compile>
@@ -285,6 +289,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DMes\CraftBomView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DMes\SchTaskAxisView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

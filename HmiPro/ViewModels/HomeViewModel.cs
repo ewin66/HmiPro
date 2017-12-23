@@ -169,7 +169,7 @@ namespace HmiPro.ViewModels {
         /// <param name="viewName">页面名称，比如页面为HomeView.xaml，则名称为HomeView</param>
         [Command(Name = "NavigateCommand")]
         public void Navigate(string viewName) {
-            NavigationSerivce.Navigate(viewName,null,this);
+            NavigationSerivce.Navigate(viewName,null,this,true);
         }
 
         [Command(Name = "JumpAppSettingViewCommand")]

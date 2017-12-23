@@ -19,7 +19,7 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 当前轴号任务
         /// </summary>
-        public AxisParamItem MqSchAxis;
+        public MqTaskAxis MqSchAxis;
         /// <summary>
         /// 工单任务的id
         /// </summary>

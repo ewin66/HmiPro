@@ -13,7 +13,7 @@ using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
 using YCsharp.Util;
 
-namespace HmiPro.Redux.Cores{
+namespace HmiPro.Redux.Cores {
     /// <summary>
     /// <date>2017-12-20</date>
     /// <author>ychost</author>
@@ -34,7 +34,8 @@ namespace HmiPro.Redux.Cores{
                 Logger.Error($"机台 {machineCode} 未配置速度逻辑，无法判断开停机，无法计算 Oee - 时间效率");
                 return null;
             }
-            var currentSpeed = (float)App.Store.GetState().CpmState.SpeedDict[machineCode].Value;
+            float currentSpeed = 0;
+            currentSpeed = App.Store.GetState().CpmState.SpeedDict[machineCode].GetFloatVal();
             var runTimeSec = getMachineRunTimeSec(machineStates, currentSpeed);
             var debugTimeSec = getMachineDebugTimeSec();
             var workTime = YUtil.GetKeystoneWorkTime();

@@ -140,7 +140,7 @@ namespace HmiPro.ViewModels {
         /// </summary>
         /// <param name="target"></param>
         public void Navigate(string target) {
-            NavigationService.Navigate(target, null, this);
+            NavigationService.Navigate(target, null, this,true);
         }
 
         /// <summary>

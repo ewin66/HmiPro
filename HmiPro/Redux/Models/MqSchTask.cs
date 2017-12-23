@@ -73,7 +73,7 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 轴号信息
         /// </summary>
-        public ObservableCollection<AxisParamItem> axisParam { get; set; }
+        public ObservableCollection<MqTaskAxis> axisParam { get; set; }
         /// <summary>
         /// 主操作手
         /// </summary>
@@ -243,7 +243,7 @@ namespace HmiPro.Redux.Models {
         public int date { get; set; }
     }
 
-    public class AxisParamItem : INotifyPropertyChanged {
+    public class MqTaskAxis : INotifyPropertyChanged {
         /// <summary>
         /// 
         /// </summary>

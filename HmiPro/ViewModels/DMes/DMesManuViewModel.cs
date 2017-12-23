@@ -148,7 +148,23 @@ namespace HmiPro.ViewModels.DMes {
                     var task = tasks.FirstOrDefault(t => t.workcode == workCode);
                     var vm = CraftBomViewModel.Create(machineCode, workCode, task?.bom);
                     //var vm = new CraftBomViewModel(machineCode,workCode,task?.bom);
-                    NavigationSerivce.Navigate("CraftBomView",vm,null,this,false);
+                    NavigationSerivce.Navigate("CraftBomView", vm, null, this,true);
+                }
+
+            }
+        }
+
+        [Command(Name = "NavigateToTaskAxisViewCommand")]
+        public void NavigateToTaskAxisView(object[] @params) {
+            if (@params?.Length == 2) {
+                var machineCode = @params[0].ToString();
+                var workCode = @params[1].ToString();
+                var mqSchTasksDict = App.Store.GetState().DMesState.MqSchTasksDict;
+                if (mqSchTasksDict.TryGetValue(machineCode, out var tasks)) {
+                    var task = tasks.FirstOrDefault(t => t.workcode == workCode);
+                    var vm = SchTaskAxisViewModel.Create(machineCode, workCode, task?.axisParam);
+                    //var vm = new CraftBomViewModel(machineCode,workCode,task?.bom);
+                    NavigationSerivce.Navigate("SchTaskAxisView", vm, null, this,true);
                 }
 
             }

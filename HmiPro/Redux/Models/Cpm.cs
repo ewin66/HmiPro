@@ -50,6 +50,18 @@ namespace HmiPro.Redux.Models {
             }
         }
 
+        /// <summary>
+        /// 获取浮点值，直接强转 (float)value会出问题
+        /// </summary>
+        /// <returns></returns>
+        public float GetFloatVal() {
+            if (ValueType != SmParamType.Signal) {
+                throw new Exception($"参数 {Name} 值 {Value} 的类型是 {ValueType}，不能强转 float");
+            }
+
+            return float.Parse(value.ToString());
+        }
+
         //采集时间
         public DateTime PickTime { get; set; }
         //采集时间戳，毫秒级别
