@@ -19,10 +19,13 @@ namespace HmiPro.Config {
         public string ShowSplash { get; set; }
         [Option(longName: "autostart", Default = "false", HelpText = "开机自启")]
         public string AutoSatrt { get; set; }
-        [Option(longName: "config", Default = @".\Profiles\Prod\", HelpText = "指定配置文件夹")]
-        public string ConfigFolder { get; set; }
         [Option(longName: "sqlite", Default = @"C:\HmiPro\Store.db", HelpText = "Sqlite 文件地址")]
         public string SqlitePath { get; set; }
+        [Option(longName: "profiles", Default = @".\Profiles", HelpText = "配置文件夹")]
+        public string ProfilesFolder { get; set; }
+        [Option(longName: "mode", Default = @"Prod", HelpText = "Dev或者Prod模式，会自动寻找Profiles文件夹下面的Mode文件夹")]
+        public string Mode { get; set; }
+
     }
 
 }

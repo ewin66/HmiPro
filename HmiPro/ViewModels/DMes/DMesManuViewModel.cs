@@ -28,6 +28,7 @@ namespace HmiPro.ViewModels.DMes {
         public string OeeStr = "";
         private Unsubscribe unsubscribe;
         public readonly LoggerService Logger;
+        public virtual INavigationService NavigationSerivce => null;
 
         public DMesManuViewModel() {
             foreach (var pair in MachineConfig.MachineDict) {
@@ -78,7 +79,10 @@ namespace HmiPro.ViewModels.DMes {
                 if (SchTaskTabDict.TryGetValue(pair.Key, out var tab)) {
                     tab.BindSource(pair.Value);
                 }
+
             }
+            //绑定Bom
+
             //监听系统信息
             unsubscribe = App.Store.Subscribe((state, action) => {
                 if (actionsExecDict.TryGetValue(action.Type(), out var exec)) {
@@ -128,7 +132,31 @@ namespace HmiPro.ViewModels.DMes {
                     Content = "任务数据有误，请联系管理员"
                 }));
             }
+        }
 
+        /// <summary>
+        /// 导航到Bom表参数页面
+        /// </summary>
+        /// <param name="params"></param>
+        [Command(Name = "NavigateToBomViewCommand")]
+        public void NavigateToBomView(object[] @params) {
+            if (@params?.Length == 2) {
+                var machineCode = @params[0].ToString();
+                var workCode = @params[1].ToString();
+                var mqSchTasksDict = App.Store.GetState().DMesState.MqSchTasksDict;
+                if (mqSchTasksDict.TryGetValue(machineCode, out var tasks)) {
+                    var task = tasks.FirstOrDefault(t => t.workcode == workCode);
+                    var vm = CraftBomViewModel.Create(machineCode, workCode, task?.bom);
+                    //var vm = new CraftBomViewModel(machineCode,workCode,task?.bom);
+                    NavigationSerivce.Navigate("CraftBomView",vm,null,this,false);
+                }
+
+            }
+        }
+
+        [Command(Name = "GoBackCommand")]
+        public void GoBack() {
+            NavigationSerivce.GoBack(null);
         }
 
         public void OnClose(CancelEventArgs e) {

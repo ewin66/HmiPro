@@ -159,6 +159,7 @@
     <Compile Include="Config\Models\Machine.cs" />
     <Compile Include="Config\Models\Setting.cs" />
     <Compile Include="Converts\CoefConvert.cs" />
+    <Compile Include="Converts\MultiParamsConvert.cs" />
     <Compile Include="DxWindow.xaml.cs">
       <DependentUpon>DxWindow.xaml</DependentUpon>
     </Compile>
@@ -221,8 +222,8 @@
     <Compile Include="Redux\Services\SysService.cs" />
     <Compile Include="ViewModels\DMes\Tab\AlarmTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
+    <Compile Include="ViewModels\DMes\Tab\BomTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\CpmsTab.cs" />
-    <Compile Include="ViewModels\DMes\Tab\SchTaskViewModel.cs" />
     <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />
     <Compile Include="ViewModels\Sys\SelectableViewModel.cs" />
@@ -234,6 +235,10 @@
       <DependentUpon>GrafanaView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\DMes\GrafanaViewModel.cs" />
+    <Compile Include="Views\DMes\CraftBomView.xaml.cs">
+      <DependentUpon>CraftBomView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\DMes\CraftBomViewModel.cs" />
     <Compile Include="Views\Dx\LoadingView.xaml.cs">
       <DependentUpon>LoadingView.xaml</DependentUpon>
     </Compile>
@@ -276,6 +281,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DMes\GrafanaView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DMes\CraftBomView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -576,7 +585,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

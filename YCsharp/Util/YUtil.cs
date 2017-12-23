@@ -119,7 +119,7 @@ namespace YCsharp.Util {
         /// <param name="lParam"></param>
         /// <returns></returns>
         [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
         private const uint WM_SYSCOMMAND = 0x112;                    //系统消息
         private const int SC_MONITORPOWER = 0xF170;                  //关闭显示器的系统命令
         private static readonly IntPtr HWND_BROADCAST = new IntPtr(0xffff);//广播消息，所有顶级窗体都会接收
@@ -131,6 +131,8 @@ namespace YCsharp.Util {
         public static void CloseScreen() {
             if (GetOsVersion() != Windows10) {
                 SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, 2);
+            } else {
+                Console.WriteLine($"关闭显示器操作目前不支持 {Windows10}");
             }
         }
 
@@ -141,6 +143,8 @@ namespace YCsharp.Util {
         public static void OpenScreen() {
             if (GetOsVersion() != Windows10) {
                 SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+            } else {
+                Console.WriteLine($"打开显示器操作目前不支持 {Windows10}");
             }
         }
 

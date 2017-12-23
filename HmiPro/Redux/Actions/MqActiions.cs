@@ -22,9 +22,9 @@ namespace HmiPro.Redux.Actions {
 
         //监听来料信息
         public static readonly string SCAN_MATERIAL_ACCEPT = "[Mq] Scan Material Accept";
-        public static readonly string START_LISTEN_SCAN_MATERIAL = "[Mq] Start Scan Material";
-        public static readonly string START_LISTEN_SCAN_MATERIAL_SUCCESS = "[Mq] Start Scan Material Success";
-        public static readonly string START_LISTEN_SCAN_MATERIAL_FAILED = "[Mq] Start Scan Material Failed";
+        public static readonly string START_LISTEN_SCAN_MATERIAL = "[Mq] Start Listen Scan Material";
+        public static readonly string START_LISTEN_SCAN_MATERIAL_SUCCESS = "[Mq] Start Listen Scan Material Success";
+        public static readonly string START_LISTEN_SCAN_MATERIAL_FAILED = "[Mq] Start Listen Scan Material Failed";
 
         //上传采集参数
         public static readonly string UPLOAD_CPMS = "[Mq] Upload Cpms To Mq";

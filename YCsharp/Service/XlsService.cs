@@ -23,6 +23,9 @@ namespace YCsharp.Service {
         private bool disposed;
 
         public XlsService(string fileName) {
+            if (!File.Exists(fileName)) {
+                throw new Exception("文件不存在 " + fileName);
+            }
             this.fileName = fileName;
             disposed = false;
         }

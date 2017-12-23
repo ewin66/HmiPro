@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YCsharp.Service;
 using YCsharp.Util;
 
 namespace HmiPro.Config {
@@ -19,8 +21,24 @@ namespace HmiPro.Config {
             var config = YUtil.GetJsonObjectFromFile<Dictionary<string, object>>(path);
             YUtil.SetStaticField(typeof(HmiConfig), config);
             YUtil.ValidRequiredConfig(typeof(HmiConfig));
+            CraftBomZhsDict = new Dictionary<string, string>();
+
         }
 
+        /// <summary>
+        /// 用xls文件初始化排产任务中的工艺Bom汉化字典
+        /// </summary>
+        /// <param name="xlsPath"></param>
+        public static void InitCraftBomZhsDict(string xlsPath) {
+            using (var xlsOp = new XlsService(xlsPath)) {
+                var dt = xlsOp.ExcelToDataTable("bom", true);
+                foreach (DataRow row in dt.Rows) {
+                    if (!string.IsNullOrEmpty(row["comment"].ToString())) {
+                        CraftBomZhsDict[row["column"].ToString()] = row["comment"].ToString();
+                    }
+                }
+            }
+        }
 
         //启动界面
         [Required] public static readonly string StartView;
@@ -120,6 +138,10 @@ namespace HmiPro.Config {
         [Required] public static readonly string InfluxCpmDbName;
 
         [Required] public static readonly int CloseScreenInterval;
+        /// <summary>
+        /// Bom表汉化字典
+        /// </summary>
+        public static IDictionary<string, string> CraftBomZhsDict;
 
         //== 来自外部命令行和约定配置
         public static string SqlitePath;

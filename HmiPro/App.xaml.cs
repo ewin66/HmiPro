@@ -81,8 +81,7 @@ namespace HmiPro {
             MongoHelper.Init(HmiConfig.MongoConn);
             //配置InfluxDb保存实时数据
             InfluxDbHelper.Init($"http://{HmiConfig.InfluxDbIp}:8086", HmiConfig.InfluxCpmDbName);
-            //配置静态资源文件
-            AssetsHelper.Init(YUtil.GetAbsolutePath(@".\Profiles\Assets\"));
+
             //配置Redux
             ReduxIoc.Init();
             //初始化全局的Store
@@ -91,7 +90,7 @@ namespace HmiPro {
             Logger = LoggerHelper.CreateLogger("DMes App");
             //打印Redux系统的动作
             Store.Subscribe(logDebugActions);
-            Console.WriteLine("当前系统版本："+YUtil.GetOsVersion());
+            Console.WriteLine("当前操作系统：" + YUtil.GetOsVersion());
             Console.WriteLine("Welcom To DMes V3.0");
         }
 
@@ -127,7 +126,11 @@ namespace HmiPro {
         /// <param name="e"></param>
         void configInit(StartupEventArgs e) {
             Parser.Default.ParseArguments<CmdOptions>(e.Args).WithParsed(opt => {
-                opt.ConfigFolder = YUtil.GetAbsolutePath(opt.ConfigFolder);
+                opt.ProfilesFolder = YUtil.GetAbsolutePath(opt.ProfilesFolder);
+                var configFolder = opt.ProfilesFolder +"\\\\" +opt.Mode;
+                var assetsFolder = opt.ProfilesFolder + @"\Assets";
+                Console.WriteLine("当前运行模式：-" + opt.Mode);
+
                 YUtil.SetAppAutoStart(GetType().ToString(), bool.Parse(opt.AutoSatrt));
                 if (bool.Parse(opt.ShowConsole)) {
                     ConsoleHelper.Show();
@@ -137,14 +140,17 @@ namespace HmiPro {
                     DXSplashScreen.SetState(SplashState.Default);
                 }
                 if (Environment.UserName.ToLower().Contains("ychost")) {
-                    HmiConfig.Load(opt.ConfigFolder + @"\Hmi.Config.Office.json");
+                    HmiConfig.Load(configFolder + @"\Hmi.Config.Office.json");
                     Console.WriteLine("初始化配置文件: -Hmi.Config.Office.json");
                 } else {
-                    HmiConfig.Load(opt.ConfigFolder + @"\Hmi.Config.Shop.json");
+                    HmiConfig.Load(configFolder + @"\Hmi.Config.Shop.json");
                     Console.WriteLine("初始化配置文件: -Hmi.Config.Shop.json");
                 }
                 HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);
+                HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
 
+                //配置静态资源文件
+                AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
 
             }).WithNotParsed(err => {
                 throw new Exception("参数异常" + e);

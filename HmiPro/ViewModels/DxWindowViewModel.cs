@@ -148,7 +148,6 @@ namespace HmiPro.ViewModels {
         /// </summary>
         public void OnViewLoaded() {
             Navigate("HomeView");
-
         }
 
         /// <summary>
