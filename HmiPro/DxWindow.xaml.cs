@@ -25,10 +25,14 @@ namespace HmiPro {
             if (Environment.UserName.ToLower().Contains("ychost")) {
                 WindowStyle = WindowStyle.SingleBorderWindow;
                 WindowState = WindowState.Normal;
+                Width = 800;
+                Height = 600;
                 Topmost = false;
                 //生产电脑
             } else {
+                Topmost = false;
                 WindowStyle = WindowStyle.None;
+                WindowState = WindowState.Maximized;
             }
         }
     }

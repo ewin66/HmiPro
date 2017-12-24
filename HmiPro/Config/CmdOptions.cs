@@ -17,7 +17,7 @@ namespace HmiPro.Config {
         public string ShowConsole { get; set; }
         [Option(longName: "splash", Default = "true", HelpText = "显示 splash 画面")]
         public string ShowSplash { get; set; }
-        [Option(longName: "autostart", Default = "false", HelpText = "开机自启")]
+        [Option(longName: "autostart", Default = "true", HelpText = "开机自启")]
         public string AutoSatrt { get; set; }
         [Option(longName: "sqlite", Default = @"C:\HmiPro\Store.db", HelpText = "Sqlite 文件地址")]
         public string SqlitePath { get; set; }

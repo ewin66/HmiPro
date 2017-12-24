@@ -124,7 +124,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="smModels"></param>
         void smModelsHandler(string ip, List<SmModel> smModels) {
             if (!MachineConfig.IpToMachineCodeDict.TryGetValue(ip, out var code)) {
-                Logger.Error($"ip {ip} 未注册");
+                Logger.Debug($"ip {ip} 未注册", ConsoleColor.Red);
                 return;
             }
             App.Store.Dispatch(new CpmActions.CpmIpActivted(ip, DateTime.Now));
@@ -164,11 +164,11 @@ namespace HmiPro.Redux.Cores {
             //      一包参数的时间应该一致
             var pickTime = DateTime.Now;
 
-            void update(Cpm cpm) {
+            void updateDiff(Cpm cpm) {
                 cpm.PickTime = pickTime;
                 //直接更新，会更新界面的数据
-                if (OnlineCpmDict[machineCode].TryGetValue(cpm.Code, out var oldCpm)) {
-                    oldCpm.Update(cpm.Value, cpm.ValueType, pickTime);
+                if (OnlineCpmDict[machineCode].TryGetValue(cpm.Code, out var storeCpm)) {
+                    storeCpm.Update(cpm.Value, cpm.ValueType, pickTime);
                 } else {
                     Logger.Error($"参数 {cpm.Code} 未注册");
                 }
@@ -179,11 +179,11 @@ namespace HmiPro.Redux.Cores {
             (from c in cpms
              where (
                  c.Value != null
-                 && (!OnlineCpmDict[machineCode].ContainsKey(c.Code) ||
-                     OnlineCpmDict[machineCode][c.Code].ToString() != c.Value.ToString())
+                 && (!OnlineCpmDict[machineCode].ContainsKey(c.Code)
+                     || OnlineCpmDict[machineCode][c.Code].Value.ToString() != c.Value.ToString())
              )
              select c
-            ).ForEach(update);
+            ).ForEach(updateDiff);
             //一定要先派遣所有更新，再派遣部分更新
             //这样就保证了reducer里面数据的唯一性
             if (cpms.Count > 0) {
@@ -213,9 +213,12 @@ namespace HmiPro.Redux.Cores {
                 });
                 //速度发生变化
                 dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.OeeSpeed, cpm => {
+                    if (cpm == null) {
+                        return;
+                    }
                     App.Store.Dispatch(new CpmActions.SpeedDiffAccpet(machineCode, cpm));
                     //速度变化为0的事件
-                    if ((float)cpm.Value == 0) {
+                    if (cpm.GetFloatVal() == 0) {
                         App.Store.Dispatch(new CpmActions.SpeedDiffZeroAccept(machineCode));
                     }
                 });

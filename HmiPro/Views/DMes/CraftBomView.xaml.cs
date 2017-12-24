@@ -20,5 +20,10 @@ namespace HmiPro.Views.DMes {
         public CraftBomView() {
             InitializeComponent();
         }
+
+
+
+
+
     }
 }

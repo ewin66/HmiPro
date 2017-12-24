@@ -6,6 +6,7 @@
     </Style>
     <Style TargetType="TextBlock">
         <Setter Property="FontFamily" Value="微软雅黑"></Setter>
+        <Setter Property="FontSize" Value="15"></Setter>
     </Style>
     <Style TargetType="Run">
         <Setter Property="FontFamily" Value="微软雅黑"></Setter>

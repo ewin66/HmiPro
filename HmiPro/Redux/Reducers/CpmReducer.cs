@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Config;
+using HmiPro.Config.Models;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
@@ -43,6 +44,7 @@ namespace HmiPro.Redux.Reducers {
             /// 每个机台的记米值
             /// </summary>
             public IDictionary<string, float> NoteMeterDict;
+
             /// <summary>
             /// Ip最后活跃时间字典
             /// </summary>
@@ -99,18 +101,19 @@ namespace HmiPro.Redux.Reducers {
                             Name = info.Name,
                             Unit = info.Unit,
                             Code = info.Code,
-                            Value = "暂无"
+                            Value = "暂无",
+                            ValueType = SmParamType.Unknown
                         };
                     }
                     state.OnlineCpmsDict[machineCode] = cpmsDict;
                     state.MachineStateDict[machineCode] = new ObservableCollection<MachineState>();
                     state.SpeedCalcDerDict[machineCode] = YUtil.CreateExecDerFunc();
                     state.SpeedDict[machineCode] = new Cpm() { Value = 0f, ValueType = SmParamType.Signal };
+                    state.NoteMeterDict[machineCode] = 0f;
                 }
                 return state;
             }).When<CpmActions.StartServerSuccess>((state, action) => {
                 return state;
-
             }).When<CpmActions.StartServerFailed>((state, action) => {
                 return state;
 
@@ -136,8 +139,9 @@ namespace HmiPro.Redux.Reducers {
                 state.SparkDiffDict[action.MachineCode] = action.SparkCpm;
                 return state;
             }).When<CpmActions.SpeedDiffAccpet>((state, action) => {
+
                 state.MachineCode = action.MachineCode;
-                var speed = (float)action.SpeedCpm.Value;
+                var speed = (float)action.SpeedCpm.GetFloatVal();
                 var speedDer = state.SpeedCalcDerDict[state.MachineCode](speed);
                 //更新速度表
                 state.SpeedDict[state.MachineCode] = action.SpeedCpm;
@@ -158,18 +162,30 @@ namespace HmiPro.Redux.Reducers {
                             Time = action.SpeedCpm.PickTime
                         };
                     }
-                    var lastMachineState = machineStates.LastOrDefault();
-                    if (lastMachineState.StatePoint == newMachineSatte.StatePoint) {
-                        state.Logger.Error($"机台 {state.MachineCode} 状态分析有误,两次状态一样均为：{lastMachineState.StatePoint}");
-                    } else {
-                        machineStates.Add(newMachineSatte);
+                    //初始化
+                    if (machineStates.Count == 0) {
+                        if (newMachineSatte != null) {
+                            machineStates.Add(newMachineSatte);
+                        }
+                        return state;
                     }
 
-                    var workTime = YUtil.GetWorkTime(8, 20);
-                    //删除上一班的机台状态数据
-                    var removeList = machineStates.Where(m => m.Time < workTime).ToList();
-                    foreach (var item in removeList) {
-                        machineStates.Remove(item);
+                    try {
+                        var lastMachineState = machineStates.Last();
+                        if (lastMachineState.StatePoint == newMachineSatte.StatePoint) {
+                            state.Logger.Error($"机台 {state.MachineCode} 状态分析有误,两次状态一样均为：{lastMachineState.StatePoint}");
+                        } else {
+                            machineStates.Add(newMachineSatte);
+                        }
+
+                        var workTime = YUtil.GetWorkTime(8, 20);
+                        //删除上一班的机台状态数据
+                        var removeList = machineStates.Where(m => m.Time < workTime).ToList();
+                        foreach (var item in removeList) {
+                            machineStates.Remove(item);
+                        }
+                    } catch (Exception e) {
+                        state.Logger.Error($"机台 {state.MachineCode} 状态分析异常", e);
                     }
                 }
                 return state;

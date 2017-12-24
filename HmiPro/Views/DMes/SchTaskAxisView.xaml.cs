@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using HmiPro.Redux.Models;
 
 namespace HmiPro.Views.DMes {
     /// <summary>
@@ -20,5 +21,7 @@ namespace HmiPro.Views.DMes {
         public SchTaskAxisView() {
             InitializeComponent();
         }
+
+
     }
 }

@@ -4,11 +4,12 @@ using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.POCO;
 using HmiPro.Config;
+using HmiPro.ViewModels.DMes.Tab;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels.DMes {
     [POCOViewModel]
-    public class CraftBomViewModel{
+    public class CraftBomViewModel:BaseTab{
         public virtual string MachineCode { get; set; }
         public virtual string WorkCode { get; set; }
         public virtual INavigationService NavigationSerivce => null;

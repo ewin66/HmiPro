@@ -22,13 +22,13 @@ namespace YCsharp {
                 args = new string[] { "update-app" };
             }
             var cmd = args[0];
-            string[] machineName = new[] { "DE", "DA", "VB", "ED", "RC", "SI" };
-            string[] netSegs = new[] { "110", "200", "140", "180", "150", "120" };
+            string[] machineName = new[] { "DE", "DA",  "VB",  "ED",  "RC_RF", "SI", "VA",  "DM", "SB" };
+            string[] netSegs = new[] {    "110", "200", "140", "180", "150",  "120", "139", "202", "191" };
             int port = 8899;
             int i = 0;
             foreach (var ns in netSegs) {
                 var url = $"http://192.168.{ns}.66:{port}";
-                //KsUpdateHttpGet(url, cmd, machineName[i++]);
+                KsUpdateHttpGet(url, cmd, machineName[i++]);
             }
             KsUpdateHttpGet("http://192.168.0.2:8899", "update-app", "da");
             YUtil.ExitWithQ();

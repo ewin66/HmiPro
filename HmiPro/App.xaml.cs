@@ -56,6 +56,10 @@ namespace HmiPro {
             CpmActions.CPMS_UPDATED_DIFF,
             CpmActions.CPMS_IP_ACTIVED,
             CpmActions.SPEED_ACCEPT,
+            CpmActions.NOTE_METER_ACCEPT,
+            DbActions.UPLOAD_CPMS_INFLUXDB,
+            DbActions.UPLOAD_CPMS_INFLUXDB_SUCCESS,
+            AlarmActions.CHECK_CPM_BOM_ALARM,
             CpmActions.NOTE_METER_ACCEPT
         };
 
@@ -101,17 +105,29 @@ namespace HmiPro {
         /// <param name="action"></param>
         void logDebugActions(AppState state, IAction action) {
             if (action.Type() != null) {
+                ConsoleColor color = ConsoleColor.Green;
+                if (action.Type().Contains("[Mq]")) {
+                    color = ConsoleColor.Yellow;
+                } else if (action.Type().Contains("[Cpm")) {
+                    color = ConsoleColor.White;
+                } else if (action.Type().Contains("[Db]")) {
+                    color = ConsoleColor.Magenta;
+                } else if (action.Type().Contains("[Alarm]")) {
+                    color = ConsoleColor.Red;
+                } else if (action.Type().Contains("[Sys]")) {
+                    color = ConsoleColor.Green;
+                }
                 //需要减缓频率的消息，没隔 MinGapSec 秒输出一次
                 if (MuffleLogDict.TryGetValue(action.Type(), out var muffle)) {
                     muffle.Freq += 1;
                     if ((DateTime.Now - muffle.LastLogTime).TotalSeconds >= muffle.MinGapSec) {
                         Logger.Debug($"Redux Muffle Action: {action.Type()}  Occur {muffle.Freq} In {muffle.MinGapSec} Seconds");
+                        muffle.LastLogTime = DateTime.Now;
                         muffle.Freq = 0;
                     }
-                    muffle.LastLogTime = DateTime.Now;
                 } else {
                     //普通动作直接输出
-                    Logger.Debug("Redux Current Action: " + action.Type());
+                    Logger.Debug("Redux Current Action: " + action.Type(), color);
                 }
                 AppState.ExectedActions[state.Type] = DateTime.Now;
             }
@@ -127,10 +143,8 @@ namespace HmiPro {
         void configInit(StartupEventArgs e) {
             Parser.Default.ParseArguments<CmdOptions>(e.Args).WithParsed(opt => {
                 opt.ProfilesFolder = YUtil.GetAbsolutePath(opt.ProfilesFolder);
-                var configFolder = opt.ProfilesFolder +"\\\\" +opt.Mode;
+                var configFolder = opt.ProfilesFolder + "\\\\" + opt.Mode;
                 var assetsFolder = opt.ProfilesFolder + @"\Assets";
-                Console.WriteLine("当前运行模式：-" + opt.Mode);
-
                 YUtil.SetAppAutoStart(GetType().ToString(), bool.Parse(opt.AutoSatrt));
                 if (bool.Parse(opt.ShowConsole)) {
                     ConsoleHelper.Show();
@@ -149,6 +163,8 @@ namespace HmiPro {
                 HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);
                 HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
 
+                Console.WriteLine("当前运行模式：-" + opt.Mode);
+                Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
                 //配置静态资源文件
                 AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
 

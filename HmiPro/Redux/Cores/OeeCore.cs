@@ -56,7 +56,7 @@ namespace HmiPro.Redux.Cores {
             if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedPlc) {
                 return CalcOeeSpeedEffByPlc(machineCode);
             } else if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedMq) {
-                return CalcOeeSpeedEffByPlc(machineCode);
+                return CalcOeeSpeedEffByMq(machineCode);
             }
             return null;
         }

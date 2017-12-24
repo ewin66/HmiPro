@@ -72,6 +72,22 @@ namespace YCsharp.Util {
             };
         }
 
+        /// <summary>
+        /// 产生指定范围的随机整数
+        /// </summary>
+        /// <param name="begin"></param>
+        /// <param name="end"></param>
+        /// <returns></returns>
+        public static Func<int> GetRandomIntGen(int begin, int end) {
+            int i = 0;
+            return () => {
+                Random r = new Random(int.Parse(DateTime.Now.ToString("HHmmssfff")) + i++);
+                return r.Next(begin, end);
+            };
+        }
+
+
+
 
         /// <summary>
         /// 控制台专用

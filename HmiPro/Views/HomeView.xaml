@@ -27,7 +27,7 @@
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
     </dxmvvm:Interaction.Behaviors>
 
-    <dxwui:PageAdornerControl  Padding="-32,-30,-32,-42" ShowBackButton="False" Header="DMes 系统 v3.0" >
+    <dxwui:PageAdornerControl  Padding="-32,-30,-32,-42" ShowBackButton="False" Header="DMes 系统" >
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -35,7 +35,7 @@
             </Grid.RowDefinitions>
 
             <dxlc:TileLayoutControl Grid.Row="1" Padding="32,50,30,10" >
-                <dxlc:Tile Header="生产管理" Size="ExtraLarge" Style="{StaticResource HorizontalTile}" Background="#FF54AF0E"  Command="{Binding NavigateCommand}" CommandParameter="DMesManuView">
+                <dxlc:Tile Header="生产管理" Style="{StaticResource HorizontalTile}" Background="#FF54AF0E"  Command="{Binding NavigateCommand}" CommandParameter="DMesManuView">
                     <BitmapImage UriSource="{Binding Assets.IconMonitor}" />
                 </dxlc:Tile>
                 <dxlc:Tile Header="呼叫管理" Style="{StaticResource HorizontalTile}" Background="#00b8d4"  Command="{Binding NavigateCommand}" CommandParameter="CallView">
@@ -50,10 +50,10 @@
                 <!--dxlc:Tile Header="质量检测"  Style="{StaticResource HorizontalTile}" Background="#009608"  Command="{Binding NavigateCommand}" CommandParameter="McQualityCheckView" >
                     <BitmapImage UriSource="{Binding Assets.IconQualityControl}" />
                 </>-->
-                <dxlc:Tile Header="实时曲线"  Style="{StaticResource HorizontalTile}" Background="#509688"  Command="{Binding NavigateCommand}" CommandParameter="OnlineGrafana">
+                <dxlc:Tile Header="实时曲线"  Style="{StaticResource HorizontalTile}" Background="#509688"  Command="{Binding NavigateCommand}" CommandParameter="GrafanaView">
                     <BitmapImage UriSource="{Binding Assets.IconStatsLines}" />
                 </dxlc:Tile>
-                <dxlc:Tile Header="测试页面"  Style="{StaticResource HorizontalTile}" Size="ExtraLarge" Background="#087688"  Command="{Binding NavigateCommand}" CommandParameter="TestView">
+                <dxlc:Tile Header="测试页面"  Style="{StaticResource HorizontalTile}"  Background="#087688"  Command="{Binding NavigateCommand}" CommandParameter="TestView">
                     <BitmapImage UriSource="{Binding Assets.IconTest}" />
                 </dxlc:Tile>
             </dxlc:TileLayoutControl>

@@ -10,7 +10,7 @@ using HmiPro.Annotations;
 
 namespace HmiPro.ViewModels.DMes.Tab {
 
-    public abstract class BaseTab : INotifyPropertyChanged {
+    public abstract class BaseTab  {
 
         private string header;
 

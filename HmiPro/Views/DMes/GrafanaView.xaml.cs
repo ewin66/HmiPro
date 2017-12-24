@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using HmiPro.Config;
 
 namespace HmiPro.Views.DMes {
     /// <summary>
@@ -19,6 +20,15 @@ namespace HmiPro.Views.DMes {
     public partial class GrafanaView : UserControl {
         public GrafanaView() {
             InitializeComponent();
+            var preUrl = $"http://{HmiConfig.InfluxDbIp}:3000";
+            //刷新频率为1s
+            var refresh = "1000ms";
+            //var dbUpperName = HmiDynamicConfig.DbName.ToUpper();
+            var viewName = MachineConfig.AllMachineName;
+            var placeholder = "machine_placeholder";
+            var suffixUrl = $"/dashboard/db/{placeholder}?refresh={refresh}&orgId=1";
+            suffixUrl = suffixUrl.Replace(placeholder, viewName);
+            this.WebBrowser.Navigate(preUrl + suffixUrl);
         }
     }
 }

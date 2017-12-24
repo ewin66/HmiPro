@@ -5,13 +5,14 @@ using DevExpress.Mvvm;
 using DevExpress.Mvvm.POCO;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
+using HmiPro.ViewModels.DMes.Tab;
 
 namespace HmiPro.ViewModels.DMes {
     /// <summary>
     /// 任务列表，含每轴的计划
     /// </summary>
     [POCOViewModel]
-    public class SchTaskAxisViewModel {
+    public class SchTaskAxisViewModel:BaseTab {
 
         public virtual string MachineCode { get; set; }
         public virtual string WorkCode { get; set; }

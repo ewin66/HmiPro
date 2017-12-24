@@ -63,7 +63,7 @@ namespace HmiPro.Redux.Models {
         }
 
         //采集时间
-        public DateTime PickTime { get; set; }
+        public DateTime PickTime { get; set; } = DateTime.Now;
         //采集时间戳，毫秒级别
         public Int64 PickTimeStampMs => YUtil.GetUtcTimestampMs(PickTime);
         //参数名字

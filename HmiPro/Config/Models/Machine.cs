@@ -41,7 +41,7 @@ namespace HmiPro.Config.Models {
         /// <param name="sheetName"></param>
         public void InitCodeAndIp(string path, string sheetName) {
             var propDict = xlsToMachine(path, sheetName);
-            Code = propDict["MachineCode"].ToString();
+            //Code = propDict["MachineCode"].ToString();
             CpmIps = propDict["CpmIps"].ToString().Split('|');
             if (propDict.TryGetValue("OeeSpeedType", out var type)) {
                 var intVal = int.Parse(type.ToString());

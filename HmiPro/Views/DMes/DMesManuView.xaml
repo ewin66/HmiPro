@@ -15,6 +15,8 @@
              xmlns:mqModels="clr-namespace:HmiPro.Redux.Models"
              xmlns:generic="clr-namespace:System.Collections.Generic;assembly=mscorlib"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:controls="clr-namespace:HmiPro.Controls"
+             xmlns:dMes1="clr-namespace:HmiPro.Views.DMes"
              mc:Ignorable="d"
              DataContext="{dxmvvm:ViewModelSource Type=dMes:DMesManuViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -27,7 +29,7 @@
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
         <dxmvvm:EventToCommand EventName="ContentRendered" Command="{Binding OnContentRenderedCommand}"/>
     </dxmvvm:Interaction.Behaviors>
-    <dxwui:PageAdornerControl  Header="DMes 系统 v3.0.0" ShowBackButton="True" BackCommand="{Binding GoBackCommand}">
+    <dxwui:PageAdornerControl  Header="DMes 系统" ShowBackButton="True" BackCommand="{Binding GoBackCommand}">
         <Grid Height="Auto" x:Name="TopGird">
             <Grid.Resources>
                 <DataTemplate x:Key="TabHeader">
@@ -41,148 +43,43 @@
                         <dxlc:FlowLayoutControl ItemsSource="{Binding Path=Cpms}" x:Name="CtrlInstParam" Orientation="Horizontal">
                             <dxlc:FlowLayoutControl.ItemTemplate>
                                 <DataTemplate>
-                                    <materialDesign:Card
-                                        Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type dxlc:FlowLayoutControl}},Path=ActualWidth,
-                                Converter={StaticResource ConverterCoef},ConverterParameter=0.23}"
-                                                                            Margin="4,4,0,0"
-                                        Padding="8"
-                                        Background="{DynamicResource MaterialDesignDarkBackground}"
-                                        Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
-                                        UniformCornerRadius="6">
-                                        <StackPanel>
-                                            <TextBlock  TextWrapping="Wrap"><Run Text="{Binding Path=Name}"/>: <Run Foreground="Yellow" Text="{Binding Path=Value}"></Run></TextBlock>
-                                        </StackPanel>
-                                    </materialDesign:Card>
+                                    <TextBlock  Style="{StaticResource CpmInstantName}" Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type dxlc:FlowLayoutControl}},Path=ActualWidth,
+                                Converter={StaticResource ConverterCoef},ConverterParameter=0.23
+                                }">
+                                    <Run Text="{Binding Path=Name}"/>
+                                    <Run Text=":" />
+                                    <Run  Text="{Binding Path=Value}"  Style="{StaticResource CpmInstantValue}"/>
+                                    <Run Text="{Binding Path=Unit}"/>
+                                    </TextBlock>
                                 </DataTemplate>
                             </dxlc:FlowLayoutControl.ItemTemplate>
                         </dxlc:FlowLayoutControl>
                     </DataTemplate>
                     <!--任务页面-->
                     <DataTemplate DataType="{x:Type Model:SchTaskTab}">
-                        <dxlc:FlowLayoutControl BreakFlowToFit="False" x:Name="CpmFlowLayout" Orientation="Horizontal" ItemsSource="{Binding Path=MqSchTasks}" >
-                            <dxlc:FlowLayoutControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type mqModels:MqSchTask}">
-                                   <materialDesign:Flipper   Style="{StaticResource MaterialDesignCardFlipper}">
-                                        <materialDesign:Flipper.FrontContent >
-                                            <Grid Margin="8,8,8,8" >
-                                                <materialDesign:Card   Background="{DynamicResource PrimaryHueDarkBrush}" Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}">
-                                                    <StackPanel >
-                                                        <TextBlock Margin="16,16,12,8" FontSize="22">工单：<Run Text="{Binding Path=workcode}"/></TextBlock>
-                                                        <ListBox ItemsSource="{Binding Path=axisParam}">
-                                                            <ListBox.ItemTemplate>
-                                                                <DataTemplate DataType="{x:Type mqModels:MqTaskAxis}">
-                                                                    <CheckBox Margin="16,4,16,0"  IsChecked="{Binding Path=IsCompleted}" Style="{StaticResource MaterialDesignUserForegroundCheckBox}" Content="{Binding Path=axiscode}"/>
-                                                                </DataTemplate>
-                                                            </ListBox.ItemTemplate>
-                                                        </ListBox>
-                                                        <TextBlock  Margin="16,16,12,8">开始：<Run Text="{Binding Path=PsTimeStr,Mode=OneWay}"/></TextBlock>
-                                                        <TextBlock  Margin="16,16,12,8">结束：<Run Text="{Binding Path=PdTimeStr,Mode=OneWay}"/></TextBlock>
-                                                        <Separator  Margin="16,16,12,8" FontSize="22"  Style="{StaticResource MaterialDesignLightSeparator}" />
-                                                        <StackPanel
-                                                            HorizontalAlignment="Right"
-                                                            Orientation="Horizontal">
-                                                            <Button
-                                                        Width="30"
-                                                        Padding="2,0,0,0"
-                                                        HorizontalAlignment="Right"
-                                                        materialDesign:RippleAssist.IsCentered="True"
-                                                        Content="详细"
-                                                        Command="{x:Static materialDesign:Flipper.FlipCommand}"
-                                                        Style="{StaticResource MaterialDesignToolForegroundButton}"/>
-                                                            <Button Content="Bom" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl},Path=DataContext.NavigateToBomViewCommand}">
-                                                                <Button.CommandParameter >
-                                                                    <MultiBinding Converter="{StaticResource MultiParamsConvert}">
-                                                                        <Binding Path="maccode"></Binding>
-                                                                        <Binding Path="workcode"></Binding>
-                                                                    </MultiBinding>
-                                                                </Button.CommandParameter>
-                                                            </Button>
-                                                            <Button Content="Detail" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl},Path=DataContext.NavigateToTaskAxisViewCommand}">
-                                                                <Button.CommandParameter >
-                                                                    <MultiBinding Converter="{StaticResource MultiParamsConvert}">
-                                                                        <Binding Path="maccode"></Binding>
-                                                                        <Binding Path="workcode"></Binding>
-                                                                    </MultiBinding>
-                                                                </Button.CommandParameter>
-                                                            </Button>
-                                                        </StackPanel>
-                                                    </StackPanel>
-                                                </materialDesign:Card>
-                                            </Grid>
-                                        </materialDesign:Flipper.FrontContent>
-                                        <materialDesign:Flipper.BackContent>
-                                            <Grid Width="800"	Height="Auto" >
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="30"  />
-                                                    <RowDefinition Height="600"/>
-                                                </Grid.RowDefinitions>
-                                                <materialDesign:ColorZone Mode="PrimaryMid" Grid.Row="0">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Button HorizontalAlignment="Left"
-                                                            Command="{x:Static materialDesign:Flipper.FlipCommand}"
-                                                            Style="{StaticResource MaterialDesignToolForegroundButton}">
-                                                            <materialDesign:PackIcon HorizontalAlignment="Right" Kind="ArrowLeft" />
-                                                        </Button>
-                                                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center"><Run Text="返回"/></TextBlock>
-                                                    </StackPanel>
-                                                </materialDesign:ColorZone>
-                                                <dxg:GridControl Grid.Row="1" ItemsSource="{Binding Path=axisParam}">
-                                                    <dxg:GridControl.View>
-                                                        <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
-                                                    </dxg:GridControl.View>
-                                                    <dxg:GridControl.Columns>
-                                                        <dxg:GridColumn Width="3*" Header="轴号" FieldName="axiscode"/>
-                                                        <dxg:GridColumn Width="*" Header="长度" FieldName="length"/>
-                                                        <dxg:GridColumn Width="*" Header="颜色" FieldName="color" />
-                                                        <dxg:GridColumn Width="*" Header="完成率" FieldName="CompletedRate"/>
-                                                        <dxg:GridColumn Width="2*" Header="状态" FieldName="State"/>
-                                                        <dxg:GridColumn Header="操作" FieldName="MachineCode_Axis_IsStarted">
-                                                            <dxg:GridColumn.DisplayTemplate>
-                                                                <ControlTemplate>
-                                                                    <Grid >
-                                                                        <Grid.ColumnDefinitions>
-                                                                            <ColumnDefinition/>
-                                                                            <ColumnDefinition/>
-                                                                        </Grid.ColumnDefinitions>
-                                                                        <Button Grid.Column="0" 
-                                                                                DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}, Path=DataContext}"
-                                                                                Command="{Binding StartTaskAxisDoingCommand}"
-                                                                                CommandParameter="{Binding Path=EditValue, RelativeSource={RelativeSource TemplatedParent}}"
-                                                                                >开始</Button>
-                                                                    </Grid>
-                                                                </ControlTemplate>
-                                                            </dxg:GridColumn.DisplayTemplate>
-                                                        </dxg:GridColumn>
-                                                    </dxg:GridControl.Columns>
-                                                </dxg:GridControl>
-                                            </Grid>
-                                        </materialDesign:Flipper.BackContent>
-                                    </materialDesign:Flipper>
-                                </DataTemplate>
-                            </dxlc:FlowLayoutControl.ItemTemplate>
-                        </dxlc:FlowLayoutControl>
-                    </DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border BorderBrush="#FF515151" BorderThickness="1" Padding="0">
+                                <controls:TileLayoutControlExt ItemsSource="{Binding MqSchTasks}" Padding="12" BreakFlowToFit="False" ItemTemplate="{StaticResource SchTaskTileTemplate}" SelectedItem="{Binding SelectedTask, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AllowItemMoving="False"/>
+                            </Border>
+                            <Grid Grid.Column="1">
+                                <dx:DXTabControl ItemsSource="{Binding Path=MqSchTaskDetails}" ItemHeaderTemplate="{StaticResource TabHeader}" >
+                                    <dx:DXTabControl.Resources>
+                                        <DataTemplate DataType="{x:Type dMes:SchTaskAxisViewModel}">
+                                            <dMes1:SchTaskAxisView DataContext="{Binding Path=.}"/>
+                                        </DataTemplate>
+                                        <DataTemplate DataType="{x:Type dMes:CraftBomViewModel}">
+                                            <dMes1:CraftBomView DataContext="{Binding Path=.}"/>
+                                        </DataTemplate>
+                                    </dx:DXTabControl.Resources>
+                                </dx:DXTabControl>
 
-                    <DataTemplate DataType="{x:Type Model:BomTab}">
-                        <dxlc:FlowLayoutControl ItemsSource="{Binding Path=Boms}"  Orientation="Vertical"  ShowLayerSeparators="True">
-                            <dxlc:FlowLayoutControl.ItemTemplate>
-                                <DataTemplate>
-                                    <dxlc:FlowLayoutControl ItemsSource="{Binding Path=TaskBoms}" Orientation="Vertical" BreakFlowToFit="True" >
-                                        <dxlc:FlowLayoutControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock  Style="{StaticResource CpmInstantName}" MinWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Grid}},Path=ActualWidth,
-                                Converter={StaticResource ConverterCoef},ConverterParameter=0.30
-                                }">
-                                                    <Run Text="{Binding Path=Key.Name,Mode=OneWay}"/>
-                                                    <Run Text=":" />
-                                                    <Run  Text="{Binding Path=Value,Mode=OneWay}"  Style="{StaticResource CpmInstantValue}"/>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </dxlc:FlowLayoutControl.ItemTemplate>
-                                    </dxlc:FlowLayoutControl>
-                                </DataTemplate>
-                            </dxlc:FlowLayoutControl.ItemTemplate>
-                        </dxlc:FlowLayoutControl>
+
+                            </Grid>
+                        </Grid>
                     </DataTemplate>
                     <!--报警页面-->
                     <DataTemplate DataType="{x:Type Model:AlarmTab}">

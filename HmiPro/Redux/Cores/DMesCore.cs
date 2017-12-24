@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using HmiPro.Annotations;
 using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Mocks;
@@ -107,7 +108,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void whenSpeedDiffZeroAccept(AppState state, IAction action) {
-            var speedAction = (CpmActions.SpeedDiffAccpet)action;
+            var speedAction = (CpmActions.SpeedDiffZeroAccept)action;
             var machineCode = speedAction.MachineCode;
             lock (SchTaskDoingDict[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
@@ -128,8 +129,9 @@ namespace HmiPro.Redux.Cores {
         /// 推送数据到influxDb
         /// </summary>
         void whenCpmsUpdateAll(AppState state, IAction action) {
-            var machineCode = state.CpmState.MachineCode;
-            var updatedCpms = state.CpmState.UpdatedCpmsAllDict[machineCode];
+            var cpmAction = (CpmActions.CpmUpdatedAll)action;
+            var machineCode = cpmAction.MachineCode;
+            var updatedCpms = cpmAction.Cpms;
             App.Store.Dispatch(dbEffects.UploadCpmsInfluxDb(new DbActions.UploadCpmsInfluxDb(machineCode, updatedCpms)));
         }
 
@@ -314,6 +316,7 @@ namespace HmiPro.Redux.Cores {
                     for (var i = 0; i < st.axisParam.Count; i++) {
                         var axis = st.axisParam[i];
                         if (axis.axiscode == axisCode) {
+                            //重复启动任务
                             if (axis.IsStarted == true) {
                                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                                     Title = "请勿重复启动任务",
@@ -323,6 +326,7 @@ namespace HmiPro.Redux.Cores {
                                 return;
                             }
                             var taskDoing = SchTaskDoingDict[machineCode];
+                            //其它任务在运行中
                             if (taskDoing.IsStarted) {
                                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                                     Title = $"尚有任务未完成，请先完成任务再启动新任务",
@@ -331,19 +335,17 @@ namespace HmiPro.Redux.Cores {
                                 App.Store.Dispatch(new SimpleAction(DMesActions.START_SCH_TASK_AXIS_FAILED));
                                 return;
                             }
-                            taskDoing.MqSchTask = st;
-                            taskDoing.MqSchTaskId = st.id;
-                            taskDoing.MqSchAxisIndex = i;
-                            taskDoing.MqSchAxis = axis;
-                            taskDoing.IsStarted = true;
-                            taskDoing.Step = st.step;
-                            taskDoing.WorkCode = st.workcode;
-                            taskDoing.MeterPlan = axis.length;
-                            taskDoing.StartTime = DateTime.Now;
-                            taskDoing.CalcAvgSpeed = YUtil.CreateExecAvgFunc();
+                            //记米没有清零
+                            var noteMeter = App.Store.GetState().CpmState.NoteMeterDict[machineCode];
+                            if ((int)noteMeter != 0) {
+                                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                                    Title = $"请先清零记米，再开始任务",
+                                    Content = $"机台 {machineCode} 记米没有清零，请先清零"
+                                }));
+                                return;
+                            }
+                            setSchTaskDoing(taskDoing, st, axis, i);
                             hasFound = true;
-                            axis.IsStarted = true;
-                            axis.State = MqSchTaskAxisState.Doing;
                             break;
                         }
                     }
@@ -352,6 +354,8 @@ namespace HmiPro.Redux.Cores {
                     }
                 }
                 if (hasFound) {
+                    //设置其它任务不能启动
+                    SetOtherTaskAxisCanStart(machineCode, axisCode, false);
                     App.Store.Dispatch(new SimpleAction(DMesActions.START_SCH_TASK_AXIS_SUCCESS));
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "启动任务成功",
@@ -366,6 +370,46 @@ namespace HmiPro.Redux.Cores {
                 }
             }
         }
+
+        /// <summary>
+        /// 给当前进行的任务赋值，通过排产任务转换成进行任务
+        /// </summary>
+        /// <param name="taskDoing"></param>
+        /// <param name="st"></param>
+        /// <param name="axis"></param>
+        /// <param name="axisIndex"></param>
+        void setSchTaskDoing([NotNull]SchTaskDoing taskDoing, [NotNull] MqSchTask st, [NotNull] MqTaskAxis axis, int axisIndex) {
+            taskDoing.MqSchTask = st;
+            taskDoing.MqSchTaskId = st.id;
+            taskDoing.MqSchAxisIndex = axisIndex;
+            taskDoing.MqSchAxis = axis;
+            taskDoing.IsStarted = true;
+            taskDoing.Step = st.step;
+            taskDoing.WorkCode = st.workcode;
+            taskDoing.MeterPlan = axis.length;
+            taskDoing.StartTime = DateTime.Now;
+            taskDoing.CalcAvgSpeed = YUtil.CreateExecAvgFunc();
+            axis.IsStarted = true;
+            axis.State = MqSchTaskAxisState.Doing;
+        }
+
+        /// <summary>
+        /// 设置其它轴的任务不能被启动
+        /// </summary>
+        /// <param name="machineCode">任务机台编码</param>
+        /// <param name="startAxisCode">当前启动的轴任务</param>
+        /// <param name="canStart">其它轴任务能否启动</param>
+        public void SetOtherTaskAxisCanStart(string machineCode, string startAxisCode, bool canStart) {
+            var tasks = MqSchTasksDict[machineCode];
+            foreach (var task in tasks) {
+                foreach (var axis in task.axisParam) {
+                    if (axis.axiscode != startAxisCode) {
+                        axis.CanStart = canStart;
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// 调试一轴结束
@@ -404,7 +448,14 @@ namespace HmiPro.Redux.Cores {
                     Title = $"机台 {machineCode} 达成任务",
                     Content = $"轴号 {axisCode} 任务达成"
                 }));
+
+                //标志位改变
                 taskDoing.MqSchAxis.State = MqSchTaskAxisState.Completed;
+                taskDoing.MqSchAxis.IsCompleted = true;
+                SetOtherTaskAxisCanStart(machineCode, axisCode, true);
+                //更新当前任务完成进度
+                var completedAxis = taskDoing.MqSchTask.axisParam.Count(a => a.IsCompleted == true);
+                taskDoing.CompleteRate = completedAxis / taskDoing.MqSchTask.axisParam.Count;
 
                 uManu = new MqUploadManu() {
                     actualBeginTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
@@ -429,11 +480,7 @@ namespace HmiPro.Redux.Cores {
             var uploadResult = await App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActiions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
             if (uploadResult) {
                 //一个工单任务完成
-                bool allCompleted = true;
-                foreach (var axis in taskDoing.MqSchTask.axisParam) {
-                    allCompleted = axis.IsCompleted;
-                }
-                if (allCompleted) {
+                if (taskDoing.CompleteRate >= 1) {
                     CompleteOneSchTask(machineCode, taskDoing.WorkCode);
                 }
                 //上传落轴数据失败，对其进行缓存

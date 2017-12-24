@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Redux.Models;
+using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Util;
 
 namespace HmiPro.Helpers {
@@ -92,7 +93,7 @@ namespace HmiPro.Helpers {
                     return result;
                 }
             } catch (WebException ex) {
-                return Encoding.UTF8.GetBytes(ex.ToString());
+                return Encoding.UTF8.GetBytes(ex.ToString() + "\n" + "postData:" + postData);
             }
         }
 
@@ -104,6 +105,9 @@ namespace HmiPro.Helpers {
         public bool WriteCpms(string measurement, params Cpm[] cpms) {
             List<string> paramList = new List<string>();
             foreach (var cpm in cpms) {
+                if (cpm.ValueType != SmParamType.Signal) {
+                    continue;
+                }
                 var timeStamp = "";
                 //fixed:不能插入时间
                 timeStamp = YUtil.GetUtcTimestampMs(cpm.PickTime) + "000000";

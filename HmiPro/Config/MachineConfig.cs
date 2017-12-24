@@ -38,6 +38,7 @@ namespace HmiPro.Config {
                 var machine = new Machine();
                 machine.InitCpmDict(path, $"{code}_采集参数");
                 machine.InitCodeAndIp(path, $"{code}_机台属性");
+                machine.Code = code;
                 MachineDict[code] = machine;
                 foreach (var ip in machine.CpmIps) {
                     IpToMachineCodeDict[ip] = code;

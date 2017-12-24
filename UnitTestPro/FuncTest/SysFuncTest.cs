@@ -116,5 +116,13 @@ namespace UnitTestPro.FuncTest {
             Console.WriteLine(zeroF);
         }
 
+        [TestMethod]
+        public void ReplaceTest()
+        {
+            string str = "/////fsfsf";
+            var rpStr = str.Replace("/", "");
+            Assert.AreEqual(rpStr,"fsfsf");
+        }
+
     }
 }

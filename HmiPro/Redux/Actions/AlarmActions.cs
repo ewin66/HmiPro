@@ -54,7 +54,7 @@ namespace HmiPro.Redux.Actions {
 
 
         public struct CloseAlarmLights : IAction {
-            public string Type() => OPEN_ALARM_LIGHTS;
+            public string Type() =>CLOSE_ALARM_LIGHTS;
             public string MachineCode;
 
             public CloseAlarmLights(string machineCode) {

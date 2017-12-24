@@ -74,8 +74,9 @@ namespace HmiPro.ViewModels {
             UnityIocService.ResolveDepend<AlarmCore>().Init();
             UnityIocService.ResolveDepend<CpmCore>().Init();
             await UnityIocService.ResolveDepend<SchCore>().Init();
-
-            dispatchMock();
+            if (Environment.UserName.ToLower().Contains("ychost")) {
+                //dispatchMock();
+            }
 
             //启动Http解析系统
             var isHttpSystem = await App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
@@ -111,9 +112,9 @@ namespace HmiPro.ViewModels {
         void dispatchMock() {
             App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "进入模拟状态", Content = $"产生的数据都是模拟的" }));
             int code = 0;
-            YUtil.SetTimeout(2000, () => {
-                dispatchMockSchTask(code);
-            });
+            YUtil.SetInterval(2000, () => {
+                dispatchMockSchTask(code++);
+            }, 2)();
         }
 
         /// <summary>
@@ -147,10 +148,12 @@ namespace HmiPro.ViewModels {
         void dispatchMockSchTask(int id = 0) {
             var mockEffects = UnityIocService.ResolveDepend<MockEffects>();
             var task = YUtil.GetJsonObjectFromFile<MqSchTask>(AssetsHelper.GetAssets().MockMqSchTaskJson);
+            task.workcode = YUtil.GetRandomString(8);
             task.id = id;
             task.maccode = MachineConfig.MachineDict.FirstOrDefault().Key;
             foreach (var axis in task.axisParam) {
                 axis.maccode = task.maccode;
+                axis.axiscode = YUtil.GetRandomString(10);
             }
             App.Store.Dispatch(mockEffects.MockSchTaskAccept(new MockActions.MockSchTaskAccpet(task)));
         }
@@ -169,7 +172,7 @@ namespace HmiPro.ViewModels {
         /// <param name="viewName">页面名称，比如页面为HomeView.xaml，则名称为HomeView</param>
         [Command(Name = "NavigateCommand")]
         public void Navigate(string viewName) {
-            NavigationSerivce.Navigate(viewName,null,this,true);
+            NavigationSerivce.Navigate(viewName, null, this, true);
         }
 
         [Command(Name = "JumpAppSettingViewCommand")]

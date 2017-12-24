@@ -4,7 +4,7 @@
                     xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors">
     <Style TargetType="{x:Type TextBlock}" x:Key="CpmInstantName">
         <Setter Property="Foreground" Value="White"/>
-        <Setter Property="FontSize" Value="17"/>
+        <Setter Property="FontSize" Value="13"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="TextAlignment" Value="Justify"/>

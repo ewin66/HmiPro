@@ -152,5 +152,42 @@ namespace YCsharp.Util {
             return string.Concat(input.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
         }
 
+        public static Func<double> RandGenerator = GetRandomGen();
+
+
+
+
+        private static int randIndex = 0;
+        /// <summary>
+        /// 获取随机长度字符串
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static string GetRandomString(int length) {
+            const string key = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            if (length < 1)
+                return string.Empty;
+            byte[] buffer = new byte[8];
+            var rnd = new Random(int.Parse(DateTime.Now.ToString("HHssffff") + randIndex++));
+            ulong bit = 31;
+            ulong result = 0;
+            int index = 0;
+            StringBuilder sb = new StringBuilder((length / 5 + 1) * 5);
+
+            while (sb.Length < length) {
+                rnd.NextBytes(buffer);
+
+                buffer[5] = buffer[6] = buffer[7] = 0x00;
+                result = BitConverter.ToUInt64(buffer, 0);
+
+                while (result > 0 && sb.Length < length) {
+                    index = (int)(bit & result);
+                    sb.Append(key[index]);
+                    result = result >> 5;
+                }
+            }
+            return sb.ToString();
+        }
+
     }
 }

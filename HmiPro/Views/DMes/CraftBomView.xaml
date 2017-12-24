@@ -9,13 +9,11 @@
              xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
              xmlns:converts="clr-namespace:HmiPro.Converts"
              mc:Ignorable="d"
-             DataContext="{dxmvvm:ViewModelSource Type=dMes:CraftBomViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <converts:CoefConverter x:Key="ConverterCoef"/>
         <converts:MultiParamsConvert x:Key="MultiParamsConvert"></converts:MultiParamsConvert>
     </UserControl.Resources>
-    <dxwui:PageAdornerControl  Header="{Binding Path=WorkCode}" ShowBackButton="True" >
         <dxlc:FlowLayoutControl ItemsSource="{Binding Path=Boms}"  Orientation="Vertical"  ShowLayerSeparators="True">
             <dxlc:FlowLayoutControl.ItemTemplate>
                 <DataTemplate>
@@ -35,5 +33,4 @@
                 </DataTemplate>
             </dxlc:FlowLayoutControl.ItemTemplate>
         </dxlc:FlowLayoutControl>
-    </dxwui:PageAdornerControl>
 </UserControl>
