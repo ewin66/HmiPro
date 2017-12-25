@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DevExpress.Data.Helpers;
+using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
@@ -24,12 +25,16 @@ namespace HmiPro.Redux.Effects {
         private readonly ActiveMqService activeMq;
         private readonly MqService mqService;
         public readonly LoggerService Logger;
-        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartListenSchTask, bool> StartListenSchTask;
-        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadCpms> UploadCpms;
-        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadAlarmMq> UploadAlarm;
-        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartUploadCpmsInterval> StartUploadCpmsInterval;
-        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.StartListenScanMaterial, bool> StartListenScanMaterial;
-        public StorePro<AppState>.AsyncActionNeedsParam<MqActiions.UploadSchTaskManu, bool> UploadSchTaskManu;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenSchTask, bool> StartListenSchTask;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadCpms> UploadCpms;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadAlarmMq> UploadAlarm;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartUploadCpmsInterval> StartUploadCpmsInterval;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenScanMaterial, bool> StartListenScanMaterial;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadSchTaskManu, bool> UploadSchTaskManu;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenEmpRfid, bool> StartListenEmpRfid;
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenAxisRfid, bool> StartListenAxisRfid;
+
+
 
 
         public MqEffects(MqService mqService) {
@@ -44,15 +49,60 @@ namespace HmiPro.Redux.Effects {
             initStartListenScanMaterial();
             initUploadAlarm();
             initUploadSchTaskManu();
+            initStartListenEmpRfid();
+            initStartListenAxisRfid();
+        }
+
+        void initStartListenAxisRfid() {
+            StartListenAxisRfid = App.Store.asyncAction<MqActions.StartListenAxisRfid, bool>(
+                async (dispatch, getState, instance) => {
+                    dispatch(instance);
+                    return await Task.Run(() => {
+                        try {
+                            activeMq.ListenTopic(instance.TopicName,null,
+                                mqService.AxisRfidAccpet)();
+                            dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_SUCCESS, null));
+                            return true;
+                        } catch (Exception e) {
+                            dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_FAILED, null));
+                        }
+
+                        return false;
+                    });
+
+
+                });
+
+        }
+
+        void initStartListenEmpRfid() {
+            StartListenEmpRfid = App.Store.asyncAction<MqActions.StartListenEmpRfid, bool>(
+                async (dispatch, getState, instance) => {
+                    dispatch(instance);
+                    return await Task.Run(() => {
+                        try {
+                            activeMq.ListenTopic(instance.TopicName,null, mqService.EmpRfidAccept)();
+                            dispatch(new MqActions.StartListenEmpRfidSuccess());
+                            return true;
+                        } catch (Exception e) {
+                            dispatch(new MqActions.StartListenEmpRfidFailed(e));
+                        }
+                        return false;
+                    });
+                }
+
+            );
+
         }
 
         void initUploadSchTaskManu() {
-            UploadSchTaskManu = App.Store.asyncAction<MqActiions.UploadSchTaskManu, bool>(
+            UploadSchTaskManu = App.Store.asyncAction<MqActions.UploadSchTaskManu, bool>(
                 async (dispatch, getState, instance) => {
                     dispatch(instance);
                     return await Task.Run(() => {
                         try {
                             activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(instance.MqUploadManu));
+                            return true;
                         } catch (Exception e) {
 
                         }
@@ -63,14 +113,14 @@ namespace HmiPro.Redux.Effects {
 
         void initUploadAlarm() {
             UploadAlarm =
-                App.Store.asyncActionVoid<MqActiions.UploadAlarmMq>(async (dispatch, getState, instance) => {
+                App.Store.asyncActionVoid<MqActions.UploadAlarmMq>(async (dispatch, getState, instance) => {
                     await Task.Run(() => {
                         dispatch(instance);
                         try {
                             activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(instance.MqAlarm));
-                            App.Store.Dispatch(new SimpleAction(MqActiions.UPLOAD_ALARM_SUCCESS));
+                            App.Store.Dispatch(new SimpleAction(MqActions.UPLOAD_ALARM_SUCCESS));
                         } catch (Exception e) {
-                            App.Store.Dispatch(new SimpleAction(MqActiions.UPLOAD_ALARM_FAILED));
+                            App.Store.Dispatch(new SimpleAction(MqActions.UPLOAD_ALARM_FAILED));
                             Logger.Error("上传报警到Mq失败", e);
                         }
                     });
@@ -79,15 +129,17 @@ namespace HmiPro.Redux.Effects {
 
         void initStartListenScanMaterial() {
             StartListenScanMaterial =
-                App.Store.asyncAction<MqActiions.StartListenScanMaterial, bool>(async (dispatch, getState, instance) => {
+                App.Store.asyncAction<MqActions.StartListenScanMaterial, bool>(async (dispatch, getState, instance) => {
                     return await Task.Run(() => {
                         dispatch(instance);
                         try {
-                            activeMq.ListenP2PMessage(instance.QueueName, mqService.ScanMaterialAccept);
-                            App.Store.Dispatch(new MqActiions.StartListenScanMaterialSuccess(instance.MachineCode));
+                            activeMq.ListenP2PMessage(instance.QueueName, json => {
+                                mqService.ScanMaterialAccept(instance.MachineCode, json);
+                            });
+                            App.Store.Dispatch(new MqActions.StartListenScanMaterialSuccess(instance.MachineCode));
                             return true;
                         } catch (Exception e) {
-                            App.Store.Dispatch(new MqActiions.StartListenScanMaterialFailed() { Exp = e, MachineCode = instance.MachineCode });
+                            App.Store.Dispatch(new MqActions.StartListenScanMaterialFailed() { Exp = e, MachineCode = instance.MachineCode });
                         }
                         return false;
                     });
@@ -96,15 +148,15 @@ namespace HmiPro.Redux.Effects {
 
         void initSchTaskEffect() {
             StartListenSchTask =
-                App.Store.asyncAction<MqActiions.StartListenSchTask, bool>(async (dispatch, getState, instance) => {
+                App.Store.asyncAction<MqActions.StartListenSchTask, bool>(async (dispatch, getState, instance) => {
                     var result = await Task.Run(() => {
                         dispatch(instance);
                         try {
                             activeMq.ListenP2PMessage(instance.QueueName, this.mqService.SchTaskAccept);
-                            dispatch(new MqActiions.StartListenSchTaskSuccess(instance.MachineCode));
+                            dispatch(new MqActions.StartListenSchTaskSuccess(instance.MachineCode));
                             return true;
                         } catch (Exception e) {
-                            dispatch(new MqActiions.StartListenSchTaskFailed() { Exp = e, MachineCode = instance.MachineCode });
+                            dispatch(new MqActions.StartListenSchTaskFailed() { Exp = e, MachineCode = instance.MachineCode });
                         }
                         return false;
                     });
@@ -114,25 +166,31 @@ namespace HmiPro.Redux.Effects {
 
         void initStartUploadCpmsIntervalEffect() {
             StartUploadCpmsInterval =
-                App.Store.asyncActionVoid<MqActiions.StartUploadCpmsInterval>(async (dipatch, getState, instance) => {
+                App.Store.asyncActionVoid<MqActions.StartUploadCpmsInterval>(async (dipatch, getState, instance) => {
                     await Task.Run(() => {
                         dipatch(instance);
                         YUtil.SetInterval(instance.Interval, () => {
-                            App.Store.Dispatch(UploadCpms(new MqActiions.UploadCpms(getState().CpmState.OnlineCpmsDict, instance.QueueName)));
+                            App.Store.Dispatch(UploadCpms(new MqActions.UploadCpms(getState().CpmState.OnlineCpmsDict, instance.QueueName)));
                         });
                     });
                 });
         }
 
         void initUploadCpmsEffect() {
-            UploadCpms = App.Store.asyncActionVoid<MqActiions.UploadCpms>(async (dispatch, getState, instance) => {
+            UploadCpms = App.Store.asyncActionVoid<MqActions.UploadCpms>(async (dispatch, getState, instance) => {
                 await Task.Run(() => {
                     var cpmsDict = instance.CpmsDict;
                     foreach (var pair in cpmsDict) {
                         var machineCode = pair.Key;
                         var machineCpms = pair.Value;
+
                         MqUploadCpms uCpms = new MqUploadCpms();
                         uCpms.machineCode = machineCode;
+                        uCpms.macSpeed = getState().CpmState.SpeedDict[machineCode]?.Value;
+                        uCpms.TimeEff = getState().OeeState.OeeDict[machineCode].TimeEff.ToString("0.00");
+                        uCpms.SpeedEff = getState().OeeState.OeeDict[machineCode].SpeedEff.ToString("0.00");
+                        uCpms.QualityEff = getState().OeeState.OeeDict[machineCode].QualityEff.ToString("0.00");
+                        Console.WriteLine($"上传Mq：Speed {uCpms.macSpeed} Timeff: {uCpms.TimeEff},SpeedEff：{uCpms.SpeedEff},QualityEff：{uCpms.QualityEff}");
                         uCpms.paramInfoList = new List<UploadParamInfo>();
                         foreach (var cpmPair in machineCpms) {
                             var cpm = cpmPair.Value;
@@ -147,9 +205,9 @@ namespace HmiPro.Redux.Effects {
                         }
                         try {
                             activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(uCpms));
-                            App.Store.Dispatch(new MqActiions.UploadCpmsSuccess());
+                            App.Store.Dispatch(new MqActions.UploadCpmsSuccess());
                         } catch (Exception e) {
-                            App.Store.Dispatch(new MqActiions.UploadCpmsFailed() { Exp = e });
+                            App.Store.Dispatch(new MqActions.UploadCpmsFailed() { Exp = e });
                         }
                     }
                 });

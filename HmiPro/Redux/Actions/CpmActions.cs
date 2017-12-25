@@ -27,6 +27,20 @@ namespace HmiPro.Redux.Actions {
         public static readonly string SPEED_DIFF_ACCEPT = "[Cpm] Speed Diff Accept";
         public static readonly string SPARK_DIFF_ACCEPT = "[Cpm] Spark Diff Accept";
         public static readonly string SPEED_DIFF_ZERO_ACCEPT = "[Cpm] Speed Diff Zero Accept";
+        public static readonly string OD_ACCPET = "[Cpm] Od Accept";
+        
+
+
+        public struct OdAccept : IAction {
+            public string Type() => OD_ACCPET;
+            public string MachineCode;
+            public Cpm OdCpm;
+
+            public OdAccept(string machineCode, Cpm odCpm) {
+                MachineCode = machineCode;
+                OdCpm = odCpm;
+            }
+        }
 
 
         /// <summary>

@@ -23,12 +23,24 @@ namespace HmiPro.Redux.Actions {
         public static readonly string HTTP_SYSTEM_INVOKE = "[Sys] Http System Invoke";
         public static readonly string FIND_UPDATED_VERSION = "[Sys] Find Updated Version";
         public static readonly string NOT_FIND_UPDATED_VERSION = "[Sys] Not Find Updated Version";
-        public static readonly string HMI_CONFIG_INITED = "[Sys] Hmi Config Has Configed";
+        public static readonly string APP_INIT_COMPLETED = "[Sys] App Init Completed";
         public static readonly string CLOSE_SCREEN = "[Sys] Close Screen";
         public static readonly string OPEN_SCREEN = "[Sys] Open Screen";
         public static readonly string START_CLOSE_SCREEN_TIMER = "[Sys] Start Turn Off Screen Timer";
         public static readonly string STOP_CLOSE_SCREEN_TIMER = "[Sys] Stop Turn Off Screen Timer";
         public static readonly string SHOW_NOTIFICATION = "[Sys] Show Notification";
+        public static readonly string SET_TOP_MESSAGE = "[Sys] Show Top Message";
+
+        public struct SetTopMessage : IAction {
+            public string Type() => SET_TOP_MESSAGE;
+            public string Message;
+            public Visibility Visibility;
+
+            public SetTopMessage(string message, Visibility visibility) {
+                Message = message;
+                Visibility = visibility;
+            }
+        }
 
         public struct ShowNotification : IAction {
             public string Type() => SHOW_NOTIFICATION;
@@ -96,8 +108,8 @@ namespace HmiPro.Redux.Actions {
             public string Cmd;
         }
 
-        public struct HmiConfigInited : IAction {
-            public string Type() => HMI_CONFIG_INITED;
+        public struct AppInitCompleted : IAction {
+            public string Type() => APP_INIT_COMPLETED;
         }
 
         public struct OpenScreen : IAction {

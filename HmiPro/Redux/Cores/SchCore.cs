@@ -43,7 +43,7 @@ namespace HmiPro.Redux.Cores {
         public async Task Init() {
             await App.Store.Dispatch(sysEffects.StartCloseScreenTimer(new SysActions.StartCloseScreenTimer(HmiConfig.CloseScreenInterval)));
             //启动定时上传Cpms到Mq定时器
-            await App.Store.Dispatch(mqEffects.StartUploadCpmsInterval(new MqActiions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
+            await App.Store.Dispatch(mqEffects.StartUploadCpmsInterval(new MqActions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
 
             //每天8点打开显示器
             Schedule(() => {

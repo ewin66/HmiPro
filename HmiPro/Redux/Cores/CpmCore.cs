@@ -136,12 +136,15 @@ namespace HmiPro.Redux.Cores {
             });
         }
 
+
+
         /// <summary>
         /// 处理参数包，将底层的包转成上层需要的Cpm
         /// </summary>
         /// <param name="machineCode"></param>
         /// <param name="sm"></param>
         void paramPkgHandler(string machineCode, SmModel sm) {
+
             var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm);
             var cpmsRelate = new List<Cpm>();
             var cpms = new List<Cpm>();
@@ -153,6 +156,18 @@ namespace HmiPro.Redux.Cores {
                     onlineFloatDict[machineCode][cpm.Code] = floatVal;
                     var relateCpms = calcRelateCpm(machineCode, cpm.Code);
                     cpmsRelate.AddRange(relateCpms);
+                }
+                if (cpm.ValueType == SmParamType.StrRfid) {
+                    if (MachineConfig.MachineDict[machineCode].CodeToLogicDict.TryGetValue(cpm.Code, out var logic)) {
+                        if (logic == CpmInfoLogic.StartRfid) {
+                            App.Store.Dispatch(new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
+                                DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.StartAxis));
+                        } else if (logic == CpmInfoLogic.EndRfid) {
+                            App.Store.Dispatch(new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
+                                DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.EndAxis));
+
+                        }
+                    }
                 }
             });
             if (cpmsDirect != null) {
@@ -178,7 +193,7 @@ namespace HmiPro.Redux.Cores {
             //差异更新，使用linq 2017-11-13
             (from c in cpms
              where (
-                 c.Value != null
+                 (c.Value != null && !string.IsNullOrEmpty(c.Value?.ToString()))
                  && (!OnlineCpmDict[machineCode].ContainsKey(c.Code)
                      || OnlineCpmDict[machineCode][c.Code].Value.ToString() != c.Value.ToString())
              )
@@ -197,6 +212,10 @@ namespace HmiPro.Redux.Cores {
                 //主要是为了计算平均速度
                 dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.OeeSpeed, cpm => {
                     App.Store.Dispatch(new CpmActions.SpeedAccept(machineCode, (float)cpm.Value));
+                });
+                //更新od值
+                dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.Od, cpm => {
+                    App.Store.Dispatch(new CpmActions.OdAccept(machineCode, cpm));
                 });
             }
             if (updatedCpmsDiffDict.Count > 0) {
@@ -274,7 +293,7 @@ namespace HmiPro.Redux.Cores {
                             dispatch(cpm);
                         }
                     } else {
-                        Logger.Error($"参数 {cpm.Name} 的值不是浮点，值为：{cpm.Value}");
+                        Logger.Debug($"参数 {cpm.Name} 的值不是浮点，类型为 {cpm.ValueType} 值为：{cpm.Value}", ConsoleColor.Red);
                     }
                 }
             });

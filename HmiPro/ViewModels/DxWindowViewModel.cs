@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Media;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -32,6 +33,28 @@ namespace HmiPro.ViewModels {
 
         public readonly StorePro<AppState> Store;
         public readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
+        private string topMessage;
+        public string TopMessage {
+            get => topMessage;
+            set {
+                if (topMessage != value) {
+                    topMessage = value;
+                    RaisePropertiesChanged(nameof(TopMessage));
+                }
+            }
+        }
+
+        private Visibility topMessageVisibility = Visibility.Collapsed;
+        public Visibility TopMessageVisibility {
+            get => topMessageVisibility;
+            set {
+                if (topMessageVisibility != value) {
+                    topMessageVisibility = value;
+                    RaisePropertiesChanged(nameof(TopMessageVisibility));
+                }
+            }
+        }
+
 
 
         public DxWindowViewModel() {
@@ -40,13 +63,72 @@ namespace HmiPro.ViewModels {
             actionsExecDict[SysActions.SHOW_NOTIFICATION] = doShowNotification;
             actionsExecDict[SysActions.SHOW_SETTING_VIEW] = doShowSettingView;
             actionsExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
+            actionsExecDict[SysActions.SET_TOP_MESSAGE] = doSetTopMessage;
+            actionsExecDict[SysActions.APP_INIT_COMPLETED] = whenAppInitCompleted;
             Store.Subscribe((state, aciton) => {
                 if (actionsExecDict.TryGetValue(aciton.Type(), out var exec)) {
                     exec(state, aciton);
                 }
             });
+            //每一分钟检查一次与服务器的连接
+            Task.Run(() => {
+                YUtil.SetInterval(60000, () => {
+                    checkNotwork(HmiConfig.InfluxDbIp);
+                });
+            });
         }
 
+        /// <summary>
+        /// 程序初始化完成
+        /// 包括配置文件初始化成功
+        /// Mq消息监听成功
+        /// Cpm服务启动成功
+        /// Http服务启动成功
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenAppInitCompleted(AppState state, IAction action) {
+            //Mocks.Mocks.DispatchMqMockScanMaterial(MachineConfig.MachineDict.Keys.FirstOrDefault());
+            var machineCode = MachineConfig.MachineDict.Keys.FirstOrDefault();
+            Mocks.Mocks.DispatchMockMqEmpRfid(machineCode);
+            YUtil.SetTimeout(5000, () => {
+                Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
+                YUtil.SetTimeout(5000, () => {
+                    Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
+                });
+            });
+
+        }
+
+
+
+
+        /// <summary>
+        /// 检查与某个ip的连接状况，并显示在window顶部
+        /// </summary>
+        /// <param name="ip"></param>
+        void checkNotwork(string ip) {
+            Ping pingSender = new Ping();
+            PingReply reply = pingSender.Send(ip, 1000);
+            if (reply.Status != IPStatus.Success) {
+                Store.Dispatch(new SysActions.SetTopMessage(
+                    $"与服务器 {ip} 连接断开，请联系管理员 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}", Visibility.Visible));
+            } else {
+                Store.Dispatch(new SysActions.SetTopMessage("", Visibility.Collapsed));
+            }
+        }
+
+
+        /// <summary>
+        /// 设置window顶部错误，消息，一般用来显示网络状况问题
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doSetTopMessage(AppState state, IAction action) {
+            var sysActionn = (SysActions.SetTopMessage)action;
+            TopMessage = sysActionn.Message;
+            TopMessageVisibility = sysActionn.Visibility;
+        }
 
         /// <summary>
         /// 打印计算的Oee
@@ -140,7 +222,7 @@ namespace HmiPro.ViewModels {
         /// </summary>
         /// <param name="target"></param>
         public void Navigate(string target) {
-            NavigationService.Navigate(target, null, this,true);
+            NavigationService.Navigate(target, null, this, true);
         }
 
         /// <summary>

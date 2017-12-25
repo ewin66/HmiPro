@@ -22,15 +22,16 @@ namespace YCsharp {
                 args = new string[] { "update-app" };
             }
             var cmd = args[0];
-            string[] machineName = new[] { "DE", "DA",  "VB",  "ED",  "RC_RF", "SI", "VA",  "DM", "SB" };
-            string[] netSegs = new[] {    "110", "200", "140", "180", "150",  "120", "139", "202", "191" };
+            string[] machineName = new[] { "CA", "CB", "CC", "DA", "DB", "DE_DF", "DM", "ED", "EJ", "EL", "EP", "RC_RF", "RG", "SA", "SB", "SI_SG", "TA_RE", "TB_TG", "VA_VC", "VB_VG", "VD", "VE_VF", "VH_VI", "VJ_VK" };
+            string[] netSegs = new[] { "192.168.130.66","192.168.131.66","192.168.132.66","192.168.200.66","192.168.201.66","192.168.110.66","192.168.202.66","192.168.180.66","192.168.183.66",
+                "192.168.186.66","182.168.184.66","192.168.150.66","192.168.152.66","192.168.190.66","192.168.191.66","192.168.120.66","192.168.220.66","192.168.221.66",
+                "192.168.139.66","192.168.140.66","192.168.142.66","192.168.144.66","192.168.146.66","192.168.149.66" };
             int port = 8899;
             int i = 0;
             foreach (var ns in netSegs) {
-                var url = $"http://192.168.{ns}.66:{port}";
+                var url = $"http://{ns}:{port}";
                 KsUpdateHttpGet(url, cmd, machineName[i++]);
             }
-            KsUpdateHttpGet("http://192.168.0.2:8899", "update-app", "da");
             YUtil.ExitWithQ();
         }
 
@@ -40,7 +41,7 @@ namespace YCsharp {
                 try {
                     url += "/" + cmd;
                     var responseString = await client.GetStringAsync(url);
-                    Console.WriteLine(responseString);
+                    Console.WriteLine(macineName+":  "+responseString);
                 } catch (Exception e) {
                     Console.WriteLine(macineName + " : " + e.Message);
                 }

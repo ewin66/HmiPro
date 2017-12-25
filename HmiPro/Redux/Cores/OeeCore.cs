@@ -44,6 +44,7 @@ namespace HmiPro.Redux.Cores {
                 Logger.Error($"计算时间效率失败，有效时间 {runTimeSec} < 0 ");
             } else {
                 timeEff = (float)((runTimeSec - debugTimeSec) / (DateTime.Now - workTime).TotalSeconds);
+                Console.WriteLine($"当班时间：{(DateTime.Now - workTime).TotalSeconds} 秒，机台运行时间 {runTimeSec} 秒");
             }
             return timeEff;
         }

@@ -58,11 +58,11 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 放线轴
         /// </summary>
-        public HashSet<string> StartRfids;
+        public HashSet<string> StartAxisRfids =new HashSet<string>();
         /// <summary>
         /// 收线Rfid，可能有多个
         /// </summary>
-        public HashSet<string> EndRfids = new HashSet<string>();
+        public HashSet<string> EndAxisRfids = new HashSet<string>();
         /// <summary>
         /// 计划生产长度
         /// </summary>
@@ -125,6 +125,9 @@ namespace HmiPro.Redux.Models {
             MeterWork = -1;
             DebugTimestampMs = 0;
             MqSchAxisIndex = -1;
+            StartAxisRfids.Clear();
+            EndAxisRfids.Clear();
+            //EmpRfids.Clear();
         }
     }
 }

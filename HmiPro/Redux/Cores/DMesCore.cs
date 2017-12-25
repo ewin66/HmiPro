@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using HmiPro.Annotations;
 using HmiPro.Config;
+using HmiPro.Config.Models;
 using HmiPro.Helpers;
 using HmiPro.Mocks;
 using HmiPro.Redux.Actions;
@@ -17,6 +18,7 @@ using HmiPro.Redux.Reducers;
 using MongoDB.Bson;
 using NeoSmart.AsyncLock;
 using Newtonsoft.Json;
+using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
 using YCsharp.Util;
 
@@ -38,6 +40,15 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         public IDictionary<string, SchTaskDoing> SchTaskDoingDict;
         /// <summary>
+        /// 每个机台的来料信息
+        /// </summary>
+        public IDictionary<string, MqScanMaterial> MqScanMaterialDict;
+        /// <summary>
+        /// 人员卡信息
+        /// </summary>
+        public IDictionary<string, List<MqEmpRfid>> MqEmpRfidDict;
+
+        /// <summary>
         /// 日志辅助
         /// </summary>
         public readonly LoggerService Logger;
@@ -45,6 +56,7 @@ namespace HmiPro.Redux.Cores {
         /// 命令派发执行的动作
         /// </summary>
         readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
+
         /// <summary>
         /// 任务锁
         /// </summary>
@@ -62,13 +74,16 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         public void Init() {
             actionExecDict[CpmActions.CPMS_UPDATED_ALL] = whenCpmsUpdateAll;
-            actionExecDict[MqActiions.SCH_TASK_ACCEPT] = whenSchTaskAccept;
+            actionExecDict[MqActions.SCH_TASK_ACCEPT] = whenSchTaskAccept;
             actionExecDict[CpmActions.NOTE_METER_ACCEPT] = whenNoteMeterAccept;
             actionExecDict[AlarmActions.CHECK_CPM_BOM_ALARM] = doCheckCpmBomAlarm;
             actionExecDict[CpmActions.SPARK_DIFF_ACCEPT] = whenSparkDiffAccept;
             actionExecDict[DMesActions.START_SCH_TASK_AXIS] = doStartSchTaskAxis;
             actionExecDict[CpmActions.SPEED_DIFF_ZERO_ACCEPT] = whenSpeedDiffZeroAccept;
             actionExecDict[CpmActions.SPEED_ACCEPT] = whenSpeedAccept;
+            actionExecDict[CpmActions.OD_ACCPET] = whenOdAccept;
+            actionExecDict[DMesActions.RFID_ACCPET] = doRfidAccept;
+            actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccept;
 
             App.Store.Subscribe((state, action) => {
                 if (actionExecDict.TryGetValue(state.Type, out var exec)) {
@@ -78,9 +93,80 @@ namespace HmiPro.Redux.Cores {
             //绑定全局的值
             SchTaskDoingDict = App.Store.GetState().DMesState.SchTaskDoingDict;
             MqSchTasksDict = App.Store.GetState().DMesState.MqSchTasksDict;
+            MqScanMaterialDict = App.Store.GetState().DMesState.MqScanMaterialDict;
+            MqEmpRfidDict = App.Store.GetState().DMesState.MqEmpRfidDict;
             foreach (var pair in MachineConfig.MachineDict) {
                 SchTaskDoingLocks[pair.Key] = new object();
             }
+        }
+
+        /// <summary>
+        /// 监听到扫描来料信息
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenScanMaterialAccept(AppState state, IAction action) {
+            var mqAction = (MqActions.ScanMaterialAccpet)action;
+            MqScanMaterialDict[mqAction.MachineCode] = mqAction.ScanMaterial;
+            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                Title = $"机台{mqAction.MachineCode}通知",
+                Content = $"接受到来料数据，请注意核实"
+            }));
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenOdAccept(AppState state, IAction action) {
+            var cpmAction = (CpmActions.OdAccept)action;
+            var machineCode = cpmAction.MachineCode;
+            //从Plc设置值检查上下限
+            if (MachineConfig.MachineDict[machineCode].OdAlarmType == AlarmActions.OdAlarmType.OdThresholdPlc) {
+                checkOdAlarmByPlc(machineCode, cpmAction.OdCpm);
+            }
+        }
+
+        /// <summary>
+        /// 从Plc中读取上下限来检查Od值报警
+        /// </summary>
+        /// <param name="machineCode"></param>
+        /// <param name="odCpm"></param>
+        void checkOdAlarmByPlc(string machineCode, Cpm odCpm) {
+            MqAlarm mqAlarm = new MqAlarm() {
+                machineCode = machineCode,
+                alarmType = AlarmType.OdErr,
+                axisCode = SchTaskDoingDict[machineCode]?.MqSchAxis?.axiscode ?? "/",
+                code = odCpm.Code,
+                CpmName = odCpm.Name,
+                employees = SchTaskDoingDict[machineCode]?.EmpRfids,
+                meter = App.Store.GetState().CpmState.NoteMeterDict[machineCode],
+                startRfids = SchTaskDoingDict[machineCode]?.StartAxisRfids,
+                endRfids = SchTaskDoingDict[machineCode]?.EndAxisRfids,
+                time = odCpm.PickTimeStampMs
+            };
+
+            if (MachineConfig.MachineDict[machineCode].LogicToCpmDict.TryGetValue(CpmInfoLogic.MaxOdPlc, out var maxInfo)) {
+                var maxOd = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][maxInfo.Code];
+                if (maxOd.ValueType == SmParamType.Signal) {
+                    if (odCpm.GetFloatVal() > maxOd.GetFloatVal()) {
+                        mqAlarm.message = $"{odCpm.Name} 超限";
+                        App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(machineCode, mqAlarm));
+                    }
+                }
+
+            } else if (MachineConfig.MachineDict[machineCode].LogicToCpmDict.TryGetValue(CpmInfoLogic.MinOdPlc, out var minInfo)) {
+                var minOd = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][minInfo.Code];
+                if (minOd.ValueType == SmParamType.Signal) {
+                    if (odCpm.GetFloatVal() < minOd.GetFloatVal()) {
+                        mqAlarm.message = $"{odCpm.Name} 超限";
+                        App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(machineCode, mqAlarm));
+                    }
+                }
+            }
+
         }
 
         /// <summary>
@@ -123,6 +209,64 @@ namespace HmiPro.Redux.Cores {
                     DebugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
                 }
             }
+        }
+
+        /// <summary>
+        /// 处理接收到的Rfid数据
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doRfidAccept(AppState state, IAction action) {
+            var dmesAction = (DMesActions.RfidAccpet)action;
+            if (dmesAction.RfidWhere == DMesActions.RfidWhere.FromMq) {
+                if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine ||
+                    dmesAction.RfidType == DMesActions.RfidType.EmpEndMachine) {
+                    var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "消息通知",
+                        Content = $"{mqEmpRfid.name} 打{mqEmpRfid.type}卡成功"
+                    }));
+
+
+                } else {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "消息通知",
+                        Content = $"手持机扫卡成功"
+                    }));
+                }
+            }
+            lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
+                var doingTask = SchTaskDoingDict[dmesAction.MachineCode];
+                //放线卡
+                if (dmesAction.RfidType == DMesActions.RfidType.StartAxis) {
+                    doingTask.StartAxisRfids.Add(dmesAction.Rfid);
+                    //收线卡
+                } else if (dmesAction.RfidType == DMesActions.RfidType.EndAxis) {
+                    doingTask.EndAxisRfids.Add(dmesAction.Rfid);
+
+                    //人员上机卡
+                } else if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine) {
+                    var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
+                    doingTask.EmpRfids.Add(dmesAction.Rfid);
+                    //全局保存打卡信息
+                    var isPrinted = MqEmpRfidDict[dmesAction.MachineCode]
+                        .Exists(s => s.employeeCode == mqEmpRfid.name);
+                    //如果没有打上机卡，则添加到全局保存
+                    if (!isPrinted) {
+                        MqEmpRfidDict[dmesAction.MachineCode].Add(mqEmpRfid);
+                    }
+
+                    //人员下机卡
+                } else if (dmesAction.RfidType == DMesActions.RfidType.EmpEndMachine) {
+                    doingTask.EmpRfids.Remove(dmesAction.Rfid);
+                    var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
+                    var removeItem = MqEmpRfidDict[dmesAction.MachineCode]
+                        .FirstOrDefault(s => s.employeeCode == mqEmpRfid.employeeCode);
+                    //从全局打卡信息中移除
+                    MqEmpRfidDict[dmesAction.MachineCode].Remove(removeItem);
+                }
+            }
+
         }
 
         /// <summary>
@@ -465,8 +609,8 @@ namespace HmiPro.Redux.Cores {
                     axixLen = taskDoing.MeterPlan,
                     courseCode = taskDoing.WorkCode,
                     empRfid = string.Join(",", taskDoing.EmpRfids),
-                    rfids_begin = string.Join(",", taskDoing.StartRfids),
-                    rfid_end = string.Join(",", taskDoing.EndRfids),
+                    rfids_begin = string.Join(",", taskDoing.StartAxisRfids),
+                    rfid_end = string.Join(",", taskDoing.EndAxisRfids),
                     acutalDispatchTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
                     mqType = "yes",
                     step = taskDoing.Step,
@@ -477,7 +621,7 @@ namespace HmiPro.Redux.Cores {
                 //重新初始化
                 taskDoing.Init();
             }
-            var uploadResult = await App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActiions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
+            var uploadResult = await App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
             if (uploadResult) {
                 //一个工单任务完成
                 if (taskDoing.CompleteRate >= 1) {

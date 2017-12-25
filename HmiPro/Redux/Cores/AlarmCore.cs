@@ -47,8 +47,8 @@ namespace HmiPro.Redux.Cores {
             historyAlarms.Add(alarmAdd);
             //通知报警历史记录改变
             App.Store.Dispatch(new AlarmActions.UpdateHistoryAlarms(machineCode, updateAction, alarmAdd, alarmRemove));
-            //打开报警灯15秒
-            App.Store.Dispatch(new AlarmActions.OpenAlarmLights(machineCode, 15000));
+            //打开报警灯5秒
+            App.Store.Dispatch(new AlarmActions.OpenAlarmLights(machineCode, 5000));
             //打开屏幕
             App.Store.Dispatch(new SysActions.OpenScreen());
             //显示消息通知
@@ -57,7 +57,7 @@ namespace HmiPro.Redux.Cores {
                 Content = machineCode + ":" + alarmAdd.alarmType
             }));
             //上传报警到Mq
-            App.Store.Dispatch(mqEffects.UploadAlarm(new MqActiions.UploadAlarmMq(HmiConfig.QueWebSrvException, alarmAdd)));
+            App.Store.Dispatch(mqEffects.UploadAlarm(new MqActions.UploadAlarmMq(HmiConfig.QueWebSrvException, alarmAdd)));
             //保存报警到Mongo
             App.Store.Dispatch(dbEffects.UploadAlarmsMongo(new DbActions.UploadAlarmsMongo(machineCode, "Alarms", alarmAdd)));
         }

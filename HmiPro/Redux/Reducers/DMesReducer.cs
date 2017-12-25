@@ -19,7 +19,10 @@ namespace HmiPro.Redux.Reducers {
         public struct State {
             public IDictionary<string, ObservableCollection<MqSchTask>> MqSchTasksDict;
             public IDictionary<string, SchTaskDoing> SchTaskDoingDict;
+            public IDictionary<string, MqScanMaterial> MqScanMaterialDict;
             public string MachineCode;
+            //人员卡信息
+            public IDictionary<string,List<MqEmpRfid>> MqEmpRfidDict;
         }
 
         public static SimpleReducer<State> Create() {
@@ -27,9 +30,12 @@ namespace HmiPro.Redux.Reducers {
                 .When<DMesActions.Init>((state, action) => {
                     state.SchTaskDoingDict = new ConcurrentDictionary<string, SchTaskDoing>();
                     state.MqSchTasksDict = new ConcurrentDictionary<string, ObservableCollection<MqSchTask>>();
+                    state.MqScanMaterialDict = new ConcurrentDictionary<string, MqScanMaterial>();
+                    state.MqEmpRfidDict = new ConcurrentDictionary<string, List<MqEmpRfid>>();
                     foreach (var pair in MachineConfig.MachineDict) {
                         state.SchTaskDoingDict[pair.Key] = new SchTaskDoing();
                         state.MqSchTasksDict[pair.Key] = new ObservableCollection<MqSchTask>();
+                        state.MqEmpRfidDict[pair.Key]= new List<MqEmpRfid>();
                     }
                     return state;
                 });

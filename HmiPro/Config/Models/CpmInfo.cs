@@ -250,7 +250,11 @@ namespace HmiPro.Config.Models {
         //火花报警
         Spark = 7,
         //Plc设定的最大速度
-        MaxSpeedPlc=8
+        MaxSpeedPlc = 8,
+        //Plc设置最大直径
+        MaxOdPlc = 9,
+        //Plc设置最小直径
+        MinOdPlc=10
     }
 
     public enum CpmInfoMethodName {

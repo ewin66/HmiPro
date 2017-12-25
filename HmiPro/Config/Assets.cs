@@ -57,6 +57,7 @@ namespace HmiPro.Config {
 
         public string CraftsBomXls => DictsFoler + "\\工艺Bom.xls";
         public string MockMqSchTaskJson => MocksFolder + "\\MqSchTask.json";
+        public string MockMqScanMaterial => MocksFolder + "\\MqScanMaterial.json";
 
         private static Assets assets;
     }

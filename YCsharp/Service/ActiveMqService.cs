@@ -63,8 +63,8 @@ namespace YCsharp.Service {
                 using (IMessageProducer producer = session.CreateProducer(new ActiveMQTopic(topic))) {
                     conn.Start();
                     //可以写入字符串，也可以是一个xml字符串等
-                    var request = session.CreateObjectMessage(message);
-                    producer.Send(request);
+                    var req = session.CreateTextMessage(message);
+                    producer.Send(req);
                 }
             });
         }
@@ -146,17 +146,27 @@ namespace YCsharp.Service {
             Uri uri = new Uri(mqConn);
             IConnectionFactory factory = new ConnectionFactory(uri);
             IConnection conn = factory.CreateConnection(mqUserName, mqUserPwd);
-            conn.ClientId = register + YUtil.GetUtcTimestampMs(DateTime.Now);
+            if (!string.IsNullOrEmpty(register)) {
+                conn.ClientId = register + YUtil.GetUtcTimestampMs(DateTime.Now);
+            }
             conn.Start();
             return () => {
                 ISession session = conn.CreateSession();
-                IMessageConsumer consumer =
-                    session.CreateDurableConsumer(new ActiveMQTopic(topic), register, "receiver='" + register + "'", false);
+                IMessageConsumer consumer = null;
+                if (!string.IsNullOrEmpty(register)) {
+                    consumer = session.CreateDurableConsumer(new ActiveMQTopic(topic), register,
+                        "receiver='" + register + "'", false);
+                } else {
+                    consumer = session.CreateDurableConsumer(new ActiveMQTopic(topic), "csharp", null, false);
+                }
                 consumer.Listener += new MessageListener((msg) => {
                     ITextMessage message = msg as ITextMessage;
-                    onMessageReceived(message.Text);
+                    if (message != null) {
+                        onMessageReceived(message.Text);
+                    }
                 });
             };
+
         }
     }
 }

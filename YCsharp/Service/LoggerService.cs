@@ -184,13 +184,15 @@ namespace YCsharp.Service {
             }
         }
 
+        public static readonly object FileOutLock = new object();
+
         /// <summary>
         /// 文件输出
         /// </summary> 
         /// <param name="content"></param>
         /// <param name="mark"></param>
         void fileOut(string content, string mark) {
-            lock (this) {
+            lock (FileOutLock) {
                 //总开关
                 if (OutFile) {
                     var path = buildLogFilePath(mark);

@@ -17,6 +17,7 @@ namespace HmiPro.Redux.Models {
     /// </summary>
     public class MqSchTask : INotifyPropertyChanged {
         public static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+
         /// <summary>
         /// 当前任务序号
         /// </summary>

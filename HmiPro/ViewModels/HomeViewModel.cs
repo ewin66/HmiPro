@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using HmiPro.Config;
@@ -74,37 +76,100 @@ namespace HmiPro.ViewModels {
             UnityIocService.ResolveDepend<AlarmCore>().Init();
             UnityIocService.ResolveDepend<CpmCore>().Init();
             await UnityIocService.ResolveDepend<SchCore>().Init();
+            foreach (var pair in MachineConfig.MachineDict) {
+                if (pair.Value.OdAlarmType == AlarmActions.OdAlarmType.OdThresholdPlc) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = $"机台 {pair.Key} Od报警来源",
+                        Content = "从Plc里面读取限值已报警"
+                    }));
+                }
+            }
+
             if (Environment.UserName.ToLower().Contains("ychost")) {
                 //dispatchMock();
             }
 
-            //启动Http解析系统
-            var isHttpSystem = await App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
-            if (!isHttpSystem) {
-                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "启动失败", Content = $"Http {HmiConfig.CmdHttpPort} 端口服务启动失败，请检查" }));
-            }
-            //启动Cpm采集服务
-            var isCpmServer = await App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
-            if (!isCpmServer) {
-                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "启动失败", Content = $"参数采集服务 {HmiConfig.CpmTcpIp}:{HmiConfig.CpmTcpPort} 启动失败，请检查" }));
-            }
+            var starHttpSystem = App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
+            var startCpmServer = App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
+            Dictionary<string, Task<bool>> startListenMqDict = new Dictionary<string, Task<bool>>();
             foreach (var pair in MachineConfig.MachineDict) {
                 //监听排产任务
                 var stQueueName = @"QUEUE_" + pair.Key;
-                var isSchTask = await App.Store.Dispatch(mqEffects.StartListenSchTask(new MqActiions.StartListenSchTask(stQueueName, pair.Key)));
-                if (!isSchTask) {
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq排产队列 {stQueueName} 失败，请检查" }));
-                }
-                //监听扫描物料信息
+                var stTask = App.Store.Dispatch(mqEffects.StartListenSchTask(new MqActions.StartListenSchTask(pair.Key, stQueueName)));
+                startListenMqDict[stQueueName] = stTask;
+                //监听来料
                 var smQueueName = $@"JUDGE_MATER_{pair.Key}";
-                var isScanMaterial = await App.Store.Dispatch(mqEffects.StartListenScanMaterial(new MqActiions.StartListenScanMaterial(pair.Key, smQueueName)));
-                if (!isScanMaterial) {
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq扫描来料队列 {smQueueName} 失败，请检查" }));
-                }
+                var smTask = App.Store.Dispatch(mqEffects.StartListenScanMaterial(new MqActions.StartListenScanMaterial(pair.Key, smQueueName)));
+                startListenMqDict[smQueueName] = smTask;
+
             }
-            var version = YUtil.GetAppVersion(Assembly.GetExecutingAssembly());
-            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "系统启动完毕", Content = $"版本:{version}" }));
+            //监听人员打卡
+            var empRfidTask = App.Store.Dispatch(mqEffects.StartListenEmpRfid(new MqActions.StartListenEmpRfid(HmiConfig.TopicEmpRfid)));
+            startListenMqDict["rfidEmpTask"] = empRfidTask;
+
+            //监听轴号卡
+            var axisRfidTAsk =
+                App.Store.Dispatch(
+                    mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(HmiConfig.TopicListenHandSet)));
+            startListenMqDict["rfidAxisTask"] = axisRfidTAsk;
+
+
+            var tasks = new List<Task<bool>>() { starHttpSystem, startCpmServer };
+            tasks.AddRange(startListenMqDict.Values);
+
+            await Task.Run(() => {
+                //等等所有任务完成
+                //一分钟超时
+                Task.WaitAll(tasks.ToArray());
+                //是否启动完成Cpm服务
+                var isCpmServer = startCpmServer.Result;
+                if (!isCpmServer) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "启动失败",
+                        Content = $"参数采集服务 {HmiConfig.CpmTcpIp}:{HmiConfig.CpmTcpPort} 启动失败，请检查"
+                    }));
+                }
+                //是否启动完成Http解析系统
+                var isHttpSystem = starHttpSystem.Result;
+                if (!isHttpSystem) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "启动失败",
+                        Content = $"Http {HmiConfig.CmdHttpPort} 端口服务启动失败，请检查"
+                    }));
+                }
+                //是否完成监听Mq
+                foreach (var pair in startListenMqDict) {
+                    var isStartListenMq = pair.Value.Result;
+                    if (pair.Key.ToUpper().Contains("QUEUE") && (!isStartListenMq)) {
+                        App.Store.Dispatch(new SysActions.ShowNotification(
+                            new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq排产队列 {pair.Key} 失败，请检查" }));
+
+                    } else if (pair.Key.ToUpper().Contains("JUDGE_MATER") && (!isStartListenMq)) {
+                        App.Store.Dispatch(new SysActions.ShowNotification(
+                            new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq扫描来料队列 {pair.Key} 失败，请检查" }));
+
+                    } else if (pair.Key.ToUpper().Contains("RFIDEMP") && (!isStartListenMq)) {
+                        App.Store.Dispatch(new SysActions.ShowNotification(
+                             new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 人员打卡 数据失败，请检查" }));
+                    } else if (pair.Key.ToUpper().Contains("RFIDAXIS") && (!isStartListenMq)) {
+                        App.Store.Dispatch(new SysActions.ShowNotification(
+                                                    new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 线盘卡失败，请检查" }));
+                    }
+                }
+
+                var version = YUtil.GetAppVersion(Assembly.GetExecutingAssembly());
+                App.Store.Dispatch(
+                    new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "系统启动完毕",
+                        Content = $"版本:{version}"
+                    }));
+                //初始化完成
+                App.Store.Dispatch(new SysActions.AppInitCompleted());
+            });
+            //dispatchMockMqEmpRfid();
         }
+
+
 
         /// <summary>
         /// 派发模拟数据
@@ -164,6 +229,10 @@ namespace HmiPro.ViewModels {
                 var machineCode = pair.Key;
                 App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(machineCode, AlarmMocks.CreateOneAlarm(code)));
             }
+        }
+
+        void dispatchMockScanMaterial() {
+
         }
 
         /// <summary>

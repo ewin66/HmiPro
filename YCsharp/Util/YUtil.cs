@@ -154,13 +154,14 @@ namespace YCsharp.Util {
 
         /// <summary>
         /// 打开显示器
-        /// <fixme>在win10上面无效</fixme>
+        /// <fixme>会卡死</fixme>
         /// </summary>
         public static void OpenScreen() {
+            Console.WriteLine("暂时不支持打开显示器");
             if (GetOsVersion() != Windows10) {
-                SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
+                //SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, -1);
             } else {
-                Console.WriteLine($"打开显示器操作目前不支持 {Windows10}");
+                //Console.WriteLine($"打开显示器操作目前不支持 {Windows10}");
             }
         }
 

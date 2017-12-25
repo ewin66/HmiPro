@@ -26,6 +26,11 @@ namespace HmiPro.Redux.Actions {
 
         public static readonly string INIT = "[Alarm] Init";
 
+        public enum OdAlarmType {
+            //从Plc中读取最大最小值
+            OdThresholdPlc = 1,
+            Unknown = 2
+        }
 
         public struct CheckCpmBomAlarm : IAction {
             public string Type() => CHECK_CPM_BOM_ALARM;
@@ -54,7 +59,7 @@ namespace HmiPro.Redux.Actions {
 
 
         public struct CloseAlarmLights : IAction {
-            public string Type() =>CLOSE_ALARM_LIGHTS;
+            public string Type() => CLOSE_ALARM_LIGHTS;
             public string MachineCode;
 
             public CloseAlarmLights(string machineCode) {

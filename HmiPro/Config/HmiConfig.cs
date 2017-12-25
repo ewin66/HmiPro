@@ -88,6 +88,8 @@ namespace HmiPro.Config {
         /// </summary>
         [Required] public static readonly string TopicListenHandSet;
 
+        [Required] public static readonly string TopicEmpRfid;
+
         //上传电能
         [Required] public static readonly string QueUploadPowerElec;
         //采集参数超时，超过该时间未有采集参数则清空实时数据表

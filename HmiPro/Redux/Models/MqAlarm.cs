@@ -63,11 +63,14 @@ namespace HmiPro.Redux.Models {
                 if (_time != value) {
                     _time = value;
                     TimeStr = YUtil.UtcTimestampToLocalTime(_time).ToString("yyyy-MM-dd HH:mm:ss");
+                    TimeStrHms = YUtil.UtcTimestampToLocalTime(_time).ToString("HH:mm:ss");
+                    OnPropertyChanged(nameof(TimeStrHms));
                     OnPropertyChanged(nameof(TimeStr));
                 }
             }
         }
         public string TimeStr { get; set; }
+        public string TimeStrHms { get; set; }
 
         private float _meter;
         /// <summary>
@@ -90,6 +93,8 @@ namespace HmiPro.Redux.Models {
         /// 放线处rfid
         /// </summary>
         public HashSet<string> startRfids { get; set; }
+
+        public HashSet<string> endRfids { get; set; }
 
         private string _alarmType;
         /// <summary>

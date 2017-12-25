@@ -36,7 +36,18 @@ namespace HmiPro.Redux.Models {
         public string currentA { get; set; }
         public string currentB { get; set; }
         public string currentC { get; set; }
-
+        /// <summary>
+        /// 时间效率（开机率）
+        /// </summary>
+        public string TimeEff { get; set; }
+        /// <summary>
+        /// 速度效率
+        /// </summary>
+        public string SpeedEff { get; set; }
+        /// <summary>
+        /// 质量效率
+        /// </summary>
+        public string QualityEff { get; set; }
         /// <summary>
         /// 直径
         /// </summary>

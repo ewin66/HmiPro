@@ -11,7 +11,7 @@ namespace HmiPro.Redux.Actions {
     /// <date>2017-12-19</date>
     /// <author>ychost</author>
     /// </summary>
-    public static class MqActiions {
+    public static class MqActions {
         /// <summary>
         /// 开始监听排产任务
         /// </summary>
@@ -39,6 +39,51 @@ namespace HmiPro.Redux.Actions {
 
         //上传任务生产数据
         public static readonly string UPLOAD_SCH_TASK_MANU = "[Mq] Uplaod Schedule Task Manu Data";
+
+        //监听人员卡
+        public static readonly string START_LISTEN_EMP_RFID = "[Mq] Start Listen Employee Rfid";
+        public static readonly string START_LISTEN_EMP_RFID_SUCCESS = "[Mq] Start Listen Employee Rfid Success";
+        public static readonly string START_LISTEN_EMP_RFID_FAILED = "[Mq] Start Listen Employee Rfid Failed";
+
+        //监听线轴卡
+        public static readonly string START_LISTEN_AXIS_RFID = "[Mq] Start Listen Axis Rfid";
+        public static readonly string START_LISTEN_AXIS_RFID_SUCCESS = "[Mq] Start Listen Axis Rfid Success";
+        public static readonly string START_LISTEN_AXIS_RFID_FAILED = "[Mq] Start Listen Axis Rfid Failed";
+
+
+
+        public struct StartListenAxisRfid : IAction {
+            public string Type() => START_LISTEN_AXIS_RFID;
+            public string TopicName;
+
+            public StartListenAxisRfid(string topicName) {
+                TopicName = topicName;
+            }
+        }
+
+
+        public struct StartListenEmpRfid : IAction {
+            public string Type() => START_LISTEN_EMP_RFID;
+            public string TopicName;
+            public StartListenEmpRfid(string topicName) {
+                TopicName = topicName;
+            }
+        }
+
+
+
+        public struct StartListenEmpRfidFailed : IAction {
+            public string Type() => START_LISTEN_EMP_RFID_FAILED;
+            public Exception Exp;
+
+            public StartListenEmpRfidFailed(Exception exp) {
+                Exp = exp;
+            }
+        }
+
+        public struct StartListenEmpRfidSuccess : IAction {
+            public string Type() => START_LISTEN_EMP_RFID_SUCCESS;
+        }
 
 
         public struct UploadSchTaskManu : IAction {
@@ -149,9 +194,11 @@ namespace HmiPro.Redux.Actions {
         public struct ScanMaterialAccpet : IAction {
             public string Type() => SCAN_MATERIAL_ACCEPT;
             public MqScanMaterial ScanMaterial;
+            public string MachineCode;
 
-            public ScanMaterialAccpet(MqScanMaterial material) {
+            public ScanMaterialAccpet(string machineCode, MqScanMaterial material) {
                 ScanMaterial = material;
+                MachineCode = machineCode;
             }
         }
 

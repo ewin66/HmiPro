@@ -66,34 +66,100 @@
                                 <controls:TileLayoutControlExt ItemsSource="{Binding MqSchTasks}" Padding="12" BreakFlowToFit="False" ItemTemplate="{StaticResource SchTaskTileTemplate}" SelectedItem="{Binding SelectedTask, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AllowItemMoving="False"/>
                             </Border>
                             <Grid Grid.Column="1">
-                                <dx:DXTabControl ItemsSource="{Binding Path=MqSchTaskDetails}" ItemHeaderTemplate="{StaticResource TabHeader}" >
-                                    <dx:DXTabControl.Resources>
-                                        <DataTemplate DataType="{x:Type dMes:SchTaskAxisViewModel}">
-                                            <dMes1:SchTaskAxisView DataContext="{Binding Path=.}"/>
-                                        </DataTemplate>
-                                        <DataTemplate DataType="{x:Type dMes:CraftBomViewModel}">
-                                            <dMes1:CraftBomView DataContext="{Binding Path=.}"/>
-                                        </DataTemplate>
-                                    </dx:DXTabControl.Resources>
-                                </dx:DXTabControl>
-
-
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Border Grid.Row="0">
+                                        <TextBlock FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Center" ><Run>上机人员: </Run><Run Text="{Binding Path=EmployeeStr}"/></TextBlock>
+                                    </Border>
+                                    <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" ItemHeaderTemplate="{StaticResource TabHeader}" >
+                                        <dx:DXTabControl.Resources>
+                                            <DataTemplate DataType="{x:Type dMes:SchTaskAxisViewModel}">
+                                                <dMes1:SchTaskAxisView DataContext="{Binding Path=.}"/>
+                                            </DataTemplate>
+                                            <DataTemplate DataType="{x:Type dMes:CraftBomViewModel}">
+                                                <dMes1:CraftBomView DataContext="{Binding Path=.}"/>
+                                            </DataTemplate>
+                                        </dx:DXTabControl.Resources>
+                                    </dx:DXTabControl>
+                                </Grid>
                             </Grid>
                         </Grid>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type Model:ScanMaterialTab}">
+                        <StackPanel DataContext ="{Binding  Path=MqScanMaterial}">
+                            <StackPanel.Resources>
+                                <Style TargetType="dxlc:FlowLayoutControl">
+                                    <Setter Property="Margin" Value="20,0,0,20"></Setter>
+                                </Style>
+                            </StackPanel.Resources>
+                            <TextBlock Text="最终信息"></TextBlock>
+                            <TextBlock Margin="30,0,0,20" Foreground="White">结果： <Run Text="{Binding Path=type }" Style="{StaticResource CpmInstantValue}"></Run>
+                                   原因： <Run Text="{Binding Path=msg}" Style="{StaticResource CpmInstantValue}"></Run>
+                            </TextBlock>
+                            <TextBlock Text="重量 信息"></TextBlock>
+                            <dxlc:FlowLayoutControl ItemsSource="{Binding Path=materMap,Mode=OneWay}" Orientation="Horizontal" ShowLayerSeparators="True">
+                                <dxlc:FlowLayoutControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock  Style="{StaticResource CpmInstantName}" Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type dxlc:FlowLayoutControl}},Path=ActualWidth,
+                                Converter={StaticResource ConverterCoef},ConverterParameter=0.23
+                                }">
+                                    <Run Text="{Binding Path=Key,Mode=OneWay}"/>
+                                    <Run Text=":" />
+                                    <Run  Text="{Binding Path=Value,Mode=OneWay}"  Style="{StaticResource CpmInstantValue}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </dxlc:FlowLayoutControl.ItemTemplate>
+
+                            </dxlc:FlowLayoutControl>
+                            <TextBlock Text="用量 信息"></TextBlock>
+                            <dxlc:FlowLayoutControl ItemsSource="{Binding Path=taskMaterMap,Mode=OneWay}" Orientation="Horizontal" ShowLayerSeparators="True">
+                                <dxlc:FlowLayoutControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock  Style="{StaticResource CpmInstantName}" Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type dxlc:FlowLayoutControl}},Path=ActualWidth,
+                                Converter={StaticResource ConverterCoef},ConverterParameter=0.23
+                                }">
+                                        <Run Text="{Binding Path=Key,Mode=OneWay}"/>
+                                        <Run Text=":" />
+                                        <Run  Text="{Binding Path=Value,Mode=OneWay}"  Style="{StaticResource CpmInstantValue}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </dxlc:FlowLayoutControl.ItemTemplate>
+                            </dxlc:FlowLayoutControl>
+                            <TextBlock Text="相关信息"></TextBlock>
+                            <dxlc:FlowLayoutControl ItemsSource="{Binding Path=msgList,Mode=OneWay}" Orientation="Horizontal" ShowLayerSeparators="True">
+                                <dxlc:FlowLayoutControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock  Style="{StaticResource CpmInstantName}" Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type dxlc:FlowLayoutControl}},Path=ActualWidth,
+                                Converter={StaticResource ConverterCoef},ConverterParameter=0.23
+                                }">
+                                        <Run Text="{Binding Path=.}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </dxlc:FlowLayoutControl.ItemTemplate>
+                            </dxlc:FlowLayoutControl>
+                        </StackPanel>
                     </DataTemplate>
                     <!--报警页面-->
                     <DataTemplate DataType="{x:Type Model:AlarmTab}">
                         <Grid>
+                            <Grid.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontSize" Value="13"></Setter>
+                                </Style>
+                            </Grid.Resources>
                             <dxg:GridControl ItemsSource="{Binding Path=Alarms}" x:Name="AlarmGridControl">
                                 <dxg:GridControl.View>
-                                    <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
+                                    <dxg:TableView  AllowResizing="False"  ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
                                 </dxg:GridControl.View>
                                 <dxg:GridControl.Columns>
                                     <dxg:GridColumn Width="2*"  Header="参数" FieldName="CpmName"/>
                                     <dxg:GridColumn Width="3*" Header="消息" FieldName="message"/>
-                                    <dxg:GridColumn Width="*"  Header="米数" FieldName="meter" />
+                                    <dxg:GridColumn Width="2*"  Header="米数" FieldName="meter" />
                                     <dxg:GridColumn Width="3*" Header="轴号" FieldName="axisCode"/>
-                                    <dxg:GridColumn Width="2*" Header="时间" FieldName="TimeStr"/>
+                                    <dxg:GridColumn Width="2*" Header="时间" FieldName="TimeStrHms"/>
                                 </dxg:GridControl.Columns>
                             </dxg:GridControl>
                         </Grid>

@@ -21,6 +21,49 @@ namespace HmiPro.Redux.Actions {
         public static readonly string START_SCH_TASK_AXIS = "[DMes] Start Schedule Task Axis";
         public static readonly string START_SCH_TASK_AXIS_SUCCESS = "[DMes] Start Schedule Task Axis Success";
         public static readonly string START_SCH_TASK_AXIS_FAILED = "[DMes] Start Schedule Task Axis Failed";
+        //接受到Rfid可能来自Mq，可能来自底层参数
+        public static readonly string RFID_ACCPET = "[Cpm] Rfid Accept";
+
+        public enum RfidWhere {
+            FromCpm,
+            FromMq,
+            Unknown
+        }
+
+        public enum RfidType {
+            //放线轴
+            StartAxis,
+            //收线轴
+            EndAxis,
+            //人员上班打卡
+            EmpStartWork,
+            //人员上机打卡
+            EmpStartMachine,
+            //人员下班打卡
+            EmpEndWork,
+            //人员下机打卡
+            EmpEndMachine,
+            //未知
+            Unknown,
+        }
+
+
+        public struct RfidAccpet : IAction {
+            public string Type() => RFID_ACCPET;
+            public RfidWhere RfidWhere;
+            public RfidType RfidType;
+            public string MachineCode;
+            public string Rfid;
+            public object MqData;
+
+            public RfidAccpet(string machineCode, string rfid, RfidWhere where, RfidType type, object mqData = null) {
+                Rfid = rfid;
+                MachineCode = machineCode;
+                RfidWhere = where;
+                RfidType = type;
+                MqData = mqData;
+            }
+        }
 
 
         public struct StartSchTaskAxis : IAction {

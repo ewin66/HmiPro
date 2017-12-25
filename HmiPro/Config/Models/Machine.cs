@@ -18,6 +18,8 @@ namespace HmiPro.Config.Models {
         /// 计算Oee速度效率方式
         /// </summary>
         public OeeActions.CalcOeeSpeedType OeeSpeedType = OeeActions.CalcOeeSpeedType.Unknown;
+
+        public AlarmActions.OdAlarmType OdAlarmType = AlarmActions.OdAlarmType.Unknown;
         public string[] CpmIps { get; set; }
         //编码：采集参数（所有）
         public IDictionary<int, CpmInfo> CodeToAllCpmDict = new Dictionary<int, CpmInfo>();
@@ -46,6 +48,10 @@ namespace HmiPro.Config.Models {
             if (propDict.TryGetValue("OeeSpeedType", out var type)) {
                 var intVal = int.Parse(type.ToString());
                 OeeSpeedType = (OeeActions.CalcOeeSpeedType)intVal;
+            }
+            if (propDict.TryGetValue("OdAlarmType", out var odAlarmType)) {
+                var intVal = int.Parse(odAlarmType.ToString());
+                OdAlarmType = (AlarmActions.OdAlarmType)intVal;
             }
         }
 
@@ -152,6 +158,14 @@ namespace HmiPro.Config.Models {
             if (OeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedPlc) {
                 if (!LogicToCpmDict.ContainsKey(CpmInfoLogic.MaxSpeedPlc)) {
                     throw new Exception($"配置了OeeSpeedType为MaxSpeedPlc，请设置最大速度的参数逻辑：{CpmInfoLogic.MaxSpeedPlc}");
+                }
+            }
+
+            if (OdAlarmType == AlarmActions.OdAlarmType.OdThresholdPlc) {
+                if (LogicToCpmDict.ContainsKey(CpmInfoLogic.MaxOdPlc) ||
+                    LogicToCpmDict.ContainsKey(CpmInfoLogic.MinOdPlc)) {
+                } else {
+                    throw new Exception($"配置了OdAlarmType为OdThresholdPlc，请设置Plc最大直径 {CpmInfoLogic.MaxOdPlc} 或者 Plc最小直径 {CpmInfoLogic.MinOdPlc}");
                 }
             }
         }

@@ -45,11 +45,12 @@
   "QueUploadPowerElec": "QUE_p2p_Power_elec",
   //上传oee参数
   "QueUploadOee": "QUE_WEB_mau_oee",
-
+  //人员打卡
+  "TopicEmpRfid": "dk",
 
   //---------连接配置---------
   "MongoConn": "mongodb://192.168.88.15:27017",
-  "MqConn": "failover:(tcp://192.168.88.15:61615,tcp://192.168.0.15:61615,tcp://192.168.88.15:61617,tcp://192.168.88.15:61618,tcp://192.168.0.15:61617,tcp://192.168.0.15:61618)?Randomize=false&amp;jms.prefetchPolicy.all=1&maxReconnectAttempts=1",
+  "MqConn": "failover:(tcp://192.168.88.15:61615,tcp://192.168.88.15:61616,tcp://192.168.88.15:61617,tcp://192.168.88.15:61618)?Randomize=false&amp;jms.prefetchPolicy.all=1&maxReconnectAttempts=1",
   "MqUserName": "admin",
   "MqUserPwd": "admin",
   "MathRound": 3,

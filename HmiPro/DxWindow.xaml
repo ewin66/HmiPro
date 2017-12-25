@@ -43,6 +43,9 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
+        <Border Background="Red" Height="30" Visibility="{Binding Path=TopMessageVisibility}" >
+            <TextBlock Text="{Binding TopMessage}" FontSize="22" HorizontalAlignment="Center"></TextBlock>
+        </Border>
         <dxwui:NavigationFrame Grid.Row="1"  x:Name="frame" AnimationType="SlideHorizontal" BackNavigationMode="PreviousScreen" />
     </Grid>
 

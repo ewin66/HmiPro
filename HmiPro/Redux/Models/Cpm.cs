@@ -96,6 +96,7 @@ namespace HmiPro.Redux.Models {
                 return cpms;
             }
 
+
             sm.SmParams?.ForEach(p => {
                 //过滤掉未配置的参数
                 if (machine.CodeToAllCpmDict.ContainsKey(p.ParamCode)) {
@@ -130,7 +131,10 @@ namespace HmiPro.Redux.Models {
                             cpm.Value = p.GetStrData();
                         }
                     }
-                    cpms.Add(cpm);
+                    //屏蔽掉通讯状态数据
+                    if (cpm.ValueType != SmParamType.MultiComStatus && cpm.ValueType != SmParamType.SingleComStatus && cpm.ValueType != SmParamType.Unknown) {
+                        cpms.Add(cpm);
+                    }
                 }
             });
 
