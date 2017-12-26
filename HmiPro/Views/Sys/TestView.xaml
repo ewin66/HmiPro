@@ -24,6 +24,7 @@
                 <Button Content="打开显示器" Height="50" Width="200" Command="{Binding Path=OpenScreenCommand}"></Button>
                 <!--<Button Content="待机显示器" Height="50" Width="200" Command="{Binding Path=StandbyScreenCommand}"></Button>-->
                 <Button Content="关闭显示器 5s" Height="50" Width="200" Command="{Binding Path=CloseScreenCommand}"  CommandParameter="5"></Button>
+                <Button Content="检查更新" Height="50" Width="200" Command="{Binding Path=CheckUpdateCommand}"  ></Button>
             </dxlc:FlowLayoutControl>
         </Grid>
     </dxwui:PageAdornerControl>

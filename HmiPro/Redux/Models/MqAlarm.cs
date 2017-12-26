@@ -138,7 +138,7 @@ namespace HmiPro.Redux.Models {
     }
 
     public static class AlarmType {
-        public static readonly string OdErr = "直径超限";
+        public static readonly string CpmErr = "参数超限";
         public static readonly string SparkErr = "火花报警";
         public static readonly string PounchErr = "打卡错误";
         public static readonly string ClearErr = "清零错误";

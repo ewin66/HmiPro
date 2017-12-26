@@ -26,6 +26,28 @@ namespace HmiPro.Redux.Actions {
 
         public static readonly string INIT = "[Alarm] Init";
 
+        /// <summary>
+        /// 采集参数值超过Plc的设定值
+        /// </summary>
+        public static readonly string CPM_PLC_ALARM_OCCUR = "[Alarm] Cpm Plc Alarm Occur";
+
+        public struct CpmPlcAlarmOccur : IAction {
+            public string Type() => CPM_PLC_ALARM_OCCUR;
+            public string MachineCode;
+            public string Message;
+            public int CpmCode;
+            public string CpmName;
+
+            public CpmPlcAlarmOccur(string machineCode, string message,int cpmCode,string cpmName) {
+                MachineCode = machineCode;
+                Message = message;
+                CpmCode = cpmCode;
+                CpmName = cpmName;
+            }
+        }
+
+
+        [Obsolete("请使用Plc报警配置")]
         public enum OdAlarmType {
             //从Plc中读取最大最小值
             OdThresholdPlc = 1,

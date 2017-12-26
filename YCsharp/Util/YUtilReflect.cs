@@ -162,7 +162,7 @@ namespace YCsharp.Util {
         /// <param name="fieldname"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static T GetPrivateField<T>(this object instance, string fieldname,Type type) {
+        public static T GetPrivateField<T>(this object instance, string fieldname, Type type) {
             BindingFlags flag = BindingFlags.Instance | BindingFlags.NonPublic;
             FieldInfo field = type.GetField(fieldname, flag);
             return (T)field.GetValue(instance);
@@ -234,6 +234,17 @@ namespace YCsharp.Util {
         /// <returns></returns>
         public static string GetPropertyName<T>(Expression<Func<T>> propertyExpression) {
             return (propertyExpression.Body as MemberExpression).Member.Name;
+        }
+
+        /// <summary>
+        /// DataRow获取column的数据
+        /// 如果不存在 column 列则返回null
+        /// </summary>
+        /// <param name="row"></param>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        public static string GetValue(this DataRow row, string column) {
+            return row.Table.Columns.Contains(column) ? row[column].ToString() : null;
         }
     }
 }

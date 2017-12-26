@@ -74,7 +74,7 @@ namespace HmiPro.Redux.Cores {
         public Task StartAsync(string ip, int port) {
             return Task.Run(() => {
                 if (SmParamTcp == null) {
-                    SmParamTcp = new YSmParamTcp(ip, port,Logger);
+                    SmParamTcp = new YSmParamTcp(ip, port, Logger);
                     SmParamTcp.OnDataReceivedAction += smModelsHandler;
                     OnlineCpmDict = App.Store.GetState().CpmState.OnlineCpmsDict;
 
@@ -242,10 +242,46 @@ namespace HmiPro.Redux.Cores {
                     }
                 });
             }
-            //检查报警
+            //检查Mq的Bom表数据报警
             dispatchCheckBomAlarm(machineCode, cpms);
+            //检查Plc上下限报警
+            dispatchCheckPlcAlarm(machineCode, cpms);
         }
 
+
+        /// <summary>
+        /// 检查Plc报警
+        /// </summary>
+        /// <param name="machineCode"></param>
+        /// <param name="cpms"></param>
+        void dispatchCheckPlcAlarm(string machineCode, List<Cpm> cpms) {
+            foreach (var cpm in cpms) {
+                if (cpm.ValueType != SmParamType.Signal) {
+                    continue;
+                }
+                if (MachineConfig.MachineDict[machineCode].CodeToPlcAlarmDict.TryGetValue(cpm.Code, out var plcAlarm)) {
+                    if (plcAlarm.MaxCode.HasValue) {
+                        var maxCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][plcAlarm.MaxCode.Value];
+                        if (maxCpm.ValueType == SmParamType.Signal) {
+                            if (cpm.GetFloatVal() > maxCpm.GetFloatVal()) {
+                                var message = $"{cpm.Name} 超过Plc最大设定值";
+                                App.Store.Dispatch(new AlarmActions.CpmPlcAlarmOccur(machineCode, message,cpm.Code,cpm.Name));
+                            }
+                        }
+                    }
+                    if (plcAlarm.MinCode.HasValue) {
+                        var minCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][plcAlarm.MinCode.Value];
+                        if (minCpm.ValueType == SmParamType.Signal) {
+                            if (cpm.GetFloatVal() < minCpm.GetFloatVal()) {
+                                var message = $"{cpm.Name} 小于Plc最小设定值";
+                                App.Store.Dispatch(new AlarmActions.CpmPlcAlarmOccur(machineCode, message,cpm.Code,cpm.Name));
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
 
         /// <summary>
         /// 将需要报警检查的Cpm发送出去
@@ -254,12 +290,12 @@ namespace HmiPro.Redux.Cores {
         /// <param name="cpms"></param>
         void dispatchCheckBomAlarm(string machineCode, List<Cpm> cpms) {
             cpms?.ForEach(cpm => {
-                if (MachineConfig.MachineDict[machineCode].CodeToBomAlarmCpmDict.TryGetValue(cpm.Code, out var alarmCpm)) {
+                if (MachineConfig.MachineDict[machineCode].CodeToMqBomAlarmCpmDict.TryGetValue(cpm.Code, out var alarmCpm)) {
                     if (cpm.ValueType != SmParamType.Signal) {
                         Logger.Error($"机台 {machineCode} 参数 {cpm.Name} 的值不是浮点类型，不能报警");
                         return;
                     }
-                    var bomKeys = alarmCpm.AlarmBomKey;
+                    var bomKeys = alarmCpm.MqAlarmBomKeys;
                     if (bomKeys?.Length != 2) {
                         Logger.Error($"机台 {machineCode} 参数 {cpm.Name} 的报警配置有误，长度不为 2 ");
                         return;

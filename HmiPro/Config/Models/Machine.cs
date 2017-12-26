@@ -19,6 +19,7 @@ namespace HmiPro.Config.Models {
         /// </summary>
         public OeeActions.CalcOeeSpeedType OeeSpeedType = OeeActions.CalcOeeSpeedType.Unknown;
 
+        [Obsolete("请使用 Plc报警配置字段")]
         public AlarmActions.OdAlarmType OdAlarmType = AlarmActions.OdAlarmType.Unknown;
         public string[] CpmIps { get; set; }
         //编码：采集参数（所有）
@@ -33,8 +34,13 @@ namespace HmiPro.Config.Models {
         public IDictionary<int, CpmInfoLogic> CodeToLogicDict = new Dictionary<int, CpmInfoLogic>();
         //编码：[算法参数编码]
         public IDictionary<int, List<int>> CodeMethodDict = new Dictionary<int, List<int>>();
-        //需要报警的参数
-        public IDictionary<int, CpmInfo> CodeToBomAlarmCpmDict = new Dictionary<int, CpmInfo>();
+
+        //mq检验报警
+        public IDictionary<int, CpmInfo> CodeToMqBomAlarmCpmDict = new Dictionary<int, CpmInfo>();
+
+        public IDictionary<int, PlcAlarmCpm> CodeToPlcAlarmDict = new Dictionary<int, PlcAlarmCpm>();
+
+
 
         /// <summary>
         /// 初始化机台属性，如机台编码，底层ip等等
@@ -106,16 +112,45 @@ namespace HmiPro.Config.Models {
                         codeList.Add(code);
                     });
                 }
-                //需要报警参数
-                if (cpm.AlarmBomKey != null) {
-                    CodeToBomAlarmCpmDict[cpm.Code] = cpm;
+                //mq报警设置
+                if (cpm.MqAlarmBomKeys != null) {
+                    CodeToMqBomAlarmCpmDict[cpm.Code] = cpm;
+                }
+                //plc报警参数设置
+                if (!string.IsNullOrEmpty(cpm.PlcAlarmKey)) {
+                    //报警参数
+                    if (!cpm.PlcAlarmKey.ToLower().Contains("_max") && !cpm.PlcAlarmKey.ToLower().Contains("_min")) {
+                        CodeToPlcAlarmDict[cpm.Code] = new PlcAlarmCpm() { Code = cpm.Code, AlarmKey = cpm.PlcAlarmKey };
+                    }
+
+                }
+            });
+            //更新Plc报警参数
+            foreach (var pair in CodeToPlcAlarmDict) {
+                var plcAlarm = pair.Value;
+                var max = cpms.FirstOrDefault(cpm => cpm.PlcAlarmKey?.ToLower() == plcAlarm.AlarmKey + "_max");
+                if (max != null) {
+                    plcAlarm.MaxCode = max.Code;
+                }
+                var min = cpms.FirstOrDefault(cpm => cpm.PlcAlarmKey?.ToLower() == plcAlarm.AlarmKey + "_min");
+                if (min != null) {
+                    plcAlarm.MinCode = min.Code;
                 }
 
-            });
+            }
+
             validCodeMethodDict();
+            validPlcAlarm();
             buildLogicDict();
         }
 
+
+        /// <summary>
+        /// 校验Plc报警配置
+        /// </summary>
+        void validPlcAlarm() {
+
+        }
 
         /// <summary>
         /// 校验算法参数的编码是有效的

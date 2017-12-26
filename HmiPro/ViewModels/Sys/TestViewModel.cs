@@ -9,6 +9,8 @@ using HmiPro.Helpers;
 using HmiPro.Mocks;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
+using HmiPro.Redux.Services;
+using YCsharp.Service;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels.Sys {
@@ -46,6 +48,17 @@ namespace HmiPro.ViewModels.Sys {
                     });
                 });
             }
+        }
+
+
+        [Command(Name = "CheckUpdateCommand")]
+        public void CheckUpdate() {
+            var sysService = UnityIocService.ResolveDepend<SysService>();
+            Task.Run(() => {
+                if (sysService.CheckUpdate()) {
+                    sysService.StartUpdate();
+                }
+            });
         }
 
         [Command(Name = "OpenScreenCommand")]

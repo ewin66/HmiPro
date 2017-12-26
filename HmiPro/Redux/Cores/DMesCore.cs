@@ -84,6 +84,7 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[CpmActions.OD_ACCPET] = whenOdAccept;
             actionExecDict[DMesActions.RFID_ACCPET] = doRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccept;
+            actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
 
             App.Store.Subscribe((state, action) => {
                 if (actionExecDict.TryGetValue(state.Type, out var exec)) {
@@ -100,6 +101,36 @@ namespace HmiPro.Redux.Cores {
             }
             //恢复任务
             RestoreTask();
+        }
+
+        /// <summary>
+        /// 采集参数超过Plc设定的最值
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenCpmPlcAlarm(AppState state, IAction action) {
+            var alarmAction = (AlarmActions.CpmPlcAlarmOccur)action;
+            var meter = App.Store.GetState().CpmState.NoteMeterDict[alarmAction.MachineCode];
+            //记米小于等于0则不产生报警
+            if (meter <= 0) {
+                return;
+            }
+            lock (SchTaskDoingLocks[alarmAction.MachineCode]) {
+                var mqAlarm = new MqAlarm() {
+                    machineCode = alarmAction.MachineCode,
+                    alarmType = AlarmType.CpmErr,
+                    axisCode = SchTaskDoingDict[alarmAction.MachineCode].MqSchAxis?.axiscode ?? "/",
+                    code = alarmAction.CpmCode,
+                    CpmName = alarmAction.CpmName,
+                    message = alarmAction.Message,
+                    employees = SchTaskDoingDict[alarmAction.MachineCode]?.EmpRfids,
+                    endRfids = SchTaskDoingDict[alarmAction.MachineCode]?.EndAxisRfids,
+                    startRfids = SchTaskDoingDict[alarmAction.MachineCode]?.StartAxisRfids,
+                    meter = meter,
+                    time = YUtil.GetUtcTimestampMs(DateTime.Now),
+                };
+                App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm));
+            }
         }
 
         /// <summary>
@@ -139,7 +170,7 @@ namespace HmiPro.Redux.Cores {
         void checkOdAlarmByPlc(string machineCode, Cpm odCpm) {
             MqAlarm mqAlarm = new MqAlarm() {
                 machineCode = machineCode,
-                alarmType = AlarmType.OdErr,
+                alarmType = AlarmType.CpmErr,
                 axisCode = SchTaskDoingDict[machineCode]?.MqSchAxis?.axiscode ?? "/",
                 code = odCpm.Code,
                 CpmName = odCpm.Name,
@@ -257,7 +288,6 @@ namespace HmiPro.Redux.Cores {
                     if (!isPrinted) {
                         MqEmpRfidDict[dmesAction.MachineCode].Add(mqEmpRfid);
                     }
-
                     //人员下机卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EmpEndMachine) {
                     doingTask.EmpRfids.Remove(dmesAction.Rfid);
@@ -435,7 +465,7 @@ namespace HmiPro.Redux.Cores {
                 if (max.HasValue && min.HasValue) {
                     var cpmVal = (float)checkAlarm.Cpm.Value;
                     if (cpmVal > max || cpmVal < min) {
-                        MqAlarm mqAlarm = createMqAlarm(machineCode, checkAlarm.Cpm.PickTimeStampMs, checkAlarm.Cpm.Name, AlarmType.OdErr);
+                        MqAlarm mqAlarm = createMqAlarm(machineCode, checkAlarm.Cpm.PickTimeStampMs, checkAlarm.Cpm.Name, AlarmType.CpmErr);
                         dispatchAlarmAction(machineCode, mqAlarm);
                     }
                 } else {
@@ -618,6 +648,12 @@ namespace HmiPro.Redux.Cores {
                 var completedAxis = taskDoing.MqSchTask.axisParam.Count(a => a.IsCompleted == true);
                 taskDoing.CompleteRate = completedAxis / taskDoing.MqSchTask.axisParam.Count;
 
+                //更新缓存
+                using (var ctx = SqliteHelper.CreateSqliteService()) {
+                    //移除已经完成的任务轴
+                    taskDoing.MqSchTask.axisParam.Remove(taskDoing.MqSchAxis);
+                    ctx.SavePersist(new Persist("task_" + machineCode, JsonConvert.SerializeObject(MqSchTasksDict[machineCode])));
+                }
                 uManu = new MqUploadManu() {
                     actualBeginTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
                     actualEndTime = YUtil.GetUtcTimestampMs(taskDoing.EndTime),
@@ -664,6 +700,7 @@ namespace HmiPro.Redux.Cores {
         public void CompleteOneSchTask(string machineCode, string workCode) {
             var mqTasks = MqSchTasksDict[machineCode];
             var removeTask = mqTasks.FirstOrDefault(t => t.workcode == workCode);
+            //移除已经完成的某个工单任务
             mqTasks.Remove(removeTask);
             //更新缓存
             using (var ctx = SqliteHelper.CreateSqliteService()) {

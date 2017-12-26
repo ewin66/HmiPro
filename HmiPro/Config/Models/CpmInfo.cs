@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YCsharp.Service;
+using YCsharp.Util;
 
 namespace HmiPro.Config.Models {
     /// <summary>
@@ -18,7 +19,12 @@ namespace HmiPro.Config.Models {
         public int Code;
         public string Name;
         public string Unit;
-        public string[] AlarmBomKey;
+        public string[] MqAlarmBomKeys;
+        /// <summary>
+        /// Plc报警配置，可能为值，也可能为值_max，值_min
+        /// </summary>
+        public string PlcAlarmKey;
+
 
         private CpmInfoMethodName? methodName;
         public CpmInfoMethodName? MethodName {
@@ -254,7 +260,7 @@ namespace HmiPro.Config.Models {
         //Plc设置最大直径
         MaxOdPlc = 9,
         //Plc设置最小直径
-        MinOdPlc=10
+        MinOdPlc = 10
     }
 
     public enum CpmInfoMethodName {
@@ -349,11 +355,10 @@ namespace HmiPro.Config.Models {
                     //算法参数（字符串）
                     cpmInfo.MethodParamStrs = string.IsNullOrEmpty(cpmStr.MethodParams) ? null : cpmStr.MethodParams.Split(new string[] { methodParamSplitor }, StringSplitOptions.RemoveEmptyEntries).ToList();
                     //报警的Bom内容的Key
-                    //cpmInfo.AlarmBomKey = cpmStr.Alarm;
-                    if (!string.IsNullOrEmpty(cpmStr.Alarm)) {
-                        cpmInfo.AlarmBomKey = cpmStr.Alarm.Trim().Split('|');
+                    if (!string.IsNullOrEmpty(cpmStr.MqAlarm)) {
+                        cpmInfo.MqAlarmBomKeys = cpmStr.MqAlarm.Trim().Split('|');
                     }
-
+                    cpmInfo.PlcAlarmKey = cpmStr.PlcAlarm;
                     //算法参数（计算型）
                     if (IsRelateMethod(cpmInfo.MethodName)) {
                         cpmInfo.MethodParamInts = new List<int>(cpmInfo.MethodParamStrs.Count);
@@ -375,15 +380,21 @@ namespace HmiPro.Config.Models {
     /// </summary>
     public static class CpmLoaderOp {
         public static CpmStr Load(DataRow row) {
-            return new CpmStr() {
+            var cpmStr = new CpmStr() {
                 Name = row["名称"].ToString(),
                 Code = row["编码"].ToString(),
                 Unit = row["单位"].ToString(),
                 MethodName = row["算法"].ToString(),
                 MethodParams = row["算法参数"].ToString(),
                 Logic = row["逻辑类型"].ToString(),
-                Alarm = row["报警配置"].ToString(),
             };
+            cpmStr.PlcAlarm = row.GetValue("Plc报警配置");
+            //兼容老版本配置
+            cpmStr.MqAlarm = row.GetValue("报警配置");
+            if (string.IsNullOrEmpty(cpmStr.MqAlarm)) {
+                cpmStr.MqAlarm = row.GetValue("Mq报警配置");
+            }
+            return cpmStr;
         }
 
         /// <summary>
@@ -412,6 +423,32 @@ namespace HmiPro.Config.Models {
         public string MethodName;
         public string MethodParams;
         public string Logic;
-        public string Alarm;
+        public string MqAlarm;
+        public string PlcAlarm;
+    }
+
+    /// <summary>
+    /// Plc报警
+    /// 含有参数编码、最大值参数编码、最小值参数编码
+    /// <author>ychost</author>
+    /// <date>2017-12-26</date>
+    /// </summary>
+    public class PlcAlarmCpm {
+        /// <summary>
+        /// 待报警参数编码
+        /// </summary>
+        public int Code;
+        /// <summary>
+        /// 最大值参数编码
+        /// </summary>
+        public int? MaxCode;
+        /// <summary>
+        /// 最小值参数编码
+        /// </summary>
+        public int? MinCode;
+        /// <summary>
+        /// 报警关键字
+        /// </summary>
+        public string AlarmKey;
     }
 }

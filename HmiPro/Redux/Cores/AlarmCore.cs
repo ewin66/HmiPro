@@ -54,7 +54,7 @@ namespace HmiPro.Redux.Cores {
             //显示消息通知
             App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                 Title = "警报",
-                Content = machineCode + ":" + alarmAdd.alarmType
+                Content = machineCode + ":" + alarmAdd.message
             }));
             //上传报警到Mq
             App.Store.Dispatch(mqEffects.UploadAlarm(new MqActions.UploadAlarmMq(HmiConfig.QueWebSrvException, alarmAdd)));
