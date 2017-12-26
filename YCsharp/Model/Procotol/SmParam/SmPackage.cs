@@ -21,16 +21,21 @@ namespace YCsharp.Model.Procotol.SmParam {
         /// <param name="count"></param>
         /// <returns></returns>
         internal static SmPackageType GetPackageType(byte[] buffer, int offset, int count) {
-            if (AsserIsPackage(buffer, offset, count)) {
-                byte cmdFrame = buffer[SmTool.GetSocketIndex(SmIndex.Cmd, offset)];
-                if (cmdFrame == (byte)SmCmdFrame.Param) {
-                    return SmPackageType.ParamPackage;
-                } else if (cmdFrame == (byte)SmCmdFrame.Heartbeat) {
-                    return SmPackageType.HeartbeatPackage;
-                } else if (cmdFrame == (byte)SmCmdFrame.ClientReplyCmd) {
-                    return SmPackageType.ClientReplyCmd;
+            try {
+                if (AsserIsPackage(buffer, offset, count)) {
+                    byte cmdFrame = buffer[SmTool.GetSocketIndex(SmIndex.Cmd, offset)];
+                    if (cmdFrame == (byte)SmCmdFrame.Param) {
+                        return SmPackageType.ParamPackage;
+                    } else if (cmdFrame == (byte)SmCmdFrame.Heartbeat) {
+                        return SmPackageType.HeartbeatPackage;
+                    } else if (cmdFrame == (byte)SmCmdFrame.ClientReplyCmd) {
+                        return SmPackageType.ClientReplyCmd;
+                    }
                 }
+            } catch {
+
             }
+
             return SmPackageType.ErrorPackage;
             ;
         }

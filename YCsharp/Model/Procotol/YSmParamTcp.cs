@@ -133,8 +133,15 @@ namespace YCsharp.Model.Procotol {
             //解析套接字数据
             using (var analysis = new SmAnalysis(SmClientManager.IPSessionBuffer[ip])) {
                 smModels = analysis.ThroughAnalysisStack(reBuffer, 0, reCount);
+                //多余的缓存进行清空
+                //最大缓存为1024*1000
+                if (SmClientManager.IPSessionBuffer[ip].DataCount > 1024000) {
+                    SmClientManager.IPSessionBuffer[ip].Clear(0, SmClientManager.IPSessionBuffer[ip].BufferSize);
+                }
+
                 if (smModels?.Count == 0) {
                     Console.WriteLine($"{ip} 包解析失败");
+                    return;
                 }
                 smModels.ForEach(sm => {
                     //按协议应给客户端回复

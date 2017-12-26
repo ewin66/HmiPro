@@ -24,6 +24,7 @@ using HmiPro.Views.Sys;
 using Newtonsoft.Json;
 using YCsharp.Service;
 using FluentScheduler;
+using HmiPro.Redux.Services;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels {
@@ -88,20 +89,22 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void whenAppInitCompleted(AppState state, IAction action) {
-            //Mocks.Mocks.DispatchMqMockScanMaterial(MachineConfig.MachineDict.Keys.FirstOrDefault());
-            var machineCode = MachineConfig.MachineDict.Keys.FirstOrDefault();
-            Mocks.Mocks.DispatchMockMqEmpRfid(machineCode);
-            YUtil.SetTimeout(5000, () => {
-                Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
+            if (YUtil.GetWindowsUserName().ToUpper().Contains("YCHOST")) {
+                var machineCode = MachineConfig.MachineDict.Keys.FirstOrDefault();
+                Mocks.Mocks.DispatchMockMqEmpRfid(machineCode);
                 YUtil.SetTimeout(5000, () => {
-                    Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
+                    Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
+                    YUtil.SetTimeout(5000, () => {
+                        Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
+                    });
                 });
-            });
-
+            }
+            //启动完毕则检查更新
+            var sysService = UnityIocService.ResolveDepend<SysService>();
+            if (sysService.CheckUpdate()) {
+                sysService.StartUpdate();
+            }
         }
-
-
-
 
         /// <summary>
         /// 检查与某个ip的连接状况，并显示在window顶部

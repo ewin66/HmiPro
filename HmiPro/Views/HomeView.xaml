@@ -38,9 +38,9 @@
                 <dxlc:Tile Header="生产管理" Style="{StaticResource HorizontalTile}" Background="#FF54AF0E"  Command="{Binding NavigateCommand}" CommandParameter="DMesManuView">
                     <BitmapImage UriSource="{Binding Assets.IconMonitor}" />
                 </dxlc:Tile>
-                <dxlc:Tile Header="呼叫管理" Style="{StaticResource HorizontalTile}" Background="#00b8d4"  Command="{Binding NavigateCommand}" CommandParameter="CallView">
+                <!--<dxlc:Tile Header="呼叫管理" Style="{StaticResource HorizontalTile}" Background="#00b8d4"  Command="{Binding NavigateCommand}" CommandParameter="CallView">
                     <BitmapImage UriSource="{Binding Assets.IconCall}" />
-                </dxlc:Tile>
+                </dxlc:Tile>-->
                 <!--<dxlc:Tile Header="任务管理"  Style="{StaticResource HorizontalTile}" Background="#009688"  Command="{Binding NavigateCommand}" CommandParameter="SystemSettingViewDev" Margin="643,-480,-643,480">
                     <BitmapImage UriSource="{Binding Assets.IconTask}" />
                 </dxlc:Tile>-->

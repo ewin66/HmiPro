@@ -31,11 +31,11 @@ namespace HmiPro.Redux.Cores {
         public float? CalcOeeTimeEff(string machineCode, IList<MachineState> machineStates) {
             float? timeEff = null;
             if (!MachineConfig.MachineDict[machineCode].LogicToCpmDict.ContainsKey(CpmInfoLogic.OeeSpeed)) {
-                Logger.Error($"机台 {machineCode} 未配置速度逻辑，无法判断开停机，无法计算 Oee - 时间效率");
+                Logger.Debug($"机台 {machineCode} 未配置速度逻辑，无法判断开停机，无法计算 Oee - 时间效率", ConsoleColor.Red);
                 return null;
             }
             float currentSpeed = 0;
-            currentSpeed = App.Store.GetState().CpmState.SpeedDict[machineCode].GetFloatVal();
+            currentSpeed = App.Store.GetState().CpmState.SpeedDict[machineCode];
             var runTimeSec = getMachineRunTimeSec(machineStates, currentSpeed);
             var debugTimeSec = getMachineDebugTimeSec();
             var workTime = YUtil.GetKeystoneWorkTime();
@@ -120,11 +120,13 @@ namespace HmiPro.Redux.Cores {
         private double getMachineRunTimeSec(IList<MachineState> machineStates, float currentSpeed) {
             double runTimeSec = -1;
             //开工时间
-            var workTime = YUtil.GetWorkTime(8, 20);
+            var workTime = YUtil.GetKeystoneWorkTime();
             //只有一个状态的情况
             if (machineStates.Count == 1) {
+                //一个开机点，则认为之前都是关机状态
                 if (machineStates[0].StatePoint == MachineState.State.Start) {
                     runTimeSec = (DateTime.Now - machineStates[0].Time).TotalSeconds;
+                    //一个关机点，则认为之前都是开机状态
                 } else {
                     runTimeSec = (machineStates[0].Time - workTime).TotalSeconds;
                 }

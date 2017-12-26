@@ -62,18 +62,20 @@ namespace HmiPro.Redux.Reducers {
             /// </summary>
             public IDictionary<string, ObservableCollection<MachineDebugState>> MachineDebugStateDict;
             /// <summary>
-            /// 计算速度导数算法
-            /// </summary>
-            public IDictionary<string, Func<double, double>> SpeedCalcDerDict;
-            /// <summary>
             /// 保存机台出线速度
             /// </summary>
-            public IDictionary<string, Cpm> SpeedDict;
+            public IDictionary<string, float> SpeedDict;
+            /// <summary>
+            /// 保存当前速度的前一个速度
+            /// </summary>
+            public IDictionary<string, float> PreSpeedDict;
             /// <summary>
             /// 机台编码
             /// </summary>
             public string MachineCode;
-
+            /// <summary>
+            /// 日志工具
+            /// </summary>
             public LoggerService Logger;
         }
 
@@ -86,10 +88,10 @@ namespace HmiPro.Redux.Reducers {
                 state.NoteMeterDict = new Dictionary<string, float>();
                 state.IpActivedDict = new Dictionary<string, DateTime>();
                 state.SparkDiffDict = new Dictionary<string, Cpm>();
-                state.MachineStateDict = new Dictionary<string, ObservableCollection<MachineState>>();
+                state.MachineStateDict = new ConcurrentDictionary<string, ObservableCollection<MachineState>>();
                 state.MachineDebugStateDict = new Dictionary<string, ObservableCollection<MachineDebugState>>();
-                state.SpeedCalcDerDict = new Dictionary<string, Func<double, double>>();
-                state.SpeedDict = new Dictionary<string, Cpm>();
+                state.SpeedDict = new Dictionary<string, float>();
+                state.PreSpeedDict = new Dictionary<string, float>();
                 state.Logger = LoggerHelper.CreateLogger(typeof(CpmReducer).ToString());
                 foreach (var pair in MachineConfig.MachineDict) {
                     var machineCode = pair.Key;
@@ -107,9 +109,9 @@ namespace HmiPro.Redux.Reducers {
                     }
                     state.OnlineCpmsDict[machineCode] = cpmsDict;
                     state.MachineStateDict[machineCode] = new ObservableCollection<MachineState>();
-                    state.SpeedCalcDerDict[machineCode] = YUtil.CreateExecDerFunc();
-                    state.SpeedDict[machineCode] = new Cpm() { Value = 0f, ValueType = SmParamType.Signal };
+                    state.SpeedDict[machineCode] = 0f;
                     state.NoteMeterDict[machineCode] = 0f;
+                    state.PreSpeedDict[machineCode] = 0f;
                 }
                 return state;
             }).When<CpmActions.StartServerSuccess>((state, action) => {
@@ -121,12 +123,10 @@ namespace HmiPro.Redux.Reducers {
                 state.MachineCode = action.MachineCode;
                 state.UpdatedCpmsDiffDict[state.MachineCode] = action.CpmsDict;
                 return state;
-
             }).When<CpmActions.CpmUpdatedAll>((state, action) => {
                 state.MachineCode = action.MachineCode;
                 state.UpdatedCpmsAllDict[action.MachineCode] = action.Cpms;
                 return state;
-
             }).When<CpmActions.NoteMeterAccept>((state, action) => {
                 state.MachineCode = action.MachineCode;
                 state.NoteMeterDict[state.MachineCode] = action.Meter;
@@ -138,55 +138,48 @@ namespace HmiPro.Redux.Reducers {
                 state.MachineCode = action.MachineCode;
                 state.SparkDiffDict[action.MachineCode] = action.SparkCpm;
                 return state;
-            }).When<CpmActions.SpeedDiffAccpet>((state, action) => {
-
+            }).When<CpmActions.SpeedAccept>((state, action) => {
                 state.MachineCode = action.MachineCode;
-                var speed = (float)action.SpeedCpm.GetFloatVal();
-                var speedDer = state.SpeedCalcDerDict[state.MachineCode](speed);
-                //更新速度表
-                state.SpeedDict[state.MachineCode] = action.SpeedCpm;
-                //速度下降到 0 了，对其机台状态进行分析
-                if ((int)speed == 0) {
-                    var machineStates = state.MachineStateDict[state.MachineCode];
-                    //导数大于0，则认为是启动阶段
-                    MachineState newMachineSatte = null;
-                    if (speedDer > 0) {
-                        newMachineSatte = new MachineState() {
-                            StatePoint = MachineState.State.Start,
-                            Time = action.SpeedCpm.PickTime
-                        };
-                        //导数小于0，则认为是关闭阶段
-                    } else if (speedDer < 0) {
-                        newMachineSatte = new MachineState() {
-                            StatePoint = MachineState.State.Stop,
-                            Time = action.SpeedCpm.PickTime
-                        };
-                    }
-                    //初始化
-                    if (machineStates.Count == 0) {
-                        if (newMachineSatte != null) {
-                            machineStates.Add(newMachineSatte);
-                        }
-                        return state;
-                    }
+                var currentSpeed = action.Speed;
+                //开机阶段，上一个速度为0 ，此时的速度大于0
+                MachineState newMachineState = null;
+                var machineCode = action.MachineCode;
+                state.SpeedDict[machineCode] = currentSpeed;
+                if (currentSpeed > 0 && state.PreSpeedDict[machineCode] == 0) {
+                    newMachineState = new MachineState() {
+                        StatePoint = MachineState.State.Start,
+                        Time = DateTime.Now
+                    };
+                }
+                //关机阶段，上一个速度大于0，此时速度等于0
+                else if (currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
+                    newMachineState = new MachineState() {
+                        StatePoint = MachineState.State.Stop,
+                        Time = DateTime.Now
+                    };
+                }
+                //赋值前一个速度
+                state.PreSpeedDict[action.MachineCode] = action.Speed;
+                if (newMachineState == null) {
+                    return state;
+                }
 
-                    try {
-                        var lastMachineState = machineStates.Last();
-                        if (lastMachineState.StatePoint == newMachineSatte.StatePoint) {
-                            state.Logger.Error($"机台 {state.MachineCode} 状态分析有误,两次状态一样均为：{lastMachineState.StatePoint}");
-                        } else {
-                            machineStates.Add(newMachineSatte);
-                        }
-
-                        var workTime = YUtil.GetWorkTime(8, 20);
-                        //删除上一班的机台状态数据
-                        var removeList = machineStates.Where(m => m.Time < workTime).ToList();
-                        foreach (var item in removeList) {
-                            machineStates.Remove(item);
-                        }
-                    } catch (Exception e) {
-                        state.Logger.Error($"机台 {state.MachineCode} 状态分析异常", e);
+                var machineStates = state.MachineStateDict[machineCode];
+                if (machineStates.Count == 0) {
+                    machineStates.Add(newMachineState);
+                } else if (machineStates.Count > 0) {
+                    var lastState = machineStates.LastOrDefault();
+                    if (lastState?.StatePoint == newMachineState.StatePoint) {
+                        state.Logger.Error($"机台 {machineCode} 分析开关机有误，两次都为 {lastState?.StatePoint}");
+                    } else {
+                        machineStates.Add(newMachineState);
                     }
+                }
+                var workTime = YUtil.GetKeystoneWorkTime();
+                //删除上一班的机台状态数据
+                var removeList = machineStates.Where(m => m.Time < workTime).ToList();
+                foreach (var item in removeList) {
+                    machineStates.Remove(item);
                 }
                 return state;
             });

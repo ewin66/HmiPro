@@ -235,7 +235,7 @@ namespace HmiPro.Redux.Cores {
                     if (cpm == null) {
                         return;
                     }
-                    App.Store.Dispatch(new CpmActions.SpeedDiffAccpet(machineCode, cpm));
+                    App.Store.Dispatch(new CpmActions.SpeedDiffAccpet(machineCode, cpm.GetFloatVal()));
                     //速度变化为0的事件
                     if (cpm.GetFloatVal() == 0) {
                         App.Store.Dispatch(new CpmActions.SpeedDiffZeroAccept(machineCode));

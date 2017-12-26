@@ -59,7 +59,7 @@ namespace HmiPro.Redux.Effects {
                     dispatch(instance);
                     return await Task.Run(() => {
                         try {
-                            activeMq.ListenTopic(instance.TopicName,null,
+                            activeMq.ListenTopic(instance.TopicName, null,
                                 mqService.AxisRfidAccpet)();
                             dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_SUCCESS, null));
                             return true;
@@ -81,7 +81,7 @@ namespace HmiPro.Redux.Effects {
                     dispatch(instance);
                     return await Task.Run(() => {
                         try {
-                            activeMq.ListenTopic(instance.TopicName,null, mqService.EmpRfidAccept)();
+                            activeMq.ListenTopic(instance.TopicName, null, mqService.EmpRfidAccept)();
                             dispatch(new MqActions.StartListenEmpRfidSuccess());
                             return true;
                         } catch (Exception e) {
@@ -186,7 +186,7 @@ namespace HmiPro.Redux.Effects {
 
                         MqUploadCpms uCpms = new MqUploadCpms();
                         uCpms.machineCode = machineCode;
-                        uCpms.macSpeed = getState().CpmState.SpeedDict[machineCode]?.Value;
+                        uCpms.macSpeed = getState().CpmState.SpeedDict[machineCode];
                         uCpms.TimeEff = getState().OeeState.OeeDict[machineCode].TimeEff.ToString("0.00");
                         uCpms.SpeedEff = getState().OeeState.OeeDict[machineCode].SpeedEff.ToString("0.00");
                         uCpms.QualityEff = getState().OeeState.OeeDict[machineCode].QualityEff.ToString("0.00");

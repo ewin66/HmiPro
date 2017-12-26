@@ -210,12 +210,12 @@ namespace HmiPro.Redux.Actions {
 
         public struct SpeedDiffAccpet : IAction {
             public string Type() => SPEED_DIFF_ACCEPT;
-            public Cpm SpeedCpm;
+            public float Speed;
             public string MachineCode;
 
-            public SpeedDiffAccpet(string machineCode, Cpm speedCpm) {
+            public SpeedDiffAccpet(string machineCode, float speed) {
                 MachineCode = machineCode;
-                SpeedCpm = speedCpm;
+                Speed = speed;
             }
         }
 
