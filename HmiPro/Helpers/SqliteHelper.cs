@@ -96,7 +96,7 @@ namespace HmiPro.Helpers {
 
         public T Restore<T>(string key) {
             var ret = default(T);
-            var persist = Persists.Where(p => p.Key == key).Take(1).FirstOrDefault();
+            var persist = Persists.FirstOrDefault(p => p.Key == key);
             if (persist != null) {
                 var json = persist.Json;
                 ret = JsonConvert.DeserializeObject<T>(json);

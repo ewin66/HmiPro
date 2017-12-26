@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace YCsharp.Util {
@@ -83,7 +84,15 @@ namespace YCsharp.Util {
         /// </summary>
         /// <param name="nirCmdPath"></param>
         public static void CloseScreenByNirCmd(string nirCmdPath) {
-            ExecCmd(nirCmdPath, "monitor off");
+            if (YUtil.GetOsVersion().Contains(Windows10)) {
+                Console.WriteLine("暂不支持win10的关闭屏幕操作");
+                return;
+            }
+            var task = Task.Run(() => {
+                ExecCmd(nirCmdPath, "monitor off");
+            });
+            //1秒超时，之前有卡死的bug，目前这样修复
+            task.Wait(1000);
         }
 
         /// <summary>
@@ -91,7 +100,15 @@ namespace YCsharp.Util {
         /// </summary>
         /// <param name="nirCmdPath"></param>
         public static void OpenScreenByNirCmmd(string nirCmdPath) {
-            ExecCmd(nirCmdPath, "monitor on");
+            if (YUtil.GetOsVersion().Contains(Windows10)) {
+                Console.WriteLine("暂不支持win10的开启屏幕操作");
+                return;
+            }
+            var task = Task.Run(() => {
+                ExecCmd(nirCmdPath, "monitor on");
+            });
+            //1秒超时，之前有卡死的bug，目前这样修复
+            task.Wait(1000);
         }
     }
 }

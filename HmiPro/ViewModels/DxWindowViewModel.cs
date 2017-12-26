@@ -100,9 +100,12 @@ namespace HmiPro.ViewModels {
             //    });
             //}
             //启动完毕则检查更新
-            var sysService = UnityIocService.ResolveDepend<SysService>();
-            if (sysService.CheckUpdate()) {
-                sysService.StartUpdate();
+
+            if (!YUtil.GetWindowsUserName().ToLower().Contains("ychost")) {
+                var sysService = UnityIocService.ResolveDepend<SysService>();
+                if (sysService.CheckUpdate()) {
+                    sysService.StartUpdate();
+                }
             }
         }
 

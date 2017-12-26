@@ -17,6 +17,7 @@
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:controls="clr-namespace:HmiPro.Controls"
              xmlns:dMes1="clr-namespace:HmiPro.Views.DMes"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
              mc:Ignorable="d"
              DataContext="{dxmvvm:ViewModelSource Type=dMes:DMesManuViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -67,13 +68,28 @@
                             </Border>
                             <Grid Grid.Column="1">
                                 <Grid>
+                                    <Grid.Resources>
+                                        <Style TargetType="dxe:InplaceBaseEdit">
+                                            <Setter Property="FontSize" Value="12"></Setter>
+                                        </Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="FontSize" Value="12"></Setter>
+                                        </Style>
+                                    </Grid.Resources>
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="50"/>
                                         <RowDefinition/>
                                     </Grid.RowDefinitions>
-                                    <Border Grid.Row="0">
-                                        <TextBlock FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Center" ><Run>上机人员: </Run><Run Text="{Binding Path=EmployeeStr}"/></TextBlock>
-                                    </Border>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"></RowDefinition>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" ><Run>上机人员: </Run>  <Run Text="{Binding Path=EmployeeStr,Mode=OneWay}"/></TextBlock>
+                                        <TextBlock Grid.Row="1" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Run >开始：</Run> <Run Text="{Binding Path=SelectedTask.PsTimeStr,Mode=OneWay}"/><Run>  结束：</Run><Run Text="{Binding SelectedTask.PdTimeStr,Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </Grid>
                                     <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" ItemHeaderTemplate="{StaticResource TabHeader}" >
                                         <dx:DXTabControl.Resources>
                                             <DataTemplate DataType="{x:Type dMes:SchTaskAxisViewModel}">

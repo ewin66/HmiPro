@@ -40,7 +40,7 @@
         </Setter>
     </Style>
     <DataTemplate x:Key="SchTaskTileTemplate" DataType="{x:Type models:MqSchTask}">
-        <controls:TileExt Width="270" Height="140" Header="{Binding}" Content="{Binding}" VerticalHeaderAlignment="Stretch" Padding="0" helpers:ZoomHelper.SupressZoomFactor="300">
+        <controls:TileExt Width="135" Height="70" Header="{Binding}" Content="{Binding}" VerticalHeaderAlignment="Stretch" Padding="0" helpers:ZoomHelper.SupressZoomFactor="300">
             <controls:TileExt.HeaderTemplate>
                 <DataTemplate DataType="{x:Type models:MqSchTask}">
                     <Grid>
@@ -49,12 +49,12 @@
                             <Grid>
                                 <Border  VerticalAlignment="Top" HorizontalAlignment="Right">
                                     <StackPanel Margin="6,2,6,3">
-                                        <TextBlock FontSize="25" Text="{Binding Path=workcode}" />
+                                        <TextBlock FontSize="12.5" Text="{Binding Path=workcode}" />
                                     </StackPanel>
                                 </Border>
                                 <Border  VerticalAlignment="Bottom" HorizontalAlignment="Left">
                                     <StackPanel Margin="10,0,10,1">
-                                        <TextBlock FontSize="28" Text="{Binding Path=CompletedRate,Converter={StaticResource PercentConvert}}" />
+                                        <TextBlock FontSize="14" Text="{Binding Path=CompletedRate,Converter={StaticResource PercentConvert}}" />
                                     </StackPanel>
                                 </Border>
                             </Grid>

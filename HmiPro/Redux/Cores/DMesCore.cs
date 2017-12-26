@@ -98,6 +98,8 @@ namespace HmiPro.Redux.Cores {
             foreach (var pair in MachineConfig.MachineDict) {
                 SchTaskDoingLocks[pair.Key] = new object();
             }
+            //恢复任务
+            RestoreTask();
         }
 
         /// <summary>
@@ -300,6 +302,21 @@ namespace HmiPro.Redux.Cores {
             mqTasks.Add(task);
             using (var ctx = SqliteHelper.CreateSqliteService()) {
                 ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(mqTasks)));
+            }
+        }
+
+        /// <summary>
+        /// 从sqlite中恢复任务
+        /// </summary>
+        public void RestoreTask() {
+            using (var ctx = SqliteHelper.CreateSqliteService()) {
+                foreach (var pair in MachineConfig.MachineDict) {
+                    var key = "task_" + pair.Key;
+                    var tasks = ctx.Restore<ObservableCollection<MqSchTask>>(key);
+                    if (tasks != null) {
+                        MqSchTasksDict[pair.Key] = tasks;
+                    }
+                }
             }
         }
 

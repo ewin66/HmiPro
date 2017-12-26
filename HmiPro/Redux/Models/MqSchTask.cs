@@ -54,11 +54,11 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public List<PmtmsItem> pmtms { get; set; }
 
-        private MesTime _psTime;
+        private JavaTime _psTime;
         /// <summary>
         /// 计划开始时间
         /// </summary>
-        public MesTime pstime {
+        public JavaTime pstime {
             get => _psTime;
             set {
                 if (_psTime != value) {
@@ -102,7 +102,7 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 交货日期
         /// </summary>
-        public MesTime delidate { get; set; }
+        public JavaTime delidate { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -120,11 +120,11 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public int axiscount { get; set; }
 
-        public MesTime _pdTime;
+        public JavaTime _pdTime;
         /// <summary>
         /// 计划结束时间
         /// </summary>
-        public MesTime pdtime {
+        public JavaTime pdtime {
             get => _pdTime;
             set {
                 if (_pdTime != value) {
@@ -208,14 +208,14 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 
         /// </summary>
-        public MesTime ptime { get; set; }
+        public JavaTime ptime { get; set; }
         /// <summary>
         /// 
         /// </summary>
         public string maccode { get; set; }
     }
 
-    public class MesTime {
+    public class JavaTime {
         /// <summary>
         /// 
         /// </summary>

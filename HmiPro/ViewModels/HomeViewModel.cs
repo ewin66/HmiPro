@@ -167,6 +167,9 @@ namespace HmiPro.ViewModels {
                 App.Store.Dispatch(new SysActions.AppInitCompleted());
             });
             //dispatchMockMqEmpRfid();
+            if (YUtil.GetWindowsUserName().ToLower().Contains("ychost")) {
+                //dispatchMock();
+            }
         }
 
 
@@ -220,6 +223,11 @@ namespace HmiPro.ViewModels {
                 axis.maccode = task.maccode;
                 axis.axiscode = YUtil.GetRandomString(10);
             }
+            JavaTime startTime = new JavaTime() {
+                time = YUtil.GetUtcTimestampMs(YUtil.GetRandomTime(DateTime.Now.AddDays(-1), DateTime.Now))
+            };
+            task.pstime = startTime;
+            task.pdtime = startTime;
             App.Store.Dispatch(mockEffects.MockSchTaskAccept(new MockActions.MockSchTaskAccpet(task)));
         }
 
