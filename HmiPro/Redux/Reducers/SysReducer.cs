@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using Reducto;
@@ -50,11 +51,11 @@ namespace HmiPro.Redux.Reducers {
                  state.HttpSystemIsStarted = false;
                  return state;
              }).When<SysActions.OpenScreen>((state, action) => {
-                 YUtil.OpenScreen();
+                 YUtil.OpenScreenByNirCmmd(AssetsHelper.GetAssets().ExeNirCmd);
                  state.IsScreenLight = true;
                  return state;
              }).When<SysActions.CloseScreen>((state, action) => {
-                 YUtil.CloseScreen();
+                 YUtil.CloseScreenByNirCmd(AssetsHelper.GetAssets().ExeNirCmd);
                  state.IsScreenLight = false;
                  return state;
              }).When<SysActions.StartCloseScreenTimer>((state, action) => {

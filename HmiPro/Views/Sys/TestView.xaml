@@ -21,6 +21,9 @@
                 <Button Height="50" Width="200" Content="打开报警灯 2s" Command="{Binding Path=OpenAlarmCommand}" CommandParameter="2000"></Button>
                 <Button Content="关闭报警灯" Height="50" Width="200" Command="{Binding Path=CloseAlarmCommand}"></Button>
                 <Button Content="关闭显示器" Height="50" Width="200" Command="{Binding Path=CloseScreenCommand}"></Button>
+                <Button Content="打开显示器" Height="50" Width="200" Command="{Binding Path=OpenScreenCommand}"></Button>
+                <!--<Button Content="待机显示器" Height="50" Width="200" Command="{Binding Path=StandbyScreenCommand}"></Button>-->
+                <Button Content="关闭显示器 5s" Height="50" Width="200" Command="{Binding Path=CloseScreenCommand}"  CommandParameter="5"></Button>
             </dxlc:FlowLayoutControl>
         </Grid>
     </dxwui:PageAdornerControl>

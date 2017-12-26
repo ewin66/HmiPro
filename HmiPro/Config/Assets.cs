@@ -59,6 +59,11 @@ namespace HmiPro.Config {
         public string MockMqSchTaskJson => MocksFolder + "\\MqSchTask.json";
         public string MockMqScanMaterial => MocksFolder + "\\MqScanMaterial.json";
 
+        //一些可执行文件
+        public string ExeType => Environment.Is64BitOperatingSystem ? "x64" : "x86";
+        public string ExePath => AssetsFolder + "\\Exe\\";
+        public string ExeNirCmd => ExePath + ExeType + "\\nircmd.exe";
+
         private static Assets assets;
     }
 }

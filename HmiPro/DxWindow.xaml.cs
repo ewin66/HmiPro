@@ -30,7 +30,7 @@ namespace HmiPro {
                 Topmost = false;
                 //生产电脑
             } else {
-                Topmost = false;
+                Topmost = true;
                 WindowStyle = WindowStyle.None;
                 WindowState = WindowState.Maximized;
             }
