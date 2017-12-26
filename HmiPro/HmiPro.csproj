@@ -439,7 +439,7 @@
     <None Include="Profiles\Prod\Machines\DB.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Profiles\Prod\Machines\DE.xls">
+    <None Include="Profiles\Prod\Machines\DE_DF.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Profiles\Prod\Machines\DM.xls">
@@ -451,7 +451,9 @@
     <None Include="Profiles\Prod\Machines\EJ.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Profiles\Prod\Machines\EK_EL.xls" />
+    <None Include="Profiles\Prod\Machines\EK_EL.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Profiles\Prod\Machines\EP.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

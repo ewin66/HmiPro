@@ -16,26 +16,37 @@
     </dxmvvm:Interaction.Behaviors>
 
     <dxwui:PageAdornerControl  Header="呼叫管理" ShowBackButton="True" >
-        <dxlc:FlowLayoutControl  Orientation="Horizontal">
-            <dxlc:FlowLayoutControl.ItemTemplate>
+        <ListBox ItemsSource="{Binding Path=MqCallDict}">
+            <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Button>
-                        <Button.Template>
-                            <ControlTemplate>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="30"></ColumnDefinition>
-                                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                    </Grid.ColumnDefinitions>
-                                    <Image Source="{Binding DataContext.Assets.IconCallUp,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}" Grid.Column="0" ></Image>
-                                    <Button Grid.Column="1"  Foreground="White" VerticalAlignment="Center"  Content="{Binding BtnTxt}" Command="{Binding AlertCommand}" ></Button>
-                                </Grid>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                    <dxlc:FlowLayoutControl Margin="0,0,0,20" HorizontalAlignment="Center" ItemsSource="{Binding Path=Value,Mode=OneWay}" Orientation="Horizontal">
+                        <dxlc:FlowLayoutControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button>
+                                    <Button.Template>
+                                        <ControlTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="30"></ColumnDefinition>
+                                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Source="{Binding Path=CallIcon}" Grid.Column="0" ></Image>
+                                                <Button IsEnabled="{Binding Path=CanCall}" Grid.Column="1"  Foreground="White" VerticalAlignment="Center"  Content="{Binding Path=CallTxt}" 
+                                                        Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}, Path=DataContext.CallCommand}"
+                                                        CommandParameter="{Binding Path=.}"
+                                                        ></Button>
+                                            </Grid>
+
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </DataTemplate>
+                        </dxlc:FlowLayoutControl.ItemTemplate>
+                    </dxlc:FlowLayoutControl>
                 </DataTemplate>
-            </dxlc:FlowLayoutControl.ItemTemplate>
-        </dxlc:FlowLayoutControl>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
 
     </dxwui:PageAdornerControl>
 

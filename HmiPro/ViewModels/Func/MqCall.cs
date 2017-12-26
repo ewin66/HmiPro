@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Annotations;
 
 namespace HmiPro.ViewModels.Func {
     /// <summary>
@@ -10,7 +13,7 @@ namespace HmiPro.ViewModels.Func {
     /// <date>2017-12-26</date>
     /// <author>ychost</author>
     /// </summary>
-    public class MqCall {
+    public class MqCall : INotifyPropertyChanged {
         /// <summary>
         /// 呼叫队Mq队列
         /// </summary>
@@ -31,6 +34,34 @@ namespace HmiPro.ViewModels.Func {
         /// 机台编码
         /// </summary>
         public string MachineCode { get; set; }
+        /// <summary>
+        /// 显示文本
+        /// </summary>
+        public string CallTxt { get; set; }
+        /// <summary>
+        /// 呼叫类型
+        /// </summary>
+        public MqCallType CallType { get; set; }
+
+        private bool canCall = true;
+
+        public bool CanCall {
+            get { return canCall; }
+            set {
+                if (canCall != value) {
+                    canCall = value;
+                    OnPropertyChanged(nameof(CanCall));
+                }
+            }
+        }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     public enum MqCallType {

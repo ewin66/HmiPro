@@ -295,7 +295,7 @@ namespace YCsharp.Model.Tcp {
             try {
                 DataReceived?.Invoke(this, new YTcpSrvEventArgs(state));
             } catch (Exception e) {
-                Logger.Error($"处理{state.TcpClientIP}的一包数据逻辑", e);
+                Logger.Error($"处理{state.TcpClientIP}的一包数据逻辑出先异常", e);
             }
         }
 
