@@ -115,7 +115,6 @@ namespace YCsharp.Model.Procotol {
             if (!isRunning) {
                 return;
             }
-
             var ip = e.State.TcpClientIP;
             if (e.State.BufferCount >= e.State.Buffer.Length) {
                 e.State.BufferCount = 0;
@@ -127,9 +126,7 @@ namespace YCsharp.Model.Procotol {
             if (!SmClientManager.IPSessionBuffer.ContainsKey(ip)) {
                 SmClientManager.IPSessionBuffer[ip] = SmClientManager.DefaultBuffer();
             }
-
             List<SmModel> smModels = new List<SmModel>();
-
             //解析套接字数据
             using (var analysis = new SmAnalysis(SmClientManager.IPSessionBuffer[ip])) {
                 smModels = analysis.ThroughAnalysisStack(reBuffer, 0, reCount);
@@ -147,11 +144,7 @@ namespace YCsharp.Model.Procotol {
                     //按协议应给客户端回复
                     if (sm.PackageType == SmPackageType.ParamPackage || sm.PackageType == SmPackageType.HeartbeatPackage) {
                         var replayPkg = SmParamApi.BuildParamPackage((byte)(sm.Cmd + 0x80), null, 2, sm.ModuleAddr);
-                        try {
-                            tcpServer.Send(e.State.TcpClient, replayPkg);
-                        } catch {
-                            Console.WriteLine($"回复客户端：{ip} 异常");
-                        }
+                        tcpServer.Send(e.State.TcpClient, replayPkg);
                     }
                 });
                 //设置模块地址

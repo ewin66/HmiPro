@@ -189,11 +189,11 @@ namespace HmiPro.Redux.Actions {
         public struct SparkDiffAccept : IAction {
             public string Type() => SPARK_DIFF_ACCEPT;
             public string MachineCode;
-            public Cpm SparkCpm;
+            public float Spark;
 
-            public SparkDiffAccept(string machineCode, Cpm sparkCpm) {
+            public SparkDiffAccept(string machineCode, float spark) {
                 MachineCode = machineCode;
-                SparkCpm = sparkCpm;
+                Spark = spark;
             }
         }
 

@@ -228,7 +228,7 @@ namespace HmiPro.Redux.Cores {
                 });
                 //火花值发生变化
                 dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.Spark, (cpm) => {
-                    App.Store.Dispatch(new CpmActions.SparkDiffAccept(machineCode, cpm));
+                    App.Store.Dispatch(new CpmActions.SparkDiffAccept(machineCode, cpm.GetFloatVal()));
                 });
                 //速度发生变化
                 dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.OeeSpeed, cpm => {

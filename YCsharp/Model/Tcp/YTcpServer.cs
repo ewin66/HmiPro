@@ -287,8 +287,10 @@ namespace YCsharp.Model.Tcp {
         public event EventHandler<YTcpSrvEventArgs> DataReceived;
 
         private void RaiseDataReceived(YTcpSrvClientState state) {
-            if (DataReceived != null) {
-                DataReceived(this, new YTcpSrvEventArgs(state));
+            try {
+                DataReceived?.Invoke(this, new YTcpSrvEventArgs(state));
+            } catch (Exception e) {
+                Console.WriteLine($"处理{state.TcpClientIP}的一包数据逻辑" + e);
             }
         }
 

@@ -52,7 +52,7 @@ namespace HmiPro.Redux.Reducers {
             /// <summary>
             /// 当前的火花值
             /// </summary>
-            public IDictionary<string, Cpm> SparkDiffDict;
+            public IDictionary<string, float> SparkDiffDict;
             /// <summary>
             /// 开关状态
             /// </summary>
@@ -87,7 +87,7 @@ namespace HmiPro.Redux.Reducers {
                 state.UpdatedCpmsAllDict = new Dictionary<string, List<Cpm>>();
                 state.NoteMeterDict = new Dictionary<string, float>();
                 state.IpActivedDict = new Dictionary<string, DateTime>();
-                state.SparkDiffDict = new Dictionary<string, Cpm>();
+                state.SparkDiffDict = new Dictionary<string, float>();
                 state.MachineStateDict = new ConcurrentDictionary<string, ObservableCollection<MachineState>>();
                 state.MachineDebugStateDict = new Dictionary<string, ObservableCollection<MachineDebugState>>();
                 state.SpeedDict = new Dictionary<string, float>();
@@ -112,6 +112,7 @@ namespace HmiPro.Redux.Reducers {
                     state.SpeedDict[machineCode] = 0f;
                     state.NoteMeterDict[machineCode] = 0f;
                     state.PreSpeedDict[machineCode] = 0f;
+                    state.SparkDiffDict[machineCode] = 0f;
                 }
                 return state;
             }).When<CpmActions.StartServerSuccess>((state, action) => {
@@ -136,7 +137,7 @@ namespace HmiPro.Redux.Reducers {
                 return state;
             }).When<CpmActions.SparkDiffAccept>((state, action) => {
                 state.MachineCode = action.MachineCode;
-                state.SparkDiffDict[action.MachineCode] = action.SparkCpm;
+                state.SparkDiffDict[action.MachineCode] = action.Spark;
                 return state;
             }).When<CpmActions.SpeedAccept>((state, action) => {
                 state.MachineCode = action.MachineCode;

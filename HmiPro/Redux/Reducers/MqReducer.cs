@@ -22,7 +22,6 @@ namespace HmiPro.Redux.Reducers {
             public string MachineCode;
             public IDictionary<string, bool> LsnScanMaterialDict;
             public IDictionary<string, bool> LsnSchTaskDict;
-           
         }
 
         public static SimpleReducer<MqReducer.State> Create() {

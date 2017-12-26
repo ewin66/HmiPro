@@ -17,6 +17,7 @@ namespace HmiPro.Redux.Patches {
     /// 给store打的补丁
     /// [x] Dispatch IAction method for specify action type
     /// [x] Dispatch async action dispatch delegate fixed
+    /// [x] Subscribe add action param
     /// <date>2017-12-18</date>
     /// <author>ychost</author>
     /// </summary>

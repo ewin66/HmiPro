@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="HmiPro.Views.Func.MqCallView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
+             xmlns:mqFunc="clr-namespace:HmiPro.ViewModels.Func"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             mc:Ignorable="d"
+             DataContext="{dxmvvm:ViewModelSource Type=mqFunc:MqCallViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type mqFunc:MqCallViewModel}">
+            <dxwui:PageAdornerControl  Header="呼叫管理" ShowBackButton="True" >
+
+            </dxwui:PageAdornerControl>
+        </DataTemplate>
+    </UserControl.Resources>
+</UserControl>

@@ -26,6 +26,7 @@ namespace HmiPro.Redux.Cores {
         private readonly MqEffects mqEffects;
         private readonly OeeEffects oeeEffects;
         public readonly LoggerService Logger;
+
         public SchCore(SysEffects sysEffects, MqEffects mqEffects, OeeEffects oeeEffects) {
             UnityIocService.AssertIsFirstInject(GetType());
             this.sysEffects = sysEffects;
@@ -41,9 +42,11 @@ namespace HmiPro.Redux.Cores {
         /// 3. 定时上传Cpm到Mq
         /// </summary>
         public async Task Init() {
-            await App.Store.Dispatch(sysEffects.StartCloseScreenTimer(new SysActions.StartCloseScreenTimer(HmiConfig.CloseScreenInterval)));
+            await App.Store.Dispatch(
+                sysEffects.StartCloseScreenTimer(new SysActions.StartCloseScreenTimer(HmiConfig.CloseScreenInterval)));
             //启动定时上传Cpms到Mq定时器
-            await App.Store.Dispatch(mqEffects.StartUploadCpmsInterval(new MqActions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
+            await App.Store.Dispatch(mqEffects.StartUploadCpmsInterval(
+                new MqActions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
 
             //每天8点打开显示器
             Schedule(() => {
@@ -58,13 +61,12 @@ namespace HmiPro.Redux.Cores {
                         Content = "请联系管理员配置 OeeSppedType"
                     }));
                 }
-
             }
 
+            //一分钟计算一次Oee
             var interval = 1 * 60 * 1000;
             await App.Store.Dispatch(oeeEffects.StartCalcOeeTimer(new OeeActions.StartCalcOeeTimer(interval)));
             JobManager.Initialize(this);
-
         }
 
 

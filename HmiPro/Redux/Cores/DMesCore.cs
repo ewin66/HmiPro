@@ -308,9 +308,9 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         void whenSparkDiffAccept(AppState state, IAction action) {
             var machineCode = state.CpmState.MachineCode;
-            var sparkCpm = state.CpmState.SparkDiffDict[machineCode];
-            if ((int)sparkCpm.Value == 1) {
-                var mqAlarm = createMqAlarm(machineCode, sparkCpm.PickTimeStampMs, sparkCpm.Name, AlarmType.SparkErr);
+            var spark = state.CpmState.SparkDiffDict[machineCode];
+            if ((int)spark == 1) {
+                var mqAlarm = createMqAlarm(machineCode, YUtil.GetUtcTimestampMs(DateTime.Now), "火花报警", AlarmType.SparkErr);
                 dispatchAlarmAction(machineCode, mqAlarm);
             }
         }
