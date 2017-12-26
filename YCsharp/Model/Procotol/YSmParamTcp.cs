@@ -7,6 +7,7 @@ using System.Timers;
 using NeoSmart.AsyncLock;
 using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Model.Tcp;
+using YCsharp.Service;
 using YCsharp.Util;
 
 
@@ -42,9 +43,12 @@ namespace YCsharp.Model.Procotol {
 
         public bool isRunning { private set; get; } = false;
 
+        public readonly LoggerService Logger;
 
-        public YSmParamTcp(string ip, int port) {
-            tcpServer = new YTcpServer(ip, port);
+
+        public YSmParamTcp(string ip, int port, LoggerService logger) {
+            Logger = logger;
+            tcpServer = new YTcpServer(ip, port, logger);
             SmClientManager = new SmClientManager();
             tcpServer.DataReceived += onDataReceived;
             tcpServer.ClientConnected += onConnected;
@@ -70,11 +74,11 @@ namespace YCsharp.Model.Procotol {
                                 try {
                                     var state = ActionClientDict[pair.Key];
                                     tcpServer.Send(state, SmParamApi.BuildAlarmPackage(state.ModuleAddr, pair.Value));
-                                    Console.WriteLine($"发送命令 {Enum.GetName(typeof(SmAction), pair.Value)} 成功 {pair.Key}");
+                                    Logger.Debug($"发送命令 {Enum.GetName(typeof(SmAction), pair.Value)} 成功 {pair.Key}");
                                     ActionCache[pair.Key] = SmAction.NoAction;
                                 } catch {
                                     canClear = false;
-                                    Console.WriteLine($"发送命令 {Enum.GetName(typeof(SmAction), pair.Value)} 异常 {pair.Key}");
+                                    Logger.Error($"发送命令 {Enum.GetName(typeof(SmAction), pair.Value)} 异常 {pair.Key}");
                                 }
                             }
                         }
@@ -115,6 +119,7 @@ namespace YCsharp.Model.Procotol {
             if (!isRunning) {
                 return;
             }
+
             var ip = e.State.TcpClientIP;
             if (e.State.BufferCount >= e.State.Buffer.Length) {
                 e.State.BufferCount = 0;
@@ -126,7 +131,9 @@ namespace YCsharp.Model.Procotol {
             if (!SmClientManager.IPSessionBuffer.ContainsKey(ip)) {
                 SmClientManager.IPSessionBuffer[ip] = SmClientManager.DefaultBuffer();
             }
+
             List<SmModel> smModels = new List<SmModel>();
+
             //解析套接字数据
             using (var analysis = new SmAnalysis(SmClientManager.IPSessionBuffer[ip])) {
                 smModels = analysis.ThroughAnalysisStack(reBuffer, 0, reCount);
@@ -137,14 +144,18 @@ namespace YCsharp.Model.Procotol {
                 }
 
                 if (smModels?.Count == 0) {
-                    Console.WriteLine($"{ip} 包解析失败");
+                    Logger.Debug($"{ip} 包解析失败", ConsoleColor.Red);
                     return;
                 }
                 smModels.ForEach(sm => {
                     //按协议应给客户端回复
                     if (sm.PackageType == SmPackageType.ParamPackage || sm.PackageType == SmPackageType.HeartbeatPackage) {
                         var replayPkg = SmParamApi.BuildParamPackage((byte)(sm.Cmd + 0x80), null, 2, sm.ModuleAddr);
-                        tcpServer.Send(e.State.TcpClient, replayPkg);
+                        try {
+                            tcpServer.Send(e.State.TcpClient, replayPkg);
+                        } catch {
+                            Logger.Error($"回复客户端：{ip} 异常");
+                        }
                     }
                 });
                 //设置模块地址
@@ -184,7 +195,7 @@ namespace YCsharp.Model.Procotol {
                 if (ActionClientDict.TryGetValue(ip, out var state)) {
                     try {
                         tcpServer.Send(state, SmParamApi.BuildAlarmPackage(state.ModuleAddr, action));
-                        Console.WriteLine($"发送命令 {Enum.GetName(typeof(SmAction), action)} 成功 {ip}");
+                        Logger.Debug($"发送命令 {Enum.GetName(typeof(SmAction), action)} 成功 {ip}");
                         ActionCache[ip] = SmAction.NoAction;
                     } catch {
                         ActionCache[ip] = action;
@@ -227,7 +238,7 @@ namespace YCsharp.Model.Procotol {
                         ActionClientDict.Remove(e.Msg);
                     }
                 } catch (Exception ex) {
-                    Console.WriteLine("移除命令客户端异常" + ex);
+                    Logger.Error("移除命令客户端异常" + ex);
                 }
             }
             OnDisConnectedAction?.Invoke(e.State.TcpClientIP);

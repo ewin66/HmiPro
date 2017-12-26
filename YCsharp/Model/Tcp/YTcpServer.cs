@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using YCsharp.Service;
 
 namespace YCsharp.Model.Tcp {
 
@@ -69,13 +70,17 @@ namespace YCsharp.Model.Tcp {
         #endregion
 
         #region 构造函数  
+
+        public readonly LoggerService Logger;
+
         /// <summary>
         /// tcp服务需要ip和端口
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        public YTcpServer(string ip, int port) {
+        public YTcpServer(string ip, int port, LoggerService logger) {
             this.buildAsyncTCPServer(IPAddress.Parse(ip), port);
+            Logger = logger;
         }
 
 
@@ -201,7 +206,7 @@ namespace YCsharp.Model.Tcp {
                 try {
                     stream.BeginRead(state.Buffer, 0, state.Buffer.Length, HandleDataReceived, state);
                 } catch (Exception e) {
-                    Console.WriteLine("Tcp异常: " + e.Message);
+                    Logger.Error("Tcp异常: ", e);
                 }
             }
         }
@@ -290,7 +295,7 @@ namespace YCsharp.Model.Tcp {
             try {
                 DataReceived?.Invoke(this, new YTcpSrvEventArgs(state));
             } catch (Exception e) {
-                Console.WriteLine($"处理{state.TcpClientIP}的一包数据逻辑" + e);
+                Logger.Error($"处理{state.TcpClientIP}的一包数据逻辑", e);
             }
         }
 

@@ -6,14 +6,37 @@
              xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
              xmlns:mqFunc="clr-namespace:HmiPro.ViewModels.Func"
              xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
              mc:Ignorable="d"
              DataContext="{dxmvvm:ViewModelSource Type=mqFunc:MqCallViewModel}"
              d:DesignHeight="300" d:DesignWidth="300">
-    <UserControl.Resources>
-        <DataTemplate DataType="{x:Type mqFunc:MqCallViewModel}">
-            <dxwui:PageAdornerControl  Header="呼叫管理" ShowBackButton="True" >
 
-            </dxwui:PageAdornerControl>
-        </DataTemplate>
-    </UserControl.Resources>
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
+    </dxmvvm:Interaction.Behaviors>
+
+    <dxwui:PageAdornerControl  Header="呼叫管理" ShowBackButton="True" >
+        <dxlc:FlowLayoutControl  Orientation="Horizontal">
+            <dxlc:FlowLayoutControl.ItemTemplate>
+                <DataTemplate>
+                    <Button>
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30"></ColumnDefinition>
+                                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Source="{Binding DataContext.Assets.IconCallUp,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}}" Grid.Column="0" ></Image>
+                                    <Button Grid.Column="1"  Foreground="White" VerticalAlignment="Center"  Content="{Binding BtnTxt}" Command="{Binding AlertCommand}" ></Button>
+                                </Grid>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </DataTemplate>
+            </dxlc:FlowLayoutControl.ItemTemplate>
+        </dxlc:FlowLayoutControl>
+
+    </dxwui:PageAdornerControl>
+
 </UserControl>

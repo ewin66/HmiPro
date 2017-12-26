@@ -255,6 +255,7 @@
     <Compile Include="Views\Dx\SplashScreenView.xaml.cs">
       <DependentUpon>SplashScreenView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\Func\MqCall.cs" />
     <Compile Include="Views\Func\MqCallView.xaml.cs">
       <DependentUpon>MqCallView.xaml</DependentUpon>
     </Compile>
