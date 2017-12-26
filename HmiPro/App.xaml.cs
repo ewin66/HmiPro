@@ -56,11 +56,11 @@ namespace HmiPro {
             CpmActions.CPMS_UPDATED_DIFF,
             CpmActions.CPMS_IP_ACTIVED,
             CpmActions.SPEED_ACCEPT,
+            CpmActions.OD_ACCPET,
             CpmActions.NOTE_METER_ACCEPT,
             DbActions.UPLOAD_CPMS_INFLUXDB,
             DbActions.UPLOAD_CPMS_INFLUXDB_SUCCESS,
             AlarmActions.CHECK_CPM_BOM_ALARM,
-            CpmActions.NOTE_METER_ACCEPT
         };
 
         public static IDictionary<string, Mufflog> MuffleLogDict = new ConcurrentDictionary<string, Mufflog>();
@@ -85,7 +85,6 @@ namespace HmiPro {
             MongoHelper.Init(HmiConfig.MongoConn);
             //配置InfluxDb保存实时数据
             InfluxDbHelper.Init($"http://{HmiConfig.InfluxDbIp}:8086", HmiConfig.InfluxCpmDbName);
-
             //配置Redux
             ReduxIoc.Init();
             //初始化全局的Store
@@ -109,7 +108,7 @@ namespace HmiPro {
                 if (action.Type().Contains("[Mq]")) {
                     color = ConsoleColor.Yellow;
                 } else if (action.Type().Contains("[Cpm")) {
-                    color = ConsoleColor.White;
+                    color = ConsoleColor.DarkYellow;
                 } else if (action.Type().Contains("[Db]")) {
                     color = ConsoleColor.Magenta;
                 } else if (action.Type().Contains("[Alarm]")) {
@@ -131,10 +130,7 @@ namespace HmiPro {
                 }
                 AppState.ExectedActions[state.Type] = DateTime.Now;
             }
-
-
         }
-
 
         /// <summary>
         /// 处理命令
@@ -149,6 +145,7 @@ namespace HmiPro {
                 if (bool.Parse(opt.ShowConsole)) {
                     ConsoleHelper.Show();
                 }
+                Console.WriteLine("配置文件：-" + opt.ProfilesFolder);
                 if (bool.Parse(opt.ShowSplash)) {
                     DXSplashScreen.Show<SplashScreenView>();
                     DXSplashScreen.SetState(SplashState.Default);
@@ -160,12 +157,12 @@ namespace HmiPro {
                     HmiConfig.Load(configFolder + @"\Hmi.Config.Shop.json");
                     Console.WriteLine("初始化配置文件: -Hmi.Config.Shop.json");
                 }
+
+                //配置静态资源文件
                 HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);
                 HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
-
                 Console.WriteLine("当前运行模式：-" + opt.Mode);
                 Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
-                //配置静态资源文件
                 AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
 
             }).WithNotParsed(err => {

@@ -136,16 +136,19 @@ namespace HmiPro.Redux.Cores {
                     var preeState = machineStates[i];
                     var nextState = machineStates[i + 1];
                     if (preeState.StatePoint == MachineState.State.Start && nextState.StatePoint == MachineState.State.Stop) {
-                        runTimeSec += (nextState.Time - preeState.Time).TotalSeconds;
+                        var diffSec = (nextState.Time - preeState.Time).TotalSeconds;
+                        runTimeSec += diffSec;
                     }
                 }
-                //开机时间为开工之前
+                //第一个点为关机，则开机时间在上班时间之前
+                //加上当班时间点-->第一个关机时间点
                 if (machineStates[0].StatePoint == MachineState.State.Stop) {
                     runTimeSec += (machineStates[0].Time - workTime).TotalSeconds;
                 }
-                //当前正在运转
+                //最后一个点为开机，则机台还在正常运转
+                //加上最后一个开机时间点--->当前时间
                 if (machineStates.Last().StatePoint == MachineState.State.Start) {
-                    runTimeSec += (DateTime.Now - machineStates[0].Time).TotalSeconds;
+                    runTimeSec += (DateTime.Now - machineStates.Last().Time).TotalSeconds;
                 }
                 //没有保留的历史状态
             } else if (machineStates.Count == 0) {

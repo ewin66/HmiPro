@@ -89,16 +89,16 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void whenAppInitCompleted(AppState state, IAction action) {
-            if (YUtil.GetWindowsUserName().ToUpper().Contains("YCHOST")) {
-                var machineCode = MachineConfig.MachineDict.Keys.FirstOrDefault();
-                Mocks.Mocks.DispatchMockMqEmpRfid(machineCode);
-                YUtil.SetTimeout(5000, () => {
-                    Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
-                    YUtil.SetTimeout(5000, () => {
-                        Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
-                    });
-                });
-            }
+            //if (YUtil.GetWindowsUserName().ToUpper().Contains("YCHOST")) {
+            //    var machineCode = MachineConfig.MachineDict.Keys.FirstOrDefault();
+            //    Mocks.Mocks.DispatchMockMqEmpRfid(machineCode);
+            //    YUtil.SetTimeout(5000, () => {
+            //        Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
+            //        YUtil.SetTimeout(5000, () => {
+            //            Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
+            //        });
+            //    });
+            //}
             //启动完毕则检查更新
             var sysService = UnityIocService.ResolveDepend<SysService>();
             if (sysService.CheckUpdate()) {
