@@ -8,6 +8,7 @@ using HmiPro.Redux.Models;
 namespace HmiPro.Redux.Actions {
     /// <summary>
     /// 采集参数相关动作指令
+    /// <author>ychost</author>
     /// </summary>
     public static class CpmActions {
 

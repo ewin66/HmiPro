@@ -15,6 +15,10 @@ using YCsharp.Service;
 
 namespace HmiPro.Redux {
 
+    /// <summary>
+    /// 程序核心逻辑依赖注入
+    /// <author>ychost</author>
+    /// </summary>
     public class ReduxIoc {
         public static void Init() {
             UnityIocService.AssertIsFirstInject(typeof(ReduxIoc));

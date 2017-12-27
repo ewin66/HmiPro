@@ -257,10 +257,8 @@ namespace HmiPro.Redux.Cores {
                     var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "消息通知",
-                        Content = $"{mqEmpRfid.name} 打{mqEmpRfid.type}卡成功"
+                        Content = $" {mqEmpRfid.name} 打{mqEmpRfid.type}卡成功, {dmesAction.MachineCode} 机台"
                     }));
-
-
                 } else {
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "消息通知",
@@ -276,7 +274,6 @@ namespace HmiPro.Redux.Cores {
                     //收线卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EndAxis) {
                     doingTask.EndAxisRfids.Add(dmesAction.Rfid);
-
                     //人员上机卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine) {
                     var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;

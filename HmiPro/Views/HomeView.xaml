@@ -35,7 +35,7 @@
             </Grid.RowDefinitions>
 
             <dxlc:TileLayoutControl Grid.Row="1" Padding="32,50,30,10" >
-                <dxlc:Tile Header="生产管理" Style="{StaticResource HorizontalTile}" Background="#FF54AF0E"  Command="{Binding NavigateCommand}" CommandParameter="DMesManuView">
+                <dxlc:Tile Header="生产管理" Style="{StaticResource HorizontalTile}" Background="#FF54AF0E"  Command="{Binding NavigateCommand}" CommandParameter="DMesCoreView">
                     <BitmapImage UriSource="{Binding Assets.IconMonitor}" />
                 </dxlc:Tile>
                 <dxlc:Tile Header="呼叫管理" Style="{StaticResource HorizontalTile}" Background="#00b8d4"  Command="{Binding NavigateCommand}" CommandParameter="MqCallView">

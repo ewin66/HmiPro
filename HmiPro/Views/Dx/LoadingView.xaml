@@ -8,7 +8,7 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
         <Border BorderThickness="1" BorderBrush="Black" Height="76">
-            <dx:BackgroundPanel>
+            <dx:BackgroundPanel Background="#111111" Foreground="White">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />

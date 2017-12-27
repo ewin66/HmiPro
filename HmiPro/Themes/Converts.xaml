@@ -14,5 +14,7 @@
     <dx:FormatStringConverter x:Key="MonthFormatConverter" FormatString="MMMM, yyyy" />
     <dx:FormatStringConverter x:Key="HomesSoldByFormatConverter" FormatString="{}Homes Sold by {0}" />
     <converts:PercentConvert x:Key="PercentConvert" />
+    <converts:CoefConverter x:Key="ConverterCoef"/>
+
 
 </ResourceDictionary>

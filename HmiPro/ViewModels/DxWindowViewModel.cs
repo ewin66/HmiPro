@@ -24,17 +24,25 @@ using HmiPro.Views.Sys;
 using Newtonsoft.Json;
 using YCsharp.Service;
 using FluentScheduler;
+using HmiPro.Mocks;
 using HmiPro.Redux.Services;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels {
+    /// <summary>
+    /// 程序窗体模型
+    /// <date>2017-12-17</date>
+    /// <author>ychost</author>
+    /// </summary>
     public class DxWindowViewModel : ViewModelBase {
-
         public readonly LoggerService Logger;
-
         public readonly StorePro<AppState> Store;
         public readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
+
         private string topMessage;
+        /// <summary>
+        /// 窗体顶部显示的提示信息，如：网络断开连接等等
+        /// </summary>
         public string TopMessage {
             get => topMessage;
             set {
@@ -66,11 +74,13 @@ namespace HmiPro.ViewModels {
             actionsExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
             actionsExecDict[SysActions.SET_TOP_MESSAGE] = doSetTopMessage;
             actionsExecDict[SysActions.APP_INIT_COMPLETED] = whenAppInitCompleted;
+
             Store.Subscribe((state, aciton) => {
                 if (actionsExecDict.TryGetValue(aciton.Type(), out var exec)) {
                     exec(state, aciton);
                 }
             });
+
             //每一分钟检查一次与服务器的连接
             Task.Run(() => {
                 YUtil.SetInterval(60000, () => {
@@ -89,22 +99,41 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void whenAppInitCompleted(AppState state, IAction action) {
-            //if (YUtil.GetWindowsUserName().ToUpper().Contains("YCHOST")) {
-            //    var machineCode = MachineConfig.MachineDict.Keys.FirstOrDefault();
-            //    Mocks.Mocks.DispatchMockMqEmpRfid(machineCode);
-            //    YUtil.SetTimeout(5000, () => {
-            //        Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
-            //        YUtil.SetTimeout(5000, () => {
-            //            Mocks.Mocks.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
-            //        });
-            //    });
-            //}
+
+            if (YUtil.GetWindowsUserName().ToUpper().Contains("YCHOST")) {
+                //var machineCode = MachineConfig.MachineDict.Keys.FirstOrDefault();
+                foreach (var pair in MachineConfig.MachineDict) {
+                    var machineCode = pair.Key;
+                    Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode);
+                    YUtil.SetTimeout(3000, () => {
+                        Mocks.MockDispatchers.DispatchMockAlarm(33);
+                    });
+
+                    YUtil.SetTimeout(6000, () => {
+                        Mocks.MockDispatchers.DispatchMqMockScanMaterial(machineCode);
+                    });
+
+                    YUtil.SetTimeout(7000, () => {
+                        Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
+                        YUtil.SetTimeout(15000, () => {
+                            Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
+                        });
+                    });
+
+                    YUtil.SetTimeout(2000, () => {
+                        MockDispatchers.DispatchMockSchTask(machineCode, 11);
+                    });
+                }
+            }
+
             //启动完毕则检查更新
             if (!YUtil.GetWindowsUserName().ToLower().Contains("ychost")) {
-                var sysService = UnityIocService.ResolveDepend<SysService>();
-                if (sysService.CheckUpdate()) {
-                    sysService.StartUpdate();
-                }
+                Task.Run(() => {
+                    var sysService = UnityIocService.ResolveDepend<SysService>();
+                    if (sysService.CheckUpdate()) {
+                        sysService.StartUpdate();
+                    }
+                });
             }
         }
 
@@ -167,7 +196,7 @@ namespace HmiPro.ViewModels {
             //默认都显示
             bool canNotify = true;
             if (msg.MinGapSec.HasValue) {
-                var key = "Title: " + msg.Title + "\t Content: " + msg.Content;
+                var key = "Title: " + msg.Title + " Content: " + msg.Content;
                 if (SysNotificationMsg.NotifyTimeDict.TryGetValue(key, out var lastTime)) {
                     if ((DateTime.Now - lastTime).TotalSeconds >= msg.MinGapSec.Value) {
                         canNotify = true;
@@ -188,9 +217,8 @@ namespace HmiPro.ViewModels {
                 }
                 Logger.Notify(logDetail);
                 DispatcherService.BeginInvoke(() => {
-                    INotification notification =
-                        NotifyNotificationService.CreatePredefinedNotification(msg.Title, msg.Content,
-                            DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    INotification notification = NotifyNotificationService.CreatePredefinedNotification
+                                                (msg.Title, msg.Content, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                     SystemSounds.Exclamation.Play();
                     notification.ShowAsync();
                 });

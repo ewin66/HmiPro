@@ -17,11 +17,18 @@ using HmiPro.Redux.Effects;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
+using HmiPro.ViewModels.DMes;
+using HmiPro.ViewModels.Sys;
 using Reducto;
 using YCsharp.Service;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels {
+    /// <summary>
+    /// 程序入口页面
+    /// <author>ychost</author>
+    /// <date>2017-12-17</date>
+    /// </summary>
     [POCOViewModel]
     public class HomeViewModel {
         public virtual Assets Assets { get; set; } = AssetsHelper.GetAssets();
@@ -142,18 +149,19 @@ namespace HmiPro.ViewModels {
                     var isStartListenMq = pair.Value.Result;
                     if (pair.Key.ToUpper().Contains("QUEUE") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
-                            new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq排产队列 {pair.Key} 失败，请检查" }));
+                            new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 排产队列 {pair.Key} 失败，请检查" }));
 
                     } else if (pair.Key.ToUpper().Contains("JUDGE_MATER") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
-                            new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq扫描来料队列 {pair.Key} 失败，请检查" }));
+                            new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 扫描来料队列 {pair.Key} 失败，请检查" }));
 
                     } else if (pair.Key.ToUpper().Contains("RFIDEMP") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
                              new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 人员打卡 数据失败，请检查" }));
+
                     } else if (pair.Key.ToUpper().Contains("RFIDAXIS") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
-                                                    new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 线盘卡失败，请检查" }));
+                             new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 线盘卡失败，请检查" }));
                     }
                 }
 
@@ -179,10 +187,10 @@ namespace HmiPro.ViewModels {
         /// </summary>
         void dispatchMock() {
             App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "进入模拟状态", Content = $"产生的数据都是模拟的" }));
-            int code = 0;
-            YUtil.SetInterval(2000, () => {
-                dispatchMockSchTask(code++);
-            }, 2)();
+            //int code = 0;
+            //YUtil.SetInterval(2000, () => {
+            //    dispatchMockSchTask(code++);
+            //}, 2)();
         }
 
         /// <summary>
@@ -209,35 +217,7 @@ namespace HmiPro.ViewModels {
             }
         }
 
-        /// <summary>
-        /// 派发模拟排产任务
-        /// </summary>
-        /// <param name="id">任务id</param>
-        void dispatchMockSchTask(int id = 0) {
-            var mockEffects = UnityIocService.ResolveDepend<MockEffects>();
-            var task = YUtil.GetJsonObjectFromFile<MqSchTask>(AssetsHelper.GetAssets().MockMqSchTaskJson);
-            task.workcode = YUtil.GetRandomString(8);
-            task.id = id;
-            task.maccode = MachineConfig.MachineDict.FirstOrDefault().Key;
-            foreach (var axis in task.axisParam) {
-                axis.maccode = task.maccode;
-                axis.axiscode = YUtil.GetRandomString(10);
-            }
-            JavaTime startTime = new JavaTime() {
-                time = YUtil.GetUtcTimestampMs(YUtil.GetRandomTime(DateTime.Now.AddDays(-1), DateTime.Now))
-            };
-            task.pstime = startTime;
-            task.pdtime = startTime;
-            App.Store.Dispatch(mockEffects.MockSchTaskAccept(new MockActions.MockSchTaskAccpet(task)));
-        }
 
-
-        void dispatchMockAlarm(int code) {
-            foreach (var pair in MachineConfig.MachineDict) {
-                var machineCode = pair.Key;
-                App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(machineCode, AlarmMocks.CreateOneAlarm(code)));
-            }
-        }
 
         void dispatchMockScanMaterial() {
 
@@ -249,7 +229,13 @@ namespace HmiPro.ViewModels {
         /// <param name="viewName">页面名称，比如页面为HomeView.xaml，则名称为HomeView</param>
         [Command(Name = "NavigateCommand")]
         public void Navigate(string viewName) {
-            NavigationSerivce.Navigate(viewName, null, this, true);
+            if (viewName == "DMesCoreView") {
+                var vm = DMesCoreViewModel.Create(MachineConfig.MachineDict.FirstOrDefault().Key);
+                NavigatorViewModel.NavMachineCodeInDoing = vm.MachineCode;
+                NavigationSerivce.Navigate("DMesCoreView", vm, null, this, true);
+            } else {
+                NavigationSerivce.Navigate(viewName, null, this, true);
+            }
         }
 
         [Command(Name = "JumpAppSettingViewCommand")]

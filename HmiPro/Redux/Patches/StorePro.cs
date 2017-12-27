@@ -124,7 +124,6 @@ namespace HmiPro.Redux.Patches {
             }
         }
 
-
         /// <summary>
         /// 初始化继承一些父类的私有元素
         /// </summary>

@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="HmiPro.Views.Sys.NavigatorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm" 
+             xmlns:sys="clr-namespace:HmiPro.ViewModels.Sys"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             mc:Ignorable="d"
+             DataContext="{dxmvvm:ViewModelSource Type=sys:NavigatorViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid Margin="65,0,5,22">
+        <dxlc:FlowLayoutControl Orientation="Horizontal" ItemsSource="{Binding Navigators}">
+            <dxlc:FlowLayoutControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type sys:Navigator}">
+                    <Button  Content="{Binding Path=MachineCode}" 
+                            FontSize="22"
+                            Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl,AncestorLevel=2},Path=DataContext.NavigateCommand}"
+                            CommandParameter="{Binding Path=.}"
+                            Style="{StaticResource ModuleLinkButton}"
+                            Width="120"
+                            Margin="50,-10,0,0"
+                            >
+                    </Button>
+                </DataTemplate>
+            </dxlc:FlowLayoutControl.ItemTemplate>
+
+        </dxlc:FlowLayoutControl>
+    </Grid>
+
+</UserControl>

@@ -14,13 +14,13 @@ namespace HmiPro.Mocks {
         public static MqAlarm CreateOneAlarm(int code = -1) {
             return new MqAlarm() {
                 alarmType = AlarmType.OtherErr,
-                axisCode = "Mock AxisCode",
+                axisCode = "GD2017122701ls01",
                 code = code,
-                CpmName = "Mock Cpm",
-                message = "测试报警",
+                CpmName = "直径",
+                message = "直径值超过Plc设定的最大值",
                 time = YUtil.GetUtcTimestampMs(DateTime.Now),
-                meter = 11.3f,
-                workCode = "Mock Work Code",
+                meter = 1103.3f,
+                workCode = "GD2017122701",
             };
         }
     }

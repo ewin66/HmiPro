@@ -173,7 +173,7 @@
     <Compile Include="Helpers\SqliteHelper.cs" />
     <Compile Include="Helpers\ZoomHelper.cs" />
     <Compile Include="Mocks\AlarmMocks.cs" />
-    <Compile Include="Mocks\Mocks.cs" />
+    <Compile Include="Mocks\MockDispatchers.cs" />
     <Compile Include="Mocks\MqMocks.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Redux\Actions\AlarmActions.cs" />
@@ -230,6 +230,10 @@
     <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />
     <Compile Include="ViewModels\Sys\SelectableViewModel.cs" />
+    <Compile Include="Views\DMes\DMesCoreView.xaml.cs">
+      <DependentUpon>DMesCoreView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\DMes\DMesCoreViewModel.cs" />
     <Compile Include="Views\DMes\DMesManuView.xaml.cs">
       <DependentUpon>DMesManuView.xaml</DependentUpon>
     </Compile>
@@ -268,6 +272,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Views\Sys\NavigatorView.xaml.cs">
+      <DependentUpon>NavigatorView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\Sys\NavigatorViewModel.cs" />
     <Compile Include="Views\Sys\SettingView.xaml.cs">
       <DependentUpon>SettingView.xaml</DependentUpon>
     </Compile>
@@ -293,6 +301,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Themes\Templates.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DMes\DMesCoreView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -329,6 +341,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\HomeView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Sys\NavigatorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
