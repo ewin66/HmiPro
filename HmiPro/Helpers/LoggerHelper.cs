@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Config;
+using HmiPro.Redux.Models;
 using YCsharp.Service;
+using YCsharp.Util;
 
 namespace HmiPro.Helpers {
     /// <summary>
@@ -23,5 +25,10 @@ namespace HmiPro.Helpers {
             }
             return new LoggerService(logFolder) { DefaultLocation = defaultLocation.Split('_')[0] };
         }
+
+
+
     }
+
+
 }

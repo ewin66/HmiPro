@@ -20,6 +20,12 @@ namespace HmiPro.Config {
         public static void Load(string path) {
             var config = YUtil.GetJsonObjectFromFile<Dictionary<string, object>>(path);
             YUtil.SetStaticField(typeof(HmiConfig), config);
+
+            bool isDevUserEnv = DevUser.ToLower().Contains(YUtil.GetWindowsUserName().ToLower());
+            var genDict = new Dictionary<string, object>();
+            genDict[nameof(IsDevUserEnv)] = isDevUserEnv;
+            YUtil.SetStaticField(typeof(HmiConfig), genDict);
+
             YUtil.ValidRequiredConfig(typeof(HmiConfig));
             CraftBomZhsDict = new Dictionary<string, string>();
 
@@ -126,10 +132,9 @@ namespace HmiPro.Config {
         [Required]
         public static readonly string DevUser;
         /// <summary>
-        /// 是否为开发环境
-        /// </summary>
+        /// 是否在开发人员电脑上运行，开发人员是上面的DevUser </summary>
         [Required]
-        public static readonly bool IsDevEnv;
+        public static readonly bool IsDevUserEnv;
         /// <summary>
         /// 时间服务器ip，端口使用默认123
         /// </summary>
@@ -148,6 +153,8 @@ namespace HmiPro.Config {
         //== 来自外部命令行和约定配置
         public static string SqlitePath;
         public static readonly string LogFolder = @"C:\HmiPro\Log\";
+
+
     }
 
 }

@@ -107,24 +107,29 @@ namespace HmiPro {
                 ConsoleColor color = ConsoleColor.Green;
                 if (action.Type().Contains("[Mq]")) {
                     color = ConsoleColor.Yellow;
-                } else if (action.Type().Contains("[Cpm")) {
+                }
+                else if (action.Type().Contains("[Cpm")) {
                     color = ConsoleColor.DarkYellow;
-                } else if (action.Type().Contains("[Db]")) {
+                }
+                else if (action.Type().Contains("[Db]")) {
                     color = ConsoleColor.Magenta;
-                } else if (action.Type().Contains("[Alarm]")) {
+                }
+                else if (action.Type().Contains("[Alarm]")) {
                     color = ConsoleColor.Red;
-                } else if (action.Type().Contains("[Sys]")) {
+                }
+                else if (action.Type().Contains("[Sys]")) {
                     color = ConsoleColor.Green;
                 }
                 //需要减缓频率的消息，没隔 MinGapSec 秒输出一次
                 if (MuffleLogDict.TryGetValue(action.Type(), out var muffle)) {
                     muffle.Freq += 1;
                     if ((DateTime.Now - muffle.LastLogTime).TotalSeconds >= muffle.MinGapSec) {
-                        Logger.Debug($"Redux Muffle Action: {action.Type()}  Occur {muffle.Freq} In {muffle.MinGapSec} Seconds");
+                        Logger.Debug($"Redux Muffle Action: {action.Type()}  Occur {muffle.Freq} Times In {muffle.MinGapSec} Seconds");
                         muffle.LastLogTime = DateTime.Now;
                         muffle.Freq = 0;
                     }
-                } else {
+                }
+                else {
                     //普通动作直接输出
                     Logger.Debug("Redux Current Action: " + action.Type(), color);
                 }
@@ -153,17 +158,20 @@ namespace HmiPro {
                 if (Environment.UserName.ToLower().Contains("ychost")) {
                     HmiConfig.Load(configFolder + @"\Hmi.Config.Office.json");
                     Console.WriteLine("初始化配置文件: -Hmi.Config.Office.json");
-                } else {
+                }
+                else {
                     HmiConfig.Load(configFolder + @"\Hmi.Config.Shop.json");
                     Console.WriteLine("初始化配置文件: -Hmi.Config.Shop.json");
                 }
-
+                Console.WriteLine("是否启用Mock数据：-" + bool.Parse(opt.Mock));
                 //配置静态资源文件
                 HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);
                 HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
                 Console.WriteLine("当前运行模式：-" + opt.Mode);
                 Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
                 AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
+                //设置全局配置
+                CmdOptions.GlobalOptions = opt;
 
             }).WithNotParsed(err => {
                 throw new Exception("参数异常" + e);

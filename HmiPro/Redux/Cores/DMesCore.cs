@@ -14,6 +14,7 @@ using HmiPro.Mocks;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Effects;
 using HmiPro.Redux.Models;
+using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
 using MongoDB.Bson;
 using NeoSmart.AsyncLock;
