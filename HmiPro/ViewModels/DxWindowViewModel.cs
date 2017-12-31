@@ -99,9 +99,7 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void whenAppInitCompleted(AppState state, IAction action) {
-
-            if (YUtil.GetWindowsUserName().ToUpper().Contains("YCHOST")) {
-                //var machineCode = MachineConfig.MachineDict.Keys.FirstOrDefault();
+            if (CmdOptions.GlobalOptions.MockVal) {
                 foreach (var pair in MachineConfig.MachineDict) {
                     var machineCode = pair.Key;
                     Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode);
@@ -127,7 +125,7 @@ namespace HmiPro.ViewModels {
             }
 
             //启动完毕则检查更新
-            if (!YUtil.GetWindowsUserName().ToLower().Contains("ychost")) {
+            if (!HmiConfig.IsDevUserEnv) {
                 Task.Run(() => {
                     var sysService = UnityIocService.ResolveDepend<SysService>();
                     if (sysService.CheckUpdate()) {
@@ -147,7 +145,8 @@ namespace HmiPro.ViewModels {
             if (reply.Status != IPStatus.Success) {
                 Store.Dispatch(new SysActions.SetTopMessage(
                     $"与服务器 {ip} 连接断开，请联系管理员 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}", Visibility.Visible));
-            } else {
+            }
+            else {
                 Store.Dispatch(new SysActions.SetTopMessage("", Visibility.Collapsed));
             }
         }
@@ -200,11 +199,13 @@ namespace HmiPro.ViewModels {
                 if (SysNotificationMsg.NotifyTimeDict.TryGetValue(key, out var lastTime)) {
                     if ((DateTime.Now - lastTime).TotalSeconds >= msg.MinGapSec.Value) {
                         canNotify = true;
-                    } else {
+                    }
+                    else {
                         canNotify = false;
                     }
 
-                } else {
+                }
+                else {
                     SysNotificationMsg.NotifyTimeDict[key] = DateTime.Now;
                     canNotify = true;
                 }
@@ -305,11 +306,13 @@ namespace HmiPro.ViewModels {
                     Store.Dispatch(new SysActions.ShutdownApp());
 
                     Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     Logger.Error("动态配置有误", e);
                     MessageBox.Show(e.Message, "配置有误", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            } else if (resultCommand == cancelCommand) {
+            }
+            else if (resultCommand == cancelCommand) {
 
             }
         }

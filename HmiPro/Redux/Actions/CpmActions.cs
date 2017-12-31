@@ -29,7 +29,8 @@ namespace HmiPro.Redux.Actions {
         public static readonly string SPARK_DIFF_ACCEPT = "[Cpm] Spark Diff Accept";
         public static readonly string SPEED_DIFF_ZERO_ACCEPT = "[Cpm] Speed Diff Zero Accept";
         public static readonly string OD_ACCPET = "[Cpm] Od Accept";
-        
+        //485串口状态更新
+        public static readonly string COM_STATUS_UPDATED = "[Cpm] Communication Status Updated";
 
 
         public struct OdAccept : IAction {

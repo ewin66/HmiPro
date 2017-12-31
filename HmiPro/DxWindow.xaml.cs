@@ -22,7 +22,7 @@ namespace HmiPro {
         public DxWindow() {
             InitializeComponent();
             //开发电脑
-            if (Environment.UserName.ToLower().Contains("ychost")) {
+            if (HmiConfig.IsDevUserEnv) {
                 //WindowStyle = WindowStyle.None;
                 WindowState = WindowState.Maximized;
                 Width = 800;

@@ -16,7 +16,7 @@
     </dxmvvm:Interaction.Behaviors>
 
     <dxwui:PageAdornerControl  Header="呼叫管理" ShowBackButton="True" >
-        <ListBox ItemsSource="{Binding Path=MqCallDict}">
+        <ListBox ItemsSource="{Binding Path=MqCallDict}" Margin="0,50,0,0">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <dxlc:FlowLayoutControl Margin="0,0,0,20" HorizontalAlignment="Center" ItemsSource="{Binding Path=Value,Mode=OneWay}" Orientation="Horizontal">

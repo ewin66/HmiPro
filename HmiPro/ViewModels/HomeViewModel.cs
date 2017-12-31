@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Documents;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
@@ -50,12 +51,14 @@ namespace HmiPro.ViewModels {
                 var setting = ctx.Settings.ToList().LastOrDefault();
                 if (setting == null) {
                     App.Store.Dispatch(new SysActions.ShowSettingView());
-                } else {
+                }
+                else {
                     try {
                         MachineConfig.Load(setting.MachineXlsPath);
                         checkConfig();
                         afterConfigLoaded();
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e) {
                         App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                             Title = "配置出错",
                             Content = e.Message
@@ -127,7 +130,11 @@ namespace HmiPro.ViewModels {
             await Task.Run(() => {
                 //等等所有任务完成
                 //一分钟超时
-                Task.WaitAll(tasks.ToArray());
+                var isTimeouted = Task.WaitAll(tasks.ToArray(), 10000);
+                if (!isTimeouted) {
+                    App.Store.Dispatch(new SysActions.SetTopMessage("启动超时，请检查网络连接", Visibility.Visible));return;
+                }
+
                 //是否启动完成Cpm服务
                 var isCpmServer = startCpmServer.Result;
                 if (!isCpmServer) {
@@ -151,15 +158,18 @@ namespace HmiPro.ViewModels {
                         App.Store.Dispatch(new SysActions.ShowNotification(
                             new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 排产队列 {pair.Key} 失败，请检查" }));
 
-                    } else if (pair.Key.ToUpper().Contains("JUDGE_MATER") && (!isStartListenMq)) {
+                    }
+                    else if (pair.Key.ToUpper().Contains("JUDGE_MATER") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
                             new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 扫描来料队列 {pair.Key} 失败，请检查" }));
 
-                    } else if (pair.Key.ToUpper().Contains("RFIDEMP") && (!isStartListenMq)) {
+                    }
+                    else if (pair.Key.ToUpper().Contains("RFIDEMP") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
                              new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 人员打卡 数据失败，请检查" }));
 
-                    } else if (pair.Key.ToUpper().Contains("RFIDAXIS") && (!isStartListenMq)) {
+                    }
+                    else if (pair.Key.ToUpper().Contains("RFIDAXIS") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
                              new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 线盘卡失败，请检查" }));
                     }
@@ -174,23 +184,6 @@ namespace HmiPro.ViewModels {
                 //初始化完成
                 App.Store.Dispatch(new SysActions.AppInitCompleted());
             });
-            //dispatchMockMqEmpRfid();
-            if (YUtil.GetWindowsUserName().ToLower().Contains("ychost")) {
-                //dispatchMock();
-            }
-        }
-
-
-
-        /// <summary>
-        /// 派发模拟数据
-        /// </summary>
-        void dispatchMock() {
-            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "进入模拟状态", Content = $"产生的数据都是模拟的" }));
-            //int code = 0;
-            //YUtil.SetInterval(2000, () => {
-            //    dispatchMockSchTask(code++);
-            //}, 2)();
         }
 
         /// <summary>
@@ -218,11 +211,6 @@ namespace HmiPro.ViewModels {
         }
 
 
-
-        void dispatchMockScanMaterial() {
-
-        }
-
         /// <summary>
         /// 页面跳转命令
         /// </summary>
@@ -233,7 +221,8 @@ namespace HmiPro.ViewModels {
                 var vm = DMesCoreViewModel.Create(MachineConfig.MachineDict.FirstOrDefault().Key);
                 NavigatorViewModel.NavMachineCodeInDoing = vm.MachineCode;
                 NavigationSerivce.Navigate("DMesCoreView", vm, null, this, true);
-            } else {
+            }
+            else {
                 NavigationSerivce.Navigate(viewName, null, this, true);
             }
         }

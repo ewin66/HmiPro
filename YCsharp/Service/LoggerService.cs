@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Colorful;
 using YCsharp.Util;
+using ColorConsole = Colorful.Console;
+using Console = System.Console;
+
 
 namespace YCsharp.Service {
+
+
     /// <summary>
     /// 日志服务，可输出到文件
     /// <todo>输出到数据库</todo>
@@ -15,6 +22,14 @@ namespace YCsharp.Service {
     /// <author>ychost</author>
     /// </summary>
     public class LoggerService {
+
+        public static readonly Formatter[] LogHilights = new Formatter[]
+        {
+            new Formatter("[Info]",Color.AntiqueWhite),
+            new Formatter("[Debug]",Color.AliceBlue),
+            new Formatter("[Warn]",Color.Yellow),
+            new Formatter("[Error]",Color.Red),
+        };
 
         /// <summary>
         /// 日志文件夹

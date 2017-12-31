@@ -25,10 +25,12 @@ namespace HmiPro.Config {
         public string ProfilesFolder { get; set; }
         [Option(longName: "mode", Default = @"Prod", HelpText = "Dev或者Prod模式，会自动寻找Profiles文件夹下面的Mode文件夹")]
         public string Mode { get; set; }
-        [Option(longName: "mock", Default = "true", HelpText = "是否启用模拟数据")]
+        [Option(longName: "mock", Default = "false", HelpText = "是否启用模拟数据")]
         public string Mock { get; set; }
+        public bool MockVal => bool.Parse(Mock);
 
         public static CmdOptions GlobalOptions;
     }
+
 
 }

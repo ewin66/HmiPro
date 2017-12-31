@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -117,11 +118,17 @@ namespace UnitTestPro.FuncTest {
         }
 
         [TestMethod]
-        public void ReplaceTest()
-        {
+        public void ReplaceTest() {
             string str = "/////fsfsf";
             var rpStr = str.Replace("/", "");
-            Assert.AreEqual(rpStr,"fsfsf");
+            Assert.AreEqual(rpStr, "fsfsf");
+        }
+
+        [TestMethod]
+        public void PingTest() {
+            Ping ping = new Ping();
+            var ret = ping.Send("192.168.88.15", 1000);
+            Console.WriteLine(ret.Status);
         }
 
     }
