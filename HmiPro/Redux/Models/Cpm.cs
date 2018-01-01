@@ -95,8 +95,6 @@ namespace HmiPro.Redux.Models {
             if (machine == null) {
                 return cpms;
             }
-
-
             sm.SmParams?.ForEach(p => {
                 //过滤掉未配置的参数
                 if (machine.CodeToAllCpmDict.ContainsKey(p.ParamCode)) {
@@ -112,7 +110,6 @@ namespace HmiPro.Redux.Models {
                     //浮点参数
                     if (p.ParamType == SmParamType.Signal) {
                         cpm.Value = p.GetSignalData(HmiConfig.MathRound);
-
                         //转义
                         if (machine.CodeToAllCpmDict[cpm.Code].MethodName == CpmInfoMethodName.Escape) {
                             //如果在转义字典里面找不到，就显示传过来的值
