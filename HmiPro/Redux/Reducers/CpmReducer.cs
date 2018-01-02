@@ -57,6 +57,7 @@ namespace HmiPro.Redux.Reducers {
             /// 开关状态
             /// </summary>
             public IDictionary<string, ObservableCollection<MachineState>> MachineStateDict;
+            public static readonly IDictionary<string, object> OeeLocks = new Dictionary<string, object>();
             /// <summary>
             /// 调机状态
             /// </summary>
@@ -113,6 +114,7 @@ namespace HmiPro.Redux.Reducers {
                     state.NoteMeterDict[machineCode] = 0f;
                     state.PreSpeedDict[machineCode] = 0f;
                     state.SparkDiffDict[machineCode] = 0f;
+                    State.OeeLocks[machineCode] = new object();
                 }
                 return state;
             }).When<CpmActions.StartServerSuccess>((state, action) => {
@@ -140,49 +142,45 @@ namespace HmiPro.Redux.Reducers {
                 state.SparkDiffDict[action.MachineCode] = action.Spark;
                 return state;
             }).When<CpmActions.SpeedAccept>((state, action) => {
-                state.MachineCode = action.MachineCode;
-                var currentSpeed = action.Speed;
-                //开机阶段，上一个速度为0 ，此时的速度大于0
-                MachineState newMachineState = null;
-                var machineCode = action.MachineCode;
-                state.SpeedDict[machineCode] = currentSpeed;
-                if (currentSpeed > 0 && state.PreSpeedDict[machineCode] == 0) {
-                    newMachineState = new MachineState() {
-                        StatePoint = MachineState.State.Start,
-                        Time = DateTime.Now
-                    };
-                }
-                //关机阶段，上一个速度大于0，此时速度等于0
-                else if (currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
-                    newMachineState = new MachineState() {
-                        StatePoint = MachineState.State.Stop,
-                        Time = DateTime.Now
-                    };
-                }
-                //赋值前一个速度
-                state.PreSpeedDict[action.MachineCode] = action.Speed;
-                if (newMachineState == null) {
+                lock (State.OeeLocks[action.MachineCode]) {
+                    state.MachineCode = action.MachineCode;
+                    var currentSpeed = action.Speed;
+                    //开机阶段，上一个速度为0 ，此时的速度大于0
+                    MachineState newMachineState = null;
+                    var machineCode = action.MachineCode;
+                    state.SpeedDict[machineCode] = currentSpeed;
+                    if (currentSpeed > 0 && state.PreSpeedDict[machineCode] == 0) {
+                        newMachineState = new MachineState() {
+                            StatePoint = MachineState.State.Start,
+                            Time = DateTime.Now
+                        };
+                    }
+                    //关机阶段，上一个速度大于0，此时速度等于0
+                    else if (currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
+                        newMachineState = new MachineState() {
+                            StatePoint = MachineState.State.Stop,
+                            Time = DateTime.Now
+                        };
+                    }
+                    //赋值前一个速度
+                    state.PreSpeedDict[action.MachineCode] = action.Speed;
+                    if (newMachineState == null) {
+                        return state;
+                    }
+                    var machineStates = state.MachineStateDict[machineCode];
+
+                    if (machineStates.Count == 0) {
+                        machineStates.Add(newMachineState);
+                    } else if (machineStates.Count > 0) {
+                        var lastState = machineStates.LastOrDefault();
+                        if (lastState?.StatePoint == newMachineState.StatePoint) {
+                            state.Logger.Error($"机台 {machineCode} 分析开关机有误，两次都为 {lastState?.StatePoint}");
+                        } else {
+                            machineStates.Add(newMachineState);
+                        }
+                    }
                     return state;
                 }
-
-                var machineStates = state.MachineStateDict[machineCode];
-                if (machineStates.Count == 0) {
-                    machineStates.Add(newMachineState);
-                } else if (machineStates.Count > 0) {
-                    var lastState = machineStates.LastOrDefault();
-                    if (lastState?.StatePoint == newMachineState.StatePoint) {
-                        state.Logger.Error($"机台 {machineCode} 分析开关机有误，两次都为 {lastState?.StatePoint}");
-                    } else {
-                        machineStates.Add(newMachineState);
-                    }
-                }
-                var workTime = YUtil.GetKeystoneWorkTime();
-                //删除上一班的机台状态数据
-                var removeList = machineStates.Where(m => m.Time < workTime).ToList();
-                foreach (var item in removeList) {
-                    machineStates.Remove(item);
-                }
-                return state;
             });
         }
     }

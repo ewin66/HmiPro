@@ -38,14 +38,23 @@ namespace HmiPro.Redux.Effects {
             StartCalcOeeTimer = App.Store.asyncActionVoid<OeeActions.StartCalcOeeTimer>(
               async (dispatch, getState, intance) => {
                   dispatch(intance);
-                  YUtil.SetInterval(intance.Interval, () => {
-                      foreach (var pair in getState().CpmState.MachineStateDict) {
-                          var machineCode = pair.Key;
-                          var timeEff = oeeCore.CalcOeeTimeEff(pair.Key, pair.Value);
-                          var speedEff = oeeCore.CalcOeeSpeedEff(pair.Key, MachineConfig.MachineDict[machineCode].OeeSpeedType);
-                          var qualityEff = oeeCore.CalcOeeQualityEff(pair.Key);
-                          App.Store.Dispatch(new OeeActions.UpdateOeePartialValue(machineCode, timeEff, speedEff, qualityEff));
-                      }
+                  await Task.Run(() => {
+                      YUtil.SetInterval(intance.Interval, () => {
+                          foreach (var pair in getState().CpmState.MachineStateDict) {
+                              var machineCode = pair.Key;
+                              //防止在计算Oee的同时接受到底层参数变化，导致不可预测的后果
+                              lock (CpmReducer.State.OeeLocks[machineCode]) {
+                                  var timeEff = oeeCore.CalcOeeTimeEff(pair.Key, pair.Value);
+                                  var speedEff = oeeCore.CalcOeeSpeedEff(pair.Key, MachineConfig.MachineDict[machineCode].OeeSpeedType);
+                                  var qualityEff = oeeCore.CalcOeeQualityEff(pair.Key);
+                                  App.Store.Dispatch(new OeeActions.UpdateOeePartialValue(
+                                          machineCode,
+                                          timeEff,
+                                          speedEff,
+                                          qualityEff));
+                              }
+                          }
+                      });
                   });
               });
         }

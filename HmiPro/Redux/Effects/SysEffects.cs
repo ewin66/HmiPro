@@ -26,7 +26,7 @@ namespace HmiPro.Redux.Effects {
     /// <author>ychost</author>
     /// </summary>
     public class SysEffects {
-        public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StartHttpSystem,bool> StartHttpSystem;
+        public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StartHttpSystem, bool> StartHttpSystem;
         public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StartCloseScreenTimer> StartCloseScreenTimer;
         public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StopCloseScreenTimer> StopCloseScrenTimer;
         public readonly LoggerService Logger;
@@ -36,7 +36,7 @@ namespace HmiPro.Redux.Effects {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             //启动http解析服务
-            StartHttpSystem = App.Store.asyncAction<SysActions.StartHttpSystem,bool>(
+            StartHttpSystem = App.Store.asyncAction<SysActions.StartHttpSystem, bool>(
                 async (dispatch, getState, instance) => {
                     dispatch(instance);
                     var isStarted = await sysService.StartHttpSystem(instance);
@@ -51,13 +51,15 @@ namespace HmiPro.Redux.Effects {
             StartCloseScreenTimer = App.Store.asyncActionVoid<SysActions.StartCloseScreenTimer>(
                 async (dispatch, getState, instance) => {
                     dispatch(instance);
-                    if (CloseScrrenTimer != null) {
-                        YUtil.RecoveryTimeout(CloseScrrenTimer);
-                    } else {
-                        CloseScrrenTimer = YUtil.SetInterval(instance.Interval, () => {
-                            App.Store.Dispatch(new SysActions.CloseScreen());
-                        });
-                    }
+                    await Task.Run(() => {
+                        if (CloseScrrenTimer != null) {
+                            YUtil.RecoveryTimeout(CloseScrrenTimer);
+                        } else {
+                            CloseScrrenTimer = YUtil.SetInterval(instance.Interval, () => {
+                                App.Store.Dispatch(new SysActions.CloseScreen());
+                            });
+                        }
+                    });
                 });
 
             //停止关闭显示器定时器

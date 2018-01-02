@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using HmiPro.Config;
 using HmiPro.Config.Models;
 using HmiPro.Helpers;
@@ -36,6 +38,8 @@ namespace HmiPro.Redux.Cores {
             }
             float currentSpeed = 0;
             currentSpeed = App.Store.GetState().CpmState.SpeedDict[machineCode];
+            //删除上一班的机台状态数据
+            removeBeforeWorkTime(machineStates, YUtil.GetKeystoneWorkTime());
             var runTimeSec = getMachineRunTimeSec(machineStates, currentSpeed);
             var debugTimeSec = getMachineDebugTimeSec();
             var workTime = YUtil.GetKeystoneWorkTime();
@@ -47,6 +51,19 @@ namespace HmiPro.Redux.Cores {
                 Console.WriteLine($"当班时间：{(DateTime.Now - workTime).TotalSeconds} 秒，机台运行时间 {runTimeSec} 秒");
             }
             return timeEff;
+        }
+
+        /// <summary>
+        /// 删除当班时间前的机台状态数据
+        /// </summary>
+        /// <param name="machineStates"></param>
+        /// <param name="workTime"></param>
+        private void removeBeforeWorkTime(IList<MachineState> machineStates, DateTime workTime) {
+            //删除上一班的机台状态数据
+            var removeList = machineStates.Where(m => m.Time < workTime).ToList();
+            foreach (var item in removeList) {
+                machineStates.Remove(item);
+            }
         }
 
         /// <summary>
