@@ -131,7 +131,7 @@ namespace HmiPro.Redux.Cores {
             smModels?.ForEach(sm => {
                 //处理参数包
                 if (sm.PackageType == SmPackageType.ParamPackage) {
-                    paramPkgHandler(code, sm);
+                    paramPkgHandler(code, sm, ip);
                 }
             });
         }
@@ -143,7 +143,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="machineCode"></param>
         /// <param name="sm"></param>
-        void paramPkgHandler(string machineCode, SmModel sm) {
+        void paramPkgHandler(string machineCode, SmModel sm, string ip) {
 
             var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm);
             var cpmsRelate = new List<Cpm>();
@@ -151,13 +151,14 @@ namespace HmiPro.Redux.Cores {
             IDictionary<int, Cpm> updatedCpmsDiffDict = new Dictionary<int, Cpm>();
             //简洁算法计算出来的参数
             cpmsDirect?.ForEach(cpm => {
+                //普通浮点参数
                 if (cpm.ValueType == SmParamType.Signal) {
                     var floatVal = (float)cpm.Value;
                     onlineFloatDict[machineCode][cpm.Code] = floatVal;
                     var relateCpms = calcRelateCpm(machineCode, cpm.Code);
                     cpmsRelate.AddRange(relateCpms);
-                }
-                if (cpm.ValueType == SmParamType.StrRfid) {
+                    //Rfid卡
+                } else if (cpm.ValueType == SmParamType.StrRfid) {
                     if (MachineConfig.MachineDict[machineCode].CodeToLogicDict.TryGetValue(cpm.Code, out var logic)) {
                         if (logic == CpmInfoLogic.StartRfid) {
                             App.Store.Dispatch(new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
@@ -167,6 +168,12 @@ namespace HmiPro.Redux.Cores {
                                 DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.EndAxis));
 
                         }
+                    }
+                    //485通讯状态
+                } else if (cpm.ValueType == SmParamType.SingleComStatus) {
+                    App.Store.Dispatch(new CpmActions.Com485SingleStatusAccept(machineCode, ip, (SmSingleStatus)cpm.Value, cpm.Code));
+                    if ((SmSingleStatus)cpm.Value == SmSingleStatus.Error) {
+                        App.Store.Dispatch(new AlarmActions.Com485SingleError(machineCode, ip, cpm.Code, cpm.Name));
                     }
                 }
             });
@@ -179,7 +186,8 @@ namespace HmiPro.Redux.Cores {
             //      一包参数的时间应该一致
             var pickTime = DateTime.Now;
 
-            void updateDiff(Cpm cpm) {
+            void updateDiff(Cpm cpm)
+            {
                 cpm.PickTime = pickTime;
                 //直接更新，会更新界面的数据
                 if (OnlineCpmDict[machineCode].TryGetValue(cpm.Code, out var storeCpm)) {
@@ -264,8 +272,8 @@ namespace HmiPro.Redux.Cores {
                         var maxCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][plcAlarm.MaxCode.Value];
                         if (maxCpm.ValueType == SmParamType.Signal) {
                             if (cpm.GetFloatVal() > maxCpm.GetFloatVal()) {
-                                var message = $"{cpm.Name} 超过Plc最大设定值";
-                                App.Store.Dispatch(new AlarmActions.CpmPlcAlarmOccur(machineCode, message,cpm.Code,cpm.Name));
+                                var message = $"{cpm.Name} 超过最大值";
+                                App.Store.Dispatch(new AlarmActions.CpmPlcAlarmOccur(machineCode, message, cpm.Code, cpm.Name));
                             }
                         }
                     }
@@ -273,8 +281,8 @@ namespace HmiPro.Redux.Cores {
                         var minCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][plcAlarm.MinCode.Value];
                         if (minCpm.ValueType == SmParamType.Signal) {
                             if (cpm.GetFloatVal() < minCpm.GetFloatVal()) {
-                                var message = $"{cpm.Name} 小于Plc最小设定值";
-                                App.Store.Dispatch(new AlarmActions.CpmPlcAlarmOccur(machineCode, message,cpm.Code,cpm.Name));
+                                var message = $"{cpm.Name} 小于最小值";
+                                App.Store.Dispatch(new AlarmActions.CpmPlcAlarmOccur(machineCode, message, cpm.Code, cpm.Name));
                             }
                         }
                     }

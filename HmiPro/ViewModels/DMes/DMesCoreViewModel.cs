@@ -6,12 +6,15 @@ using System.Linq;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.POCO;
+using HmiPro.Config;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
 using HmiPro.ViewModels.DMes.Tab;
 using HmiPro.ViewModels.Sys;
 using Reducto;
+using YCsharp.Model.Procotol.SmParam;
+using YCsharp.Util;
 
 namespace HmiPro.ViewModels.DMes {
     /// <summary>
@@ -29,6 +32,7 @@ namespace HmiPro.ViewModels.DMes {
         public virtual SchTaskTab SchTaskTab { get; set; } = new SchTaskTab() { Header = "任务" };
         public virtual AlarmTab AlarmTab { get; set; } = new AlarmTab() { Header = "报警" };
         public virtual ScanMaterialTab ScanMaterialTab { get; set; } = new ScanMaterialTab() { Header = "来料" };
+        public virtual Com485Tab Com485Tab { get; set; } = new Com485Tab() { Header = "通讯" };
         private Unsubscribe unsubscribe;
         public readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
         public virtual string Header { get; set; }
@@ -43,6 +47,7 @@ namespace HmiPro.ViewModels.DMes {
             ViewSource.Add(SchTaskTab);
             ViewSource.Add(AlarmTab);
             ViewSource.Add(ScanMaterialTab);
+            ViewSource.Add(Com485Tab);
 
             actionExecDict[AlarmActions.UPDATE_HISTORY_ALARMS] = whenUpdateHistoryAlarms;
             actionExecDict[DMesActions.RFID_ACCPET] = whenRfidAccept;
@@ -69,6 +74,12 @@ namespace HmiPro.ViewModels.DMes {
             if (scanMaterialDict.TryGetValue(MachineCode, out var material)) {
                 ScanMaterialTab.Update(material);
             }
+            //绑定485通讯状态
+            var com485Dict = App.Store.GetState().CpmState.Com485StatusDict;
+            var status = com485Dict.Where(c => MachineConfig.MachineCodeToIpsDict[MachineCode].Contains(c.Key))
+                .Select(c => c.Value).ToList();
+            Com485Tab.BindSource(status);
+
             //订阅派发事件
             unsubscribe = App.Store.Subscribe((state, action) => {
                 if (actionExecDict.TryGetValue(action.Type(), out var exec)) {
@@ -140,8 +151,8 @@ namespace HmiPro.ViewModels.DMes {
         public void Navigate(Navigator nav) {
             if (nav.MachineCode != NavigatorViewModel.NavMachineCodeInDoing) {
                 var vm = DMesCoreViewModel.Create(nav.MachineCode);
-                NavigatorViewModel.NavMachineCodeInDoing =nav.MachineCode;
-                NavigationSerivce.Navigate("DMesCoreView", vm, null, this,false);
+                NavigatorViewModel.NavMachineCodeInDoing = nav.MachineCode;
+                NavigationSerivce.Navigate("DMesCoreView", vm, null, this, false);
             }
 
         }

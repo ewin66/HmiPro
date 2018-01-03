@@ -2,9 +2,13 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data.SqlTypes;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Annotations;
 using HmiPro.Config;
 using HmiPro.Config.Models;
 using HmiPro.Helpers;
@@ -78,8 +82,11 @@ namespace HmiPro.Redux.Reducers {
             /// 日志工具
             /// </summary>
             public LoggerService Logger;
+            /// <summary>
+            /// 每个Ip对应的485状态表
+            /// </summary>
+            public IDictionary<string, Com485SingleStatus> Com485StatusDict;
         }
-
 
         public static SimpleReducer<State> Create() {
             return new SimpleReducer<State>().When<CpmActions.Init>((state, action) => {
@@ -91,6 +98,7 @@ namespace HmiPro.Redux.Reducers {
                 state.SparkDiffDict = new Dictionary<string, float>();
                 state.MachineStateDict = new ConcurrentDictionary<string, ObservableCollection<MachineState>>();
                 state.MachineDebugStateDict = new Dictionary<string, ObservableCollection<MachineDebugState>>();
+                state.Com485StatusDict = new ConcurrentDictionary<string, Com485SingleStatus>();
                 state.SpeedDict = new Dictionary<string, float>();
                 state.PreSpeedDict = new Dictionary<string, float>();
                 state.Logger = LoggerHelper.CreateLogger(typeof(CpmReducer).ToString());
@@ -115,6 +123,11 @@ namespace HmiPro.Redux.Reducers {
                     state.PreSpeedDict[machineCode] = 0f;
                     state.SparkDiffDict[machineCode] = 0f;
                     State.OeeLocks[machineCode] = new object();
+                }
+                //初始化所有ip的通讯状态为未知
+                foreach (var pair in MachineConfig.IpToMachineCodeDict) {
+                    var ip = pair.Key;
+                    state.Com485StatusDict[ip] = new Com485SingleStatus() { Status = SmSingleStatus.Unknown, Time = DateTime.Now, Ip = ip };
                 }
                 return state;
             }).When<CpmActions.StartServerSuccess>((state, action) => {
@@ -181,7 +194,60 @@ namespace HmiPro.Redux.Reducers {
                     }
                     return state;
                 }
+                //更新ip的485状态
+            }).When<CpmActions.Com485SingleStatusAccept>((state, action) => {
+                state.Com485StatusDict[action.Ip].Status = action.Status;
+                state.Com485StatusDict[action.Ip].Time = DateTime.Now;
+                return state;
             });
+        }
+    }
+
+    public class Com485SingleStatus : INotifyPropertyChanged {
+        private SmSingleStatus status;
+        public SmSingleStatus Status {
+            get => status;
+            set {
+                if (status != value) {
+                    status = value;
+                    OnPropertyChanged(nameof(StatusStr));
+                }
+            }
+
+        }
+        public string StatusStr {
+            get {
+                switch (status) {
+                    case SmSingleStatus.Error:
+                        return "错误";
+                    case SmSingleStatus.Ok:
+                        return "正常";
+                    case SmSingleStatus.Unknown:
+                        return "初始化";
+                    default:
+                        return "初始化";
+                }
+            }
+        }
+
+        private DateTime time;
+        public DateTime Time {
+            get => time;
+            set {
+                if (time != value) {
+                    time = value;
+                    OnPropertyChanged(nameof(TimeStr));
+                }
+            }
+        }
+        public string TimeStr => time.ToString("yyyy-MM-dd HH:mm:ss");
+
+        public string Ip { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

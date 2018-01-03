@@ -180,6 +180,29 @@
                             </dxg:GridControl>
                         </Grid>
                     </DataTemplate>
+                    <!--485通讯监控-->
+                    <DataTemplate DataType="{x:Type Model:Com485Tab}">
+                        <Grid>
+                            <Grid.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontSize" Value="13"></Setter>
+                                </Style>
+                                <Style TargetType="dxe:InplaceBaseEdit">
+                                    <Setter Property="FontSize" Value="13"></Setter>
+                                </Style>
+                            </Grid.Resources>
+                            <dxg:GridControl ItemsSource="{Binding Path=Com485Status}" x:Name="AlarmGridControl">
+                                <dxg:GridControl.View>
+                                    <dxg:TableView  AllowResizing="False"  ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
+                                </dxg:GridControl.View>
+                                <dxg:GridControl.Columns>
+                                    <dxg:GridColumn Width="2*"  Header="Ip" FieldName="Ip"/>
+                                    <dxg:GridColumn Width="3*" Header="状态" FieldName="StatusStr"/>
+                                    <dxg:GridColumn Width="2*"  Header="时间" FieldName="TimeStr" />
+                                </dxg:GridControl.Columns>
+                            </dxg:GridControl>
+                        </Grid>
+                    </DataTemplate>
                 </dx:DXTabControl.Resources>
             </dx:DXTabControl>
 

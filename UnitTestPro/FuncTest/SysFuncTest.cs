@@ -131,5 +131,16 @@ namespace UnitTestPro.FuncTest {
             Console.WriteLine(ret.Status);
         }
 
+        [TestMethod]
+        public void EnumTest() {
+            object e = TestEnum.Hello;
+            Console.Write((TestEnum)e);
+        }
+
+        public enum TestEnum {
+            Hello = 1,
+            World = 2
+        }
+
     }
 }

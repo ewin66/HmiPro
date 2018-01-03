@@ -102,14 +102,12 @@ namespace YCsharp.Model.Procotol.SmParam {
         /// </summary>
         /// <returns></returns>
         public bool IsSignalData() {
-            var typeCheck = (DataType == (byte)EmsocketDataType.ReverseFloat ||
-                             DataType == (byte)EmsocketDataType.Int ||
-                             DataType == (byte)EmsocketDataType.Float ||
-                             DataType == (byte)EmsocketDataType.Float3412 ||
-                             DataType == (byte)EmsocketDataType.Int3412 ||
-                             DataType == (byte)EmsocketDataType.Float2143
-                             );
-            return typeCheck;
+            return DataType == (byte) EmsocketDataType.ReverseFloat ||
+                   DataType == (byte) EmsocketDataType.Int ||
+                   DataType == (byte) EmsocketDataType.Float4321 ||
+                   DataType == (byte) EmsocketDataType.Float3412 ||
+                   DataType == (byte) EmsocketDataType.Int3412 ||
+                   DataType == (byte) EmsocketDataType.Float2143;
         }
 
         /// <summary>
@@ -292,7 +290,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                 val = BitConverter.ToSingle(Data, 0);
             }
               //普通顺序 4321
-              else if (DataType == (byte)EmsocketDataType.Float) {
+              else if (DataType == (byte)EmsocketDataType.Float4321) {
                 val = BitConverter.ToSingle(Data, 0);
                 //乱序1 3412 ==> 4321
             } else if (DataType == (byte)EmsocketDataType.Float3412) {
@@ -305,7 +303,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                 val = BitConverter.ToSingle(this.Data, 0);
             }
             singleData = (Single)val;
-          
+
             //复位Data
             Data = dataCopy;
             return (float)Math.Round(val, mathRound);
@@ -341,7 +339,7 @@ namespace YCsharp.Model.Procotol.SmParam {
             //值
             var value = BitConverter.GetBytes(this.ParamValue);
             //类型
-            var type = BitConverter.GetBytes((Int16)EmsocketDataType.Float)[0];
+            var type = BitConverter.GetBytes((Int16)EmsocketDataType.Float4321)[0];
             //浮点位置
             var floatPlace = BitConverter.GetBytes(0)[0];
             //数据长度
@@ -420,7 +418,6 @@ namespace YCsharp.Model.Procotol.SmParam {
     /// 单个通讯状态
     /// </summary>
     public enum SmSingleStatus {
-
         //通讯正常
         Ok = 0,
         //通讯故障

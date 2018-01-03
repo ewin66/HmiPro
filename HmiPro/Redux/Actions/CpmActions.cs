@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Redux.Models;
+using YCsharp.Model.Procotol.SmParam;
 
 namespace HmiPro.Redux.Actions {
     /// <summary>
@@ -30,8 +31,23 @@ namespace HmiPro.Redux.Actions {
         public static readonly string SPEED_DIFF_ZERO_ACCEPT = "[Cpm] Speed Diff Zero Accept";
         public static readonly string OD_ACCPET = "[Cpm] Od Accept";
         //485串口状态更新
-        public static readonly string COM_STATUS_UPDATED = "[Cpm] Communication Status Updated";
+        //单节点状态
+        public static readonly string COM_485_SINGLE_STATUS_ACCEPT = "[Cpm] Communication 485 Single  Status Accept";
 
+        public struct Com485SingleStatusAccept : IAction {
+            public string Type() => COM_485_SINGLE_STATUS_ACCEPT;
+            public string Ip;
+            public string MachineCode;
+            public SmSingleStatus Status;
+            public int CpmCode;
+
+            public Com485SingleStatusAccept(string machineCode, string ip, SmSingleStatus status,int cpmCode) {
+                MachineCode = machineCode;
+                Ip = ip;
+                Status = status;
+                CpmCode = cpmCode;
+            }
+        }
 
         public struct OdAccept : IAction {
             public string Type() => OD_ACCPET;

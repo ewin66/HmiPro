@@ -143,5 +143,6 @@ namespace HmiPro.Redux.Models {
         public static readonly string PounchErr = "打卡错误";
         public static readonly string ClearErr = "清零错误";
         public static readonly string OtherErr = "其它异常";
+        public static readonly string Com485Err = "485通讯异常";
     }
 }

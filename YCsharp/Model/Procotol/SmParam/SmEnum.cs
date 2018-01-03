@@ -92,7 +92,7 @@ namespace YCsharp.Model.Procotol.SmParam {
         //整形
         Int = 1,
         //普通浮点 4321 ==>4321
-        Float = 3,
+        Float4321 = 3,
         //整形逆序：3421==>4321
         Int3412 = 4,
         //乱序浮点1

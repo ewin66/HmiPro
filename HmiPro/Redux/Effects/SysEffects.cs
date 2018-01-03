@@ -66,9 +66,11 @@ namespace HmiPro.Redux.Effects {
             StopCloseScrenTimer = App.Store.asyncActionVoid<SysActions.StopCloseScreenTimer>(
                 async (dispatch, getState, instance) => {
                     dispatch(instance);
-                    if (CloseScrrenTimer != null) {
-                        YUtil.ClearTimeout(CloseScrrenTimer);
-                    }
+                    await Task.Run(() => {
+                        if (CloseScrrenTimer != null) {
+                            YUtil.ClearTimeout(CloseScrrenTimer);
+                        }
+                    });
                 });
         }
 

@@ -21,6 +21,7 @@ namespace HmiPro.Config {
         /// </summary>
         public static IDictionary<string, Machine> MachineDict;
         public static IDictionary<string, string> IpToMachineCodeDict;
+        public static IDictionary<string, List<string>> MachineCodeToIpsDict;
         public static string AllMachineName;
 
         /// <summary>
@@ -32,6 +33,7 @@ namespace HmiPro.Config {
             MachineDict = new Dictionary<string, Machine>();
             IpToMachineCodeDict = new Dictionary<string, string>();
             AlarmIpDict = new Dictionary<string, string>();
+            MachineCodeToIpsDict = new Dictionary<string, List<string>>();
             var codes = Path.GetFileNameWithoutExtension(path).Split('_');
             AllMachineName = Path.GetFileNameWithoutExtension(path);
             foreach (var code in codes) {
@@ -46,6 +48,7 @@ namespace HmiPro.Config {
                         AlarmIpDict[code] = ip;
                     }
                 }
+                MachineCodeToIpsDict[code] = machine.CpmIps.ToList();
             }
         }
     }

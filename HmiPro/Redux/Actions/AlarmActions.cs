@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Redux.Models;
+using YCsharp.Model.Procotol.SmParam;
 
 namespace HmiPro.Redux.Actions {
     /// <summary>
@@ -31,6 +32,26 @@ namespace HmiPro.Redux.Actions {
         /// </summary>
         public static readonly string CPM_PLC_ALARM_OCCUR = "[Alarm] Cpm Plc Alarm Occur";
 
+        public static readonly string COM_485_SINGLE_ERROR = "[Alarm] Communication 485 Single Point Error";
+
+        /// <summary>
+        /// 485单点通讯状态异常
+        /// </summary>
+        public struct Com485SingleError : IAction {
+            public string Type() => COM_485_SINGLE_ERROR;
+            public string Ip;
+            public string MachineCode;
+            public int CpmCode;
+            public string CpmName;
+
+            public Com485SingleError(string machineCode, string ip, int cpmCode, string cpmName) {
+                Ip = ip;
+                MachineCode = machineCode;
+                CpmCode = cpmCode;
+                CpmName = cpmName;
+            }
+        }
+
         public struct CpmPlcAlarmOccur : IAction {
             public string Type() => CPM_PLC_ALARM_OCCUR;
             public string MachineCode;
@@ -38,7 +59,7 @@ namespace HmiPro.Redux.Actions {
             public int CpmCode;
             public string CpmName;
 
-            public CpmPlcAlarmOccur(string machineCode, string message,int cpmCode,string cpmName) {
+            public CpmPlcAlarmOccur(string machineCode, string message, int cpmCode, string cpmName) {
                 MachineCode = machineCode;
                 Message = message;
                 CpmCode = cpmCode;
@@ -99,10 +120,12 @@ namespace HmiPro.Redux.Actions {
             public string Type() => GENERATE_ONE_ALARM;
             public string MachineCode;
             public MqAlarm MqAlarm;
+            public int MinGapSec;
 
-            public GenerateOneAlarm(string machineCode, MqAlarm alarm) {
+            public GenerateOneAlarm(string machineCode, MqAlarm alarm, int minGapSec = 0) {
                 MachineCode = machineCode;
                 MqAlarm = alarm;
+                MinGapSec = minGapSec;
             }
         }
 

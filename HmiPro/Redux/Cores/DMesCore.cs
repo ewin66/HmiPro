@@ -82,10 +82,10 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[DMesActions.START_SCH_TASK_AXIS] = doStartSchTaskAxis;
             actionExecDict[CpmActions.SPEED_DIFF_ZERO_ACCEPT] = whenSpeedDiffZeroAccept;
             actionExecDict[CpmActions.SPEED_ACCEPT] = whenSpeedAccept;
-            actionExecDict[CpmActions.OD_ACCPET] = whenOdAccept;
             actionExecDict[DMesActions.RFID_ACCPET] = doRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccept;
             actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
+            actionExecDict[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
 
             App.Store.Subscribe((state, action) => {
                 if (actionExecDict.TryGetValue(state.Type, out var exec)) {
@@ -102,6 +102,48 @@ namespace HmiPro.Redux.Cores {
             }
             //恢复任务
             RestoreTask();
+        }
+
+        /// <summary>
+        /// 485通讯发生故障
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenCom485SingleError(AppState state, IAction action) {
+            var alarmAction = (AlarmActions.Com485SingleError)action;
+            var mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName,
+                $"ip {alarmAction.Ip} 485故障");
+            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障");
+            //485故障暂时不考虑上报
+            //App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm));
+        }
+
+        /// <summary>
+        /// 创建报警对象，无论是否有任务进行
+        /// </summary>
+        /// <param name="machineCode"></param>
+        /// <param name="code"></param>
+        /// <param name="name"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        MqAlarm createMqAlarmAnyway(string machineCode, int code, string name, string message) {
+            var meter = App.Store.GetState().CpmState.NoteMeterDict[machineCode];
+            lock (SchTaskDoingLocks[machineCode]) {
+                var mqAlarm = new MqAlarm() {
+                    machineCode = machineCode,
+                    alarmType = AlarmType.CpmErr,
+                    axisCode = SchTaskDoingDict[machineCode].MqSchAxis?.axiscode ?? "/",
+                    code = code,
+                    CpmName = name,
+                    message = message,
+                    employees = SchTaskDoingDict[machineCode]?.EmpRfids,
+                    endRfids = SchTaskDoingDict[machineCode]?.EndAxisRfids,
+                    startRfids = SchTaskDoingDict[machineCode]?.StartAxisRfids,
+                    meter = meter,
+                    time = YUtil.GetUtcTimestampMs(DateTime.Now),
+                };
+                return mqAlarm;
+            }
         }
 
         /// <summary>
@@ -146,60 +188,6 @@ namespace HmiPro.Redux.Cores {
                 Title = $"机台{mqAction.MachineCode}通知",
                 Content = $"接受到来料数据，请注意核实"
             }));
-
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
-        void whenOdAccept(AppState state, IAction action) {
-            var cpmAction = (CpmActions.OdAccept)action;
-            var machineCode = cpmAction.MachineCode;
-            //从Plc设置值检查上下限
-            if (MachineConfig.MachineDict[machineCode].OdAlarmType == AlarmActions.OdAlarmType.OdThresholdPlc) {
-                checkOdAlarmByPlc(machineCode, cpmAction.OdCpm);
-            }
-        }
-
-        /// <summary>
-        /// 从Plc中读取上下限来检查Od值报警
-        /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="odCpm"></param>
-        void checkOdAlarmByPlc(string machineCode, Cpm odCpm) {
-            MqAlarm mqAlarm = new MqAlarm() {
-                machineCode = machineCode,
-                alarmType = AlarmType.CpmErr,
-                axisCode = SchTaskDoingDict[machineCode]?.MqSchAxis?.axiscode ?? "/",
-                code = odCpm.Code,
-                CpmName = odCpm.Name,
-                employees = SchTaskDoingDict[machineCode]?.EmpRfids,
-                meter = App.Store.GetState().CpmState.NoteMeterDict[machineCode],
-                startRfids = SchTaskDoingDict[machineCode]?.StartAxisRfids,
-                endRfids = SchTaskDoingDict[machineCode]?.EndAxisRfids,
-                time = odCpm.PickTimeStampMs
-            };
-
-            if (MachineConfig.MachineDict[machineCode].LogicToCpmDict.TryGetValue(CpmInfoLogic.MaxOdPlc, out var maxInfo)) {
-                var maxOd = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][maxInfo.Code];
-                if (maxOd.ValueType == SmParamType.Signal) {
-                    if (odCpm.GetFloatVal() > maxOd.GetFloatVal()) {
-                        mqAlarm.message = $"{odCpm.Name} 超限";
-                        App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(machineCode, mqAlarm));
-                    }
-                }
-
-            } else if (MachineConfig.MachineDict[machineCode].LogicToCpmDict.TryGetValue(CpmInfoLogic.MinOdPlc, out var minInfo)) {
-                var minOd = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][minInfo.Code];
-                if (minOd.ValueType == SmParamType.Signal) {
-                    if (odCpm.GetFloatVal() < minOd.GetFloatVal()) {
-                        mqAlarm.message = $"{odCpm.Name} 超限";
-                        App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(machineCode, mqAlarm));
-                    }
-                }
-            }
 
         }
 
@@ -355,7 +343,7 @@ namespace HmiPro.Redux.Cores {
             var machineCode = state.CpmState.MachineCode;
             var spark = state.CpmState.SparkDiffDict[machineCode];
             if ((int)spark == 1) {
-                var mqAlarm = createMqAlarm(machineCode, YUtil.GetUtcTimestampMs(DateTime.Now), "火花报警", AlarmType.SparkErr);
+                var mqAlarm = createMqAlarmMustInTask(machineCode, YUtil.GetUtcTimestampMs(DateTime.Now), "火花报警", AlarmType.SparkErr);
                 dispatchAlarmAction(machineCode, mqAlarm);
             }
         }
@@ -377,13 +365,14 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 创建一个报警对象
         /// 因为很多地方都要创建，这里提取其公共属性
+        /// 必须要有任务进行才能创建
         /// </summary>
         /// <param name="machineCode">机台编码</param>
         /// <param name="time">报警时间戳</param>
         /// <param name="alarmType">报警类型</param>
         /// <param name="cpmName">报警参数名</param>
         /// <returns></returns>
-        private MqAlarm createMqAlarm(string machineCode, long time, string cpmName, string alarmType) {
+        private MqAlarm createMqAlarmMustInTask(string machineCode, long time, string cpmName, string alarmType) {
             lock (SchTaskDoingLocks[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
                 //如果当前没有正在执行的任务，则报警无意义
@@ -463,7 +452,7 @@ namespace HmiPro.Redux.Cores {
                 if (max.HasValue && min.HasValue) {
                     var cpmVal = (float)checkAlarm.Cpm.Value;
                     if (cpmVal > max || cpmVal < min) {
-                        MqAlarm mqAlarm = createMqAlarm(machineCode, checkAlarm.Cpm.PickTimeStampMs, checkAlarm.Cpm.Name, AlarmType.CpmErr);
+                        MqAlarm mqAlarm = createMqAlarmMustInTask(machineCode, checkAlarm.Cpm.PickTimeStampMs, checkAlarm.Cpm.Name, AlarmType.CpmErr);
                         dispatchAlarmAction(machineCode, mqAlarm);
                     }
                 } else {

@@ -127,9 +127,11 @@ namespace HmiPro.Redux.Models {
                             cpm.ValueType = SmParamType.StrRfid;
                             cpm.Value = p.GetStrData();
                         }
+                    } else if (cpm.ValueType == SmParamType.SingleComStatus) {
+                        cpm.value = p.GetSingleComStatus();
                     }
-                    //屏蔽掉通讯状态数据
-                    if (cpm.ValueType != SmParamType.MultiComStatus && cpm.ValueType != SmParamType.SingleComStatus && cpm.ValueType != SmParamType.Unknown) {
+                    //暂时对如下数据类型不做处理
+                    if (cpm.ValueType != SmParamType.MultiComStatus && cpm.ValueType != SmParamType.Unknown) {
                         cpms.Add(cpm);
                     }
                 }

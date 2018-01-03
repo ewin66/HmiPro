@@ -51,14 +51,12 @@ namespace HmiPro.ViewModels {
                 var setting = ctx.Settings.ToList().LastOrDefault();
                 if (setting == null) {
                     App.Store.Dispatch(new SysActions.ShowSettingView());
-                }
-                else {
+                } else {
                     try {
                         MachineConfig.Load(setting.MachineXlsPath);
                         checkConfig();
                         afterConfigLoaded();
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                             Title = "配置出错",
                             Content = e.Message
@@ -132,7 +130,11 @@ namespace HmiPro.ViewModels {
                 //一分钟超时
                 var isTimeouted = Task.WaitAll(tasks.ToArray(), 10000);
                 if (!isTimeouted) {
-                    App.Store.Dispatch(new SysActions.SetTopMessage("启动超时，请检查网络连接", Visibility.Visible));return;
+                    App.Store.Dispatch(new SysActions.SetTopMessage("启动超时，请检查网络连接", Visibility.Visible));
+                    if (CmdOptions.GlobalOptions.MockVal) {
+                        App.Store.Dispatch(new SysActions.AppInitCompleted());
+                    }
+                    return;
                 }
 
                 //是否启动完成Cpm服务
@@ -158,18 +160,15 @@ namespace HmiPro.ViewModels {
                         App.Store.Dispatch(new SysActions.ShowNotification(
                             new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 排产队列 {pair.Key} 失败，请检查" }));
 
-                    }
-                    else if (pair.Key.ToUpper().Contains("JUDGE_MATER") && (!isStartListenMq)) {
+                    } else if (pair.Key.ToUpper().Contains("JUDGE_MATER") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
                             new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 扫描来料队列 {pair.Key} 失败，请检查" }));
 
-                    }
-                    else if (pair.Key.ToUpper().Contains("RFIDEMP") && (!isStartListenMq)) {
+                    } else if (pair.Key.ToUpper().Contains("RFIDEMP") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
                              new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 人员打卡 数据失败，请检查" }));
 
-                    }
-                    else if (pair.Key.ToUpper().Contains("RFIDAXIS") && (!isStartListenMq)) {
+                    } else if (pair.Key.ToUpper().Contains("RFIDAXIS") && (!isStartListenMq)) {
                         App.Store.Dispatch(new SysActions.ShowNotification(
                              new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 线盘卡失败，请检查" }));
                     }
@@ -221,8 +220,7 @@ namespace HmiPro.ViewModels {
                 var vm = DMesCoreViewModel.Create(MachineConfig.MachineDict.FirstOrDefault().Key);
                 NavigatorViewModel.NavMachineCodeInDoing = vm.MachineCode;
                 NavigationSerivce.Navigate("DMesCoreView", vm, null, this, true);
-            }
-            else {
+            } else {
                 NavigationSerivce.Navigate(viewName, null, this, true);
             }
         }
