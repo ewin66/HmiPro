@@ -120,15 +120,12 @@ namespace HmiPro.ViewModels {
                 App.Store.Dispatch(
                     mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(HmiConfig.TopicListenHandSet)));
             startListenMqDict["rfidAxisTask"] = axisRfidTAsk;
-
-
             var tasks = new List<Task<bool>>() { starHttpSystem, startCpmServer };
             tasks.AddRange(startListenMqDict.Values);
-
             await Task.Run(() => {
                 //等等所有任务完成
                 //一分钟超时
-                var isTimeouted = Task.WaitAll(tasks.ToArray(), 10000);
+                var isTimeouted = Task.WaitAll(tasks.ToArray(), 1200000);
                 if (!isTimeouted) {
                     App.Store.Dispatch(new SysActions.SetTopMessage("启动超时，请检查网络连接", Visibility.Visible));
                     if (CmdOptions.GlobalOptions.MockVal) {

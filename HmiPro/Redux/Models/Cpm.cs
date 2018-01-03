@@ -127,7 +127,8 @@ namespace HmiPro.Redux.Models {
                             cpm.ValueType = SmParamType.StrRfid;
                             cpm.Value = p.GetStrData();
                         }
-                    } else if (cpm.ValueType == SmParamType.SingleComStatus) {
+                    } else if (p.ParamType == SmParamType.SingleComStatus) {
+                        Console.WriteLine("接受到底层485状态包");
                         cpm.value = p.GetSingleComStatus();
                     }
                     //暂时对如下数据类型不做处理

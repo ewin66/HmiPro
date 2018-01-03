@@ -35,7 +35,7 @@ namespace YCsharp.Model.Procotol.SmParam {
             List<byte[]> replayCmdPackages = packageDictionary[SmPackageType.ClientReplyCmd];
             //采集参数包解码
             paramPackages.ForEach(p => {
-                SmModel data = processPackage(p, 0);
+                SmModel data = processParamPackage(p, 0);
                 dataList.Add(data);
             });
             //心跳包解码
@@ -96,8 +96,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                     if (propLen > 0 && index < socketBuffer.GetDataCount() &&
                         socketBuffer[index] == (byte)SmFrame.End) {
                         //获取包类型
-                        smPackageType =
-                            SmPackage.GetPackageType(socketBuffer.Buffer, i, packageLen);
+                        smPackageType = SmPackage.GetPackageType(socketBuffer.Buffer, i, packageLen);
                         if (smPackageType != SmPackageType.ErrorPackage) {
                             byte[] bytes = copyPackageAndClearOrigin2(ref i, packageLen);
                             if (smPackageType == SmPackageType.ParamPackage) {
@@ -146,7 +145,7 @@ namespace YCsharp.Model.Procotol.SmParam {
         /// <param name="buffer"></param>
         /// <param name="offset"></param>
         /// <returns></returns>
-        private SmModel processPackage(byte[] buffer, int offset) {
+        private SmModel processParamPackage(byte[] buffer, int offset) {
             List<byte> byList = buffer.ToList();
             byList = byList.GetRange(offset, byList.Count);
             SmModel emSocket = processPackage(buffer, offset, SmPackageType.ParamPackage);
@@ -182,7 +181,6 @@ namespace YCsharp.Model.Procotol.SmParam {
 
         /// <summary>
         /// 心跳包进行处理
-        /// todo 未添加逻辑，只是简单标识
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="offset"></param>
@@ -193,7 +191,6 @@ namespace YCsharp.Model.Procotol.SmParam {
         }
 
         /// <summary>
-        /// todo 未对命令回复包做操作
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="offset"></param>

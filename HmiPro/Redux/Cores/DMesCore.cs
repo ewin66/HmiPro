@@ -113,7 +113,8 @@ namespace HmiPro.Redux.Cores {
             var alarmAction = (AlarmActions.Com485SingleError)action;
             var mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName,
                 $"ip {alarmAction.Ip} 485故障");
-            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障");
+            //0.5小时记录一次485故障到文件
+            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障",1800);
             //485故障暂时不考虑上报
             //App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm));
         }

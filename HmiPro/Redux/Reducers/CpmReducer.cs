@@ -127,7 +127,7 @@ namespace HmiPro.Redux.Reducers {
                 //初始化所有ip的通讯状态为未知
                 foreach (var pair in MachineConfig.IpToMachineCodeDict) {
                     var ip = pair.Key;
-                    state.Com485StatusDict[ip] = new Com485SingleStatus() { Status = SmSingleStatus.Unknown, Time = DateTime.Now, Ip = ip };
+                    state.Com485StatusDict[ip] = new Com485SingleStatus() { Status = SmSingleStatus.Ok, Time = DateTime.Now, Ip = ip };
                 }
                 return state;
             }).When<CpmActions.StartServerSuccess>((state, action) => {
@@ -198,6 +198,7 @@ namespace HmiPro.Redux.Reducers {
             }).When<CpmActions.Com485SingleStatusAccept>((state, action) => {
                 state.Com485StatusDict[action.Ip].Status = action.Status;
                 state.Com485StatusDict[action.Ip].Time = DateTime.Now;
+                state.Logger.Debug($"接受到 {action.Ip} 的485状态 {action.Status}");
                 return state;
             });
         }

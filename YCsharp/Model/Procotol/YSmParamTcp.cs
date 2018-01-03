@@ -132,22 +132,16 @@ namespace YCsharp.Model.Procotol {
                 SmClientManager.IPSessionBuffer[ip] = SmClientManager.DefaultBuffer();
             }
 
-            List<SmModel> smModels = new List<SmModel>();
+            List<SmModel> smModels;
 
             //解析套接字数据
             using (var analysis = new SmAnalysis(SmClientManager.IPSessionBuffer[ip])) {
                 smModels = analysis.ThroughAnalysisStack(reBuffer, 0, reCount);
-                //多余的缓存进行清空
-                //最大缓存为1024*1000
-                if (SmClientManager.IPSessionBuffer[ip].DataCount > 1024000) {
-                    SmClientManager.IPSessionBuffer[ip].Clear(0, SmClientManager.IPSessionBuffer[ip].BufferSize);
-                }
-
                 if (smModels?.Count == 0) {
                     Logger.Debug($"{ip} 包解析失败", ConsoleColor.Red);
                     return;
                 }
-                smModels.ForEach(sm => {
+                smModels?.ForEach(sm => {
                     //按协议应给客户端回复
                     if (sm.PackageType == SmPackageType.ParamPackage || sm.PackageType == SmPackageType.HeartbeatPackage) {
                         var replayPkg = SmParamApi.BuildParamPackage((byte)(sm.Cmd + 0x80), null, 2, sm.ModuleAddr);
@@ -159,11 +153,11 @@ namespace YCsharp.Model.Procotol {
                     }
                 });
                 //设置模块地址
-                if (smModels.Count > 0 && e.State.ModuleAddr == null) {
+                if (smModels?.Count > 0 && e.State.ModuleAddr == null) {
                     e.State.ModuleAddr = smModels[0].ModuleAddr;
                 }
             }
-            if (smModels.Count > 0) {
+            if (smModels?.Count > 0) {
                 OnDataReceivedAction?.Invoke(ip, smModels);
             }
         }
