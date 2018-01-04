@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.SqlTypes;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -129,6 +130,17 @@ namespace HmiPro.Redux.Reducers {
                     var ip = pair.Key;
                     state.Com485StatusDict[ip] = new Com485SingleStatus() { Status = SmSingleStatus.Ok, Time = DateTime.Now, Ip = ip };
                 }
+                //ping一下所有ip
+                Task.Run(() => {
+                    foreach (var pair in state.Com485StatusDict) {
+                        Ping ping = new Ping();
+                        var ret = ping.Send(pair.Key, 1000);
+                        if (ret?.Status != IPStatus.Success) {
+                            pair.Value.Status = SmSingleStatus.Offline;
+                            pair.Value.Time = DateTime.Now;
+                        }
+                    }
+                });
                 return state;
             }).When<CpmActions.StartServerSuccess>((state, action) => {
                 return state;
@@ -231,6 +243,8 @@ namespace HmiPro.Redux.Reducers {
                         return "正常";
                     case SmSingleStatus.Unknown:
                         return "初始化";
+                    case SmSingleStatus.Offline:
+                        return "离线";
                     default:
                         return "初始化";
                 }

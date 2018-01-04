@@ -423,7 +423,8 @@ namespace YCsharp.Model.Procotol.SmParam {
         //通讯故障
         Error = 1,
         //通讯状态未知
-        Unknown = 2
+        Unknown = 2,
+        Offline=3
     }
 
 

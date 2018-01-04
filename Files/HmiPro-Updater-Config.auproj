@@ -2,7 +2,7 @@
 <AuProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <UpdateInfo>
     <AppName>HmiPro</AppName>
-    <AppVersion>3.0.913.6578</AppVersion>
+    <AppVersion>3.0.919.6578</AppVersion>
     <FileExecuteBefore />
     <FileExecuteAfter>HmiPro.exe</FileExecuteAfter>
     <ExecuteTimeout>0</ExecuteTimeout>
@@ -901,6 +901,16 @@
     </ProjectItem>
     <ProjectItem>
       <Path>de\DevExpress.Xpf.Grid.v17.1.Core.resources.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>es\DevExpress.Xpf.Grid.v17.1.Core.resources.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>ja\DevExpress.Xpf.Grid.v17.1.Core.resources.dll</Path>
       <UpdateMethod>Ignore</UpdateMethod>
       <FileVerificationLevel>None</FileVerificationLevel>
     </ProjectItem>

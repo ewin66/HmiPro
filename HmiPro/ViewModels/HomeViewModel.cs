@@ -216,9 +216,9 @@ namespace HmiPro.ViewModels {
             if (viewName == "DMesCoreView") {
                 var vm = DMesCoreViewModel.Create(MachineConfig.MachineDict.FirstOrDefault().Key);
                 NavigatorViewModel.NavMachineCodeInDoing = vm.MachineCode;
-                NavigationSerivce.Navigate("DMesCoreView", vm, null, this, true);
+                NavigationSerivce.Navigate("DMesCoreView", vm, null, this,true);
             } else {
-                NavigationSerivce.Navigate(viewName, null, this, true);
+                NavigationSerivce.Navigate(viewName, null, this,true);
             }
         }
 

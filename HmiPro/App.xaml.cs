@@ -95,7 +95,6 @@ namespace HmiPro {
             Store.Subscribe(logDebugActions);
             Console.WriteLine("当前操作系统：" + YUtil.GetOsVersion());
             Console.WriteLine("Welcom To DMes V3.0");
-            testLogTimeout();
         }
 
         void testLogTimeout() {

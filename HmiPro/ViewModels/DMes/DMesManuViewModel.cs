@@ -198,7 +198,7 @@ namespace HmiPro.ViewModels.DMes {
                     var task = tasks.FirstOrDefault(t => t.workcode == workCode);
                     var vm = CraftBomViewModel.Create(machineCode, workCode, task?.bom);
                     //var vm = new CraftBomViewModel(machineCode,workCode,task?.bom);
-                    NavigationSerivce.Navigate("CraftBomView", vm, null, this, true);
+                    NavigationSerivce.Navigate("CraftBomView", vm, null, this,false);
                 }
 
             }
@@ -214,7 +214,7 @@ namespace HmiPro.ViewModels.DMes {
                     var task = tasks.FirstOrDefault(t => t.workcode == workCode);
                     var vm = SchTaskAxisViewModel.Create(machineCode, workCode, task?.axisParam);
                     //var vm = new CraftBomViewModel(machineCode,workCode,task?.bom);
-                    NavigationSerivce.Navigate("SchTaskAxisView", vm, null, this, true);
+                    NavigationSerivce.Navigate("SchTaskAxisView", vm, null, this,false);
                 }
 
             }
