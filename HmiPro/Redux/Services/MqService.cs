@@ -32,6 +32,9 @@ namespace HmiPro.Redux.Services {
                     Title = "接受到新任务",
                     Content = "请注意及时更新进度"
                 }));
+                for (var i = 0; i < schTask.axisParam.Count; i++) {
+                    schTask.axisParam[i].Index = i + 1;
+                }
 
                 App.Store.Dispatch(new MqActions.SchTaskAccept(schTask));
             } catch (Exception e) {

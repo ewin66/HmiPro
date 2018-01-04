@@ -125,7 +125,11 @@ namespace HmiPro.ViewModels {
             await Task.Run(() => {
                 //等等所有任务完成
                 //一分钟超时
-                var isTimeouted = Task.WaitAll(tasks.ToArray(), 1200000);
+                var timeout = 60000 * 10;
+                if (CmdOptions.GlobalOptions.MockVal) {
+                    timeout = 3000;
+                }
+                var isTimeouted = Task.WaitAll(tasks.ToArray(), timeout);
                 if (!isTimeouted) {
                     App.Store.Dispatch(new SysActions.SetTopMessage("启动超时，请检查网络连接", Visibility.Visible));
                     if (CmdOptions.GlobalOptions.MockVal) {
@@ -216,9 +220,9 @@ namespace HmiPro.ViewModels {
             if (viewName == "DMesCoreView") {
                 var vm = DMesCoreViewModel.Create(MachineConfig.MachineDict.FirstOrDefault().Key);
                 NavigatorViewModel.NavMachineCodeInDoing = vm.MachineCode;
-                NavigationSerivce.Navigate("DMesCoreView", vm, null, this,true);
+                NavigationSerivce.Navigate("DMesCoreView", vm, null, this, true);
             } else {
-                NavigationSerivce.Navigate(viewName, null, this,true);
+                NavigationSerivce.Navigate(viewName, null, this, true);
             }
         }
 

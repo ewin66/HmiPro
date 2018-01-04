@@ -58,7 +58,7 @@ namespace HmiPro.Redux.Models {
         public string diameter { get; set; }
 
         public static class MachineState {
-            public static readonly string Running = "开机";
+            public static readonly string Running = "运行";
             public static readonly string Closed = "关机";
             public static readonly string Repairing = "维修";
         }

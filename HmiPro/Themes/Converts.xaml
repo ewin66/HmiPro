@@ -15,6 +15,6 @@
     <dx:FormatStringConverter x:Key="HomesSoldByFormatConverter" FormatString="{}Homes Sold by {0}" />
     <converts:PercentConvert x:Key="PercentConvert" />
     <converts:CoefConverter x:Key="ConverterCoef"/>
-
+    <converts:ImageConvert x:Key="ImageConvert"></converts:ImageConvert>
 
 </ResourceDictionary>

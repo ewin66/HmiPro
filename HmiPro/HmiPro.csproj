@@ -120,6 +120,7 @@
       <HintPath>..\packages\System.Data.SQLite.Linq.1.0.106.0\lib\net46\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Reflection.TypeExtensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Reflection.TypeExtensions.4.1.0-rc2-24027\lib\net46\System.Reflection.TypeExtensions.dll</HintPath>
     </Reference>
@@ -155,9 +156,13 @@
     <Compile Include="Config\MachineConfig.cs" />
     <Compile Include="Config\Models\Machine.cs" />
     <Compile Include="Config\Models\Setting.cs" />
+    <Compile Include="Controls\Panels\DeviceDetector.cs" />
+    <Compile Include="Controls\Panels\DpiResizingPanel.cs" />
+    <Compile Include="Controls\Panels\FilterUnselectionBehavior.cs" />
     <Compile Include="Controls\TileLayoutControlExt.cs" />
     <Compile Include="Controls\VisualStateControl.cs" />
     <Compile Include="Converts\CoefConvert.cs" />
+    <Compile Include="Converts\ImageConvert.cs" />
     <Compile Include="Converts\MultiParamsConvert.cs" />
     <Compile Include="Converts\PercentConvert.cs" />
     <Compile Include="DxWindow.xaml.cs">
@@ -251,6 +256,9 @@
       <DependentUpon>SchTaskAxisView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\DMes\SchTaskAxisViewModel.cs" />
+    <Compile Include="Views\DMes\TaskSelectPanel.xaml.cs">
+      <DependentUpon>TaskSelectPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dx\LoadingView.xaml.cs">
       <DependentUpon>LoadingView.xaml</DependentUpon>
     </Compile>
@@ -322,6 +330,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DMes\SchTaskAxisView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DMes\TaskSelectPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -660,7 +672,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\arrow-left.png" />
+    <Resource Include="Resources\arrow-right.png" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="Profiles\Assets\Exe\x64\nircmd.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -671,10 +686,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\completed.png" />
+    <Resource Include="Resources\in-progress.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

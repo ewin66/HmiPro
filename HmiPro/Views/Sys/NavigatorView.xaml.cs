@@ -23,10 +23,5 @@ namespace HmiPro.Views.Sys {
         public NavigatorView() {
             InitializeComponent();
         }
-
-
-
     }
-
-
 }

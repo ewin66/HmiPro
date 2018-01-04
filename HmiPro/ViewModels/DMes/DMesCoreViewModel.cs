@@ -34,7 +34,7 @@ namespace HmiPro.ViewModels.DMes {
         public virtual ScanMaterialTab ScanMaterialTab { get; set; } = new ScanMaterialTab() { Header = "来料" };
         public virtual Com485Tab Com485Tab { get; set; } = new Com485Tab() { Header = "通讯" };
         private Unsubscribe unsubscribe;
-        public readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
+        readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
         public virtual string Header { get; set; }
 
         public DMesCoreViewModel(string machineCode) : this() {

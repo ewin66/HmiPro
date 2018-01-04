@@ -118,8 +118,10 @@ namespace HmiPro.ViewModels {
                         });
                     });
 
-                    YUtil.SetTimeout(2000, () => {
-                        MockDispatchers.DispatchMockSchTask(machineCode, 11);
+                    YUtil.SetTimeout(10000, () => {
+                        for (int i = 0; i < 5; i++) {
+                            MockDispatchers.DispatchMockSchTask(machineCode, i);
+                        }
                     });
                 }
             }
@@ -145,8 +147,7 @@ namespace HmiPro.ViewModels {
             if (reply.Status != IPStatus.Success) {
                 Store.Dispatch(new SysActions.SetTopMessage(
                     $"与服务器 {ip} 连接断开，请联系管理员 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}", Visibility.Visible));
-            }
-            else {
+            } else {
                 Store.Dispatch(new SysActions.SetTopMessage("", Visibility.Collapsed));
             }
         }
@@ -199,13 +200,11 @@ namespace HmiPro.ViewModels {
                 if (SysNotificationMsg.NotifyTimeDict.TryGetValue(key, out var lastTime)) {
                     if ((DateTime.Now - lastTime).TotalSeconds >= msg.MinGapSec.Value) {
                         canNotify = true;
-                    }
-                    else {
+                    } else {
                         canNotify = false;
                     }
 
-                }
-                else {
+                } else {
                     SysNotificationMsg.NotifyTimeDict[key] = DateTime.Now;
                     canNotify = true;
                 }
@@ -306,13 +305,11 @@ namespace HmiPro.ViewModels {
                     Store.Dispatch(new SysActions.ShutdownApp());
 
                     Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     Logger.Error("动态配置有误", e);
                     MessageBox.Show(e.Message, "配置有误", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            }
-            else if (resultCommand == cancelCommand) {
+            } else if (resultCommand == cancelCommand) {
 
             }
         }

@@ -262,6 +262,10 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 
         /// </summary>
+        public int Index { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
         public string product { get; set; }
         /// <summary>
         /// 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using HmiPro.Annotations;
 using HmiPro.Config;
 using HmiPro.Config.Models;
@@ -101,7 +102,9 @@ namespace HmiPro.Redux.Cores {
                 SchTaskDoingLocks[pair.Key] = new object();
             }
             //恢复任务
-            RestoreTask();
+            if (!CmdOptions.GlobalOptions.MockVal) {
+                RestoreTask();
+            }
         }
 
         /// <summary>
@@ -114,7 +117,7 @@ namespace HmiPro.Redux.Cores {
             var mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName,
                 $"ip {alarmAction.Ip} 485故障");
             //0.5小时记录一次485故障到文件
-            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障",1800);
+            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障", 1800);
             //485故障暂时不考虑上报
             //App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm));
         }
@@ -305,20 +308,26 @@ namespace HmiPro.Redux.Cores {
             var machineCode = state.MqState.MachineCode;
             var mqTasks = MqSchTasksDict[machineCode];
             var task = state.MqState.MqSchTaskAccpetDict[machineCode];
-            foreach (var cacheTask in mqTasks) {
-                if (cacheTask.id == task.id) {
-                    Logger.Error($"任务id重复,id={cacheTask.id}");
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = "系统异常",
-                        Content = $"接收到重复任务，请联系管理员，任务Id {task.id},工单 {task.workcode}"
-                    }));
-                    return;
+            lock (SchTaskDoingLocks[machineCode]) {
+                foreach (var cacheTask in mqTasks) {
+                    if (cacheTask.id == task.id) {
+                        Logger.Error($"任务id重复,id={cacheTask.id}");
+                        App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                            Title = "系统异常",
+                            Content = $"接收到重复任务，请联系管理员，任务Id {task.id},工单 {task.workcode}"
+                        }));
+                        return;
+                    }
                 }
-            }
-            //将任务添加到任务队列里面
-            mqTasks.Add(task);
-            using (var ctx = SqliteHelper.CreateSqliteService()) {
-                ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(mqTasks)));
+                //将任务添加到任务队列里面
+                //fix: 2018-01-04
+                // mqTasks被view引用了，所以用Ui线程来更新
+                Application.Current.Dispatcher.Invoke(() => {
+                    mqTasks.Add(task);
+                });
+                using (var ctx = SqliteHelper.CreateSqliteService()) {
+                    ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(mqTasks)));
+                }
             }
         }
 
