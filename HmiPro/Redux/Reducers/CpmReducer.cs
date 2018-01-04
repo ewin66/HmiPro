@@ -216,7 +216,6 @@ namespace HmiPro.Redux.Reducers {
             }).When<CpmActions.Com485SingleStatusAccept>((state, action) => {
                 state.Com485StatusDict[action.Ip].Status = action.Status;
                 state.Com485StatusDict[action.Ip].Time = DateTime.Now;
-                state.Logger.Debug($"接受到 {action.Ip} 的485状态 {action.Status}");
                 return state;
             });
         }

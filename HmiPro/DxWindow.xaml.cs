@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using DevExpress.Xpf.Core;
 using HmiPro.Config;
 
@@ -29,12 +30,17 @@ namespace HmiPro {
                 Height = 600;
                 Topmost = false;
                 //生产电脑
-            }
-            else {
+            } else {
                 Topmost = true;
                 WindowStyle = WindowStyle.None;
                 WindowState = WindowState.Maximized;
             }
+
+
+            //每一秒回收一次垃圾
+            DispatcherTimer timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            timer.Tick += (d, e) => { GC.Collect(); };
+            timer.Start();
         }
     }
 
