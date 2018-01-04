@@ -49,6 +49,9 @@ namespace YCsharp.Model.Buffers {
                     Buffer[i] = Buffer[count + i];
                 }
                 DataCount = DataCount - count;
+                if (DataCount < 0) {
+                    DataCount = 0;
+                }
             }
         }
 

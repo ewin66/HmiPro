@@ -135,7 +135,7 @@ namespace YCsharp.Model.Procotol {
             List<SmModel> smModels;
 
             //解析套接字数据
-            using (var analysis = new SmAnalysis(SmClientManager.IPSessionBuffer[ip])) {
+            using (var analysis = new SmAnalysis(SmClientManager.IPSessionBuffer[ip],Logger)) {
                 smModels = analysis.ThroughAnalysisStack(reBuffer, 0, reCount);
                 if (smModels?.Count == 0) {
                     Logger.Debug($"{ip} 包解析失败", ConsoleColor.Red);

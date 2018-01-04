@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using YCsharp.Model.Buffers;
+using YCsharp.Service;
 
 namespace YCsharp.Model.Procotol.SmParam {
     /// <summary>
@@ -13,9 +14,10 @@ namespace YCsharp.Model.Procotol.SmParam {
     public class SmAnalysis : IDisposable {
 
         private YDynamicBuffer socketBuffer;
-
-        public SmAnalysis(YDynamicBuffer buffer) {
+        public readonly LoggerService Logger;
+        public SmAnalysis(YDynamicBuffer buffer, LoggerService logger) {
             socketBuffer = buffer;
+            Logger = logger;
         }
 
         /// <summary>
@@ -70,7 +72,16 @@ namespace YCsharp.Model.Procotol.SmParam {
 
             Dictionary<SmPackageType, List<byte[]>> packageDictionary = new Dictionary<SmPackageType, List<byte[]>>();
             //var validBuffer = socketBuffer.GetBuffer();
-            socketBuffer.WriteBuffer(buffer, offset, count);
+            try {
+                //fixed: 2018-01-04
+                // 某些机台这里会抛异常
+                socketBuffer.WriteBuffer(buffer, offset, count);
+            } catch (Exception e) {
+                //Console.WriteLine("DynamicBuffer WriteBuffer 异常" + e.Message);
+                Logger.Error($"DynamicBuffer WriteBuffer 异常: DataCount: {socketBuffer.GetDataCount()},BufferSize: {socketBuffer.BufferSize}", e);
+                //清空缓存
+                socketBuffer.Clear(0, socketBuffer.BufferSize);
+            }
             List<byte[]> normalPackages = new List<byte[]>();
             List<byte[]> heartbeatPackages = new List<byte[]>();
             List<byte[]> clientReplyCmdPackages = new List<byte[]>();
