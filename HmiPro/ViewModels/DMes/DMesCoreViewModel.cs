@@ -39,7 +39,7 @@ namespace HmiPro.ViewModels.DMes {
 
         public DMesCoreViewModel(string machineCode) : this() {
             MachineCode = machineCode;
-            Header = MachineCode + " 生产管理";
+            Header = MachineCode + " 生产管理                                     可用内存："+YUtil.GetAvaliableMemoryByte()/1000000 +" M";
         }
 
         public DMesCoreViewModel() {

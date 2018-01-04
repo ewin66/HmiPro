@@ -25,7 +25,7 @@ namespace YCsharp.Service {
         /// <summary>
         /// 上次保存日志到文件的时间
         /// </summary>
-        static IDictionary<string, DateTime> lastSaveFileTimeDict = new ConcurrentDictionary<string, DateTime>();
+        static readonly IDictionary<string, DateTime> lastSaveFileTimeDict = new ConcurrentDictionary<string, DateTime>();
 
         /// <summary>
         /// 日志文件夹
@@ -205,13 +205,16 @@ namespace YCsharp.Service {
         /// <param name="mark"></param>
         /// <param name="fileOutMinGapSec">上次记录与此次记录时间差大于该间隙才能输出到文件</param>
         void fileOut(string content, string mark, int fileOutMinGapSec = 0) {
-            if (!lastSaveFileTimeDict.ContainsKey(content + mark)) {
-                lastSaveFileTimeDict[content + mark] = DateTime.MinValue;
+            //var key = content + mark;
+            var key = content.Split(new string[] { "信息：" }, StringSplitOptions.None)[1]+mark;
+            if (!lastSaveFileTimeDict.ContainsKey(key)) {
+                lastSaveFileTimeDict[key] = DateTime.MinValue;
             }
-            if ((DateTime.Now - lastSaveFileTimeDict[content + mark]).TotalSeconds < fileOutMinGapSec) {
+            if ((DateTime.Now - lastSaveFileTimeDict[key]).TotalSeconds < fileOutMinGapSec && fileOutMinGapSec > 0) {
                 return;
             }
-            lastSaveFileTimeDict[content + mark] = DateTime.Now;
+      
+            lastSaveFileTimeDict[key] = DateTime.Now;
             lock (FileOutLock) {
                 //总开关
                 if (OutFile) {

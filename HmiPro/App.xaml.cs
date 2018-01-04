@@ -95,6 +95,13 @@ namespace HmiPro {
             Store.Subscribe(logDebugActions);
             Console.WriteLine("当前操作系统：" + YUtil.GetOsVersion());
             Console.WriteLine("Welcom To DMes V3.0");
+            testLogTimeout();
+        }
+
+        void testLogTimeout() {
+            YUtil.SetInterval(500, () => {
+                Logger.Error("哈哈哈",1800);
+            }, 100)();
         }
 
         /// <summary>
@@ -107,17 +114,13 @@ namespace HmiPro {
                 ConsoleColor color = ConsoleColor.Green;
                 if (action.Type().Contains("[Mq]")) {
                     color = ConsoleColor.Yellow;
-                }
-                else if (action.Type().Contains("[Cpm")) {
+                } else if (action.Type().Contains("[Cpm")) {
                     color = ConsoleColor.DarkYellow;
-                }
-                else if (action.Type().Contains("[Db]")) {
+                } else if (action.Type().Contains("[Db]")) {
                     color = ConsoleColor.Magenta;
-                }
-                else if (action.Type().Contains("[Alarm]")) {
+                } else if (action.Type().Contains("[Alarm]")) {
                     color = ConsoleColor.Red;
-                }
-                else if (action.Type().Contains("[Sys]")) {
+                } else if (action.Type().Contains("[Sys]")) {
                     color = ConsoleColor.Green;
                 }
                 //需要减缓频率的消息，没隔 MinGapSec 秒输出一次
@@ -128,8 +131,7 @@ namespace HmiPro {
                         muffle.LastLogTime = DateTime.Now;
                         muffle.Freq = 0;
                     }
-                }
-                else {
+                } else {
                     //普通动作直接输出
                     Logger.Debug("Redux Current Action: " + action.Type(), color);
                 }
@@ -158,8 +160,7 @@ namespace HmiPro {
                 if (Environment.UserName.ToLower().Contains("ychost")) {
                     HmiConfig.Load(configFolder + @"\Hmi.Config.Office.json");
                     Console.WriteLine("初始化配置文件: -Hmi.Config.Office.json");
-                }
-                else {
+                } else {
                     HmiConfig.Load(configFolder + @"\Hmi.Config.Shop.json");
                     Console.WriteLine("初始化配置文件: -Hmi.Config.Shop.json");
                 }
@@ -180,7 +181,7 @@ namespace HmiPro {
             //记录程序崩溃日志
             AppDomain.CurrentDomain.UnhandledException += (s, ue) => {
                 Logger.Error("程序崩溃：" + ue.ExceptionObject);
-                Logger.Error("当前可用内存："+YUtil.GetAvaliableMemoryByte()/1000000+" M");
+                Logger.Error("当前可用内存：" + YUtil.GetAvaliableMemoryByte() / 1000000 + " M");
             };
         }
     }

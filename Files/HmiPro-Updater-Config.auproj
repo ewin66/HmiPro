@@ -899,6 +899,11 @@
       <UpdateMethod>Ignore</UpdateMethod>
       <FileVerificationLevel>None</FileVerificationLevel>
     </ProjectItem>
+    <ProjectItem>
+      <Path>de\DevExpress.Xpf.Grid.v17.1.Core.resources.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
   </Files>
   <ApplicationDirectory>..\HmiPro\bin\Debug</ApplicationDirectory>
   <DestinationDirectory>..\..\tmp\hmipro-updater</DestinationDirectory>
