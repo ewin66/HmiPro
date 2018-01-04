@@ -68,6 +68,8 @@ namespace HmiPro {
 
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
+            ApplicationThemeHelper.ApplicationThemeName =Theme.MetropolisDark.Name;
+
             MuffleLogActions.ForEach(action => {
                 MuffleLogDict[action] = new Mufflog();
             });

@@ -25,7 +25,7 @@
                              />
         </dxg:GridControl.View>
         <dxg:GridControl.Columns >
-            <dxg:GridColumn Width="*" Header="序号" FieldName="Index"/>
+            <dxg:GridColumn Width="0.5*" Header="序号" FieldName="Index"/>
             <dxg:GridColumn Width="*" Header="长度" FieldName="length"/>
             <dxg:GridColumn Width="*" Header="颜色" FieldName="color" />
             <dxg:GridColumn Width="*" Header="完成率" FieldName="CompletedRate"/>
