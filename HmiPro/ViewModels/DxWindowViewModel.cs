@@ -220,7 +220,7 @@ namespace HmiPro.ViewModels {
                 DispatcherService.BeginInvoke(() => {
                     INotification notification = NotifyNotificationService.CreatePredefinedNotification
                                                 (msg.Title, msg.Content, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                    SystemSounds.Exclamation.Play();
+                    //SystemSounds.Exclamation.Play();
                     notification.ShowAsync();
                 });
             }

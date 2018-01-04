@@ -13,6 +13,8 @@ namespace HmiPro.Redux.Models {
         public enum State {
             Start,
             Stop,
+            Repair,
+            RepairCompleted
         }
         public State StatePoint;
     }

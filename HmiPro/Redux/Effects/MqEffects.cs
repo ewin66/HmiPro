@@ -190,6 +190,18 @@ namespace HmiPro.Redux.Effects {
                         uCpms.TimeEff = getState().OeeState.OeeDict[machineCode].TimeEff.ToString("0.00");
                         uCpms.SpeedEff = getState().OeeState.OeeDict[machineCode].SpeedEff.ToString("0.00");
                         uCpms.QualityEff = getState().OeeState.OeeDict[machineCode].QualityEff.ToString("0.00");
+                        //机台状态
+                        string state = MqUploadCpms.MachineState.Running;
+                        var machineState = getState().CpmState.MachineStateDict[machineCode];
+                        if (machineState.Count > 0) {
+                            if (machineState.Last().StatePoint == MachineState.State.Start) {
+                                state = MqUploadCpms.MachineState.Running;
+                            } else if (machineState.Last().StatePoint == MachineState.State.Stop) {
+                                state = MqUploadCpms.MachineState.Closed;
+                            }
+                        }
+                        uCpms.machineState = state;
+
                         Console.WriteLine($"上传Mq：Speed {uCpms.macSpeed} Timeff: {uCpms.TimeEff},SpeedEff：{uCpms.SpeedEff},QualityEff：{uCpms.QualityEff}");
                         uCpms.paramInfoList = new List<UploadParamInfo>();
                         foreach (var cpmPair in machineCpms) {

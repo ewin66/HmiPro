@@ -29,6 +29,10 @@ namespace HmiPro.Redux.Models {
         /// 总电能
         /// </summary>
         public string totalPower { get; set; }
+        /// <summary>
+        /// 机台状态
+        /// </summary>
+        public string machineState { get; set; }
 
         /// <summary>
         /// 电流
@@ -52,7 +56,17 @@ namespace HmiPro.Redux.Models {
         /// 直径
         /// </summary>
         public string diameter { get; set; }
+
+        public static class MachineState {
+            public static readonly string Running = "开机";
+            public static readonly string Closed = "关机";
+            public static readonly string Repairing = "维修";
+        }
     }
+
+
+
+
     /// <summary>
     /// 单个参数信息
     /// </summary>

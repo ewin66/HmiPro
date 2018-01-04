@@ -206,10 +206,9 @@ namespace YCsharp.Service {
         /// <param name="fileOutMinGapSec">上次记录与此次记录时间差大于该间隙才能输出到文件</param>
         void fileOut(string content, string mark, int fileOutMinGapSec = 0) {
             if (!lastSaveFileTimeDict.ContainsKey(content + mark)) {
-                lastSaveFileTimeDict[content + mark] = DateTime.Now;
+                lastSaveFileTimeDict[content + mark] = DateTime.MinValue;
             }
             if ((DateTime.Now - lastSaveFileTimeDict[content + mark]).TotalSeconds < fileOutMinGapSec) {
-                lastSaveFileTimeDict[content + mark] = DateTime.Now;
                 return;
             }
             lastSaveFileTimeDict[content + mark] = DateTime.Now;

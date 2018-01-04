@@ -158,6 +158,12 @@ namespace HmiPro.Redux.Reducers {
                 lock (State.OeeLocks[action.MachineCode]) {
                     state.MachineCode = action.MachineCode;
                     var currentSpeed = action.Speed;
+                    var lastMachineState = state.MachineStateDict[action.MachineCode].LastOrDefault();
+                    //如果机台处于维修状态则不更改其状态，直到其维修完毕
+                    if (lastMachineState?.StatePoint == MachineState.State.Repair) {
+                        return state;
+                    }
+
                     //开机阶段，上一个速度为0 ，此时的速度大于0
                     MachineState newMachineState = null;
                     var machineCode = action.MachineCode;

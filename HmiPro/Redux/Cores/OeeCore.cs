@@ -11,6 +11,7 @@ using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
+using MongoDB.Driver.Linq;
 using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
 using YCsharp.Util;
@@ -61,6 +62,11 @@ namespace HmiPro.Redux.Cores {
         private void removeBeforeWorkTime(IList<MachineState> machineStates, DateTime workTime) {
             //删除上一班的机台状态数据
             var removeList = machineStates.Where(m => m.Time < workTime).ToList();
+            //如果最后一个状态是维修，且该状态在上一班，则表示该维修状态超过了一班时间
+            //保留该状态，直到维修完毕
+            if (removeList?.LastOrDefault()?.StatePoint == MachineState.State.Repair) {
+                removeList.Remove(removeList.Last());
+            }
             foreach (var item in removeList) {
                 machineStates.Remove(item);
             }
@@ -144,15 +150,18 @@ namespace HmiPro.Redux.Cores {
                 if (machineStates[0].StatePoint == MachineState.State.Start) {
                     runTimeSec = (DateTime.Now - machineStates[0].Time).TotalSeconds;
                     //一个关机点，则认为之前都是开机状态
-                } else {
+                } else if (machineStates[0].StatePoint == MachineState.State.Stop) {
                     runTimeSec = (machineStates[0].Time - workTime).TotalSeconds;
+                    //一个维修点
+                } else if (machineStates[0].StatePoint == MachineState.State.Repair) {
+                    runTimeSec = 0;
                 }
                 //多个状态的情况
             } else if (machineStates.Count > 1) {
                 for (var i = 0; i < machineStates.Count - 1; i += 1) {
                     var preeState = machineStates[i];
                     var nextState = machineStates[i + 1];
-                    if (preeState.StatePoint == MachineState.State.Start && nextState.StatePoint == MachineState.State.Stop) {
+                    if (preeState.StatePoint == MachineState.State.Start && nextState.StatePoint != MachineState.State.Start) {
                         var diffSec = (nextState.Time - preeState.Time).TotalSeconds;
                         runTimeSec += diffSec;
                     }

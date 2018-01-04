@@ -180,6 +180,7 @@ namespace HmiPro {
             //记录程序崩溃日志
             AppDomain.CurrentDomain.UnhandledException += (s, ue) => {
                 Logger.Error("程序崩溃：" + ue.ExceptionObject);
+                Logger.Error("当前可用内存："+YUtil.GetAvaliableMemoryByte()/1000000+" M");
             };
         }
     }
