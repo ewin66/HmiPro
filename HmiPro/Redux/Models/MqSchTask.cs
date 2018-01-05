@@ -314,9 +314,12 @@ namespace HmiPro.Redux.Models {
                 if (_completeRate != value) {
                     _completeRate = value;
                     OnPropertyChanged(nameof(CompletedRate));
+                    OnPropertyChanged(nameof(CompletedRateStr));
                 }
             }
         }
+
+        public string CompletedRateStr => (CompletedRate * 100).ToString("0.00") + "%";
 
         private bool _isCompleted;
         /// <summary>
