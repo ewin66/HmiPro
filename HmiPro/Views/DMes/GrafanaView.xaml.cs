@@ -21,8 +21,8 @@ namespace HmiPro.Views.DMes {
         public GrafanaView() {
             InitializeComponent();
             var preUrl = $"http://{HmiConfig.InfluxDbIp}:3000";
-            //刷新频率为1s
-            var refresh = "1000ms";
+            //刷新频率同上传频率
+            var refresh = $"{HmiConfig.UploadWebBoardInterval}ms";
             //var dbUpperName = HmiDynamicConfig.DbName.ToUpper();
             var viewName = MachineConfig.AllMachineName;
             var placeholder = "machine_placeholder";
