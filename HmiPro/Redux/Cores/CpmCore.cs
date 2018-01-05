@@ -74,7 +74,7 @@ namespace HmiPro.Redux.Cores {
         public Task StartAsync(string ip, int port) {
             return Task.Run(() => {
                 if (SmParamTcp == null) {
-                    SmParamTcp = new YSmParamTcp(ip, port, Logger);
+                    SmParamTcp = new YSmParamTcp(ip, port, LoggerHelper.CreateLogger("YSmParamTcp"));
                     SmParamTcp.OnDataReceivedAction += smModelsHandler;
                     OnlineCpmDict = App.Store.GetState().CpmState.OnlineCpmsDict;
 
