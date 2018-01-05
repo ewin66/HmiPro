@@ -198,10 +198,11 @@ namespace HmiPro.Redux.Effects {
                                 state = MqUploadCpms.MachineState.Running;
                             } else if (machineState.Last().StatePoint == MachineState.State.Stop) {
                                 state = MqUploadCpms.MachineState.Closed;
+                            } else if (machineState.Last().StatePoint == MachineState.State.Repair) {
+                                state = MqUploadCpms.MachineState.Repairing;
                             }
                         }
                         uCpms.machineState = state;
-                        Console.WriteLine($"上传Mq：Speed {uCpms.macSpeed} Timeff: {uCpms.TimeEff},SpeedEff：{uCpms.SpeedEff},QualityEff：{uCpms.QualityEff}");
                         uCpms.paramInfoList = new List<UploadParamInfo>();
                         foreach (var cpmPair in machineCpms) {
                             var cpm = cpmPair.Value;
@@ -216,6 +217,7 @@ namespace HmiPro.Redux.Effects {
                         }
                         try {
                             activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(uCpms));
+                            Console.WriteLine($"上传Mq：Speed {uCpms.macSpeed} Timeff: {uCpms.TimeEff},SpeedEff：{uCpms.SpeedEff},QualityEff：{uCpms.QualityEff}");
                             App.Store.Dispatch(new MqActions.UploadCpmsSuccess());
                         } catch (Exception e) {
                             App.Store.Dispatch(new MqActions.UploadCpmsFailed() { Exp = e });
@@ -223,12 +225,15 @@ namespace HmiPro.Redux.Effects {
                     }
                 });
 
-                if (await Task.WhenAny(task, Task.Delay(1000)) == task) {
+                //每个机台等待1s
+                var awaitTime = MachineConfig.MachineDict.Count * 1000;
+                if (await Task.WhenAny(task, Task.Delay(awaitTime)) == task) {
                     //在时间之内完成了task
                 } else {
                     //超时
                     App.Store.Dispatch(new MqActions.UploadCpmsFailed() { Exp = new Exception("上传超时 1s ") });
                 }
+                task.Dispose();
             });
         }
 

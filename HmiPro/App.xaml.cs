@@ -68,7 +68,7 @@ namespace HmiPro {
 
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
-            ApplicationThemeHelper.ApplicationThemeName =Theme.MetropolisDark.Name;
+            ApplicationThemeHelper.ApplicationThemeName = Theme.MetropolisDark.Name;
 
             MuffleLogActions.ForEach(action => {
                 MuffleLogDict[action] = new Mufflog();
@@ -101,7 +101,7 @@ namespace HmiPro {
 
         void testLogTimeout() {
             YUtil.SetInterval(500, () => {
-                Logger.Error("哈哈哈",1800);
+                Logger.Error("哈哈哈", 1800);
             }, 100)();
         }
 
@@ -123,6 +123,9 @@ namespace HmiPro {
                     color = ConsoleColor.Red;
                 } else if (action.Type().Contains("[Sys]")) {
                     color = ConsoleColor.Green;
+                }
+                if (action.Type().Contains("Failed")) {
+                    color = ConsoleColor.Red;
                 }
                 //需要减缓频率的消息，没隔 MinGapSec 秒输出一次
                 if (MuffleLogDict.TryGetValue(action.Type(), out var muffle)) {
