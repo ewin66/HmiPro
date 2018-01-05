@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using CommandLine;
@@ -16,6 +17,7 @@ using HmiPro.Redux.Effects;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
 using HmiPro.Views.Dx;
+using MongoDB.Bson.IO;
 using Reducto;
 using YCsharp.Service;
 using YCsharp.Util;
@@ -95,8 +97,8 @@ namespace HmiPro {
             Logger = LoggerHelper.CreateLogger("DMes App");
             //打印Redux系统的动作
             Store.Subscribe(logDebugActions);
-            Console.WriteLine("当前操作系统：" + YUtil.GetOsVersion());
-            Console.WriteLine("Welcom To DMes V3.0");
+            Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
+            Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
         }
 
         void testLogTimeout() {
@@ -184,8 +186,9 @@ namespace HmiPro {
 
             //记录程序崩溃日志
             AppDomain.CurrentDomain.UnhandledException += (s, ue) => {
-                Logger.Error("程序崩溃：" + ue.ExceptionObject);
-                Logger.Error("当前可用内存：" + YUtil.GetAvaliableMemoryByte() / 1000000 + " M");
+                var message = $"程序崩溃：{ue.ExceptionObject}\r\n当前可用内存：{YUtil.GetAvaliableMemoryByte() / 1000000} M\r\nApp.Store: {Newtonsoft.Json.JsonConvert.SerializeObject(App.Store)}";
+                //将错误日志写入mongoDb
+                Logger.ErrorWithDb(message, MachineConfig.AllMachineName);
             };
         }
     }

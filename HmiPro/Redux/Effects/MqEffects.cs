@@ -225,13 +225,14 @@ namespace HmiPro.Redux.Effects {
                     }
                 });
 
-                //每个机台等待1s
-                var awaitTime = MachineConfig.MachineDict.Count * 1000;
+                //每个机台等待2s
+                var awaitTime = MachineConfig.MachineDict.Count * 2000;
                 if (await Task.WhenAny(task, Task.Delay(awaitTime)) == task) {
                     //在时间之内完成了task
                 } else {
                     //超时
-                    App.Store.Dispatch(new MqActions.UploadCpmsFailed() { Exp = new Exception("上传超时 1s ") });
+                    Console.WriteLine($"上传Mq超时{awaitTime / 1000}s");
+                    App.Store.Dispatch(new MqActions.UploadCpmsFailed() { Exp = new Exception($"上传超时 {awaitTime / 1000}s ") });
                 }
                 task.Dispose();
             });
