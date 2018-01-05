@@ -158,18 +158,14 @@ namespace HmiPro {
                 if (bool.Parse(opt.ShowConsole)) {
                     ConsoleHelper.Show();
                 }
-                Console.WriteLine("配置文件：-" + opt.ProfilesFolder);
+                Console.WriteLine("配置文件夹：-" + opt.ProfilesFolder);
                 if (bool.Parse(opt.ShowSplash)) {
                     DXSplashScreen.Show<SplashScreenView>();
                     DXSplashScreen.SetState(SplashState.Default);
                 }
-                if (Environment.UserName.ToLower().Contains("ychost")) {
-                    HmiConfig.Load(configFolder + @"\Hmi.Config.Office.json");
-                    Console.WriteLine("初始化配置文件: -Hmi.Config.Office.json");
-                } else {
-                    HmiConfig.Load(configFolder + @"\Hmi.Config.Shop.json");
-                    Console.WriteLine("初始化配置文件: -Hmi.Config.Shop.json");
-                }
+                var configFile = configFolder + $@"\Hmi.Config.{opt.Config}.json";
+                HmiConfig.Load(configFile);
+                Console.WriteLine($"初始化配置文件: -{configFile}");
                 Console.WriteLine("是否启用Mock数据：-" + bool.Parse(opt.Mock));
                 //配置静态资源文件
                 HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);

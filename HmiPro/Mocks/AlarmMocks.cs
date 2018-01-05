@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Config;
 using HmiPro.Redux.Models;
 using YCsharp.Util;
 
@@ -21,6 +22,7 @@ namespace HmiPro.Mocks {
                 time = YUtil.GetUtcTimestampMs(DateTime.Now),
                 meter = 1103.3f,
                 workCode = "GD2017122701",
+                machineCode = MachineConfig.MachineDict.First().Key
             };
         }
     }

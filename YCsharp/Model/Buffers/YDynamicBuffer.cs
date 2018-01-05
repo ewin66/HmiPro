@@ -55,6 +55,13 @@ namespace YCsharp.Model.Buffers {
             }
         }
 
+        /// <summary>
+        /// 清空所有缓存
+        /// </summary>
+        public void Clear() {
+            DataCount = 0;
+        }
+
 
 
         /// <summary>

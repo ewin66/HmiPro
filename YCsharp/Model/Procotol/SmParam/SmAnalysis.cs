@@ -71,7 +71,6 @@ namespace YCsharp.Model.Procotol.SmParam {
             buffer = SmEncrypt.DecodeArray(buffer, offset, count);
 
             Dictionary<SmPackageType, List<byte[]>> packageDictionary = new Dictionary<SmPackageType, List<byte[]>>();
-            //var validBuffer = socketBuffer.GetBuffer();
             try {
                 //fixed: 2018-01-04
                 // 某些机台这里会抛异常
@@ -80,7 +79,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                 //Console.WriteLine("DynamicBuffer WriteBuffer 异常" + e.Message);
                 Logger.Error($"DynamicBuffer WriteBuffer 异常: DataCount: {socketBuffer.GetDataCount()},BufferSize: {socketBuffer.BufferSize}", e);
                 //清空缓存
-                socketBuffer.Clear(0, socketBuffer.BufferSize);
+                socketBuffer.Clear();
             }
             List<byte[]> normalPackages = new List<byte[]>();
             List<byte[]> heartbeatPackages = new List<byte[]>();

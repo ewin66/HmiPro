@@ -155,7 +155,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        void whenCpmPlcAlarm(AppState state, IAction action) {
+        void  whenCpmPlcAlarm(AppState state, IAction action) {
             var alarmAction = (AlarmActions.CpmPlcAlarmOccur)action;
             var meter = App.Store.GetState().CpmState.NoteMeterDict[alarmAction.MachineCode];
             //记米小于等于0则不产生报警
@@ -434,9 +434,10 @@ namespace HmiPro.Redux.Cores {
                 float? std = null;
                 //从Bom表中求出最大、最小值
                 foreach (var bom in boms) {
-                    bom.TryGetValue(checkAlarm.MaxBomKey, out var maxObj);
-                    bom.TryGetValue(checkAlarm.MinBomKey, out var minObj);
-                    bom.TryGetValue(checkAlarm.StdBomKey, out var stdObj);
+                    bom.TryGetValue(checkAlarm.MaxBomKey ?? "__default", out var maxObj);
+                    bom.TryGetValue(checkAlarm.MinBomKey ?? "__default", out var minObj);
+                    bom.TryGetValue(checkAlarm.StdBomKey ?? "__default", out var stdObj);
+
                     try {
                         max = maxObj != null ? (float?)maxObj : null;
                         min = minObj != null ? (float?)minObj : null;

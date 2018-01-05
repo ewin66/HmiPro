@@ -93,7 +93,7 @@ namespace HmiPro.Helpers {
                     return result;
                 }
             } catch (WebException ex) {
-                return Encoding.UTF8.GetBytes(ex.ToString() + "\n" + "postData:" + postData);
+                return Encoding.UTF8.GetBytes(ex.ToString());
             }
         }
 
@@ -105,6 +105,35 @@ namespace HmiPro.Helpers {
         public bool WriteCpms(string measurement, params Cpm[] cpms) {
             List<string> paramList = new List<string>();
             foreach (var cpm in cpms) {
+                if (cpm.ValueType != SmParamType.Signal) {
+                    continue;
+                }
+                var timeStamp = "";
+                //fixed:不能插入时间
+                timeStamp = YUtil.GetUtcTimestampMs(cpm.PickTime) + "000000";
+                var param = $"{measurement},param={cpm.Name} value={cpm.Value} {timeStamp}";
+                paramList.Add(param);
+            }
+            var resp = WriteMulti(paramList.ToArray());
+            if (resp.Length > 0) {
+                Console.WriteLine(Encoding.UTF8.GetString(resp));
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 写入大量的采集参数到influxDb
+        /// </summary>
+        /// <param name="measurement"></param>
+        /// <param name="cpms"></param>
+        public bool WriteCpms(string measurement, Cpm[] cpms, int offset, int count) {
+            if (offset + count >= cpms.Length) {
+                return false;
+            }
+            List<string> paramList = new List<string>();
+            for (int i = offset; i < count + offset; i++) {
+                var cpm = cpms[i];
                 if (cpm.ValueType != SmParamType.Signal) {
                     continue;
                 }

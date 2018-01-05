@@ -121,6 +121,8 @@ namespace YCsharp.Model.Procotol {
             }
 
             var ip = e.State.TcpClientIP;
+            //一分钟输出一次，某个ip正在活动
+            Logger.Debug($"{ip} 正在活动", ConsoleColor.DarkGreen, 60000);
             if (e.State.BufferCount >= e.State.Buffer.Length) {
                 e.State.BufferCount = 0;
             }
@@ -135,7 +137,7 @@ namespace YCsharp.Model.Procotol {
             List<SmModel> smModels;
 
             //解析套接字数据
-            using (var analysis = new SmAnalysis(SmClientManager.IPSessionBuffer[ip],Logger)) {
+            using (var analysis = new SmAnalysis(SmClientManager.IPSessionBuffer[ip], Logger)) {
                 smModels = analysis.ThroughAnalysisStack(reBuffer, 0, reCount);
                 if (smModels?.Count == 0) {
                     Logger.Debug($"{ip} 包解析失败", ConsoleColor.Red);

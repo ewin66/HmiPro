@@ -139,7 +139,8 @@ namespace UnitTestPro.FuncTest {
 
         [TestMethod]
         public async Task TaskTest() {
-            var task = Task.Run(() => {Thread.Sleep(900);
+            var task = Task.Run(() => {
+                Thread.Sleep(900);
                 Console.WriteLine("执行完毕");
             });
 
@@ -153,6 +154,22 @@ namespace UnitTestPro.FuncTest {
         public enum TestEnum {
             Hello = 1,
             World = 2
+        }
+
+        [TestMethod]
+        public void TryFinallyTest() {
+            TestClass test()
+            {
+                TestClass testObj = new TestClass();
+                try {
+                    testObj.Name = "hello";
+                    return testObj;
+                } finally {
+                    testObj.Name = "world";
+                }
+            }
+
+            Console.WriteLine(test().Name);
         }
 
     }

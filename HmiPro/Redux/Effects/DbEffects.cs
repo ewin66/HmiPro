@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
 using MongoDB.Driver;
+using NeoSmart.AsyncLock;
+using YCsharp.Model.Buffers;
 using YCsharp.Service;
 using YCsharp.Util;
 
@@ -87,22 +91,64 @@ namespace HmiPro.Redux.Effects {
                 });
         }
 
+
+        private static readonly AsyncLock cpmCacheLock = new AsyncLock();
+
+        private static IDictionary<string, CpmCache> cpmCacheDict = new Dictionary<string, CpmCache>();
+
         /// <summary>
         /// 上传采集参数到时态数据库
         /// </summary>
         void initUploadCpmsInfluxDb() {
             UploadCpmsInfluxDb = App.Store.asyncActionVoid<DbActions.UploadCpmsInfluxDb>(
               async (dispatch, getState, instance) => {
-                  await Task.Run(() => {
-                      dispatch(instance);
-                      bool success = InfluxDbHelper.GetInfluxDbService().WriteCpms(instance.MachineCode, instance.Cpms.ToArray());
-                      if (success) {
-                          App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbSuccess());
-                      } else {
-                          App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbFailed());
+                  dispatch(instance);
+                  using (await cpmCacheLock.LockAsync()) {
+                      if (!cpmCacheDict.ContainsKey(instance.MachineCode)) {
+                          cpmCacheDict[instance.MachineCode] = new CpmCache(1024);
                       }
-                  });
+                      var cache = cpmCacheDict[instance.MachineCode];
+                      //缓存
+                      foreach (var cpm in instance.Cpms) {
+                          cache.Add(cpm);
+                      }
+                      //上传周期同与mq保持一致
+                      if ((DateTime.Now - cache.LastUploadTime).TotalMilliseconds > HmiConfig.UploadWebBoardInterval || cache.DataCount > 900) {
+                          await Task.Run(() => {
+                              bool success = InfluxDbHelper.GetInfluxDbService().WriteCpms(instance.MachineCode, cache.Caches, 0, cache.DataCount);
+                              cache.LastUploadTime = DateTime.Now;
+                              cache.Clear();
+                              if (success) {
+                                  App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbSuccess());
+                              } else {
+                                  App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbFailed());
+                              }
+                          });
+                      }
+                  }
               });
+        }
+    }
+
+    public class CpmCache {
+        public Cpm[] Caches;
+        public int DataCount = 0;
+        public DateTime LastUploadTime;
+
+        public CpmCache(int size) {
+            Caches = new Cpm[size];
+        }
+
+        public void Add(Cpm cpm) {
+            //超限
+            if (DataCount >= Caches.Length) {
+                DataCount = Caches.Length - 1;
+            }
+            Caches[DataCount++] = cpm;
+        }
+
+        public void Clear() {
+            DataCount = 0;
         }
     }
 }

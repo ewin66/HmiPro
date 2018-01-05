@@ -27,6 +27,8 @@ namespace HmiPro.Config {
         public string Mode { get; set; }
         [Option(longName: "mock", Default = "false", HelpText = "是否启用模拟数据")]
         public string Mock { get; set; }
+        [Option(longName: "config", Default = "Shop", HelpText = "指定 Hmi.Config.[value].json")]
+        public string Config { get; set; }
         public bool MockVal => bool.Parse(Mock);
 
         public static CmdOptions GlobalOptions;
