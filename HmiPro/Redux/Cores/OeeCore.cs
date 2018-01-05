@@ -113,13 +113,13 @@ namespace HmiPro.Redux.Cores {
             var maxSpeedCode = MachineConfig.MachineDict[machineCode].LogicToCpmDict[CpmInfoLogic.MaxSpeedPlc].Code;
             var maxSpeedCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][maxSpeedCode];
             if (maxSpeedCpm.ValueType != SmParamType.Signal) {
-                Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率");
+                Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率",36000);
                 return null;
             }
             var speedCode = MachineConfig.MachineDict[machineCode].LogicToCpmDict[CpmInfoLogic.OeeSpeed].Code;
-            var speedCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][speedCode];
+            var speedCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][speedCode]; 
             if (speedCpm.ValueType != SmParamType.Signal) {
-                Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率");
+                Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率",36000);
                 return null;
             }
             var maxSpeed = (float)maxSpeedCpm.Value;

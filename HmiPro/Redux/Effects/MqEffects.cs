@@ -178,7 +178,7 @@ namespace HmiPro.Redux.Effects {
 
         void initUploadCpmsEffect() {
             UploadCpms = App.Store.asyncActionVoid<MqActions.UploadCpms>(async (dispatch, getState, instance) => {
-                await Task.Run(() => {
+                var task = Task.Run(() => {
                     var cpmsDict = instance.CpmsDict;
                     foreach (var pair in cpmsDict) {
                         var machineCode = pair.Key;
@@ -201,7 +201,6 @@ namespace HmiPro.Redux.Effects {
                             }
                         }
                         uCpms.machineState = state;
-
                         Console.WriteLine($"上传Mq：Speed {uCpms.macSpeed} Timeff: {uCpms.TimeEff},SpeedEff：{uCpms.SpeedEff},QualityEff：{uCpms.QualityEff}");
                         uCpms.paramInfoList = new List<UploadParamInfo>();
                         foreach (var cpmPair in machineCpms) {
@@ -223,6 +222,13 @@ namespace HmiPro.Redux.Effects {
                         }
                     }
                 });
+
+                if (await Task.WhenAny(task, Task.Delay(1000)) == task) {
+                    //在时间之内完成了task
+                } else {
+                    //超时
+                    App.Store.Dispatch(new MqActions.UploadCpmsFailed() { Exp = new Exception("上传超时 1s ") });
+                }
             });
         }
 

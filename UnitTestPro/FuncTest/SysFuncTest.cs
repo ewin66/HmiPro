@@ -137,6 +137,19 @@ namespace UnitTestPro.FuncTest {
             Console.Write((TestEnum)e);
         }
 
+        [TestMethod]
+        public async Task TaskTest() {
+            var task = Task.Run(() => {Thread.Sleep(900);
+                Console.WriteLine("执行完毕");
+            });
+
+            if (await Task.WhenAny(task, Task.Delay(1000)) == task) {
+                Console.WriteLine("在1s之内完成");
+            } else {
+                Console.WriteLine("超时1s");
+            }
+        }
+
         public enum TestEnum {
             Hello = 1,
             World = 2
