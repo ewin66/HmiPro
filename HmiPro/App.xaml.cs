@@ -10,6 +10,7 @@ using System.Windows;
 using CommandLine;
 using DevExpress.Xpf.Core;
 using HmiPro.Config;
+using HmiPro.Config.Models;
 using HmiPro.Helpers;
 using HmiPro.Redux;
 using HmiPro.Redux.Actions;
@@ -42,7 +43,7 @@ namespace HmiPro {
             /// <summary>
             /// 上次打印时间
             /// </summary>
-            public DateTime LastLogTime;
+            public DateTime LastLogTime = DateTime.MinValue;
             /// <summary>
             /// 最小打印时间间隔
             /// </summary>
@@ -79,6 +80,8 @@ namespace HmiPro {
             ExceptionHelper.Init();
             //配置解析外部命令
             configInit(e);
+            //加载全局配置
+            GlobalConfig.Load(YUtil.GetAbsolutePath(".\\Profiles\\Global.xls"));
             //配置日志路径
             LoggerHelper.Init(HmiConfig.LogFolder);
             //配置Sqlite路径
@@ -101,6 +104,7 @@ namespace HmiPro {
             syncTime(!HmiConfig.IsDevUserEnv);
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
+
         }
 
         /// <summary>
@@ -129,7 +133,7 @@ namespace HmiPro {
                 if (MuffleLogDict.TryGetValue(action.Type(), out var muffle)) {
                     muffle.Freq += 1;
                     if ((DateTime.Now - muffle.LastLogTime).TotalSeconds >= muffle.MinGapSec) {
-                        Logger.Debug($"Redux Muffle Action: {action.Type()}  Occur {muffle.Freq} Times In {muffle.MinGapSec} Seconds");
+                        Logger.Debug($"Redux Muffle Action: {action.Type()}  Occur [{muffle.Freq}] Times In {muffle.MinGapSec} Seconds");
                         muffle.LastLogTime = DateTime.Now;
                         muffle.Freq = 0;
                     }
@@ -137,7 +141,7 @@ namespace HmiPro {
                     //普通动作直接输出
                     Logger.Debug("Redux Current Action: " + action.Type(), color);
                 }
-                AppState.ExectedActions[state.Type] = DateTime.Now;
+                AppState.ExectedActions[action.Type()] = DateTime.Now;
             }
         }
 

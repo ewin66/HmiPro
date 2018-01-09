@@ -18,6 +18,7 @@ namespace HmiPro.Redux {
     /// <summary>
     /// 程序核心逻辑依赖注入
     /// <author>ychost</author>
+    /// <date>2017-12-17</date>
     /// </summary>
     public class ReduxIoc {
         public static void Init() {

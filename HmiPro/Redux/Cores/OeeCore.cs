@@ -27,7 +27,7 @@ namespace HmiPro.Redux.Cores {
         public OeeCore() {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
-            actionExecDict[OeeActions.CALC_OEE] = doCalcOee;
+            actionExecDict[CpmActions.SPEED_ACCEPT] = whenSpeedAccept;
         }
 
         public void Init() {
@@ -42,8 +42,9 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        private void doCalcOee(AppState state, IAction action) {
-            var oeeAction = (OeeActions.CalcOee)action;
+        private void whenSpeedAccept(AppState state, IAction action) {
+            //每当速度变化则计算一次Oee
+            var oeeAction = (CpmActions.SpeedAccept)action;
             var machineCode = oeeAction.MachineCode;
             var machineStates = state.CpmState.MachineStateDict[machineCode];
             var timeEff = CalcOeeTimeEff(machineCode, machineStates);
@@ -111,6 +112,8 @@ namespace HmiPro.Redux.Cores {
                 return CalcOeeSpeedEffByPlc(machineCode);
             } else if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedMq) {
                 return CalcOeeSpeedEffByMq(machineCode);
+            } else if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedSetting) {
+                return CalcOeeSpeedEffBySetting(machineCode);
             }
             return null;
         }
@@ -130,6 +133,18 @@ namespace HmiPro.Redux.Cores {
         /// <param name="machineCode"></param>
         /// <returns></returns>
         public float? CalcOeeSpeedEffByMq(string machineCode) {
+            return null;
+        }
+
+        public float? CalcOeeSpeedEffBySetting(string machineCode) {
+            var maxSetting = MachineConfig.MachineDict[machineCode].MaxOeeSpeedSetting;
+            if (maxSetting.HasValue) {
+                if (maxSetting != 0) {
+                    return App.Store.GetState().CpmState.SpeedDict[machineCode] / maxSetting.Value;
+                } else {
+                    Logger.Error($"机台[{machineCode}] MaxSetting 为 0请检查");
+                }
+            }
             return null;
         }
 

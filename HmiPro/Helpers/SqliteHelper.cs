@@ -19,20 +19,24 @@ namespace HmiPro.Helpers {
     /// <date>2017-12-18</date>
     /// <author>ychost</author>
     /// </summary>
+    ///<update>
+    /// 2018-01-09: 分两种Sqlite,一种每个Hmi都不一定一样可动态给用户设定的（比如配置机台文件路径）
+    ///             一种属于全局管理，集中配置的
+    /// </update>
     public static class SqliteHelper {
         private static string connection;
 
         public static void Init(string sqlitePath) {
-            connection = $"Data Source={sqlitePath};Pooling=true";
+            SqliteHelper.connection = $"Data Source={sqlitePath};Pooling=true";
         }
 
         public static SqliteService CreateSqliteService() {
             if (string.IsNullOrEmpty(connection)) {
                 throw new Exception("请先初始化 SqliteHelper.Init(sqlitePath)");
             }
-
             return new SqliteService(connection);
         }
+
 
     }
 
@@ -110,6 +114,7 @@ namespace HmiPro.Helpers {
         }
     }
 
+
     /// <summary>
     /// sqlite初始化策略
     /// <date>2017-07-18</date>
@@ -120,6 +125,7 @@ namespace HmiPro.Helpers {
 
         }
     }
+
 
     /// <summary>
     /// 序列化实体

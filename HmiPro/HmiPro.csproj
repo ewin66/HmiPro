@@ -151,9 +151,11 @@
     </ApplicationDefinition>
     <Compile Include="Config\Assets.cs" />
     <Compile Include="Config\CmdOptions.cs" />
+    <Compile Include="Config\GlobalConfig.cs" />
     <Compile Include="Config\Models\CpmInfo.cs" />
     <Compile Include="Config\HmiConfig.cs" />
     <Compile Include="Config\MachineConfig.cs" />
+    <Compile Include="Config\Models\MachineSetting.cs" />
     <Compile Include="Config\Models\Machine.cs" />
     <Compile Include="Config\Models\Setting.cs" />
     <Compile Include="Controls\Panels\DeviceDetector.cs" />
@@ -447,6 +449,9 @@
     <None Include="Profiles\Assets\Mocks\MqSchTask.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Profiles\Global.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Profiles\Prod\Hmi.Config.Shop.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -696,7 +701,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

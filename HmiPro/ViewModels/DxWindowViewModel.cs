@@ -171,9 +171,7 @@ namespace HmiPro.ViewModels {
         /// <param name="action"></param>
         void whenOeeUpdated(AppState state, IAction action) {
             var oeeAction = (OeeActions.UpdateOeePartialValue)action;
-            Logger.Debug($@"Oee 时间效率 {oeeAction.TimeEff ?? 1},
-                            速度效率：{oeeAction.SpeedEff ?? 1}，
-                            质量效率：{oeeAction.QualityEff ?? 1}", ConsoleColor.Yellow);
+            Logger.Debug($@"Oee 时间效率 {oeeAction.TimeEff ?? 1}, 速度效率：{oeeAction.SpeedEff ?? 1}，质量效率：{oeeAction.QualityEff ?? 1}", ConsoleColor.Yellow);
         }
 
         /// <summary>

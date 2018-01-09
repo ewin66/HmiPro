@@ -38,9 +38,9 @@ namespace HmiPro.Config {
             AllMachineName = Path.GetFileNameWithoutExtension(path);
             foreach (var code in codes) {
                 var machine = new Machine();
+                machine.Code = code;
                 machine.InitCpmDict(path, $"{code}_采集参数");
                 machine.InitCodeAndIp(path, $"{code}_机台属性");
-                machine.Code = code;
                 MachineDict[code] = machine;
                 foreach (var ip in machine.CpmIps) {
                     IpToMachineCodeDict[ip] = code;

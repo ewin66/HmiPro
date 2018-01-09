@@ -86,6 +86,7 @@ namespace HmiPro.ViewModels {
             await UnityIocService.ResolveDepend<SchCore>().Init();
 
 
+
             var starHttpSystem = App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
             var startCpmServer = App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
             Dictionary<string, Task<bool>> startListenMqDict = new Dictionary<string, Task<bool>>();

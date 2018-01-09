@@ -157,7 +157,7 @@ namespace HmiPro.Redux.Reducers {
                 state.MachineCode = action.MachineCode;
                 state.SparkDiffDict[action.MachineCode] = action.Spark;
                 return state;
-            }).When<CpmActions.SpeedDiffAccpet>((state, action) =>
+            }).When<CpmActions.SpeedAccept>((state, action) =>
                 //更新机台状态
                 updateMachineState(action, state)
             //更新ip的485状态
@@ -196,7 +196,7 @@ namespace HmiPro.Redux.Reducers {
         /// <param name="action"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        private static State updateMachineState(CpmActions.SpeedDiffAccpet action, State state) {
+        private static State updateMachineState(CpmActions.SpeedAccept action, State state) {
             state.MachineCode = action.MachineCode;
             var currentSpeed = action.Speed;
             var lastMachineState = state.MachineStateDict[action.MachineCode].LastOrDefault();
@@ -208,14 +208,14 @@ namespace HmiPro.Redux.Reducers {
             MachineState newMachineState = null;
             var machineCode = action.MachineCode;
             state.SpeedDict[machineCode] = currentSpeed;
-            if (currentSpeed > 0 && (int)state.PreSpeedDict[machineCode] == 0) {
+            if (currentSpeed > 0 && state.PreSpeedDict[machineCode] == 0) {
                 newMachineState = new MachineState() {
                     StatePoint = MachineState.State.Start,
                     Time = DateTime.Now
                 };
             }
             //关机阶段，上一个速度大于0，此时速度等于0
-            else if ((int)currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
+            else if (currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
                 newMachineState = new MachineState() {
                     StatePoint = MachineState.State.Stop,
                     Time = DateTime.Now
@@ -237,8 +237,6 @@ namespace HmiPro.Redux.Reducers {
                     machineStates.Add(newMachineState);
                 }
             }
-            //更新计算一次Oee
-            App.Store.Dispatch(new OeeActions.CalcOee(machineCode));
             return state;
         }
     }

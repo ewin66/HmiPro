@@ -19,8 +19,7 @@ namespace HmiPro.Config.Models {
         /// </summary>
         public OeeActions.CalcOeeSpeedType OeeSpeedType = OeeActions.CalcOeeSpeedType.Unknown;
 
-        [Obsolete("请使用 Plc报警配置字段")]
-        public AlarmActions.OdAlarmType OdAlarmType = AlarmActions.OdAlarmType.Unknown;
+
         public string[] CpmIps { get; set; }
         //编码：采集参数（所有）
         public IDictionary<int, CpmInfo> CodeToAllCpmDict = new Dictionary<int, CpmInfo>();
@@ -39,7 +38,9 @@ namespace HmiPro.Config.Models {
         public IDictionary<int, CpmInfo> CodeToMqBomAlarmCpmDict = new Dictionary<int, CpmInfo>();
 
         public IDictionary<int, PlcAlarmCpm> CodeToPlcAlarmDict = new Dictionary<int, PlcAlarmCpm>();
-
+        //设定的最大速度
+        public float? MaxOeeSpeedSetting { get; set; }
+        public int? MaxOeeSpeedCpmCode { get; set; }
 
 
         /// <summary>
@@ -49,16 +50,28 @@ namespace HmiPro.Config.Models {
         /// <param name="sheetName"></param>
         public void InitCodeAndIp(string path, string sheetName) {
             var propDict = xlsToMachine(path, sheetName);
-            //Code = propDict["MachineCode"].ToString();
             CpmIps = propDict["CpmIps"].ToString().Split('|');
-            if (propDict.TryGetValue("OeeSpeedType", out var type)) {
-                var intVal = int.Parse(type.ToString());
-                OeeSpeedType = (OeeActions.CalcOeeSpeedType)intVal;
-            }
-            if (propDict.TryGetValue("OdAlarmType", out var odAlarmType)) {
-                var intVal = int.Parse(odAlarmType.ToString());
-                OdAlarmType = (AlarmActions.OdAlarmType)intVal;
-            }
+            //默认未知
+            OeeSpeedType = OeeActions.CalcOeeSpeedType.Unknown;
+            if (GlobalConfig.MachineOeeSettingDict.TryGetValue(Code, out var oeeSetting)) {
+                if (!string.IsNullOrEmpty(oeeSetting.OeeSpeedCpmName)) {
+                    var oeeCpm = CodeToAllCpmDict.Values.First(v => v.Name == oeeSetting.OeeSpeedCpmName);
+                    LogicToCpmDict[CpmInfoLogic.OeeSpeed] = oeeCpm;
+                    CodeToLogicDict[oeeCpm.Code] = CpmInfoLogic.OeeSpeed;
+                }
+                if (oeeSetting.OeeSpeedMax1Setting.HasValue) {
+                    MaxOeeSpeedSetting = oeeSetting.OeeSpeedMax1Setting.Value;
+                    OeeSpeedType = OeeActions.CalcOeeSpeedType.MaxSpeedSetting;
+                } else if (!string.IsNullOrEmpty(oeeSetting.OeeSpeedMax2CpmName)) {
+                    var maxCpm = CodeToAllCpmDict.Values.First(v => v.Name == oeeSetting.OeeSpeedMax2CpmName);
+                    LogicToCpmDict[CpmInfoLogic.MaxSpeedPlc] = maxCpm;
+                    CodeToLogicDict[maxCpm.Code] = CpmInfoLogic.MaxSpeedPlc;
+                    OeeSpeedType = OeeActions.CalcOeeSpeedType.MaxSpeedPlc;
+                } else if (!string.IsNullOrEmpty(oeeSetting.OeeSpeedMax3MqKey)) {
+                    OeeSpeedType = OeeActions.CalcOeeSpeedType.MaxSpeedMq;
+                }
+            } 
+            Console.WriteLine($"机台 {Code} 计算Oee Spped Eff 的方式：{OeeSpeedType}");
         }
 
         IDictionary<string, object> xlsToMachine(string xlsPath, string sheetName) {
@@ -196,13 +209,6 @@ namespace HmiPro.Config.Models {
                 }
             }
 
-            if (OdAlarmType == AlarmActions.OdAlarmType.OdThresholdPlc) {
-                if (LogicToCpmDict.ContainsKey(CpmInfoLogic.MaxOdPlc) ||
-                    LogicToCpmDict.ContainsKey(CpmInfoLogic.MinOdPlc)) {
-                } else {
-                    throw new Exception($"配置了OdAlarmType为OdThresholdPlc，请设置Plc最大直径 {CpmInfoLogic.MaxOdPlc} 或者 Plc最小直径 {CpmInfoLogic.MinOdPlc}");
-                }
-            }
         }
 
     }

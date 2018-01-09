@@ -16,7 +16,6 @@ namespace HmiPro.Redux.Actions {
         /// </summary>
         public static readonly string UPDATE_OEE_PARTIAL_VALUE = "[Oee] Update Oee Parital Value";
 
-        public static readonly string CALC_OEE = "[Oee] Calc Oee";
         public static readonly string INIT = "[Oee] Init";
 
         public struct Init : IAction {
@@ -24,14 +23,6 @@ namespace HmiPro.Redux.Actions {
         }
 
 
-        public struct CalcOee : IAction {
-            public string Type() => CALC_OEE;
-            public string MachineCode;
-
-            public CalcOee(string machineCode) {
-                MachineCode = machineCode;
-            }
-        }
 
         public struct StartCalcOeeTimer : IAction {
             public string Type() => START_CALC_OEE_TIMER;
@@ -47,8 +38,10 @@ namespace HmiPro.Redux.Actions {
             MaxSpeedPlc = 1,
             //Mq设定最大值
             MaxSpeedMq = 2,
+            //经验设定的最大值
+            MaxSpeedSetting = 3,
             //未知
-            Unknown = 3,
+            Unknown = -1,
         }
 
         public struct UpdateOeePartialValue : IAction {

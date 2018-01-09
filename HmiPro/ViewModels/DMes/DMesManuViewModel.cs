@@ -18,6 +18,7 @@ using YCsharp.Service;
 
 namespace HmiPro.ViewModels.DMes {
     [POCOViewModel]
+    [Obsolete("请使用DMesCoreViewModel")]
     public class DMesManuViewModel : IDocumentContent {
         public virtual ObservableCollection<BaseTab> ViewSource { get; set; } = new ObservableCollection<BaseTab>();
         public virtual IDispatcherService DispatcherService => null;
@@ -198,7 +199,7 @@ namespace HmiPro.ViewModels.DMes {
                     var task = tasks.FirstOrDefault(t => t.workcode == workCode);
                     var vm = CraftBomViewModel.Create(machineCode, workCode, task?.bom);
                     //var vm = new CraftBomViewModel(machineCode,workCode,task?.bom);
-                    NavigationSerivce.Navigate("CraftBomView", vm, null, this,false);
+                    NavigationSerivce.Navigate("CraftBomView", vm, null, this, false);
                 }
 
             }
@@ -214,7 +215,7 @@ namespace HmiPro.ViewModels.DMes {
                     var task = tasks.FirstOrDefault(t => t.workcode == workCode);
                     var vm = SchTaskAxisViewModel.Create(machineCode, workCode, task?.axisParam);
                     //var vm = new CraftBomViewModel(machineCode,workCode,task?.bom);
-                    NavigationSerivce.Navigate("SchTaskAxisView", vm, null, this,false);
+                    NavigationSerivce.Navigate("SchTaskAxisView", vm, null, this, false);
                 }
 
             }
