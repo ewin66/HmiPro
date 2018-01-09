@@ -16,13 +16,17 @@ namespace HmiPro.Config {
     /// </summary>
     public static class GlobalConfig {
         public static IDictionary<string, MachineOeeSetting> MachineOeeSettingDict;
-
+        public static IDictionary<string, string> IpToHmiDict;
+        public static IDictionary<string, string> HmiToIpDict;
         public static void Load(string path) {
             path = YUtil.GetAbsolutePath(path);
             MachineOeeSettingDict = new Dictionary<string, MachineOeeSetting>();
+            IpToHmiDict = new Dictionary<string, string>();
+            HmiToIpDict = new Dictionary<string, string>();
+
             using (var xlsOp = new XlsService(path)) {
-                var dt = xlsOp.ExcelToDataTable("速度配置", true);
-                foreach (DataRow row in dt.Rows) {
+                var speedDt = xlsOp.ExcelToDataTable("速度配置", true);
+                foreach (DataRow row in speedDt.Rows) {
                     MachineOeeSetting setting = new MachineOeeSetting();
                     setting.Code = row["Code"].ToString();
                     setting.OeeSpeedCpmName = row["OeeSpeedCpmName"].ToString();
@@ -36,6 +40,12 @@ namespace HmiPro.Config {
                     setting.OeeSpeedMax3MqKey = row["OeeSpeedMax3MqKey"].ToString();
                     setting.MqNeedSpeedCpmName = row["MqNeedSpeedCpmName"].ToString();
                     MachineOeeSettingDict[setting.Code] = setting;
+                }
+
+                var ipDt = xlsOp.ExcelToDataTable("Ip配置", true);
+                foreach (DataRow row in ipDt.Rows) {
+                    IpToHmiDict[row["Ip"].ToString()] = row["Hmi"].ToString();
+                    HmiToIpDict[row["Hmi"].ToString()] = row["Ip"].ToString();
                 }
             }
         }

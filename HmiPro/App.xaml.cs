@@ -101,7 +101,8 @@ namespace HmiPro {
             //打印Redux系统的动作
             Store.Subscribe(logDebugActions);
             //同步时间
-            syncTime(!HmiConfig.IsDevUserEnv);
+            bool canSync = !HmiConfig.IsDevUserEnv;
+            syncTime(canSync);
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
 
@@ -152,7 +153,8 @@ namespace HmiPro {
         void configInit(StartupEventArgs e) {
             Parser.Default.ParseArguments<CmdOptions>(e.Args).WithParsed(opt => {
                 opt.ProfilesFolder = YUtil.GetAbsolutePath(opt.ProfilesFolder);
-                var configFolder = opt.ProfilesFolder + "\\\\" + opt.Mode;
+                var configFolder = opt.ProfilesFolder + "\\" + opt.Mode;
+                opt.ConfigFolder = configFolder;
                 var assetsFolder = opt.ProfilesFolder + @"\Assets";
                 //开机自启
                 YUtil.SetAppAutoStart(GetType().ToString(), bool.Parse(opt.AutoSatrt));

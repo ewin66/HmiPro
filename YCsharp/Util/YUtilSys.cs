@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,6 +20,16 @@ namespace YCsharp.Util {
                 }
             }
             return availablebytes;
+        }
+
+        /// <summary>
+        /// 获取本机所有的ip
+        /// </summary>
+        /// <returns></returns>
+        public static string[] GetAllIps() {
+            string name = Dns.GetHostName();
+            IPAddress[] ipadrlist = Dns.GetHostAddresses(name);
+            return ipadrlist.Select(ip => ip.ToString()).ToArray();
         }
     }
 }

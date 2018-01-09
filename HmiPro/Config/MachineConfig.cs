@@ -2,12 +2,14 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Config.Models;
 using YCsharp.Service;
+using YCsharp.Util;
 
 namespace HmiPro.Config {
     /// <summary>
@@ -50,6 +52,38 @@ namespace HmiPro.Config {
                 }
                 MachineCodeToIpsDict[code] = machine.CpmIps.ToList();
             }
+        }
+
+        /// <summary>
+        /// 根据ip来寻找其配置文件的路径
+        /// </summary>
+        public static void LoadFromGlobal() {
+            string configPath = null;
+
+            bool hasConfiged = false;
+            if (!string.IsNullOrEmpty(CmdOptions.GlobalOptions.HmiName)) {
+                configPath = YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" +
+                                                   CmdOptions.GlobalOptions.HmiName + ".xls");
+                Console.WriteLine("指定配置Hmi：" + CmdOptions.GlobalOptions.HmiName);
+                hasConfiged = true;
+            } else {
+
+                var ips = YUtil.GetAllIps();
+                foreach (var ip in ips) {
+                    if (GlobalConfig.IpToHmiDict.TryGetValue(ip, out var hmi)) {
+                        configPath =
+                            YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" + hmi +
+                                                  ".xls");
+                        Load(configPath);
+                        hasConfiged = true;
+                    }
+                }
+            }
+            if (!hasConfiged) {
+                throw new Exception("未在Global中配置本机ip对应的Hmi");
+            }
+
+            Console.WriteLine("加载机台配置文件路径：-" + configPath);
         }
     }
 }

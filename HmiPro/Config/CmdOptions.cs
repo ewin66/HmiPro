@@ -29,7 +29,11 @@ namespace HmiPro.Config {
         public string Mock { get; set; }
         [Option(longName: "config", Default = "Shop", HelpText = "指定 Hmi.Config.[value].json")]
         public string Config { get; set; }
+        [Option(longName: "hmi", Default = "", HelpText = "指定Hmi名称如：DE_DF")]
+        public string HmiName { get; set; }
         public bool MockVal => bool.Parse(Mock);
+
+        public string ConfigFolder;
 
         public static CmdOptions GlobalOptions;
     }
