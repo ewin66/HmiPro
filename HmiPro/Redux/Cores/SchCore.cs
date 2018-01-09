@@ -64,8 +64,8 @@ namespace HmiPro.Redux.Cores {
             }
 
             //一分钟计算一次Oee
-            //var interval = 1 * 60 * 1000;
-            //await App.Store.Dispatch(oeeEffects.StartCalcOeeTimer(new OeeActions.StartCalcOeeTimer(interval)));
+            var interval = 1 * 60 * 1000;
+            await App.Store.Dispatch(oeeEffects.StartCalcOeeTimer(new OeeActions.StartCalcOeeTimer(interval)));
             JobManager.Initialize(this);
         }
 
