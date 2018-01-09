@@ -100,7 +100,7 @@ namespace HmiPro.Redux.Reducers {
                 state.MachineStateDict = new ConcurrentDictionary<string, ObservableCollection<MachineState>>();
                 state.MachineDebugStateDict = new Dictionary<string, ObservableCollection<MachineDebugState>>();
                 state.Com485StatusDict = new ConcurrentDictionary<string, Com485SingleStatus>();
-                state.SpeedDict = new Dictionary<string, float>();
+                state.SpeedDict = new ConcurrentDictionary<string, float>();
                 state.PreSpeedDict = new Dictionary<string, float>();
                 state.Logger = LoggerHelper.CreateLogger(typeof(CpmReducer).ToString());
                 foreach (var pair in MachineConfig.MachineDict) {
@@ -146,7 +146,6 @@ namespace HmiPro.Redux.Reducers {
                 return state;
             }).When<CpmActions.StartServerFailed>((state, action) => {
                 return state;
-
             }).When<CpmActions.CpmUpdateDiff>((state, action) => {
                 state.MachineCode = action.MachineCode;
                 state.UpdatedCpmsDiffDict[state.MachineCode] = action.CpmsDict;
@@ -166,7 +165,7 @@ namespace HmiPro.Redux.Reducers {
                 state.MachineCode = action.MachineCode;
                 state.SparkDiffDict[action.MachineCode] = action.Spark;
                 return state;
-            }).When<CpmActions.SpeedAccept>((state, action) => {
+            }).When<CpmActions.SpeedDiffAccpet>((state, action) => {
                 lock (State.OeeLocks[action.MachineCode]) {
                     state.MachineCode = action.MachineCode;
                     var currentSpeed = action.Speed;
@@ -180,14 +179,14 @@ namespace HmiPro.Redux.Reducers {
                     MachineState newMachineState = null;
                     var machineCode = action.MachineCode;
                     state.SpeedDict[machineCode] = currentSpeed;
-                    if (currentSpeed > 0 && state.PreSpeedDict[machineCode] == 0) {
+                    if (currentSpeed > 0 && (int)state.PreSpeedDict[machineCode] == 0) {
                         newMachineState = new MachineState() {
                             StatePoint = MachineState.State.Start,
                             Time = DateTime.Now
                         };
                     }
                     //关机阶段，上一个速度大于0，此时速度等于0
-                    else if (currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
+                    else if ((int)currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
                         newMachineState = new MachineState() {
                             StatePoint = MachineState.State.Stop,
                             Time = DateTime.Now

@@ -97,14 +97,10 @@ namespace HmiPro {
             Logger = LoggerHelper.CreateLogger("DMes App");
             //打印Redux系统的动作
             Store.Subscribe(logDebugActions);
+            //同步时间
+            syncTime(!HmiConfig.IsDevUserEnv);
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
-        }
-
-        void testLogTimeout() {
-            YUtil.SetInterval(500, () => {
-                Logger.Error("哈哈哈", 1800);
-            }, 100)();
         }
 
         /// <summary>
@@ -154,15 +150,20 @@ namespace HmiPro {
                 opt.ProfilesFolder = YUtil.GetAbsolutePath(opt.ProfilesFolder);
                 var configFolder = opt.ProfilesFolder + "\\\\" + opt.Mode;
                 var assetsFolder = opt.ProfilesFolder + @"\Assets";
+                //开机自启
                 YUtil.SetAppAutoStart(GetType().ToString(), bool.Parse(opt.AutoSatrt));
+                //显示Console框
                 if (bool.Parse(opt.ShowConsole)) {
                     ConsoleHelper.Show();
                 }
+                Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
                 Console.WriteLine("配置文件夹：-" + opt.ProfilesFolder);
+                //启动画面
                 if (bool.Parse(opt.ShowSplash)) {
                     DXSplashScreen.Show<SplashScreenView>();
                     DXSplashScreen.SetState(SplashState.Default);
                 }
+                //全局配置文件
                 var configFile = configFolder + $@"\Hmi.Config.{opt.Config}.json";
                 HmiConfig.Load(configFile);
                 Console.WriteLine($"初始化配置文件: -{configFile}");
@@ -171,10 +172,10 @@ namespace HmiPro {
                 HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);
                 HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
                 Console.WriteLine("当前运行模式：-" + opt.Mode);
-                Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
                 AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
                 //设置全局配置
                 CmdOptions.GlobalOptions = opt;
+
 
             }).WithNotParsed(err => {
                 throw new Exception("参数异常" + e);
@@ -187,6 +188,22 @@ namespace HmiPro {
                 Logger.ErrorWithDb(message, MachineConfig.AllMachineName);
             };
         }
-    }
 
+        /// <summary>
+        /// 与服务器同步时间
+        /// </summary>
+        private void syncTime(bool canSync) {
+            //非开发环境才同步时间
+            if (canSync) {
+                try {
+                    //获取服务器时间
+                    var ntpTime = YUtil.GetNtpTime(HmiConfig.NtpIp);
+                    YUtil.SetLoadTimeByDateTime(ntpTime);
+                    Logger.Info($"同步时间成功: {ntpTime}");
+                } catch (Exception e) {
+                    Logger.Error("获取服务器时间失败", e);
+                }
+            }
+        }
+    }
 }

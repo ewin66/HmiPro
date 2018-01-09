@@ -144,7 +144,6 @@ namespace HmiPro.Redux.Cores {
         /// <param name="machineCode"></param>
         /// <param name="sm"></param>
         void paramPkgHandler(string machineCode, SmModel sm, string ip) {
-
             var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm);
             var cpmsRelate = new List<Cpm>();
             var cpms = new List<Cpm>();
@@ -186,14 +185,13 @@ namespace HmiPro.Redux.Cores {
             //      一包参数的时间应该一致
             var pickTime = DateTime.Now;
 
-            void updateDiff(Cpm cpm)
-            {
+            void updateDiff(Cpm cpm) {
                 cpm.PickTime = pickTime;
                 //直接更新，会更新界面的数据
                 if (OnlineCpmDict[machineCode].TryGetValue(cpm.Code, out var storeCpm)) {
                     storeCpm.Update(cpm.Value, cpm.ValueType, pickTime);
                 } else {
-                    Logger.Error($"参数 {cpm.Code} 未注册");
+                    Logger.Error($"参数 {cpm.Code} 未注册", 3600);
                 }
                 updatedCpmsDiffDict[cpm.Code] = cpm;
             }
@@ -240,12 +238,9 @@ namespace HmiPro.Redux.Cores {
                 });
                 //速度发生变化
                 dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.OeeSpeed, cpm => {
-                    if (cpm == null) {
-                        return;
-                    }
                     App.Store.Dispatch(new CpmActions.SpeedDiffAccpet(machineCode, cpm.GetFloatVal()));
                     //速度变化为0的事件
-                    if (cpm.GetFloatVal() == 0) {
+                    if ((int)cpm.GetFloatVal() == 0) {
                         App.Store.Dispatch(new CpmActions.SpeedDiffZeroAccept(machineCode));
                     }
                 });
@@ -332,7 +327,7 @@ namespace HmiPro.Redux.Cores {
         void dispatchLogicCpm(string machineCode, List<Cpm> cpms, CpmInfoLogic logic, Action<Cpm> dispatch) {
             cpms?.ForEach(cpm => {
                 if (MachineConfig.MachineDict[machineCode].CodeToLogicDict.TryGetValue(cpm.Code, out var logicCpm)) {
-                    if (cpm.ValueType == SmParamType.Signal) {
+                    if (cpm.ValueType == SmParamType.Signal && cpm.Value != null) {
                         if (logicCpm == logic) {
                             dispatch(cpm);
                         }

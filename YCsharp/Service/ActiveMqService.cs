@@ -16,14 +16,16 @@ namespace YCsharp.Service {
     /// <author>ychost</author>
     /// </summary>
     public class ActiveMqService {
-        private string mqConn;
-        private string mqUserName;
-        private string mqUserPwd;
+        private readonly string mqConn;
+        private readonly string mqUserName;
+        private readonly string mqUserPwd;
+        private readonly TimeSpan requestTimeout;
 
-        public ActiveMqService(string mqConn, string mqUserName, string mqUserPwd) {
+        public ActiveMqService(string mqConn, string mqUserName, string mqUserPwd, TimeSpan requestTimeout) {
             this.mqConn = mqConn;
             this.mqUserName = mqUserName;
             this.mqUserPwd = mqUserPwd;
+            this.requestTimeout = requestTimeout;
         }
         /// <summary>
         /// 基础操作,只能执行一次动作
@@ -61,6 +63,7 @@ namespace YCsharp.Service {
         public void PulishOneTopic(string topic, string message) {
             this.OperateOneAction((session, conn) => {
                 using (IMessageProducer producer = session.CreateProducer(new ActiveMQTopic(topic))) {
+                    producer.RequestTimeout = requestTimeout;
                     conn.Start();
                     //可以写入字符串，也可以是一个xml字符串等
                     var req = session.CreateTextMessage(message);
@@ -89,6 +92,7 @@ namespace YCsharp.Service {
             this.OperateOneAction((session, conn) => {
                 IDestination destination = SessionUtil.GetDestination(session, queueName);
                 using (IMessageProducer producer = session.CreateProducer(destination)) {
+                    producer.RequestTimeout = requestTimeout;
                     conn.Start();
                     ITextMessage request = session.CreateTextMessage(message);
                     producer.Send(request);

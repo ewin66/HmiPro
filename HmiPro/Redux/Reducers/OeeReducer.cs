@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,7 @@ namespace HmiPro.Redux.Reducers {
         public static SimpleReducer<State> Create() {
             return new SimpleReducer<State>()
                 .When<OeeActions.Init>((state, action) => {
-                    state.OeeDict = new Dictionary<string, Oee>();
+                    state.OeeDict = new ConcurrentDictionary<string, Oee>();
                     foreach (var pair in MachineConfig.MachineDict) {
                         state.OeeDict[pair.Key] = new Oee();
                     }

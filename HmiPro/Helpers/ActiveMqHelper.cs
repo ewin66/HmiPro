@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Config;
 using YCsharp.Service;
 
 namespace HmiPro.Helpers {
@@ -16,7 +17,7 @@ namespace HmiPro.Helpers {
             ActiveMqHelper.connection = connection;
             ActiveMqHelper.user = user;
             ActiveMqHelper.password = password;
-            activeMqService = new ActiveMqService(ActiveMqHelper.connection, ActiveMqHelper.user, ActiveMqHelper.password);
+            activeMqService = new ActiveMqService(ActiveMqHelper.connection, ActiveMqHelper.user, ActiveMqHelper.password, TimeSpan.FromSeconds(HmiConfig.MqSendRequestTimeoutSec));
         }
 
         public static ActiveMqService GetActiveMqService() {

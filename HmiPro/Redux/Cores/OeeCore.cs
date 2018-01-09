@@ -40,16 +40,16 @@ namespace HmiPro.Redux.Cores {
             float currentSpeed = 0;
             currentSpeed = App.Store.GetState().CpmState.SpeedDict[machineCode];
             //删除上一班的机台状态数据
-            removeBeforeWorkTime(machineStates, YUtil.GetKeystoneWorkTime());
+            var workTime = YUtil.GetKeystoneWorkTime();
+            removeBeforeWorkTime(machineStates, workTime);
             var runTimeSec = getMachineRunTimeSec(machineStates, currentSpeed);
             var debugTimeSec = getMachineDebugTimeSec();
-            var workTime = YUtil.GetKeystoneWorkTime();
             //计算时间效率
             if (runTimeSec < 0) {
                 Logger.Error($"计算时间效率失败，有效时间 {runTimeSec} < 0 ");
             } else {
                 timeEff = (float)((runTimeSec - debugTimeSec) / (DateTime.Now - workTime).TotalSeconds);
-                Console.WriteLine($"当班时间：{(DateTime.Now - workTime).TotalSeconds} 秒，机台运行时间 {runTimeSec} 秒");
+                Logger.Debug($"当班时间：{(DateTime.Now - workTime).TotalHours} 小时，机台运行时间 {(float)runTimeSec / 3600f} 小时");
             }
             return timeEff;
         }
@@ -113,18 +113,18 @@ namespace HmiPro.Redux.Cores {
             var maxSpeedCode = MachineConfig.MachineDict[machineCode].LogicToCpmDict[CpmInfoLogic.MaxSpeedPlc].Code;
             var maxSpeedCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][maxSpeedCode];
             if (maxSpeedCpm.ValueType != SmParamType.Signal) {
-                Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率",36000);
+                Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率", 36000);
                 return null;
             }
             var speedCode = MachineConfig.MachineDict[machineCode].LogicToCpmDict[CpmInfoLogic.OeeSpeed].Code;
-            var speedCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][speedCode]; 
+            var speedCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][speedCode];
             if (speedCpm.ValueType != SmParamType.Signal) {
-                Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率",36000);
+                Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率", 36000);
                 return null;
             }
             var maxSpeed = (float)maxSpeedCpm.Value;
             var speed = (float)speedCpm.Value;
-            if (maxSpeed == 0) {
+            if ((int)maxSpeed == 0) {
                 App.Store.Dispatch(new SysNotificationMsg() {
                     Title = "无法计算 Oee-速度效率",
                     Content = $"机台 {machineCode} 的 {maxSpeedCpm.Name} ==0",

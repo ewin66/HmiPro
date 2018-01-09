@@ -16,9 +16,9 @@ namespace HmiPro.Redux.Actions {
         public static readonly string INIT = "[Cpm] Init";
         public static readonly string START_SERVER = "[Cpm] Start Server";
         public static readonly string START_SERVER_SUCCESS = "[Cpm] Start Server Success";
-        public static readonly string START_SERVER_FAILED = "[Cpm] Start Failed";
+        public static readonly string START_SERVER_FAILED =  "[Cpm] Start Server  Failed";
         public static readonly string CPMS_UPDATED_ALL = "[Cpm] Updated All";
-        public static readonly string CPMS_UPDATED_DIFF = "[Cpm] Updated Different";
+        public static readonly string CPMS_UPDATED_DIFF = "[Cpm] Updated Difference";
         public static readonly string CPMS_IP_ACTIVED = "[Cpm] Ip Actived";
         public static readonly string STOP_SERVER = "[Cpm] Stop Server";
         public static readonly string STOP_SERVER_SUCCESS = "[Cpm] Stop Server Success";

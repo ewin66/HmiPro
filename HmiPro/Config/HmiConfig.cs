@@ -145,6 +145,8 @@ namespace HmiPro.Config {
         [Required] public static readonly string InfluxCpmDbName;
 
         [Required] public static readonly int CloseScreenInterval;
+        //Mq发送消息超时
+        [Required] public static readonly int MqSendRequestTimeoutSec = 4;
         /// <summary>
         /// Bom表汉化字典
         /// </summary>

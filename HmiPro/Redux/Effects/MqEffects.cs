@@ -225,8 +225,8 @@ namespace HmiPro.Redux.Effects {
                     }
                 });
 
-                //每个机台等待2s
-                var awaitTime = MachineConfig.MachineDict.Count * 2000;
+                //每个机台等待3s
+                var awaitTime = MachineConfig.MachineDict.Count * 3000;
                 if (await Task.WhenAny(task, Task.Delay(awaitTime)) == task) {
                     //在时间之内完成了task
                 } else {
