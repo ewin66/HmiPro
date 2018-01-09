@@ -78,24 +78,13 @@ namespace HmiPro.ViewModels {
             var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
-            var dbEffects = UnityIocService.ResolveDepend<DbEffects>();
 
             UnityIocService.ResolveDepend<DMesCore>().Init();
             UnityIocService.ResolveDepend<AlarmCore>().Init();
             UnityIocService.ResolveDepend<CpmCore>().Init();
+            UnityIocService.ResolveDepend<OeeCore>().Init();
             await UnityIocService.ResolveDepend<SchCore>().Init();
-            foreach (var pair in MachineConfig.MachineDict) {
-                if (pair.Value.OdAlarmType == AlarmActions.OdAlarmType.OdThresholdPlc) {
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = $"机台 {pair.Key} Od报警来源",
-                        Content = "从Plc里面读取限值已报警"
-                    }));
-                }
-            }
 
-            if (Environment.UserName.ToLower().Contains("ychost")) {
-                //dispatchMock();
-            }
 
             var starHttpSystem = App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
             var startCpmServer = App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));

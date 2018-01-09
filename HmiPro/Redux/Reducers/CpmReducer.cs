@@ -129,7 +129,16 @@ namespace HmiPro.Redux.Reducers {
                 return state;
                 //更新ip的485状态为正常
             }).When<CpmActions.CpmIpActivted>((state, action) => {
-                state.Com485StatusDict[action.Ip].Status = SmSingleStatus.Ok;
+                //如果上个状态不是Error
+                //或者Erro状态过去已经超过1分钟了
+                //则认为该活动Ip的状态为正常
+                //因为在传送Error状态的时候Ip也会Actived
+                if (state.Com485StatusDict[action.Ip].Status != SmSingleStatus.Error
+                || (state.Com485StatusDict[action.Ip].Status == SmSingleStatus.Error
+                    && (DateTime.Now - state.Com485StatusDict[action.Ip].Time).TotalSeconds > 60
+                    )) {
+                    state.Com485StatusDict[action.Ip].Status = SmSingleStatus.Ok;
+                }
                 state.Com485StatusDict[action.Ip].Time = DateTime.Now;
                 return state;
             }).When<CpmActions.CpmUpdateDiff>((state, action) => {
@@ -188,49 +197,49 @@ namespace HmiPro.Redux.Reducers {
         /// <param name="state"></param>
         /// <returns></returns>
         private static State updateMachineState(CpmActions.SpeedDiffAccpet action, State state) {
-            lock (State.OeeLocks[action.MachineCode]) {
-                state.MachineCode = action.MachineCode;
-                var currentSpeed = action.Speed;
-                var lastMachineState = state.MachineStateDict[action.MachineCode].LastOrDefault();
-                //如果机台处于维修状态则不更改其状态，直到其维修完毕
-                if (lastMachineState?.StatePoint == MachineState.State.Repair) {
-                    return state;
-                }
-                //开机阶段，上一个速度为0 ，此时的速度大于0
-                MachineState newMachineState = null;
-                var machineCode = action.MachineCode;
-                state.SpeedDict[machineCode] = currentSpeed;
-                if (currentSpeed > 0 && (int)state.PreSpeedDict[machineCode] == 0) {
-                    newMachineState = new MachineState() {
-                        StatePoint = MachineState.State.Start,
-                        Time = DateTime.Now
-                    };
-                }
-                //关机阶段，上一个速度大于0，此时速度等于0
-                else if ((int)currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
-                    newMachineState = new MachineState() {
-                        StatePoint = MachineState.State.Stop,
-                        Time = DateTime.Now
-                    };
-                }
-                //赋值前一个速度
-                state.PreSpeedDict[action.MachineCode] = action.Speed;
-                if (newMachineState == null) {
-                    return state;
-                }
-                var machineStates = state.MachineStateDict[machineCode];
-                if (machineStates.Count == 0) {
-                    machineStates.Add(newMachineState);
-                } else if (machineStates.Count > 0) {
-                    var lastState = machineStates.LastOrDefault();
-                    if (lastState?.StatePoint == newMachineState.StatePoint) {
-                        state.Logger.Error($"机台 {machineCode} 分析开关机有误，两次都为 {lastState?.StatePoint}");
-                    } else {
-                        machineStates.Add(newMachineState);
-                    }
-                }
+            state.MachineCode = action.MachineCode;
+            var currentSpeed = action.Speed;
+            var lastMachineState = state.MachineStateDict[action.MachineCode].LastOrDefault();
+            //如果机台处于维修状态则不更改其状态，直到其维修完毕
+            if (lastMachineState?.StatePoint == MachineState.State.Repair) {
                 return state;
             }
+            //开机阶段，上一个速度为0 ，此时的速度大于0
+            MachineState newMachineState = null;
+            var machineCode = action.MachineCode;
+            state.SpeedDict[machineCode] = currentSpeed;
+            if (currentSpeed > 0 && (int)state.PreSpeedDict[machineCode] == 0) {
+                newMachineState = new MachineState() {
+                    StatePoint = MachineState.State.Start,
+                    Time = DateTime.Now
+                };
+            }
+            //关机阶段，上一个速度大于0，此时速度等于0
+            else if ((int)currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
+                newMachineState = new MachineState() {
+                    StatePoint = MachineState.State.Stop,
+                    Time = DateTime.Now
+                };
+            }
+            //赋值前一个速度
+            state.PreSpeedDict[action.MachineCode] = action.Speed;
+            if (newMachineState == null) {
+                return state;
+            }
+            var machineStates = state.MachineStateDict[machineCode];
+            if (machineStates.Count == 0) {
+                machineStates.Add(newMachineState);
+            } else if (machineStates.Count > 0) {
+                var lastState = machineStates.LastOrDefault();
+                if (lastState?.StatePoint == newMachineState.StatePoint) {
+                    state.Logger.Error($"机台 {machineCode} 分析开关机有误，两次都为 {lastState?.StatePoint}");
+                } else {
+                    machineStates.Add(newMachineState);
+                }
+            }
+            //更新计算一次Oee
+            App.Store.Dispatch(new OeeActions.CalcOee(machineCode));
+            return state;
         }
     }
 

@@ -216,8 +216,8 @@ namespace HmiPro.Redux.Effects {
                             uCpms.paramInfoList.Add(uInfo);
                         }
                         try {
-                            activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(uCpms));
                             Console.WriteLine($"上传Mq：Speed {uCpms.macSpeed} Timeff: {uCpms.TimeEff},SpeedEff：{uCpms.SpeedEff},QualityEff：{uCpms.QualityEff}");
+                            activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(uCpms));
                             App.Store.Dispatch(new MqActions.UploadCpmsSuccess());
                         } catch (Exception e) {
                             App.Store.Dispatch(new MqActions.UploadCpmsFailed() { Exp = e });

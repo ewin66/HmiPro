@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -158,8 +159,7 @@ namespace UnitTestPro.FuncTest {
 
         [TestMethod]
         public void TryFinallyTest() {
-            TestClass test()
-            {
+            TestClass test() {
                 TestClass testObj = new TestClass();
                 try {
                     testObj.Name = "hello";
@@ -170,6 +170,38 @@ namespace UnitTestPro.FuncTest {
             }
 
             Console.WriteLine(test().Name);
+        }
+
+        [TestMethod]
+        public void LockDictTest() {
+            IDictionary<string, object> lockDict = new ConcurrentDictionary<string, object>();
+            for (int i = 0; i < 10; i++) {
+                lockDict[i.ToString()] = new object();
+            }
+
+            Task.Run(() => {
+                lock (lockDict["1"]) {
+                    Thread.Sleep(1000);
+                    Console.WriteLine("Task1 Completed");
+                }
+            });
+
+            Task.Run(() => {
+                lock (lockDict["1"]) {
+                    Console.WriteLine("Task2.Completed");
+                }
+            });
+
+            Thread.Sleep(1003);
+        }
+
+        [TestMethod]
+        public void FloatTest() {
+            float? a = 1;
+            float? b = 1;
+            float? c = a * b;
+            Assert.AreEqual(c,1);
+            Console.WriteLine(a);
         }
 
     }

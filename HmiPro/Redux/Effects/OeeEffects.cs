@@ -25,6 +25,7 @@ namespace HmiPro.Redux.Effects {
     public class OeeEffects {
 
         public readonly LoggerService Logger;
+        [Obsolete("有Bug，会导致程序卡死")]
         public StorePro<AppState>.AsyncActionNeedsParam<OeeActions.StartCalcOeeTimer> StartCalcOeeTimer;
         private readonly OeeCore oeeCore;
         public OeeEffects(OeeCore oeeCore) {

@@ -15,10 +15,22 @@ namespace HmiPro.Redux.Actions {
         /// 更新Oee的部分参数
         /// </summary>
         public static readonly string UPDATE_OEE_PARTIAL_VALUE = "[Oee] Update Oee Parital Value";
+
+        public static readonly string CALC_OEE = "[Oee] Calc Oee";
         public static readonly string INIT = "[Oee] Init";
 
         public struct Init : IAction {
             public string Type() => INIT;
+        }
+
+
+        public struct CalcOee : IAction {
+            public string Type() => CALC_OEE;
+            public string MachineCode;
+
+            public CalcOee(string machineCode) {
+                MachineCode = machineCode;
+            }
         }
 
         public struct StartCalcOeeTimer : IAction {

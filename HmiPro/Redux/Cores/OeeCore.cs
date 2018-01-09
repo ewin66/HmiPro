@@ -23,10 +23,40 @@ namespace HmiPro.Redux.Cores {
     /// </summary>
     public class OeeCore {
         public readonly LoggerService Logger;
+        private readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
         public OeeCore() {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
+            actionExecDict[OeeActions.CALC_OEE] = doCalcOee;
         }
+
+        public void Init() {
+            App.Store.Subscribe((state, action) => {
+                if (actionExecDict.TryGetValue(action.Type(), out var exec)) {
+                    exec(state, action);
+                }
+            });
+        }
+        /// <summary>
+        /// 计算Oee
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        private void doCalcOee(AppState state, IAction action) {
+            var oeeAction = (OeeActions.CalcOee)action;
+            var machineCode = oeeAction.MachineCode;
+            var machineStates = state.CpmState.MachineStateDict[machineCode];
+            var timeEff = CalcOeeTimeEff(machineCode, machineStates);
+            var speedEff = CalcOeeSpeedEff(machineCode, MachineConfig.MachineDict[machineCode].OeeSpeedType);
+            var qualityEff = CalcOeeQualityEff(machineCode);
+            //更新Oee字典
+            App.Store.Dispatch(new OeeActions.UpdateOeePartialValue(
+                machineCode,
+                timeEff,
+                speedEff,
+                qualityEff));
+        }
+
         /// <summary>
         /// 计算Oee的开机率，Or
         /// </summary>
