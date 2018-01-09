@@ -127,7 +127,7 @@ namespace HmiPro.Redux.Cores {
                 Logger.Debug($"ip {ip} 未注册", ConsoleColor.Red);
                 return;
             }
-            App.Store.Dispatch(new CpmActions.CpmIpActivted(ip, DateTime.Now));
+            App.Store.Dispatch(new CpmActions.CpmIpActivted(code,ip, DateTime.Now));
             smModels?.ForEach(sm => {
                 //处理参数包
                 if (sm.PackageType == SmPackageType.ParamPackage) {

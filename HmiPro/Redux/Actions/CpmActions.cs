@@ -16,7 +16,7 @@ namespace HmiPro.Redux.Actions {
         public static readonly string INIT = "[Cpm] Init";
         public static readonly string START_SERVER = "[Cpm] Start Server";
         public static readonly string START_SERVER_SUCCESS = "[Cpm] Start Server Success";
-        public static readonly string START_SERVER_FAILED =  "[Cpm] Start Server  Failed";
+        public static readonly string START_SERVER_FAILED = "[Cpm] Start Server  Failed";
         public static readonly string CPMS_UPDATED_ALL = "[Cpm] Updated All";
         public static readonly string CPMS_UPDATED_DIFF = "[Cpm] Updated Difference";
         public static readonly string CPMS_IP_ACTIVED = "[Cpm] Ip Actived";
@@ -41,7 +41,7 @@ namespace HmiPro.Redux.Actions {
             public SmSingleStatus Status;
             public int CpmCode;
 
-            public Com485SingleStatusAccept(string machineCode, string ip, SmSingleStatus status,int cpmCode) {
+            public Com485SingleStatusAccept(string machineCode, string ip, SmSingleStatus status, int cpmCode) {
                 MachineCode = machineCode;
                 Ip = ip;
                 Status = status;
@@ -93,9 +93,11 @@ namespace HmiPro.Redux.Actions {
             public string Type() => CPMS_IP_ACTIVED;
             public DateTime ActivedTime;
             public string Ip;
-            public CpmIpActivted(string ip, DateTime time) {
+            public string MachineCode;
+            public CpmIpActivted(string machineCode, string ip, DateTime time) {
                 ActivedTime = time;
                 Ip = ip;
+                MachineCode = machineCode;
             }
         }
 

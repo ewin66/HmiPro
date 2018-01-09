@@ -49,11 +49,6 @@ namespace HmiPro.Redux.Reducers {
             /// 每个机台的记米值
             /// </summary>
             public IDictionary<string, float> NoteMeterDict;
-
-            /// <summary>
-            /// Ip最后活跃时间字典
-            /// </summary>
-            public IDictionary<string, DateTime> IpActivedDict;
             /// <summary>
             /// 当前的火花值
             /// </summary>
@@ -95,7 +90,6 @@ namespace HmiPro.Redux.Reducers {
                 state.UpdatedCpmsDiffDict = new Dictionary<string, IDictionary<int, Cpm>>();
                 state.UpdatedCpmsAllDict = new Dictionary<string, List<Cpm>>();
                 state.NoteMeterDict = new Dictionary<string, float>();
-                state.IpActivedDict = new Dictionary<string, DateTime>();
                 state.SparkDiffDict = new Dictionary<string, float>();
                 state.MachineStateDict = new ConcurrentDictionary<string, ObservableCollection<MachineState>>();
                 state.MachineDebugStateDict = new Dictionary<string, ObservableCollection<MachineDebugState>>();
@@ -142,9 +136,10 @@ namespace HmiPro.Redux.Reducers {
                     }
                 });
                 return state;
-            }).When<CpmActions.StartServerSuccess>((state, action) => {
-                return state;
-            }).When<CpmActions.StartServerFailed>((state, action) => {
+                //更新ip的485状态为正常
+            }).When<CpmActions.CpmIpActivted>((state, action) => {
+                state.Com485StatusDict[action.Ip].Status = SmSingleStatus.Ok;
+                state.Com485StatusDict[action.Ip].Time = DateTime.Now;
                 return state;
             }).When<CpmActions.CpmUpdateDiff>((state, action) => {
                 state.MachineCode = action.MachineCode;
@@ -157,9 +152,6 @@ namespace HmiPro.Redux.Reducers {
             }).When<CpmActions.NoteMeterAccept>((state, action) => {
                 state.MachineCode = action.MachineCode;
                 state.NoteMeterDict[state.MachineCode] = action.Meter;
-                return state;
-            }).When<CpmActions.CpmIpActivted>((state, action) => {
-                state.IpActivedDict[action.Ip] = action.ActivedTime;
                 return state;
             }).When<CpmActions.SparkDiffAccept>((state, action) => {
                 state.MachineCode = action.MachineCode;
@@ -174,7 +166,6 @@ namespace HmiPro.Redux.Reducers {
                     if (lastMachineState?.StatePoint == MachineState.State.Repair) {
                         return state;
                     }
-
                     //开机阶段，上一个速度为0 ，此时的速度大于0
                     MachineState newMachineState = null;
                     var machineCode = action.MachineCode;
