@@ -19,16 +19,16 @@ namespace HmiPro.Helpers {
         public static void Init(string logFolder) {
             LoggerHelper.logFolder = logFolder;
         }
+        /// <summary>
+        /// 创建一个日志记录对象
+        /// </summary>
+        /// <param name="defaultLocation">一般为GetType().ToString() 主要为了定位日志所在的类</param>
+        /// <returns></returns>
         public static LoggerService CreateLogger(string defaultLocation = "") {
             if (string.IsNullOrEmpty(logFolder)) {
                 throw new Exception("请先初始化 LoggerHelper.Init(folder)");
             }
             return new LoggerService(logFolder) { DefaultLocation = defaultLocation.Split('_')[0] };
         }
-
-
-
     }
-
-
 }

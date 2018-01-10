@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Redux.Actions;
+using HmiPro.Redux.Models;
 using YCsharp.Service;
 
 namespace HmiPro.Config.Models {
@@ -43,6 +44,12 @@ namespace HmiPro.Config.Models {
         public void InitCpmDict(string path, string sheetName) {
             CpmLoader cpmLoader = new CpmLoader(path, sheetName);
             List<CpmInfo> cpms = cpmLoader.Load();
+            //添加Oee显示
+            cpms.Add(new CpmInfo() { Code = DefinedParamCode.Oee, Name = "Oee" });
+            cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeTime, Name = "Oee-时间效率" });
+            cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeSpeed, Name = "Oee-速度效率" });
+            cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeQuality, Name = "Oee-质量效率" });
+
             cpms.ForEach(cpm => {
                 CpmNameToCodeDict[cpm.Name] = cpm.Code;
                 //所有参数
@@ -118,7 +125,7 @@ namespace HmiPro.Config.Models {
 
         }
 
-       
+
 
     }
 }

@@ -25,6 +25,12 @@ namespace HmiPro.Redux.Models {
         //人员Rfid
         public static readonly int EmployeeRfied = -100;
 
+        //Oee
+        public static readonly int Oee = -100;
+        public static readonly int OeeSpeed = -101;
+        public static readonly int OeeTime = -102;
+        public static readonly int OeeQuality = -103;
+
         public static bool IsRfidParam(int paramCode) {
             return paramCode == StartRfid || paramCode == EndRfid || paramCode == EmployeeRfied;
         }

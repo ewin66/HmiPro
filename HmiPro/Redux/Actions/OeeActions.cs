@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Logging.Simple;
+using HmiPro.Config;
 
 namespace HmiPro.Redux.Actions {
     /// <summary>
@@ -71,6 +72,15 @@ namespace HmiPro.Redux.Actions {
                 SpeedEff = speedEff;
                 QualityEff = qualityEff;
                 Oee = TimeEff * qualityEff * speedEff;
+                if (TimeEff.HasValue) {
+                    TimeEff = (float)Math.Round(TimeEff.Value, HmiConfig.MathRound);
+                }
+                if (SpeedEff.HasValue) {
+                    SpeedEff = (float)Math.Round(SpeedEff.Value, HmiConfig.MathRound);
+                }
+                if (QualityEff.HasValue) {
+                    QualityEff = (float)Math.Round(QualityEff.Value, HmiConfig.MathRound);
+                }
             }
         }
     }

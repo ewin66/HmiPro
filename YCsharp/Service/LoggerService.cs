@@ -60,6 +60,7 @@ namespace YCsharp.Service {
         /// <param name="message">输出内容</param>
         /// <param name="outFile">是否输出到温度，默认是</param>
         /// <param name="consoleColor">Console输出的颜色，默认白色</param>
+        /// <param name="outMinGapSec">日志打印最小时间间隔秒数</param>
         public void Info(string message, bool outFile = true, ConsoleColor consoleColor = ConsoleColor.White, int outMinGapSec = 0) {
             var lineNum = YUtil.GetCurCodeLineNum(2);
             Console.ForegroundColor = consoleColor;
@@ -73,6 +74,7 @@ namespace YCsharp.Service {
         /// <param name="location">位置标识</param>
         /// <param name="message">输出内容</param>
         /// <param name="outFile">是否输出到文件</param>
+        /// <param name="outMinGapSec">日志打印最小时间间隔秒数</param>
         public void Info(string location, string message, bool outFile, int outMinGapSec = 0) {
             var content = createLogContent(location, message, "info");
             consoleOut(content, outMinGapSec);
@@ -87,6 +89,7 @@ namespace YCsharp.Service {
         /// <param name="message"></param>
         /// <param name="outFile"></param>
         /// <param name="consoleColor"></param>
+        /// <param name="outMinGapSec">日志打印最小时间间隔秒数</param>
         public void Notify(string message, bool outFile = true, ConsoleColor consoleColor = ConsoleColor.White, int outMinGapSec = 0) {
             var lineNum = YUtil.GetCurCodeLineNum(2);
             Console.ForegroundColor = consoleColor;
@@ -100,6 +103,7 @@ namespace YCsharp.Service {
         /// <param name="location"></param>
         /// <param name="message"></param>
         /// <param name="outFile"></param>
+        /// <param name="outMinGapSec">日志打印最小时间间隔秒数</param>
         public void Notify(string location, string message, bool outFile, int outMinGapSec = 0) {
             var content = createLogContent(location, message, "notify");
             consoleOut(content, outMinGapSec);
@@ -131,6 +135,7 @@ namespace YCsharp.Service {
         /// </summary>
         /// <param name="message"></param>
         /// <param name="e"></param>
+        /// <param name="outMinGapSec">日志打印最小时间间隔秒数</param>
         public void Error(string message, Exception e, int outMinGapSec = 0) {
             var lineNum = YUtil.GetCurCodeLineNum(2);
             Error(DefaultLocation + $"[{lineNum}]行", $"{message} 原因：{e}", outMinGapSec);
@@ -139,6 +144,7 @@ namespace YCsharp.Service {
         /// 常用api
         /// </summary>
         /// <param name="message"></param>
+        /// <param name="outMinGapSec">日志打印最小时间间隔秒数</param>
         public void Error(string message, int outMinGapSec = 0) {
             var lineNum = YUtil.GetCurCodeLineNum(2);
             Error(DefaultLocation + $"[{lineNum}]行", message, outMinGapSec);
@@ -149,6 +155,7 @@ namespace YCsharp.Service {
         /// </summary>
         /// <param name="message"></param>
         /// <param name="color"></param>
+        /// <param name="outMinGapSec">日志打印最小时间间隔秒数</param>
         public void Debug(string message, ConsoleColor color = ConsoleColor.Green, int outMinGapSec = 0) {
             var content = createLogContent(DefaultLocation, message, "debug");
             Console.ForegroundColor = color;
@@ -161,12 +168,13 @@ namespace YCsharp.Service {
         /// </summary>
         /// <param name="location"></param>
         /// <param name="message"></param>
-        public void Warn(string location, string message, int fileOutMinGapSec = 0) {
-            Warn(location, message, true, fileOutMinGapSec);
+        /// <param name="outMinGapSec">日志打印最小时间间隔秒数</param>
+        public void Warn(string location, string message, int outMinGapSec = 0) {
+            Warn(location, message, true, outMinGapSec);
         }
 
-        public void Warn(string message, bool outFile, int fileOutMinGapSec = 0) {
-            Warn(DefaultLocation, message, outFile, fileOutMinGapSec);
+        public void Warn(string message, bool outFile, int outMinGapSec = 0) {
+            Warn(DefaultLocation, message, outFile, outMinGapSec);
         }
 
         public void Warn(string location, string message, bool outFile, int outMinGapSec = 0) {
@@ -191,6 +199,7 @@ namespace YCsharp.Service {
         /// 控制台输出
         /// </summary>
         /// <param name="content"></param>
+        /// <param name="outMinGapSec">日志打印最小时间间隔秒数</param>
         void consoleOut(string content, int outMinGapSec) {
             var key = content.Split(new string[] { "信息：" }, StringSplitOptions.None)[1];
             if (!lastConsoleTimeDict.ContainsKey(key)) {
@@ -212,14 +221,14 @@ namespace YCsharp.Service {
         /// </summary> 
         /// <param name="content"></param>
         /// <param name="mark"></param>
-        /// <param name="fileOutMinGapSec">上次记录与此次记录时间差大于该间隙才能输出到文件</param>
-        void fileOut(string content, string mark, int fileOutMinGapSec = 0) {
+        /// <param name="outMinGapSec">上次记录与此次记录时间差大于该间隙才能输出到文件</param>
+        void fileOut(string content, string mark, int outMinGapSec = 0) {
             //var key = content + mark;
             var key = content.Split(new string[] { "信息：" }, StringSplitOptions.None)[1];
             if (!lastSaveFileTimeDict.ContainsKey(key)) {
                 lastSaveFileTimeDict[key] = DateTime.MinValue;
             }
-            if ((DateTime.Now - lastSaveFileTimeDict[key]).TotalSeconds < fileOutMinGapSec && fileOutMinGapSec > 0) {
+            if ((DateTime.Now - lastSaveFileTimeDict[key]).TotalSeconds < outMinGapSec && outMinGapSec > 0) {
                 return;
             }
             lastSaveFileTimeDict[key] = DateTime.Now;

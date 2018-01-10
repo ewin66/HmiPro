@@ -57,12 +57,40 @@ namespace HmiPro.Redux.Cores {
             }
             actionExecDict[AlarmActions.OPEN_ALARM_LIGHTS] = doOpenAlarmLights;
             actionExecDict[AlarmActions.CLOSE_ALARM_LIGHTS] = doCloseAlarmLights;
+            actionExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
+
             App.Store.Subscribe((state, action) => {
                 if (actionExecDict.TryGetValue(state.Type, out var exec)) {
                     exec(state, action);
                 }
             });
 
+        }
+
+        /// <summary>
+        /// 更新参数界面上面的Oee显示
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenOeeUpdated(AppState state, IAction action) {
+            var oeeAction = (OeeActions.UpdateOeePartialValue)action;
+            var onlineDict = OnlineCpmDict[oeeAction.MachineCode];
+            if (oeeAction.TimeEff.HasValue) {
+                onlineDict[DefinedParamCode.OeeTime].Value = oeeAction.TimeEff.Value;
+                onlineDict[DefinedParamCode.OeeTime].ValueType = SmParamType.Signal;
+            }
+            if (oeeAction.SpeedEff.HasValue) {
+                onlineDict[DefinedParamCode.OeeSpeed].Value = oeeAction.SpeedEff.Value;
+                onlineDict[DefinedParamCode.OeeSpeed].ValueType = SmParamType.Signal;
+            }
+            if (oeeAction.QualityEff.HasValue) {
+                onlineDict[DefinedParamCode.OeeQuality].Value = oeeAction.QualityEff;
+                onlineDict[DefinedParamCode.OeeQuality].ValueType = SmParamType.Signal;
+            }
+            if (oeeAction.Oee.HasValue) {
+                onlineDict[DefinedParamCode.Oee].Value = oeeAction.Oee;
+                onlineDict[DefinedParamCode.Oee].ValueType = SmParamType.Signal;
+            }
         }
 
         /// <summary>
