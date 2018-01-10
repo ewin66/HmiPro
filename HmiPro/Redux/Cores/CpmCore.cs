@@ -148,6 +148,7 @@ namespace HmiPro.Redux.Cores {
             var cpmsRelate = new List<Cpm>();
             var cpms = new List<Cpm>();
             IDictionary<int, Cpm> updatedCpmsDiffDict = new Dictionary<int, Cpm>();
+            var setting = GlobalConfig.MachineSettingDict[machineCode];
             //简洁算法计算出来的参数
             cpmsDirect?.ForEach(cpm => {
                 //普通浮点参数
@@ -158,15 +159,13 @@ namespace HmiPro.Redux.Cores {
                     cpmsRelate.AddRange(relateCpms);
                     //Rfid卡
                 } else if (cpm.ValueType == SmParamType.StrRfid) {
-                    if (MachineConfig.MachineDict[machineCode].CodeToLogicDict.TryGetValue(cpm.Code, out var logic)) {
-                        if (logic == CpmInfoLogic.StartRfid) {
-                            App.Store.Dispatch(new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
-                                DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.StartAxis));
-                        } else if (logic == CpmInfoLogic.EndRfid) {
-                            App.Store.Dispatch(new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
-                                DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.EndAxis));
+                    if (setting.StartRfids.Contains(cpm.Name)) {
+                        App.Store.Dispatch(new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
+                            DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.StartAxis));
+                    } else if (setting.EndRfids.Contains(cpm.Name)) {
+                        App.Store.Dispatch(new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
+                            DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.EndAxis));
 
-                        }
                     }
                     //485通讯状态
                 } else if (cpm.ValueType == SmParamType.SingleComStatus) {
@@ -246,38 +245,6 @@ namespace HmiPro.Redux.Cores {
                     }
                 }
             }
-        }
-
-        [Obsolete("请使用 dispatchDiffLogicSetting")]
-        private void dispatchDiffLogic(string machineCode, List<Cpm> diffCpms) {
-            //记米发生变化
-            dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.NoteMeter,
-                (cpm) => { App.Store.Dispatch(new CpmActions.NoteMeterDiffAccept(machineCode, (float)cpm.Value)); });
-            //火花值发生变化
-            dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.Spark,
-                (cpm) => { App.Store.Dispatch(new CpmActions.SparkDiffAccept(machineCode, cpm.GetFloatVal())); });
-            //速度发生变化
-            dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.OeeSpeed, cpm => {
-                App.Store.Dispatch(new CpmActions.StateSpeedDiffAccpet(machineCode, cpm.GetFloatVal()));
-                //速度变化为0的事件
-                if (cpm.GetFloatVal() == 0) {
-                    App.Store.Dispatch(new CpmActions.StateSpeedDiffZeroAccept(machineCode));
-                }
-            });
-        }
-
-        [Obsolete("请使用DispatchLogicSetting")]
-        private void dispatchLogic(string machineCode, List<Cpm> cpms) {
-            //不断更新记米值
-            dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.NoteMeter,
-                (cpm) => { App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, (float)cpm.Value)); });
-            //不断的更新速度
-            //主要是为了计算平均速度
-            dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.OeeSpeed,
-                cpm => { App.Store.Dispatch(new CpmActions.StateSpeedAccept(machineCode, (float)cpm.Value)); });
-            //更新od值
-            dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.Od,
-                cpm => { App.Store.Dispatch(new CpmActions.OdAccept(machineCode, cpm.GetFloatVal())); });
         }
 
         private void dispatchLogicSetting(string machineCode, List<Cpm> cpms) {
@@ -371,24 +338,7 @@ namespace HmiPro.Redux.Cores {
             });
         }
 
-        /// <summary>
-        /// 派遣逻辑参数相关指令
-        /// </summary>
-        void dispatchLogicCpm(string machineCode, List<Cpm> cpms, CpmInfoLogic logic, Action<Cpm> dispatch) {
-            cpms?.ForEach(cpm => {
-                if (MachineConfig.MachineDict[machineCode].CodeToLogicDict.TryGetValue(cpm.Code, out var logicCpm)) {
-                    if (cpm.ValueType == SmParamType.Signal && cpm.Value != null) {
-                        if (logicCpm == logic) {
-                            dispatch(cpm);
-                        }
-                    } else {
-                        Logger.Debug($"参数 {cpm.Name} 的值不是浮点，类型为 {cpm.ValueType} 值为：{cpm.Value}", ConsoleColor.Red);
-                    }
-                }
-            });
-        }
-
-        /// <summary>
+              /// <summary>
         /// 更新需要算法计算的参数，并返回转换后的集合
         /// </summary>
         /// <returns></returns>

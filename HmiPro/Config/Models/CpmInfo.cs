@@ -15,7 +15,6 @@ namespace HmiPro.Config.Models {
     /// <author>ychost</author>
     /// </summary>
     public class CpmInfo {
-        public CpmInfoLogic? Logic;
         public int Code;
         public string Name;
         public string Unit;
@@ -234,34 +233,6 @@ namespace HmiPro.Config.Models {
 
     }
 
-    [Obsolete]
-    public enum CpmInfoLogic {
-        //速度导数，只要有速度，则这个存在
-        //非配置类型
-        SpeedDerivative = -1,
-        SpeedStdDev = -2,
-        //默认
-        Default = 0,
-        //记米
-        NoteMeter = 1,
-        //计算Oee的速度
-        OeeSpeed = 2,
-        //Od值
-        Od = 3,
-        //放线
-        StartRfid = 4,
-        //收线
-        EndRfid = 5,
-        //指纹
-        Fingerprint = 6,
-        //火花报警
-        Spark = 7,
-        //Plc设定的最大速度
-        MaxSpeedPlc = 8,
-        //可判断机台开停机状态
-        StateSpeed = 9
-    }
-
     public enum CpmInfoMethodName {
 
         //默认值
@@ -347,8 +318,6 @@ namespace HmiPro.Config.Models {
                     //单位
                     cpmInfo.Unit = cpmStr.Unit;
 
-                    //逻辑类型
-                    cpmInfo.Logic = string.IsNullOrEmpty(cpmStr.Logic) ? default(CpmInfoLogic?) : (CpmInfoLogic)int.Parse(cpmStr.Logic);
                     //算法
                     cpmInfo.MethodName = string.IsNullOrEmpty(cpmStr.MethodName) ? default(CpmInfoMethodName?) : (CpmInfoMethodName)int.Parse(cpmStr.MethodName);
                     //算法参数（字符串）
@@ -385,7 +354,6 @@ namespace HmiPro.Config.Models {
                 Unit = row["单位"].ToString(),
                 MethodName = row["算法"].ToString(),
                 MethodParams = row["算法参数"].ToString(),
-                Logic = row["逻辑类型"].ToString(),
             };
             cpmStr.PlcAlarm = row.GetValue("Plc报警配置");
             //兼容老版本配置
@@ -407,7 +375,6 @@ namespace HmiPro.Config.Models {
             dt.Columns.Add("单位");
             dt.Columns.Add("算法参数");
             dt.Columns.Add("算法");
-            dt.Columns.Add("逻辑类型");
             return dt;
         }
     }
@@ -421,7 +388,6 @@ namespace HmiPro.Config.Models {
         public string Unit;
         public string MethodName;
         public string MethodParams;
-        public string Logic;
         public string MqAlarm;
         public string PlcAlarm;
     }

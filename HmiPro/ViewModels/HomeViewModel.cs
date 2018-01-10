@@ -182,24 +182,6 @@ namespace HmiPro.ViewModels {
         /// 检查配置
         /// </summary>
         void checkConfig() {
-            foreach (var pair in MachineConfig.MachineDict) {
-                var machineCode = pair.Key;
-                var machineConfig = pair.Value;
-                if (!machineConfig.LogicToCpmDict.ContainsKey(CpmInfoLogic.OeeSpeed)) {
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = "程序配置有误",
-                        Content = $"机台 {machineCode} 未配置速度逻辑 {(int)CpmInfoLogic.OeeSpeed}",
-                        Level = NotifyLevel.Error
-                    }));
-                }
-                if (!machineConfig.LogicToCpmDict.ContainsKey(CpmInfoLogic.NoteMeter)) {
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = "程序配置有误",
-                        Content = $"机台 {machineCode} 未配置记米逻辑 {(int)CpmInfoLogic.NoteMeter}",
-                        Level = NotifyLevel.Error
-                    }));
-                }
-            }
         }
 
 

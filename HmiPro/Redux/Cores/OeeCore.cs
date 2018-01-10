@@ -64,10 +64,6 @@ namespace HmiPro.Redux.Cores {
         /// <returns></returns>
         public float? CalcOeeTimeEff(string machineCode, IList<MachineState> machineStates) {
             float? timeEff = null;
-            if (!MachineConfig.MachineDict[machineCode].LogicToCpmDict.ContainsKey(CpmInfoLogic.OeeSpeed)) {
-                Logger.Debug($"机台 {machineCode} 未配置速度逻辑，无法判断开停机，无法计算 Oee - 时间效率", ConsoleColor.Red);
-                return null;
-            }
             float currentSpeed = 0;
             currentSpeed = App.Store.GetState().CpmState.StateSpeedDict[machineCode];
             //删除上一班的机台状态数据
