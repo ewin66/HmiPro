@@ -81,8 +81,8 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[AlarmActions.CHECK_CPM_BOM_ALARM] = doCheckCpmBomAlarm;
             actionExecDict[CpmActions.SPARK_DIFF_ACCEPT] = whenSparkDiffAccept;
             actionExecDict[DMesActions.START_SCH_TASK_AXIS] = doStartSchTaskAxis;
-            actionExecDict[CpmActions.SPEED_DIFF_ZERO_ACCEPT] = whenSpeedDiffZeroAccept;
-            actionExecDict[CpmActions.SPEED_ACCEPT] = whenSpeedAccept;
+            actionExecDict[CpmActions.STATE_SPEED_DIFF_ZERO_ACCEPT] = whenSpeedDiffZeroAccept;
+            actionExecDict[CpmActions.STATE_SPEED_ACCEPT] = whenSpeedAccept;
             actionExecDict[DMesActions.RFID_ACCPET] = doRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccept;
             actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
@@ -155,7 +155,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        void  whenCpmPlcAlarm(AppState state, IAction action) {
+        void whenCpmPlcAlarm(AppState state, IAction action) {
             var alarmAction = (AlarmActions.CpmPlcAlarmOccur)action;
             var meter = App.Store.GetState().CpmState.NoteMeterDict[alarmAction.MachineCode];
             //记米小于等于0则不产生报警
@@ -201,7 +201,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void whenSpeedAccept(AppState state, IAction action) {
-            var speedAction = (CpmActions.SpeedAccept)action;
+            var speedAction = (CpmActions.StateSpeedAccept)action;
             var machineCode = speedAction.MachineCode;
             var speed = speedAction.Speed;
             lock (SchTaskDoingLocks[machineCode]) {
@@ -220,7 +220,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void whenSpeedDiffZeroAccept(AppState state, IAction action) {
-            var speedAction = (CpmActions.SpeedDiffZeroAccept)action;
+            var speedAction = (CpmActions.StateSpeedDiffZeroAccept)action;
             var machineCode = speedAction.MachineCode;
             lock (SchTaskDoingDict[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];

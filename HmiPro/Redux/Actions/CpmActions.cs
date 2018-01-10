@@ -25,10 +25,11 @@ namespace HmiPro.Redux.Actions {
         public static readonly string STOP_SERVER_FAILED = "[Cpm] Stop Server Failed";
         public static readonly string NOTE_METER_DIFF_ACCEPT = "[Cpm] Note Meter Diff Accept";
         public static readonly string NOTE_METER_ACCEPT = "[Cpm] Note Meter Accpet";
-        public static readonly string SPEED_ACCEPT = "[Cpm] Speed Accept";
-        public static readonly string SPEED_DIFF_ACCEPT = "[Cpm] Speed Diff Accept";
+        public static readonly string STATE_SPEED_ACCEPT = "[Cpm] State Speed Accept";
+        public static readonly string STATE_SPEED_DIFF_ACCEPT = "[Cpm] State Speed Diff Accept";
+        public static readonly string OEE_SPEED_ACCEPT = "[Cpm] Oee Speed Accept";
         public static readonly string SPARK_DIFF_ACCEPT = "[Cpm] Spark Diff Accept";
-        public static readonly string SPEED_DIFF_ZERO_ACCEPT = "[Cpm] Speed Diff Zero Accept";
+        public static readonly string STATE_SPEED_DIFF_ZERO_ACCEPT = "[Cpm] State Speed Diff Zero Accept";
         public static readonly string OD_ACCPET = "[Cpm] Od Accept";
         //485串口状态更新
         //单节点状态
@@ -52,11 +53,11 @@ namespace HmiPro.Redux.Actions {
         public struct OdAccept : IAction {
             public string Type() => OD_ACCPET;
             public string MachineCode;
-            public Cpm OdCpm;
+            public float Od;
 
-            public OdAccept(string machineCode, Cpm odCpm) {
+            public OdAccept(string machineCode, float od) {
                 MachineCode = machineCode;
-                OdCpm = odCpm;
+                Od = od;
             }
         }
 
@@ -217,34 +218,45 @@ namespace HmiPro.Redux.Actions {
             }
         }
 
-        public struct SpeedAccept : IAction {
-            public string Type() => SPEED_ACCEPT;
+        public struct StateSpeedAccept : IAction {
+            public string Type() => STATE_SPEED_ACCEPT;
             public string MachineCode;
             public float Speed;
 
-            public SpeedAccept(string machineCode, float speed) {
+            public StateSpeedAccept(string machineCode, float speed) {
                 MachineCode = machineCode;
                 Speed = speed;
             }
         }
 
-        public struct SpeedDiffAccpet : IAction {
-            public string Type() => SPEED_DIFF_ACCEPT;
+        public struct StateSpeedDiffAccpet : IAction {
+            public string Type() => STATE_SPEED_DIFF_ACCEPT;
             public float Speed;
             public string MachineCode;
 
-            public SpeedDiffAccpet(string machineCode, float speed) {
+            public StateSpeedDiffAccpet(string machineCode, float speed) {
                 MachineCode = machineCode;
                 Speed = speed;
             }
         }
 
-        public struct SpeedDiffZeroAccept : IAction {
-            public string Type() => SPEED_DIFF_ZERO_ACCEPT;
+        public struct StateSpeedDiffZeroAccept : IAction {
+            public string Type() => STATE_SPEED_DIFF_ZERO_ACCEPT;
             public string MachineCode;
 
-            public SpeedDiffZeroAccept(string machineCode) {
+            public StateSpeedDiffZeroAccept(string machineCode) {
                 MachineCode = machineCode;
+            }
+        }
+
+        public struct OeeSpeedAccept : IAction {
+            public string Type() => OEE_SPEED_ACCEPT;
+            public string MachineCode;
+            public float Speed;
+
+            public OeeSpeedAccept(string machineCode, float speed) {
+                MachineCode = machineCode;
+                Speed = speed;
             }
         }
     }

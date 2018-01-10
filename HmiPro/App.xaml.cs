@@ -58,7 +58,7 @@ namespace HmiPro {
             CpmActions.CPMS_UPDATED_ALL,
             CpmActions.CPMS_UPDATED_DIFF,
             CpmActions.CPMS_IP_ACTIVED,
-            CpmActions.SPEED_ACCEPT,
+            CpmActions.STATE_SPEED_ACCEPT,
             CpmActions.OD_ACCPET,
             CpmActions.NOTE_METER_ACCEPT,
             DbActions.UPLOAD_CPMS_INFLUXDB,

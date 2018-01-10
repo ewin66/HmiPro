@@ -65,11 +65,11 @@ namespace HmiPro.Redux.Reducers {
             /// <summary>
             /// 保存机台出线速度
             /// </summary>
-            public IDictionary<string, float> SpeedDict;
+            public IDictionary<string, float> StateSpeedDict;
             /// <summary>
             /// 保存当前速度的前一个速度
             /// </summary>
-            public IDictionary<string, float> PreSpeedDict;
+            public IDictionary<string, float> PreStateSpeedDict;
             /// <summary>
             /// 机台编码
             /// </summary>
@@ -94,8 +94,8 @@ namespace HmiPro.Redux.Reducers {
                 state.MachineStateDict = new ConcurrentDictionary<string, ObservableCollection<MachineState>>();
                 state.MachineDebugStateDict = new Dictionary<string, ObservableCollection<MachineDebugState>>();
                 state.Com485StatusDict = new ConcurrentDictionary<string, Com485SingleStatus>();
-                state.SpeedDict = new ConcurrentDictionary<string, float>();
-                state.PreSpeedDict = new Dictionary<string, float>();
+                state.StateSpeedDict = new ConcurrentDictionary<string, float>();
+                state.PreStateSpeedDict = new Dictionary<string, float>();
                 state.Logger = LoggerHelper.CreateLogger(typeof(CpmReducer).ToString());
                 foreach (var pair in MachineConfig.MachineDict) {
                     var machineCode = pair.Key;
@@ -113,16 +113,17 @@ namespace HmiPro.Redux.Reducers {
                     }
                     state.OnlineCpmsDict[machineCode] = cpmsDict;
                     state.MachineStateDict[machineCode] = new ObservableCollection<MachineState>();
-                    state.SpeedDict[machineCode] = 0f;
+                    state.StateSpeedDict[machineCode] = 0f;
                     state.NoteMeterDict[machineCode] = 0f;
-                    state.PreSpeedDict[machineCode] = 0f;
+                    state.PreStateSpeedDict[machineCode] = 0f;
                     state.SparkDiffDict[machineCode] = 0f;
                     State.OeeLocks[machineCode] = new object();
                 }
                 //初始化所有ip的通讯状态为未知
                 foreach (var pair in MachineConfig.IpToMachineCodeDict) {
                     var ip = pair.Key;
-                    state.Com485StatusDict[ip] = new Com485SingleStatus() { Status = SmSingleStatus.Ok, Time = DateTime.Now, Ip = ip };
+                    state.Com485StatusDict[ip] =
+                        new Com485SingleStatus() { Status = SmSingleStatus.Ok, Time = DateTime.Now, Ip = ip };
                 }
                 //一分钟ping一次模块的ip，更新其离线状态
                 updateCom485Interval(state, 60);
@@ -134,8 +135,8 @@ namespace HmiPro.Redux.Reducers {
                 //则认为该活动Ip的状态为正常
                 //因为在传送Error状态的时候Ip也会Actived
                 if (state.Com485StatusDict[action.Ip].Status != SmSingleStatus.Error
-                || (state.Com485StatusDict[action.Ip].Status == SmSingleStatus.Error
-                    && (DateTime.Now - state.Com485StatusDict[action.Ip].Time).TotalSeconds > 60
+                    || (state.Com485StatusDict[action.Ip].Status == SmSingleStatus.Error
+                        && (DateTime.Now - state.Com485StatusDict[action.Ip].Time).TotalSeconds > 60
                     )) {
                     state.Com485StatusDict[action.Ip].Status = SmSingleStatus.Ok;
                 }
@@ -157,9 +158,9 @@ namespace HmiPro.Redux.Reducers {
                 state.MachineCode = action.MachineCode;
                 state.SparkDiffDict[action.MachineCode] = action.Spark;
                 return state;
-            }).When<CpmActions.SpeedAccept>((state, action) =>
-                //更新机台状态
-                updateMachineState(action, state)
+            }).When<CpmActions.StateSpeedAccept>((state, action) =>
+                        //更新机台状态
+                        updateMachineState(action, state)
             //更新ip的485状态
             ).When<CpmActions.Com485SingleStatusAccept>((state, action) => {
                 state.Com485StatusDict[action.Ip].Status = action.Status;
@@ -196,7 +197,7 @@ namespace HmiPro.Redux.Reducers {
         /// <param name="action"></param>
         /// <param name="state"></param>
         /// <returns></returns>
-        private static State updateMachineState(CpmActions.SpeedAccept action, State state) {
+        private static State updateMachineState(CpmActions.StateSpeedAccept action, State state) {
             state.MachineCode = action.MachineCode;
             var currentSpeed = action.Speed;
             var lastMachineState = state.MachineStateDict[action.MachineCode].LastOrDefault();
@@ -207,22 +208,22 @@ namespace HmiPro.Redux.Reducers {
             //开机阶段，上一个速度为0 ，此时的速度大于0
             MachineState newMachineState = null;
             var machineCode = action.MachineCode;
-            state.SpeedDict[machineCode] = currentSpeed;
-            if (currentSpeed > 0 && state.PreSpeedDict[machineCode] == 0) {
+            state.StateSpeedDict[machineCode] = currentSpeed;
+            if (currentSpeed > 0 && state.PreStateSpeedDict[machineCode] == 0) {
                 newMachineState = new MachineState() {
                     StatePoint = MachineState.State.Start,
                     Time = DateTime.Now
                 };
             }
             //关机阶段，上一个速度大于0，此时速度等于0
-            else if (currentSpeed == 0 && state.PreSpeedDict[machineCode] > 0) {
+            else if (currentSpeed == 0 && state.PreStateSpeedDict[machineCode] > 0) {
                 newMachineState = new MachineState() {
                     StatePoint = MachineState.State.Stop,
                     Time = DateTime.Now
                 };
             }
             //赋值前一个速度
-            state.PreSpeedDict[action.MachineCode] = action.Speed;
+            state.PreStateSpeedDict[action.MachineCode] = action.Speed;
             if (newMachineState == null) {
                 return state;
             }

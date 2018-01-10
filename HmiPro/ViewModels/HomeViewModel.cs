@@ -53,8 +53,8 @@ namespace HmiPro.ViewModels {
                     App.Store.Dispatch(new SysActions.ShowSettingView());
                 } else {
                     try {
-                        //MachineConfig.Load(setting.MachineXlsPath);
-                        MachineConfig.LoadFromGlobal();
+                        MachineConfig.Load(setting.MachineXlsPath);
+                        //MachineConfig.LoadFromGlobal();
 
                         checkConfig();
                         afterConfigLoaded();

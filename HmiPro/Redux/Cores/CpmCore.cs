@@ -127,7 +127,7 @@ namespace HmiPro.Redux.Cores {
                 Logger.Debug($"ip {ip} 未注册", ConsoleColor.Red);
                 return;
             }
-            App.Store.Dispatch(new CpmActions.CpmIpActivted(code,ip, DateTime.Now));
+            App.Store.Dispatch(new CpmActions.CpmIpActivted(code, ip, DateTime.Now));
             smModels?.ForEach(sm => {
                 //处理参数包
                 if (sm.PackageType == SmPackageType.ParamPackage) {
@@ -210,45 +210,95 @@ namespace HmiPro.Redux.Cores {
             if (cpms.Count > 0) {
                 //派发所有接受到的参数
                 App.Store.Dispatch(new CpmActions.CpmUpdatedAll(machineCode, cpms));
-                //不断更新记米值
-                dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.NoteMeter, (cpm) => {
-                    App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, (float)cpm.Value));
-                });
-                //不断的更新速度
-                //主要是为了计算平均速度
-                dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.OeeSpeed, cpm => {
-                    App.Store.Dispatch(new CpmActions.SpeedAccept(machineCode, (float)cpm.Value));
-                });
-                //更新od值
-                dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.Od, cpm => {
-                    App.Store.Dispatch(new CpmActions.OdAccept(machineCode, cpm));
-                });
+                dispatchLogicSetting(machineCode, cpms);
+
             }
             if (updatedCpmsDiffDict.Count > 0) {
                 var diffCpms = updatedCpmsDiffDict.Values.ToList();
                 //所有变化的参数
                 App.Store.Dispatch(new CpmActions.CpmUpdateDiff(machineCode, updatedCpmsDiffDict));
-                //记米发生变化
-                dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.NoteMeter, (cpm) => {
-                    App.Store.Dispatch(new CpmActions.NoteMeterDiffAccept(machineCode, (float)cpm.Value));
-                });
-                //火花值发生变化
-                dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.Spark, (cpm) => {
-                    App.Store.Dispatch(new CpmActions.SparkDiffAccept(machineCode, cpm.GetFloatVal()));
-                });
-                //速度发生变化
-                dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.OeeSpeed, cpm => {
-                    App.Store.Dispatch(new CpmActions.SpeedDiffAccpet(machineCode, cpm.GetFloatVal()));
-                    //速度变化为0的事件
-                    if ((int)cpm.GetFloatVal() == 0) {
-                        App.Store.Dispatch(new CpmActions.SpeedDiffZeroAccept(machineCode));
-                    }
-                });
+                dispatchDiffLogicSetting(machineCode, diffCpms);
+
             }
             //检查Mq的Bom表数据报警
             dispatchCheckBomAlarm(machineCode, cpms);
             //检查Plc上下限报警
             dispatchCheckPlcAlarm(machineCode, cpms);
+        }
+
+        private void dispatchDiffLogicSetting(string machineCode, List<Cpm> diffCpms) {
+            var setting = GlobalConfig.MachineSettingDict[machineCode];
+            foreach (var cpm in diffCpms) {
+                if (cpm.ValueType != SmParamType.Signal) {
+                    continue;
+                }
+                if (cpm.Name == setting.NoteMeter) {
+                    App.Store.Dispatch(new CpmActions.NoteMeterDiffAccept(machineCode, cpm.GetFloatVal()));
+                }
+                if (cpm.Name == setting.Spark) {
+                    App.Store.Dispatch(new CpmActions.SparkDiffAccept(machineCode, cpm.GetFloatVal()));
+                }
+                if (cpm.Name == setting.StateSpeed) {
+                    App.Store.Dispatch(new CpmActions.StateSpeedDiffAccpet(machineCode, cpm.GetFloatVal()));
+                    //速度变化为0的事件
+                    if (cpm.GetFloatVal() == 0) {
+                        App.Store.Dispatch(new CpmActions.StateSpeedDiffZeroAccept(machineCode));
+                    }
+                }
+            }
+        }
+
+        [Obsolete("请使用 dispatchDiffLogicSetting")]
+        private void dispatchDiffLogic(string machineCode, List<Cpm> diffCpms) {
+            //记米发生变化
+            dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.NoteMeter,
+                (cpm) => { App.Store.Dispatch(new CpmActions.NoteMeterDiffAccept(machineCode, (float)cpm.Value)); });
+            //火花值发生变化
+            dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.Spark,
+                (cpm) => { App.Store.Dispatch(new CpmActions.SparkDiffAccept(machineCode, cpm.GetFloatVal())); });
+            //速度发生变化
+            dispatchLogicCpm(machineCode, diffCpms, CpmInfoLogic.OeeSpeed, cpm => {
+                App.Store.Dispatch(new CpmActions.StateSpeedDiffAccpet(machineCode, cpm.GetFloatVal()));
+                //速度变化为0的事件
+                if (cpm.GetFloatVal() == 0) {
+                    App.Store.Dispatch(new CpmActions.StateSpeedDiffZeroAccept(machineCode));
+                }
+            });
+        }
+
+        [Obsolete("请使用DispatchLogicSetting")]
+        private void dispatchLogic(string machineCode, List<Cpm> cpms) {
+            //不断更新记米值
+            dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.NoteMeter,
+                (cpm) => { App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, (float)cpm.Value)); });
+            //不断的更新速度
+            //主要是为了计算平均速度
+            dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.OeeSpeed,
+                cpm => { App.Store.Dispatch(new CpmActions.StateSpeedAccept(machineCode, (float)cpm.Value)); });
+            //更新od值
+            dispatchLogicCpm(machineCode, cpms, CpmInfoLogic.Od,
+                cpm => { App.Store.Dispatch(new CpmActions.OdAccept(machineCode, cpm.GetFloatVal())); });
+        }
+
+        private void dispatchLogicSetting(string machineCode, List<Cpm> cpms) {
+            var setting = GlobalConfig.MachineSettingDict[machineCode];
+            foreach (var cpm in cpms) {
+                if (cpm.ValueType != SmParamType.Signal) {
+                    continue;
+                }
+                if (setting.OeeSpeed == cpm.Name) {
+                    App.Store.Dispatch(new CpmActions.OeeSpeedAccept(machineCode, cpm.GetFloatVal()));
+                }
+                if (setting.NoteMeter == cpm.Name) {
+                    App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, cpm.GetFloatVal()));
+                }
+                if (setting.StateSpeed == cpm.Name) {
+                    App.Store.Dispatch(new CpmActions.StateSpeedAccept(machineCode, cpm.GetFloatVal()));
+                }
+                if (setting.Od == cpm.Name) {
+                    App.Store.Dispatch(new CpmActions.OdAccept(machineCode, cpm.GetFloatVal()));
+                }
+            }
         }
 
 

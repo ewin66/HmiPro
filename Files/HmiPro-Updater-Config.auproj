@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<AuProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<AuProject xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <UpdateInfo>
     <AppName>HmiPro</AppName>
-    <AppVersion>3.0.919.6578</AppVersion>
+    <AppVersion>3.1.1079.6584</AppVersion>
     <FileExecuteBefore />
     <FileExecuteAfter>HmiPro.exe</FileExecuteAfter>
     <ExecuteTimeout>0</ExecuteTimeout>
@@ -916,7 +916,7 @@
     </ProjectItem>
   </Files>
   <ApplicationDirectory>..\HmiPro\bin\Debug</ApplicationDirectory>
-  <DestinationDirectory>..\..\tmp\hmipro-updater</DestinationDirectory>
+  <DestinationDirectory>Z:\ks-hmi-wpf\HmiPro-Updater</DestinationDirectory>
   <CreateCompatiblePackage>true</CreateCompatiblePackage>
   <CompressPackage>true</CompressPackage>
   <EnableIncreaseUpdate>true</EnableIncreaseUpdate>

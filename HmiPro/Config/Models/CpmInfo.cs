@@ -234,6 +234,7 @@ namespace HmiPro.Config.Models {
 
     }
 
+    [Obsolete]
     public enum CpmInfoLogic {
         //速度导数，只要有速度，则这个存在
         //非配置类型
@@ -257,10 +258,8 @@ namespace HmiPro.Config.Models {
         Spark = 7,
         //Plc设定的最大速度
         MaxSpeedPlc = 8,
-        //Plc设置最大直径
-        MaxOdPlc = 9,
-        //Plc设置最小直径
-        MinOdPlc = 10
+        //可判断机台开停机状态
+        StateSpeed = 9
     }
 
     public enum CpmInfoMethodName {

@@ -38,9 +38,10 @@ namespace HmiPro.Config.Models {
         public IDictionary<int, CpmInfo> CodeToMqBomAlarmCpmDict = new Dictionary<int, CpmInfo>();
 
         public IDictionary<int, PlcAlarmCpm> CodeToPlcAlarmDict = new Dictionary<int, PlcAlarmCpm>();
-        //设定的最大速度
-        public float? MaxOeeSpeedSetting { get; set; }
-        public int? MaxOeeSpeedCpmCode { get; set; }
+        /// <summary>
+        /// 参数名称：编码
+        /// </summary>
+        public IDictionary<string, int> CpmNameToCodeDict = new Dictionary<string, int>();
 
 
         /// <summary>
@@ -49,29 +50,9 @@ namespace HmiPro.Config.Models {
         /// <param name="path"></param>
         /// <param name="sheetName"></param>
         public void InitCodeAndIp(string path, string sheetName) {
-            var propDict = xlsToMachine(path, sheetName);
-            CpmIps = propDict["CpmIps"].ToString().Split('|');
-            //默认未知
-            OeeSpeedType = OeeActions.CalcOeeSpeedType.Unknown;
-            if (GlobalConfig.MachineOeeSettingDict.TryGetValue(Code, out var oeeSetting)) {
-                if (!string.IsNullOrEmpty(oeeSetting.OeeSpeedCpmName)) {
-                    var oeeCpm = CodeToAllCpmDict.Values.First(v => v.Name == oeeSetting.OeeSpeedCpmName);
-                    LogicToCpmDict[CpmInfoLogic.OeeSpeed] = oeeCpm;
-                    CodeToLogicDict[oeeCpm.Code] = CpmInfoLogic.OeeSpeed;
-                }
-                if (oeeSetting.OeeSpeedMax1Setting.HasValue) {
-                    MaxOeeSpeedSetting = oeeSetting.OeeSpeedMax1Setting.Value;
-                    OeeSpeedType = OeeActions.CalcOeeSpeedType.MaxSpeedSetting;
-                } else if (!string.IsNullOrEmpty(oeeSetting.OeeSpeedMax2CpmName)) {
-                    var maxCpm = CodeToAllCpmDict.Values.First(v => v.Name == oeeSetting.OeeSpeedMax2CpmName);
-                    LogicToCpmDict[CpmInfoLogic.MaxSpeedPlc] = maxCpm;
-                    CodeToLogicDict[maxCpm.Code] = CpmInfoLogic.MaxSpeedPlc;
-                    OeeSpeedType = OeeActions.CalcOeeSpeedType.MaxSpeedPlc;
-                } else if (!string.IsNullOrEmpty(oeeSetting.OeeSpeedMax3MqKey)) {
-                    OeeSpeedType = OeeActions.CalcOeeSpeedType.MaxSpeedMq;
-                }
-            } 
-            Console.WriteLine($"机台 {Code} 计算Oee Spped Eff 的方式：{OeeSpeedType}");
+            //var propDict = xlsToMachine(path, sheetName);
+            //CpmIps = propDict["CpmIps"].ToString().Split('|');
+            //CpmIps = GlobalConfig.MachineSettingDict[Code].CpmModuleIps;
         }
 
         IDictionary<string, object> xlsToMachine(string xlsPath, string sheetName) {
@@ -95,6 +76,7 @@ namespace HmiPro.Config.Models {
             CpmLoader cpmLoader = new CpmLoader(path, sheetName);
             List<CpmInfo> cpms = cpmLoader.Load();
             cpms.ForEach(cpm => {
+                CpmNameToCodeDict[cpm.Name] = cpm.Code;
                 //所有参数
                 if (CodeToAllCpmDict.ContainsKey(cpm.Code)) {
                     throw new Exception($"参数编码 [{cpm.Code}] 重复了");

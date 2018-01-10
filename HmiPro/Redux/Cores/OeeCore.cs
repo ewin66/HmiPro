@@ -27,7 +27,7 @@ namespace HmiPro.Redux.Cores {
         public OeeCore() {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
-            actionExecDict[CpmActions.SPEED_ACCEPT] = whenSpeedAccept;
+            actionExecDict[CpmActions.OEE_SPEED_ACCEPT] = whenOeeSpeedAccept;
         }
 
         public void Init() {
@@ -42,9 +42,9 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        private void whenSpeedAccept(AppState state, IAction action) {
+        private void whenOeeSpeedAccept(AppState state, IAction action) {
             //每当速度变化则计算一次Oee
-            var oeeAction = (CpmActions.SpeedAccept)action;
+            var oeeAction = (CpmActions.OeeSpeedAccept)action;
             var machineCode = oeeAction.MachineCode;
             var machineStates = state.CpmState.MachineStateDict[machineCode];
             var timeEff = CalcOeeTimeEff(machineCode, machineStates);
@@ -69,7 +69,7 @@ namespace HmiPro.Redux.Cores {
                 return null;
             }
             float currentSpeed = 0;
-            currentSpeed = App.Store.GetState().CpmState.SpeedDict[machineCode];
+            currentSpeed = App.Store.GetState().CpmState.StateSpeedDict[machineCode];
             //删除上一班的机台状态数据
             var workTime = YUtil.GetKeystoneWorkTime();
             removeBeforeWorkTime(machineStates, workTime);
@@ -108,12 +108,13 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <returns></returns>
         public float? CalcOeeSpeedEff(string machineCode, OeeActions.CalcOeeSpeedType oeeSpeedType) {
+            var setting = GlobalConfig.MachineSettingDict[machineCode];
             if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedPlc) {
                 return CalcOeeSpeedEffByPlc(machineCode);
             } else if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedMq) {
                 return CalcOeeSpeedEffByMq(machineCode);
             } else if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedSetting) {
-                return CalcOeeSpeedEffBySetting(machineCode);
+                return CalcOeeSpeedEffBySetting(machineCode, float.Parse(setting.OeeSpeed));
             }
             return null;
         }
@@ -136,16 +137,8 @@ namespace HmiPro.Redux.Cores {
             return null;
         }
 
-        public float? CalcOeeSpeedEffBySetting(string machineCode) {
-            var maxSetting = MachineConfig.MachineDict[machineCode].MaxOeeSpeedSetting;
-            if (maxSetting.HasValue) {
-                if (maxSetting != 0) {
-                    return App.Store.GetState().CpmState.SpeedDict[machineCode] / maxSetting.Value;
-                } else {
-                    Logger.Error($"机台[{machineCode}] MaxSetting 为 0请检查");
-                }
-            }
-            return null;
+        public float? CalcOeeSpeedEffBySetting(string machineCode, float maxVal) {
+            return App.Store.GetState().CpmState.StateSpeedDict[machineCode] / maxVal;
         }
 
         /// <summary>
@@ -155,13 +148,14 @@ namespace HmiPro.Redux.Cores {
         /// <returns></returns>
         public float? CalcOeeSpeedEffByPlc(string machineCode) {
             float? speedEff = null;
-            var maxSpeedCode = MachineConfig.MachineDict[machineCode].LogicToCpmDict[CpmInfoLogic.MaxSpeedPlc].Code;
+            var setting = GlobalConfig.MachineSettingDict[machineCode];
+            var maxSpeedCode = MachineConfig.MachineDict[machineCode].CpmNameToCodeDict[setting.OeeSpeedMax.ToString()];
             var maxSpeedCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][maxSpeedCode];
             if (maxSpeedCpm.ValueType != SmParamType.Signal) {
                 Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率", 36000);
                 return null;
             }
-            var speedCode = MachineConfig.MachineDict[machineCode].LogicToCpmDict[CpmInfoLogic.OeeSpeed].Code;
+            var speedCode = MachineConfig.MachineDict[machineCode].CpmNameToCodeDict[setting.OeeSpeed];
             var speedCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][speedCode];
             if (speedCpm.ValueType != SmParamType.Signal) {
                 Logger.Error($"机台 {machineCode} 未采集到 {maxSpeedCpm.Name} 的值，将无法计算 Oee 速度效率", 36000);
@@ -169,7 +163,7 @@ namespace HmiPro.Redux.Cores {
             }
             var maxSpeed = (float)maxSpeedCpm.Value;
             var speed = (float)speedCpm.Value;
-            if ((int)maxSpeed == 0) {
+            if (maxSpeed == 0) {
                 App.Store.Dispatch(new SysNotificationMsg() {
                     Title = "无法计算 Oee-速度效率",
                     Content = $"机台 {machineCode} 的 {maxSpeedCpm.Name} ==0",

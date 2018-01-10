@@ -186,7 +186,11 @@ namespace HmiPro.Redux.Effects {
 
                         MqUploadCpms uCpms = new MqUploadCpms();
                         uCpms.machineCode = machineCode;
-                        uCpms.macSpeed = getState().CpmState.SpeedDict[machineCode];
+                        var setting = GlobalConfig.MachineSettingDict[machineCode];
+                        var cpmNameToCodeDict = MachineConfig.MachineDict[machineCode].CpmNameToCodeDict;
+                        if (getState().CpmState.OnlineCpmsDict[machineCode].TryGetValue(cpmNameToCodeDict[setting.MqNeedSpeed], out var speedCpm)) {
+                            uCpms.macSpeed = speedCpm.Value;
+                        }
                         uCpms.TimeEff = getState().OeeState.OeeDict[machineCode].TimeEff.ToString("0.00");
                         uCpms.SpeedEff = getState().OeeState.OeeDict[machineCode].SpeedEff.ToString("0.00");
                         uCpms.QualityEff = getState().OeeState.OeeDict[machineCode].QualityEff.ToString("0.00");

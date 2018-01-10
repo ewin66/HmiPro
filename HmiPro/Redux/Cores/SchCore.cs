@@ -52,20 +52,6 @@ namespace HmiPro.Redux.Cores {
             Schedule(() => {
                 App.Store.Dispatch(new SysActions.OpenScreen());
             }).ToRunEvery(1).Days().At(8, 0);
-
-            foreach (var pair in MachineConfig.MachineDict) {
-                var machine = pair.Value;
-                if (machine.OeeSpeedType == OeeActions.CalcOeeSpeedType.Unknown) {
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = $"机台 {machine.Code} 无法计算Oee-速度效率",
-                        Content = "请联系管理员配置 OeeSppedType"
-                    }));
-                }
-            }
-
-            //一分钟计算一次Oee
-            var interval = 1 * 60 * 1000;
-            //await App.Store.Dispatch(oeeEffects.StartCalcOeeTimer(new OeeActions.StartCalcOeeTimer(interval)));
             JobManager.Initialize(this);
         }
 

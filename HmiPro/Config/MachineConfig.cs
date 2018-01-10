@@ -42,7 +42,7 @@ namespace HmiPro.Config {
                 var machine = new Machine();
                 machine.Code = code;
                 machine.InitCpmDict(path, $"{code}_采集参数");
-                machine.InitCodeAndIp(path, $"{code}_机台属性");
+                machine.CpmIps = GlobalConfig.MachineSettingDict[code].CpmModuleIps;
                 MachineDict[code] = machine;
                 foreach (var ip in machine.CpmIps) {
                     IpToMachineCodeDict[ip] = code;
@@ -59,30 +59,26 @@ namespace HmiPro.Config {
         /// </summary>
         public static void LoadFromGlobal() {
             string configPath = null;
-
-            bool hasConfiged = false;
+            //命令行参数指定Hmi配置
             if (!string.IsNullOrEmpty(CmdOptions.GlobalOptions.HmiName)) {
                 configPath = YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" +
                                                    CmdOptions.GlobalOptions.HmiName + ".xls");
                 Console.WriteLine("指定配置Hmi：" + CmdOptions.GlobalOptions.HmiName);
-                hasConfiged = true;
+                //Global.xls中根据ip来指定Hmi配置
             } else {
-
                 var ips = YUtil.GetAllIps();
                 foreach (var ip in ips) {
                     if (GlobalConfig.IpToHmiDict.TryGetValue(ip, out var hmi)) {
                         configPath =
                             YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" + hmi +
                                                   ".xls");
-                        Load(configPath);
-                        hasConfiged = true;
                     }
                 }
             }
-            if (!hasConfiged) {
-                throw new Exception("未在Global中配置本机ip对应的Hmi");
+            if (string.IsNullOrEmpty(configPath)) {
+                throw new Exception($"本机ip{string.Join(",", YUtil.GetAllIps())}未在 Global.xls中配置");
             }
-
+            Load(configPath);
             Console.WriteLine("加载机台配置文件路径：-" + configPath);
         }
     }
