@@ -63,7 +63,5 @@ namespace HmiPro.Config {
         public string ExeType => Environment.Is64BitOperatingSystem ? "x64" : "x86";
         public string ExePath => AssetsFolder + "\\Exe\\";
         public string ExeNirCmd => ExePath + ExeType + "\\nircmd.exe";
-
-        private static Assets assets;
     }
 }

@@ -315,6 +315,10 @@ namespace HmiPro.Redux.Models {
                     _completeRate = value;
                     OnPropertyChanged(nameof(CompletedRate));
                     OnPropertyChanged(nameof(CompletedRateStr));
+                    if (_completeRate > 0.9) {
+                        CanCompleted = true;
+                        OnPropertyChanged(nameof(CanCompleted));
+                    }
                 }
             }
         }
@@ -331,6 +335,8 @@ namespace HmiPro.Redux.Models {
                 if (_isCompleted != value) {
                     _isCompleted = value;
                     OnPropertyChanged(nameof(IsCompleted));
+                    CanCompleted = false;
+                    OnPropertyChanged(nameof(CanCompleted));
                 }
             }
         }
@@ -388,6 +394,8 @@ namespace HmiPro.Redux.Models {
                 }
             }
         }
+
+        public bool CanCompleted { get; set; } = false;
 
 
 

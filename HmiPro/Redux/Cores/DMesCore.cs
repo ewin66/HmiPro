@@ -81,12 +81,13 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[AlarmActions.CHECK_CPM_BOM_ALARM] = doCheckCpmBomAlarm;
             actionExecDict[CpmActions.SPARK_DIFF_ACCEPT] = whenSparkDiffAccept;
             actionExecDict[DMesActions.START_SCH_TASK_AXIS] = doStartSchTaskAxis;
-            actionExecDict[CpmActions.STATE_SPEED_DIFF_ZERO_ACCEPT] = whenSpeedDiffZeroAccept;
+            actionExecDict[CpmActions.STATE_SPEED_ZERRO_ACCEPT] = whenSpeedZeroAccept;
             actionExecDict[CpmActions.STATE_SPEED_ACCEPT] = whenSpeedAccept;
             actionExecDict[DMesActions.RFID_ACCPET] = doRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccept;
             actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
             actionExecDict[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
+            actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompletedSchAxis;
 
             App.Store.Subscribe((state, action) => {
                 if (actionExecDict.TryGetValue(state.Type, out var exec)) {
@@ -108,6 +109,16 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
+        /// 完成某个排产轴任务
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doCompletedSchAxis(AppState state, IAction action) {
+            var dmesAction = (DMesActions.CompletedSchAxis)action;
+            CompleteOneAxis(dmesAction.MachineCode, dmesAction.AxisCode);
+        }
+
+        /// <summary>
         /// 485通讯发生故障
         /// </summary>
         /// <param name="state"></param>
@@ -116,8 +127,8 @@ namespace HmiPro.Redux.Cores {
             var alarmAction = (AlarmActions.Com485SingleError)action;
             var mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName,
                 $"ip {alarmAction.Ip} 485故障");
-            //0.5小时记录一次485故障到文件
-            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障", 1800);
+            //1小时记录一次485故障到文件
+            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障", 3600);
             //485故障暂时不考虑上报
             //App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm));
         }
@@ -214,13 +225,13 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 当速度变化为0
+        /// 当速度为0
         /// 任务完成率大于 0.98 的时候则认为一轴的任务完成
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        void whenSpeedDiffZeroAccept(AppState state, IAction action) {
-            var speedAction = (CpmActions.StateSpeedDiffZeroAccept)action;
+        void whenSpeedZeroAccept(AppState state, IAction action) {
+            var speedAction = (CpmActions.StateSpeedZeroAccept)action;
             var machineCode = speedAction.MachineCode;
             lock (SchTaskDoingDict[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
@@ -229,7 +240,7 @@ namespace HmiPro.Redux.Cores {
                 }
                 //一轴生成完成时候速度为0
                 if (taskDoing.CompleteRate >= 0.98) {
-                    CompleteOneAxis(machineCode, taskDoing?.MqSchAxis?.axiscode);
+                    App.Store.Dispatch(new DMesActions.CompletedSchAxis(machineCode, taskDoing?.MqSchAxis?.axiscode));
                     //调试完成的时候速度为0
                 } else if (taskDoing.CompleteRate > 0) {
                     DebugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
@@ -261,12 +272,30 @@ namespace HmiPro.Redux.Cores {
             }
             lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
                 var doingTask = SchTaskDoingDict[dmesAction.MachineCode];
+                var setting = GlobalConfig.MachineSettingDict[dmesAction.MachineCode];
+
                 //放线卡
                 if (dmesAction.RfidType == DMesActions.RfidType.StartAxis) {
                     doingTask.StartAxisRfids.Add(dmesAction.Rfid);
+                    //非采集参数，也更新其Rfid数据
+                    if (dmesAction.RfidWhere != DMesActions.RfidWhere.FromCpm) {
+                        if (state.CpmState.OnlineCpmsDict[dmesAction.MachineCode]
+                            .TryGetValue(DefinedParamCode.StartRfid, out var startRfidCpm)) {
+                            startRfidCpm.Value = dmesAction.Rfid;
+                            startRfidCpm.ValueType = SmParamType.StrRfid;
+                        }
+                    }
                     //收线卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EndAxis) {
                     doingTask.EndAxisRfids.Add(dmesAction.Rfid);
+                    //更新界面显示
+                    if (dmesAction.RfidWhere != DMesActions.RfidWhere.FromCpm) {
+                        if (state.CpmState.OnlineCpmsDict[dmesAction.MachineCode]
+                            .TryGetValue(DefinedParamCode.EndRfid, out var endRfidCpm)) {
+                            endRfidCpm.Value = dmesAction.Rfid;
+                            endRfidCpm.ValueType = SmParamType.StrRfid;
+                        }
+                    }
                     //人员上机卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine) {
                     var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;

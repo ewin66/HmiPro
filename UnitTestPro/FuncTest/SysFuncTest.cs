@@ -200,9 +200,11 @@ namespace UnitTestPro.FuncTest {
             float? a = 1;
             float? b = 1;
             float? c = a * b;
-            Assert.AreEqual(c,1);
+            Assert.AreEqual(c, 1);
             Console.WriteLine(a);
         }
+
+      }
 
     }
 }

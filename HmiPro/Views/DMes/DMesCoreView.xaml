@@ -54,54 +54,6 @@
                             </dxlc:FlowLayoutControl.ItemTemplate>
                         </dxlc:FlowLayoutControl>
                     </DataTemplate>
-                    <!--任务页面-->
-                    <!--<DataTemplate DataType="{x:Type Model:SchTaskTab}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Border BorderBrush="#FF515151" BorderThickness="1" Padding="0">
-                                <controls:TileLayoutControlExt ItemsSource="{Binding MqSchTasks}" Padding="12" BreakFlowToFit="False" ItemTemplate="{StaticResource SchTaskTileTemplate}" SelectedItem="{Binding SelectedTask, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AllowItemMoving="False"/>
-                            </Border>
-                            <Grid Grid.Column="1">
-                                <Grid>
-                                    <Grid.Resources>
-                                        <Style TargetType="dxe:InplaceBaseEdit">
-                                            <Setter Property="FontSize" Value="12"></Setter>
-                                        </Style>
-                                        <Style TargetType="Button">
-                                            <Setter Property="FontSize" Value="12"></Setter>
-                                        </Style>
-                                    </Grid.Resources>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="50"/>
-                                        <RowDefinition/>
-                                    </Grid.RowDefinitions>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="*"/>
-                                            <RowDefinition Height="*"></RowDefinition>
-                                        </Grid.RowDefinitions>
-                                        <TextBlock FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" ><Run>上机人员: </Run>  <Run Text="{Binding Path=EmployeeStr,Mode=OneWay}"/></TextBlock>
-                                        <TextBlock Grid.Row="1" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <Run >开始：</Run> <Run Text="{Binding Path=SelectedTask.PsTimeStr,Mode=OneWay}"/><Run>  结束：</Run><Run Text="{Binding SelectedTask.PdTimeStr,Mode=OneWay}"/>
-                                        </TextBlock>
-                                    </Grid>
-                                    <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" ItemHeaderTemplate="{StaticResource TabHeader}" >
-                                        <dx:DXTabControl.Resources>
-                                            <DataTemplate DataType="{x:Type dMes1:SchTaskAxisViewModel}">
-                                                <dMes:SchTaskAxisView DataContext="{Binding Path=.}"/>
-                                            </DataTemplate>
-                                            <DataTemplate DataType="{x:Type dMes1:CraftBomViewModel}">
-                                                <dMes:CraftBomView DataContext="{Binding Path=.}"/>
-                                            </DataTemplate>
-                                        </dx:DXTabControl.Resources>
-                                    </dx:DXTabControl>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </DataTemplate>-->
                     <!--新任务页面-->
                     <DataTemplate DataType="{x:Type Model:SchTaskTab}">
                         <DockPanel>

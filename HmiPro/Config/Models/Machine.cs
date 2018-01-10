@@ -15,11 +15,8 @@ namespace HmiPro.Config.Models {
     public class Machine {
         public string Code { get; set; }
         /// <summary>
-        /// 计算Oee速度效率方式
+        /// 底层Ip
         /// </summary>
-        public OeeActions.CalcOeeSpeedType OeeSpeedType = OeeActions.CalcOeeSpeedType.Unknown;
-
-
         public string[] CpmIps { get; set; }
         //编码：采集参数（所有）
         public IDictionary<int, CpmInfo> CodeToAllCpmDict = new Dictionary<int, CpmInfo>();

@@ -43,6 +43,12 @@
                                CommandParameter="{Binding  Path=RowData.Row}"
                                IsEnabled="{Binding Path=RowData.Row.CanStart}"
                                  >开始</Button>
+                            <Button Grid.Column="1" 
+                               Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl}, Path=DataContext.CompletedTaskAxisDoingCommand}"
+                               CommandParameter="{Binding  Path=RowData.Row}"
+                               IsEnabled="{Binding Path=RowData.Row.CanCompleted}"
+                                 >完成</Button>
+
                         </Grid>
                     </ControlTemplate>
                 </dxg:GridColumn.DisplayTemplate>

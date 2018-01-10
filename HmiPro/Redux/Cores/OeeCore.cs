@@ -48,7 +48,7 @@ namespace HmiPro.Redux.Cores {
             var machineCode = oeeAction.MachineCode;
             var machineStates = state.CpmState.MachineStateDict[machineCode];
             var timeEff = CalcOeeTimeEff(machineCode, machineStates);
-            var speedEff = CalcOeeSpeedEff(machineCode, MachineConfig.MachineDict[machineCode].OeeSpeedType);
+            var speedEff = CalcOeeSpeedEff(machineCode, GlobalConfig.MachineSettingDict[machineCode].OeeSpeedType);
             var qualityEff = CalcOeeQualityEff(machineCode);
             //更新Oee字典
             App.Store.Dispatch(new OeeActions.UpdateOeePartialValue(
@@ -110,7 +110,7 @@ namespace HmiPro.Redux.Cores {
             } else if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedMq) {
                 return CalcOeeSpeedEffByMq(machineCode);
             } else if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedSetting) {
-                return CalcOeeSpeedEffBySetting(machineCode, float.Parse(setting.OeeSpeed));
+                return CalcOeeSpeedEffBySetting(machineCode, float.Parse(setting.OeeSpeedMax.ToString()));
             }
             return null;
         }

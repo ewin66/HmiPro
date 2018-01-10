@@ -17,12 +17,18 @@ namespace HmiPro.Config {
     /// </summary>
     public static class GlobalConfig {
         public static IDictionary<string, MachineSetting> MachineSettingDict;
+        /// <summary>
+        /// Hmi电脑的ip
+        /// <example>
+        /// 192.168.110.66:DE_DF
+        /// </example>
+        /// </summary>
         public static IDictionary<string, string> IpToHmiDict;
+
         public static void Load(string path) {
             path = YUtil.GetAbsolutePath(path);
             MachineSettingDict = new Dictionary<string, MachineSetting>();
             IpToHmiDict = new Dictionary<string, string>();
-
             using (var xlsOp = new XlsService(path)) {
                 var speedDt = xlsOp.ExcelToDataTable("逻辑配置", true);
                 foreach (DataRow row in speedDt.Rows) {
@@ -56,6 +62,7 @@ namespace HmiPro.Config {
                     setting.StartRfids = row["StartRfids"].ToString().Split('|');
                     setting.EndRfids = row["EndRfids"].ToString().Split('|');
                     setting.CpmModuleIps = row["CpmModuleIps"].ToString().Split('|');
+                   
                     MachineSettingDict[setting.Code] = setting;
                 }
 

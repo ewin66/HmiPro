@@ -12,7 +12,7 @@ namespace HmiPro.ViewModels.DMes {
     /// 任务列表，含每轴的计划
     /// </summary>
     [POCOViewModel]
-    public class SchTaskAxisViewModel:BaseTab {
+    public class SchTaskAxisViewModel : BaseTab {
 
         public virtual string MachineCode { get; set; }
         public virtual string WorkCode { get; set; }
@@ -32,6 +32,12 @@ namespace HmiPro.ViewModels.DMes {
         public void StartTaskAxisDoing(object row) {
             var axis = (MqTaskAxis)row;
             App.Store.Dispatch(new DMesActions.StartSchTaskAxis(axis.maccode, axis.axiscode));
+        }
+
+        [Command(Name = "CompletedTaskAxisDoingCommand")]
+        public void CompletedTaskAxisDoing(object row) {
+            var axis = (MqTaskAxis)row;
+            App.Store.Dispatch(new DMesActions.CompletedSchAxis(axis.maccode, axis.axiscode));
         }
 
         public static SchTaskAxisViewModel Create(string machineCode, string workCode, IList<MqTaskAxis> taskAxisList) {

@@ -30,6 +30,7 @@ namespace HmiPro.Redux.Actions {
         public static readonly string OEE_SPEED_ACCEPT = "[Cpm] Oee Speed Accept";
         public static readonly string SPARK_DIFF_ACCEPT = "[Cpm] Spark Diff Accept";
         public static readonly string STATE_SPEED_DIFF_ZERO_ACCEPT = "[Cpm] State Speed Diff Zero Accept";
+        public static readonly string STATE_SPEED_ZERRO_ACCEPT = "[Cpm] State Speed Zero Accept";
         public static readonly string OD_ACCPET = "[Cpm] Od Accept";
         //485串口状态更新
         //单节点状态
@@ -245,6 +246,15 @@ namespace HmiPro.Redux.Actions {
             public string MachineCode;
 
             public StateSpeedDiffZeroAccept(string machineCode) {
+                MachineCode = machineCode;
+            }
+        }
+
+        public struct StateSpeedZeroAccept : IAction {
+            public string Type() => STATE_SPEED_ZERRO_ACCEPT;
+            public string MachineCode;
+
+            public StateSpeedZeroAccept(string machineCode) {
                 MachineCode = machineCode;
             }
         }

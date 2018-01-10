@@ -24,14 +24,12 @@ namespace HmiPro.Redux.Cores {
     public class SchCore : Registry {
         private readonly SysEffects sysEffects;
         private readonly MqEffects mqEffects;
-        private readonly OeeEffects oeeEffects;
         public readonly LoggerService Logger;
 
-        public SchCore(SysEffects sysEffects, MqEffects mqEffects, OeeEffects oeeEffects) {
+        public SchCore(SysEffects sysEffects, MqEffects mqEffects) {
             UnityIocService.AssertIsFirstInject(GetType());
             this.sysEffects = sysEffects;
             this.mqEffects = mqEffects;
-            this.oeeEffects = oeeEffects;
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
         }
 

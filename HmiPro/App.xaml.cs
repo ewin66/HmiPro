@@ -30,26 +30,14 @@ namespace HmiPro {
     /// <author>ychost</author>
     /// </summary>
     public partial class App : Application {
+        /// <summary>
+        /// 设置程序启动时间
+        /// </summary>
+        public App() {
+            AppState.ExectedActions["[App] Started"] = DateTime.Now;
+        }
         public static LoggerService Logger;
         public static StorePro<AppState> Store;
-        /// <summary>
-        /// 对频率较高的日志的打印频率进行抑制
-        /// </summary>
-        public class Mufflog {
-            /// <summary>
-            /// 在最小时间间隔内出现的次数
-            /// </summary>
-            public int Freq;
-            /// <summary>
-            /// 上次打印时间
-            /// </summary>
-            public DateTime LastLogTime = DateTime.MinValue;
-            /// <summary>
-            /// 最小打印时间间隔
-            /// </summary>
-            public int MinGapSec = 10;
-        }
-
         /// <summary>
         /// 减缓这些消除的日志输出频率 
         /// 因为这些消息的原始频率太高了
@@ -68,11 +56,13 @@ namespace HmiPro {
 
         public static IDictionary<string, Mufflog> MuffleLogDict = new ConcurrentDictionary<string, Mufflog>();
 
-
+        /// <summary>
+        /// 对程序进行配置
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
-            ApplicationThemeHelper.ApplicationThemeName = Theme.MetropolisDark.Name;
-
+            //移植日志输出初始化
             MuffleLogActions.ForEach(action => {
                 MuffleLogDict[action] = new Mufflog();
             });
@@ -97,7 +87,7 @@ namespace HmiPro {
             //初始化全局的Store
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
             //初始化全局的日志
-            Logger = LoggerHelper.CreateLogger("DMes App");
+            Logger = LoggerHelper.CreateLogger("App");
             //打印Redux系统的动作
             Store.Subscribe(logDebugActions);
             //同步时间
@@ -181,8 +171,6 @@ namespace HmiPro {
                 AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
                 //设置全局配置
                 CmdOptions.GlobalOptions = opt;
-
-
             }).WithNotParsed(err => {
                 throw new Exception("参数异常" + e);
             });
@@ -211,5 +199,22 @@ namespace HmiPro {
                 }
             }
         }
+    }
+    /// <summary>
+    /// 对频率较高的日志的打印频率进行抑制
+    /// </summary>
+    public class Mufflog {
+        /// <summary>
+        /// 在最小时间间隔内出现的次数
+        /// </summary>
+        public int Freq;
+        /// <summary>
+        /// 上次打印时间
+        /// </summary>
+        public DateTime LastLogTime = DateTime.MinValue;
+        /// <summary>
+        /// 最小打印时间间隔
+        /// </summary>
+        public int MinGapSec = 10;
     }
 }

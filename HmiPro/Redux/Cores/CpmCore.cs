@@ -225,6 +225,11 @@ namespace HmiPro.Redux.Cores {
             dispatchCheckPlcAlarm(machineCode, cpms);
         }
 
+        /// <summary>
+        /// 排产逻辑参数差异值
+        /// </summary>
+        /// <param name="machineCode"></param>
+        /// <param name="diffCpms"></param>
         private void dispatchDiffLogicSetting(string machineCode, List<Cpm> diffCpms) {
             var setting = GlobalConfig.MachineSettingDict[machineCode];
             foreach (var cpm in diffCpms) {
@@ -247,6 +252,11 @@ namespace HmiPro.Redux.Cores {
             }
         }
 
+        /// <summary>
+        /// 派遣设定的逻辑参数值
+        /// </summary>
+        /// <param name="machineCode"></param>
+        /// <param name="cpms"></param>
         private void dispatchLogicSetting(string machineCode, List<Cpm> cpms) {
             var setting = GlobalConfig.MachineSettingDict[machineCode];
             foreach (var cpm in cpms) {
@@ -261,6 +271,9 @@ namespace HmiPro.Redux.Cores {
                 }
                 if (setting.StateSpeed == cpm.Name) {
                     App.Store.Dispatch(new CpmActions.StateSpeedAccept(machineCode, cpm.GetFloatVal()));
+                    if (cpm.GetFloatVal() == 0) {
+                        App.Store.Dispatch(new CpmActions.StateSpeedZeroAccept(machineCode));
+                    }
                 }
                 if (setting.Od == cpm.Name) {
                     App.Store.Dispatch(new CpmActions.OdAccept(machineCode, cpm.GetFloatVal()));
@@ -338,7 +351,7 @@ namespace HmiPro.Redux.Cores {
             });
         }
 
-              /// <summary>
+        /// <summary>
         /// 更新需要算法计算的参数，并返回转换后的集合
         /// </summary>
         /// <returns></returns>
