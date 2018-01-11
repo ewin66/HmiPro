@@ -204,7 +204,51 @@ namespace UnitTestPro.FuncTest {
             Console.WriteLine(a);
         }
 
-      }
+        [TestMethod]
+        public void FinallyTest() {
+            int test() {
+                try {
+                    throw new Exception("haha");
+                    return 0;
+                } catch {
+                    return -1;
+                } finally {
+                    Console.WriteLine("Enter Finally");
+                }
+                return 3;
+            }
+
+            var s = test();
+            Assert.AreEqual(s, -1);
+        }
+
+        [TestMethod]
+        public void LockTest2() {
+            object lockObj = new object();
+
+            int monitorTest() {
+                if (Monitor.TryEnter(lockObj)) {
+                    try {
+                        Console.WriteLine("MonitorTest in");
+                        return 3;
+                    } finally {
+                        Monitor.Exit(lockObj);
+                    }
+                }
+                return 4;
+            }
+
+            if (Monitor.TryEnter(lockObj)) {
+                try {
+                    Console.WriteLine("lockin");
+                    var s = monitorTest();
+                    Assert.AreEqual(s, 3);
+                } finally {
+                    Monitor.Exit(lockObj);
+                }
+            }
+        }
 
     }
+
 }

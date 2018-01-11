@@ -87,7 +87,7 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccept;
             actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
             actionExecDict[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
-            actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompletedSchAxis;
+            actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompleteSchAxis;
 
             App.Store.Subscribe((state, action) => {
                 if (actionExecDict.TryGetValue(state.Type, out var exec)) {
@@ -113,7 +113,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        void doCompletedSchAxis(AppState state, IAction action) {
+        void doCompleteSchAxis(AppState state, IAction action) {
             var dmesAction = (DMesActions.CompletedSchAxis)action;
             CompleteOneAxis(dmesAction.MachineCode, dmesAction.AxisCode);
         }
@@ -221,7 +221,6 @@ namespace HmiPro.Redux.Cores {
                     taskDoing.SpeedAvg = (float)taskDoing.CalcAvgSpeed(speed);
                 }
             }
-
         }
 
         /// <summary>
@@ -241,19 +240,22 @@ namespace HmiPro.Redux.Cores {
         /// 检查当前任务可否完成
         /// </summary>
         /// <param name="machineCode"></param>
-        private void checkCurrentAxisCanComplete(string machineCode) {
-            lock (SchTaskDoingDict[machineCode]) {
+        private bool checkCurrentAxisCanComplete(string machineCode) {
+            lock (SchTaskDoingLocks[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
                 if (!taskDoing.IsStarted) {
-                    return;
+                    return false;
                 }
                 //一轴生成完成时候速度为0
                 if (taskDoing.AxisCompleteRate >= 0.98) {
                     App.Store.Dispatch(new DMesActions.CompletedSchAxis(machineCode, taskDoing?.MqSchAxis?.axiscode));
+                    return true;
                     //调试完成的时候速度为0
                 } else if (taskDoing.AxisCompleteRate > 0) {
-                    DebugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
+                    //DebugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
                 }
+                return false;
+
             }
         }
 
@@ -364,9 +366,10 @@ namespace HmiPro.Redux.Cores {
                 Application.Current.Dispatcher.Invoke(() => {
                     mqTasks.Add(task);
                 });
-                using (var ctx = SqliteHelper.CreateSqliteService()) {
-                    ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(mqTasks)));
-                }
+            }
+            //Sqlite存储很耗时间
+            using (var ctx = SqliteHelper.CreateSqliteService()) {
+                ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(mqTasks)));
             }
         }
 
@@ -454,6 +457,7 @@ namespace HmiPro.Redux.Cores {
             var taskDoing = SchTaskDoingDict[machineCode];
             lock (SchTaskDoingLocks[machineCode]) {
                 //没有正在执行的任务，则无Bom，终止检查
+
                 if (taskDoing.MqSchTask == null) {
                     return;
                 }
@@ -483,7 +487,7 @@ namespace HmiPro.Redux.Cores {
                         std = stdObj != null ? (float?)stdObj : null;
                     } catch (Exception e) {
                         var logDetail = $"任务 id={taskDoing.MqSchTaskId} 的Bom表上下限有误" +
-                                     $"{checkAlarm.MaxBomKey}: {maxObj},{checkAlarm.MinBomKey}:{minObj},{checkAlarm.StdBomKey}: {stdObj}";
+                                        $"{checkAlarm.MaxBomKey}: {maxObj},{checkAlarm.MinBomKey}:{minObj},{checkAlarm.StdBomKey}: {stdObj}";
                         //10分钟通知一次
                         App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                             Title = $"机台 {machineCode} 报警失败",
@@ -502,7 +506,8 @@ namespace HmiPro.Redux.Cores {
                 if (max.HasValue && min.HasValue) {
                     var cpmVal = (float)checkAlarm.Cpm.Value;
                     if (cpmVal > max || cpmVal < min) {
-                        MqAlarm mqAlarm = createMqAlarmMustInTask(machineCode, checkAlarm.Cpm.PickTimeStampMs, checkAlarm.Cpm.Name, AlarmType.CpmErr);
+                        MqAlarm mqAlarm = createMqAlarmMustInTask(machineCode, checkAlarm.Cpm.PickTimeStampMs,
+                            checkAlarm.Cpm.Name, AlarmType.CpmErr);
                         dispatchAlarmAction(machineCode, mqAlarm);
                     }
                 } else {
@@ -510,7 +515,6 @@ namespace HmiPro.Redux.Cores {
                 }
             }
         }
-
         /// <summary>
         /// 记米相关处理
         /// </summary>
@@ -518,19 +522,19 @@ namespace HmiPro.Redux.Cores {
             var meterAction = (CpmActions.NoteMeterAccept)action;
             var machineCode = meterAction.MachineCode;
             var noteMeter = meterAction.Meter;
-            lock (SchTaskDoingDict[machineCode]) {
+            lock (SchTaskDoingLocks[machineCode]) {
                 var doingTask = SchTaskDoingDict[machineCode];
                 if (SchTaskDoingDict[machineCode].IsStarted) {
-                    doingTask.MeterWork = noteMeter;
-                    var rate = noteMeter / doingTask.MeterPlan;
-                    doingTask.AxisCompleteRate = rate;
-                }
-                //记米为0的时候检查当前任务可否完成
-                if (noteMeter == 0) {
-                    checkCurrentAxisCanComplete(machineCode);
+                    //记米数减小了，则去检查任务是否达完成条件
+                    if (noteMeter < doingTask.MeterWork && checkCurrentAxisCanComplete(machineCode)) {
+                        //任务已经完成
+                    } else {
+                        doingTask.MeterWork = noteMeter;
+                        var rate = noteMeter / doingTask.MeterPlan;
+                        doingTask.AxisCompleteRate = rate;
+                    }
                 }
             }
-
         }
 
         /// <summary>
@@ -674,27 +678,15 @@ namespace HmiPro.Redux.Cores {
                     Logger.Error($"机台 {machineCode} 当前正在生产的轴号:{taskDoing.MqSchAxis?.axiscode}与设置完成轴号{axisCode}不一致");
                     return;
                 }
-
-                //显示完成消息
-                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                    Title = $"机台 {machineCode} 达成任务",
-                    Content = $"轴号 {axisCode} 任务达成"
-                }));
-
                 //标志位改变
                 taskDoing.MqSchAxis.State = MqSchTaskAxisState.Completed;
                 taskDoing.MqSchAxis.IsCompleted = true;
+                taskDoing.MqSchAxis.CanStart = false;
+                taskDoing.EndTime = DateTime.Now;
                 SetOtherTaskAxisCanStart(machineCode, axisCode, true);
                 //更新当前任务完成进度
                 var completedAxis = taskDoing.MqSchTask.axisParam.Count(a => a.IsCompleted == true);
-                taskDoing.MqSchTask.CompletedRate= (float)completedAxis / taskDoing.MqSchTask.axisParam.Count;
-
-                //更新缓存
-                using (var ctx = SqliteHelper.CreateSqliteService()) {
-                    //移除已经完成的任务轴
-                    //taskDoing.MqSchTask.axisParam.Remove(taskDoing.MqSchAxis);
-                    ctx.SavePersist(new Persist("task_" + machineCode, JsonConvert.SerializeObject(MqSchTasksDict[machineCode])));
-                }
+                taskDoing.MqSchTask.CompletedRate = (float)completedAxis / taskDoing.MqSchTask.axisParam.Count;
                 uManu = new MqUploadManu() {
                     actualBeginTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
                     actualEndTime = YUtil.GetUtcTimestampMs(taskDoing.EndTime),
@@ -711,9 +703,18 @@ namespace HmiPro.Redux.Cores {
                     testLen = taskDoing.MeterDebug,
                     testTime = taskDoing.DebugTimestampMs,
                     speed = taskDoing.SpeedAvg,
+                    seqCode = taskDoing.MqSchAxis.seqcode,
+                    status = "正常结束",
                 };
                 //重新初始化
                 taskDoing.Init();
+            }
+            //更新缓存
+            using (var ctx = SqliteHelper.CreateSqliteService()) {
+                //移除已经完成的任务轴
+                //taskDoing.MqSchTask.axisParam.Remove(taskDoing.MqSchAxis);
+                ctx.SavePersist(new Persist("task_" + machineCode,
+                    JsonConvert.SerializeObject(MqSchTasksDict[machineCode])));
             }
             var uploadResult = await App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
             if (uploadResult) {
@@ -721,6 +722,12 @@ namespace HmiPro.Redux.Cores {
                 if (taskDoing.AxisCompleteRate >= 1) {
                     CompleteOneSchTask(machineCode, taskDoing.WorkCode);
                 }
+                //显示完成消息
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = $"机台 {machineCode} 达成任务",
+                    Content = $"轴号 {axisCode} 任务达成"
+                }));
+                Logger.Info($"回传机台{machineCode},{axisCode}排产数据成功");
                 //上传落轴数据失败，对其进行缓存
             } else {
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
@@ -730,6 +737,7 @@ namespace HmiPro.Redux.Cores {
                 using (var ctx = SqliteHelper.CreateSqliteService()) {
                     ctx.UploadManuFailures.Add(uManu);
                 }
+                Logger.Error($"回传机台{machineCode},{axisCode}排产数据失败，已缓存");
             }
         }
 

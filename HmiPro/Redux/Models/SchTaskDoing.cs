@@ -42,7 +42,9 @@ namespace HmiPro.Redux.Models {
             set {
                 if (axisCompleteRate != value) {
                     axisCompleteRate = value;
-                    MqSchAxis.CompletedRate = value;
+                    if (MqSchAxis != null) {
+                        MqSchAxis.CompletedRate = value;
+                    }
                 }
             }
         }
@@ -61,7 +63,7 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 放线轴
         /// </summary>
-        public HashSet<string> StartAxisRfids =new HashSet<string>();
+        public HashSet<string> StartAxisRfids = new HashSet<string>();
         /// <summary>
         /// 收线Rfid，可能有多个
         /// </summary>

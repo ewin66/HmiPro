@@ -54,7 +54,6 @@ namespace HmiPro.Redux.Models {
         public float speed { get; set; }
         //产品规格型号
         public String proGgxh { get; set; }
-
         //落轴：yes，非落轴：no
         public string mqType { get; set; }
     }
