@@ -233,20 +233,30 @@ namespace HmiPro.Redux.Cores {
         void whenSpeedZeroAccept(AppState state, IAction action) {
             var speedAction = (CpmActions.StateSpeedZeroAccept)action;
             var machineCode = speedAction.MachineCode;
+            //速度为0的时候检查当前任务可否完成
+            checkCurrentAxisCanComplete(machineCode);
+        }
+
+        /// <summary>
+        /// 检查当前任务可否完成
+        /// </summary>
+        /// <param name="machineCode"></param>
+        private void checkCurrentAxisCanComplete(string machineCode) {
             lock (SchTaskDoingDict[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
                 if (!taskDoing.IsStarted) {
                     return;
                 }
                 //一轴生成完成时候速度为0
-                if (taskDoing.CompleteRate >= 0.98) {
+                if (taskDoing.AxisCompleteRate >= 0.98) {
                     App.Store.Dispatch(new DMesActions.CompletedSchAxis(machineCode, taskDoing?.MqSchAxis?.axiscode));
                     //调试完成的时候速度为0
-                } else if (taskDoing.CompleteRate > 0) {
+                } else if (taskDoing.AxisCompleteRate > 0) {
                     DebugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
                 }
             }
         }
+
 
         /// <summary>
         /// 处理接收到的Rfid数据
@@ -513,7 +523,11 @@ namespace HmiPro.Redux.Cores {
                 if (SchTaskDoingDict[machineCode].IsStarted) {
                     doingTask.MeterWork = noteMeter;
                     var rate = noteMeter / doingTask.MeterPlan;
-                    doingTask.CompleteRate = rate;
+                    doingTask.AxisCompleteRate = rate;
+                }
+                //记米为0的时候检查当前任务可否完成
+                if (noteMeter == 0) {
+                    checkCurrentAxisCanComplete(machineCode);
                 }
             }
 
@@ -554,14 +568,14 @@ namespace HmiPro.Redux.Cores {
                                 return;
                             }
                             //记米没有清零
-                            var noteMeter = App.Store.GetState().CpmState.NoteMeterDict[machineCode];
-                            if ((int)noteMeter != 0) {
-                                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                                    Title = $"请先清零记米，再开始任务",
-                                    Content = $"机台 {machineCode} 记米没有清零，请先清零"
-                                }));
-                                return;
-                            }
+                            //var noteMeter = App.Store.GetState().CpmState.NoteMeterDict[machineCode];
+                            //if (noteMeter != 0) {
+                            //    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                            //        Title = $"请先清零记米，再开始任务",
+                            //        Content = $"机台 {machineCode} 记米没有清零，请先清零"
+                            //    }));
+                            //    return;
+                            //}
                             setSchTaskDoing(taskDoing, st, axis, i);
                             hasFound = true;
                             break;
@@ -673,12 +687,12 @@ namespace HmiPro.Redux.Cores {
                 SetOtherTaskAxisCanStart(machineCode, axisCode, true);
                 //更新当前任务完成进度
                 var completedAxis = taskDoing.MqSchTask.axisParam.Count(a => a.IsCompleted == true);
-                taskDoing.CompleteRate = completedAxis / taskDoing.MqSchTask.axisParam.Count;
+                taskDoing.MqSchTask.CompletedRate= (float)completedAxis / taskDoing.MqSchTask.axisParam.Count;
 
                 //更新缓存
                 using (var ctx = SqliteHelper.CreateSqliteService()) {
                     //移除已经完成的任务轴
-                    taskDoing.MqSchTask.axisParam.Remove(taskDoing.MqSchAxis);
+                    //taskDoing.MqSchTask.axisParam.Remove(taskDoing.MqSchAxis);
                     ctx.SavePersist(new Persist("task_" + machineCode, JsonConvert.SerializeObject(MqSchTasksDict[machineCode])));
                 }
                 uManu = new MqUploadManu() {
@@ -704,7 +718,7 @@ namespace HmiPro.Redux.Cores {
             var uploadResult = await App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
             if (uploadResult) {
                 //一个工单任务完成
-                if (taskDoing.CompleteRate >= 1) {
+                if (taskDoing.AxisCompleteRate >= 1) {
                     CompleteOneSchTask(machineCode, taskDoing.WorkCode);
                 }
                 //上传落轴数据失败，对其进行缓存

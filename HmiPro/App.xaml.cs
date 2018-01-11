@@ -179,7 +179,7 @@ namespace HmiPro {
             AppDomain.CurrentDomain.UnhandledException += (s, ue) => {
                 var message = $"程序崩溃：{ue.ExceptionObject}\r\n当前可用内存：{YUtil.GetAvaliableMemoryByte() / 1000000} M\r\nApp.Store: {Newtonsoft.Json.JsonConvert.SerializeObject(App.Store)}";
                 //将错误日志写入mongoDb
-                Logger.ErrorWithDb(message, MachineConfig.AllMachineName);
+                Logger.ErrorWithDb(message, MachineConfig.HmiName);
             };
         }
 

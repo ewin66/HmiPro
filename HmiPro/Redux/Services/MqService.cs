@@ -77,7 +77,7 @@ namespace HmiPro.Redux.Services {
             try {
                 MqAxisRfid mqRfid = JsonConvert.DeserializeObject<MqAxisRfid>(json);
                 //机台校验
-                if (!MachineConfig.AllMachineName.ToUpper().Contains(mqRfid.macCode.ToUpper())) {
+                if (!MachineConfig.HmiName.ToUpper().Contains(mqRfid.macCode.ToUpper())) {
                     return;
                 }
                 DMesActions.RfidType type = DMesActions.RfidType.Unknown;
@@ -107,7 +107,7 @@ namespace HmiPro.Redux.Services {
             try {
                 MqEmpRfid mqRfid = JsonConvert.DeserializeObject<MqEmpRfid>(json);
                 //机台校验
-                if (!MachineConfig.AllMachineName.ToUpper().Contains(mqRfid.macCode)) {
+                if (!MachineConfig.HmiName.ToUpper().Contains(mqRfid.macCode)) {
                     return;
                 }
                 //设置打卡时间

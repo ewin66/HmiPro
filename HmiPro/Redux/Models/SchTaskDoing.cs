@@ -29,16 +29,19 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public int MqSchAxisIndex;
 
-        private float completeRate;
+        /// <summary>
+        /// 当轴百分比
+        /// </summary>
+        private float axisCompleteRate;
 
         /// <summary>
         /// 完成百分比
         /// </summary>
-        public float CompleteRate {
-            get => completeRate;
+        public float AxisCompleteRate {
+            get => axisCompleteRate;
             set {
-                if (completeRate != value) {
-                    completeRate = value;
+                if (axisCompleteRate != value) {
+                    axisCompleteRate = value;
                     MqSchAxis.CompletedRate = value;
                 }
             }
@@ -115,7 +118,7 @@ namespace HmiPro.Redux.Models {
             MqSchTask = null;
             MqSchAxis = null;
             IsStarted = false;
-            CompleteRate = 0;
+            AxisCompleteRate = 0;
             WorkCode = null;
             Step = -1;
             CalcAvgSpeed = null;

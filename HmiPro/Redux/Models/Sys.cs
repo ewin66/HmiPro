@@ -7,20 +7,20 @@ using HmiPro.Config;
 using HmiPro.Config.Models;
 
 namespace HmiPro.Redux.Models {
-    public class Sys {
-
-    }
-
+    /// <summary>
+    /// Http系统RestApi外层包裹
+    /// <author>ychost</author>
+    /// <date>2017-12-20</date>
+    /// </summary>
     public class HttpSystemRest {
         public string Message { get; set; }
         public object Data { get; set; }
         public int Code { get; set; }
-        public string Machine { get; set; }
-        public int MachineId { get; set; }
+        public string Hmi { get; set; }
         public string DebugMessage { get; set; }
 
         public HttpSystemRest() {
-            Machine = MachineConfig.AllMachineName;
+            Hmi = MachineConfig.HmiName;
             Code = 0;
         }
     }

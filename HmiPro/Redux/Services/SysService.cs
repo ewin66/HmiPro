@@ -87,7 +87,7 @@ namespace HmiPro.Redux.Services {
         private void execGetState(HttpListenerResponse responnse) {
             var rest = new HttpSystemRest();
             rest.Data = AppState.ExectedActions;
-            rest.Machine = MachineConfig.AllMachineName;
+            rest.Hmi = MachineConfig.HmiName;
             rest.Message = "获取程序状态成功";
             outResponse(responnse, rest);
         }

@@ -24,7 +24,7 @@ namespace HmiPro.Views.DMes {
             //刷新频率同上传频率
             var refresh = $"{HmiConfig.UploadWebBoardInterval}ms";
             //var dbUpperName = HmiDynamicConfig.DbName.ToUpper();
-            var viewName = MachineConfig.AllMachineName;
+            var viewName = MachineConfig.HmiName;
             var placeholder = "machine_placeholder";
             var suffixUrl = $"/dashboard/db/{placeholder}?refresh={refresh}&orgId=1";
             suffixUrl = suffixUrl.Replace(placeholder, viewName);
