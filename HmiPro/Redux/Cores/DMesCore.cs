@@ -115,7 +115,19 @@ namespace HmiPro.Redux.Cores {
         /// <param name="action"></param>
         void doCompleteSchAxis(AppState state, IAction action) {
             var dmesAction = (DMesActions.CompletedSchAxis)action;
+            //完成一轴任务
             CompleteOneAxis(dmesAction.MachineCode, dmesAction.AxisCode);
+            //自动开始下一轴任务
+            lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
+                var nextAxisCode = SchTaskDoingDict[dmesAction.MachineCode]?.MqSchTask?.axisParam
+                                  ?.FirstOrDefault(s => s.IsCompleted == false)?.axiscode;
+                Logger.Info("自动开始下一轴号：" + nextAxisCode);
+                if (!string.IsNullOrEmpty(nextAxisCode)) {
+                    DMesActions.StartSchTaskAxis startAxis = new DMesActions.StartSchTaskAxis(dmesAction.MachineCode, nextAxisCode);
+                    doStartSchTaskAxis(state, startAxis, true);
+                }
+            }
+
         }
 
         /// <summary>
@@ -351,11 +363,11 @@ namespace HmiPro.Redux.Cores {
             var task = state.MqState.MqSchTaskAccpetDict[machineCode];
             lock (SchTaskDoingLocks[machineCode]) {
                 foreach (var cacheTask in mqTasks) {
-                    if (cacheTask.id == task.id) {
-                        Logger.Error($"任务id重复,id={cacheTask.id}");
+                    if (cacheTask.workcode == task.workcode) {
+                        Logger.Error($"工单重复,{cacheTask.workcode}");
                         App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                             Title = "系统异常",
-                            Content = $"接收到重复任务，请联系管理员，任务Id {task.id},工单 {task.workcode}"
+                            Content = $"接收到重复任务，请联系管理员,工单 {task.workcode}"
                         }));
                         return;
                     }
@@ -538,9 +550,18 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
+        /// 重载下周
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        public void doStartSchTaskAxis(AppState state, IAction action) {
+            doStartSchTaskAxis(state, action, false);
+        }
+
+        /// <summary>
         /// 根据轴号设置当前任务开始
         /// </summary>
-        public void doStartSchTaskAxis(AppState state, IAction action) {
+        public void doStartSchTaskAxis(AppState state, IAction action, bool isAutoStart) {
             var startParam = (DMesActions.StartSchTaskAxis)action;
             var machineCode = startParam.MachineCode;
             var axisCode = startParam.AxisCode;
@@ -593,8 +614,12 @@ namespace HmiPro.Redux.Cores {
                     //设置其它任务不能启动
                     SetOtherTaskAxisCanStart(machineCode, axisCode, false);
                     App.Store.Dispatch(new SimpleAction(DMesActions.START_SCH_TASK_AXIS_SUCCESS));
+                    var title = "启动任务成功";
+                    if (isAutoStart) {
+                        title = "自动 " + title;
+                    }
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = "启动任务成功",
+                        Title = title,
                         Content = $"机台 {machineCode} 轴号： {axisCode}"
                     }));
                 } else {

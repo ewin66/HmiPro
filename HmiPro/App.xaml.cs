@@ -192,7 +192,10 @@ namespace HmiPro {
                 try {
                     //获取服务器时间
                     var ntpTime = YUtil.GetNtpTime(HmiConfig.NtpIp);
-                    YUtil.SetLoadTimeByDateTime(ntpTime);
+                    //时间差超过10秒才同步时间
+                    if (Math.Abs((DateTime.Now - ntpTime).TotalSeconds) > 10) {
+                        YUtil.SetLoadTimeByDateTime(ntpTime);
+                    }
                     Logger.Info($"同步时间成功: {ntpTime}");
                 } catch (Exception e) {
                     Logger.Error("获取服务器时间失败", e);

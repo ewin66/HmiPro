@@ -258,13 +258,13 @@ namespace HmiPro.Redux.Reducers {
             get {
                 switch (status) {
                     case SmSingleStatus.Error:
-                        return "错误";
+                        return "485异常";
                     case SmSingleStatus.Ok:
                         return "正常";
                     case SmSingleStatus.Unknown:
                         return "初始化";
                     case SmSingleStatus.Offline:
-                        return "离线";
+                        return "无法Ping通";
                     default:
                         return "初始化";
                 }

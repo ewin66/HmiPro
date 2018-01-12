@@ -117,7 +117,7 @@ namespace HmiPro.Redux.Models {
         }
 
         public void Init() {
-            MqSchTask = null;
+            //MqSchTask = null;
             MqSchAxis = null;
             IsStarted = false;
             AxisCompleteRate = 0;
