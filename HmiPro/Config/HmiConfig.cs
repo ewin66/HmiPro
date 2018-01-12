@@ -147,6 +147,9 @@ namespace HmiPro.Config {
         [Required] public static readonly int CloseScreenInterval;
         //Mq发送消息超时
         [Required] public static readonly int MqSendRequestTimeoutSec = 3;
+        //一个工单任务最多存活的天数
+        //比如工单的计划时间是5月7日，当前时间为5月20日，则认为任务过期作废
+        [Required] public static readonly int TaskPersistMaxDays = 7;
         /// <summary>
         /// Bom表汉化字典
         /// </summary>

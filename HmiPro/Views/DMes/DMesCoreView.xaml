@@ -68,15 +68,17 @@
                             <dMes:TaskSelectPanel DockPanel.Dock="Left" DataContext="{Binding Path=.}"/>
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="32"/>
                                     <RowDefinition Height="32"></RowDefinition>
                                     <RowDefinition Height="*"></RowDefinition>
                                 </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" ><Run>上机人员: </Run>  <Run Text="{Binding Path=EmployeeStr,Mode=OneWay}"/></TextBlock>
-                                <TextBlock Grid.Row="1" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <Run >开始：</Run> <Run Text="{Binding Path=SelectedTask.PsTimeStr,Mode=OneWay}"/><Run>  结束：</Run><Run Text="{Binding SelectedTask.PdTimeStr,Mode=OneWay}"/>
-                                </TextBlock>
-                                <dx:DXTabControl Grid.Row="2" ItemsSource="{Binding Path=MqSchTaskDetails}" ItemHeaderTemplate="{StaticResource TabHeader}" >
+                                <DockPanel Grid.Row="0">
+                                    <TextBlock DockPanel.Dock="Left" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" ><Run>上机人员: </Run>  <Run Text="{Binding Path=EmployeeStr,Mode=OneWay}"/></TextBlock>
+                                    <TextBlock DockPanel.Dock="Right" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                     <Run Text="{Binding Path=SelectedTask.PsTimeStr,Mode=OneWay}"/><Run>--</Run><Run Text="{Binding SelectedTask.PdTimeStr,Mode=OneWay}"/>
+                                    </TextBlock>
+                                </DockPanel>
+
+                                <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" ItemHeaderTemplate="{StaticResource TabHeader}" >
                                     <dx:DXTabControl.Resources>
                                         <DataTemplate DataType="{x:Type dMes1:SchTaskAxisViewModel}">
                                             <dMes:SchTaskAxisView DataContext="{Binding Path=.}"/>

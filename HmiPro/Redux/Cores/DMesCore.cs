@@ -394,7 +394,33 @@ namespace HmiPro.Redux.Cores {
                     var key = "task_" + pair.Key;
                     var tasks = ctx.Restore<ObservableCollection<MqSchTask>>(key);
                     if (tasks != null) {
+                        //过滤掉重复、过期任务等等
+                        HashSet<string> allCodes = new HashSet<string>();
+                        List<MqSchTask> delTasks = new List<MqSchTask>();
+                        foreach (var task in tasks) {
+                            if (!allCodes.Add(task.workcode)) {
+                                delTasks.Add(task);
+                            }
+                            try {
+                                var dayDiff = (DateTime.Now - YUtil.UtcTimestampToLocalTime(task.pstime.time)).TotalDays;
+                                if (dayDiff > HmiConfig.TaskPersistMaxDays) {
+                                    delTasks.Add(task);
+                                }
+                            } catch (Exception e) {
+                                Logger.Error("检查过期任务失败", e);
+                            }
+                        }
+                        foreach (var delTask in delTasks) {
+                            tasks.Remove(delTask);
+                        }
+
+                        //更新缓存
+                        if (delTasks.Count > 0) {
+                            //ctx.SavePersist(new Persist(key, JsonConvert.SerializeObject(tasks)));
+                        }
+
                         MqSchTasksDict[pair.Key] = tasks;
+
                     }
                 }
             }
@@ -617,6 +643,8 @@ namespace HmiPro.Redux.Cores {
                     var title = "启动任务成功";
                     if (isAutoStart) {
                         title = "自动 " + title;
+                    } else {
+                        title = "手动 " + title;
                     }
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = title,
