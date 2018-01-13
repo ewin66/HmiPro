@@ -116,13 +116,12 @@ namespace HmiPro.ViewModels {
             tasks.AddRange(startListenMqDict.Values);
             await Task.Run(() => {
                 //等等所有任务完成
-                //一分钟超时
                 var timeout = 60000 * 10;
                 if (CmdOptions.GlobalOptions.MockVal) {
                     timeout = 3000;
                 }
-                var isTimeouted = Task.WaitAll(tasks.ToArray(), timeout);
-                if (!isTimeouted) {
+                var isStartedOk = Task.WaitAll(tasks.ToArray(), timeout);
+                if (!isStartedOk) {
                     App.Store.Dispatch(new SysActions.SetTopMessage("启动超时，请检查网络连接", Visibility.Visible));
                     if (CmdOptions.GlobalOptions.MockVal) {
                         App.Store.Dispatch(new SysActions.AppInitCompleted());
