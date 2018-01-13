@@ -394,9 +394,9 @@ namespace HmiPro.Redux.Cores {
                     var key = "task_" + pair.Key;
                     var tasks = ctx.Restore<ObservableCollection<MqSchTask>>(key);
                     if (tasks != null) {
-                        //过滤掉重复、过期任务等等
+                        //过滤掉重复、已完成、过期工单等等
                         HashSet<string> allCodes = new HashSet<string>();
-                        List<MqSchTask> delTasks = new List<MqSchTask>();
+                        HashSet<MqSchTask> delTasks = new HashSet<MqSchTask>();
                         foreach (var task in tasks) {
                             if (!allCodes.Add(task.workcode)) {
                                 delTasks.Add(task);
@@ -409,6 +409,11 @@ namespace HmiPro.Redux.Cores {
                             } catch (Exception e) {
                                 Logger.Error("检查过期任务失败", e);
                             }
+
+                            if (task.CompletedRate >= 1) {
+                                delTasks.Add(task);
+                            }
+
                         }
                         foreach (var delTask in delTasks) {
                             tasks.Remove(delTask);
@@ -416,7 +421,7 @@ namespace HmiPro.Redux.Cores {
 
                         //更新缓存
                         if (delTasks.Count > 0) {
-                            //ctx.SavePersist(new Persist(key, JsonConvert.SerializeObject(tasks)));
+                            ctx.SavePersist(new Persist(key, JsonConvert.SerializeObject(tasks)));
                         }
 
                         MqSchTasksDict[pair.Key] = tasks;
@@ -740,6 +745,10 @@ namespace HmiPro.Redux.Cores {
                 //更新当前任务完成进度
                 var completedAxis = taskDoing.MqSchTask.axisParam.Count(a => a.IsCompleted == true);
                 taskDoing.MqSchTask.CompletedRate = (float)completedAxis / taskDoing.MqSchTask.axisParam.Count;
+                //一个工单任务完成
+                if (taskDoing.MqSchTask.CompletedRate >= 1) {
+                    CompleteOneSchTask(machineCode, taskDoing.WorkCode);
+                }
                 uManu = new MqUploadManu() {
                     actualBeginTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
                     actualEndTime = YUtil.GetUtcTimestampMs(taskDoing.EndTime),
@@ -759,6 +768,7 @@ namespace HmiPro.Redux.Cores {
                     seqCode = taskDoing.MqSchAxis.seqcode,
                     status = "正常结束",
                 };
+
                 //重新初始化
                 taskDoing.Init();
             }
@@ -771,10 +781,7 @@ namespace HmiPro.Redux.Cores {
             }
             var uploadResult = await App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
             if (uploadResult) {
-                //一个工单任务完成
-                if (taskDoing.AxisCompleteRate >= 1) {
-                    CompleteOneSchTask(machineCode, taskDoing.WorkCode);
-                }
+
                 //显示完成消息
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                     Title = $"机台 {machineCode} 达成任务",
