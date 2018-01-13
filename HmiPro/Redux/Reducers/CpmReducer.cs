@@ -57,7 +57,6 @@ namespace HmiPro.Redux.Reducers {
             /// 开关状态
             /// </summary>
             public IDictionary<string, ObservableCollection<MachineState>> MachineStateDict;
-            public static readonly IDictionary<string, object> OeeLocks = new Dictionary<string, object>();
             /// <summary>
             /// 调机状态
             /// </summary>
@@ -82,6 +81,10 @@ namespace HmiPro.Redux.Reducers {
             /// 每个Ip对应的485状态表
             /// </summary>
             public IDictionary<string, Com485SingleStatus> Com485StatusDict;
+            /// <summary>
+            /// 最后打开报警灯时间
+            /// </summary>
+            public IDictionary<string, AlarmLightsState> AlarmLightsStateDict;
         }
 
         public static SimpleReducer<State> Create() {
@@ -96,6 +99,7 @@ namespace HmiPro.Redux.Reducers {
                 state.Com485StatusDict = new ConcurrentDictionary<string, Com485SingleStatus>();
                 state.StateSpeedDict = new ConcurrentDictionary<string, float>();
                 state.PreStateSpeedDict = new Dictionary<string, float>();
+                state.AlarmLightsStateDict = new ConcurrentDictionary<string, AlarmLightsState>();
                 state.Logger = LoggerHelper.CreateLogger(typeof(CpmReducer).ToString());
                 foreach (var pair in MachineConfig.MachineDict) {
                     var machineCode = pair.Key;
@@ -117,7 +121,7 @@ namespace HmiPro.Redux.Reducers {
                     state.NoteMeterDict[machineCode] = 0f;
                     state.PreStateSpeedDict[machineCode] = 0f;
                     state.SparkDiffDict[machineCode] = 0f;
-                    State.OeeLocks[machineCode] = new object();
+                    state.AlarmLightsStateDict[machineCode] = AlarmLightsState.Off;
                 }
                 //初始化所有ip的通讯状态为未知
                 foreach (var pair in MachineConfig.IpToMachineCodeDict) {
@@ -240,6 +244,14 @@ namespace HmiPro.Redux.Reducers {
             }
             return state;
         }
+    }
+
+    /// <summary>
+    /// 报警灯目前的工作状态
+    /// </summary>
+    public enum AlarmLightsState {
+        On,
+        Off
     }
 
     public class Com485SingleStatus : INotifyPropertyChanged {

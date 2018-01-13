@@ -398,9 +398,11 @@ namespace HmiPro.Redux.Cores {
                         HashSet<string> allCodes = new HashSet<string>();
                         HashSet<MqSchTask> delTasks = new HashSet<MqSchTask>();
                         foreach (var task in tasks) {
+                            //重复工单
                             if (!allCodes.Add(task.workcode)) {
                                 delTasks.Add(task);
                             }
+                            //过期工单
                             try {
                                 var dayDiff = (DateTime.Now - YUtil.UtcTimestampToLocalTime(task.pstime.time)).TotalDays;
                                 if (dayDiff > HmiConfig.TaskPersistMaxDays) {
@@ -409,23 +411,19 @@ namespace HmiPro.Redux.Cores {
                             } catch (Exception e) {
                                 Logger.Error("检查过期任务失败", e);
                             }
-
+                            //已经完成工单
                             if (task.CompletedRate >= 1) {
                                 delTasks.Add(task);
                             }
-
                         }
                         foreach (var delTask in delTasks) {
                             tasks.Remove(delTask);
                         }
-
                         //更新缓存
                         if (delTasks.Count > 0) {
                             ctx.SavePersist(new Persist(key, JsonConvert.SerializeObject(tasks)));
                         }
-
                         MqSchTasksDict[pair.Key] = tasks;
-
                     }
                 }
             }
@@ -781,7 +779,6 @@ namespace HmiPro.Redux.Cores {
             }
             var uploadResult = await App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
             if (uploadResult) {
-
                 //显示完成消息
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                     Title = $"机台 {machineCode} 达成任务",

@@ -39,6 +39,10 @@ namespace HmiPro.Redux.Cores {
         /// 订阅指令：执行逻辑
         /// </summary>
         readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new ConcurrentDictionary<string, Action<AppState, IAction>>();
+        /// <summary>
+        /// 最后打开报警灯时间
+        /// </summary>
+        public IDictionary<string, AlarmLightsState> AlarmLightsStateDict;
 
         //编码：采集参数
         //外部可能会对此进行采样
@@ -55,6 +59,7 @@ namespace HmiPro.Redux.Cores {
             foreach (var pair in MachineConfig.MachineDict) {
                 onlineFloatDict[pair.Key] = new ConcurrentDictionary<int, float>();
             }
+            AlarmLightsStateDict = App.Store.GetState().CpmState.AlarmLightsStateDict;
             actionExecDict[AlarmActions.OPEN_ALARM_LIGHTS] = doOpenAlarmLights;
             actionExecDict[AlarmActions.CLOSE_ALARM_LIGHTS] = doCloseAlarmLights;
             actionExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
@@ -123,10 +128,17 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         void doOpenAlarmLights(AppState state, IAction action) {
             var alarmAction = (AlarmActions.OpenAlarmLights)action;
+            //update: 2018-01-13
+            //如果报警灯还处于工作状态，则忽略此次报警响灯操作
+            if (AlarmLightsStateDict[alarmAction.MachineCode] == AlarmLightsState.On) {
+                return;
+            }
             if (MachineConfig.AlarmIpDict.TryGetValue(alarmAction.MachineCode, out var ip)) {
                 SmParamTcp?.OpenAlarm(ip);
+                AlarmLightsStateDict[alarmAction.MachineCode] = AlarmLightsState.On;
                 YUtil.SetTimeout(alarmAction.LightMs, () => {
                     SmParamTcp?.CloseAlarm(ip);
+                    AlarmLightsStateDict[alarmAction.MachineCode] = AlarmLightsState.Off;
                 });
             } else {
                 Logger.Error($"机台 {alarmAction.MachineCode} 没有报警 ip");
