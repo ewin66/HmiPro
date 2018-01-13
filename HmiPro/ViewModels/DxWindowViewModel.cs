@@ -215,9 +215,11 @@ namespace HmiPro.ViewModels {
                 }
                 Logger.Notify(logDetail);
                 DispatcherService.BeginInvoke(() => {
-                    INotification notification = NotifyNotificationService.CreatePredefinedNotification
-                                                (msg.Title, msg.Content, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                    //SystemSounds.Exclamation.Play();
+                    INotification notification = NotifyNotificationService.CreatePredefinedNotification(msg.Title, msg.Content, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    //Hmi没有播放声音设备
+                    if (HmiConfig.IsDevUserEnv) {
+                        SystemSounds.Exclamation.Play();
+                    }
                     notification.ShowAsync();
                 });
             }
