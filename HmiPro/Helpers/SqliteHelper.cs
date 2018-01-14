@@ -37,6 +37,19 @@ namespace HmiPro.Helpers {
             return new SqliteService(connection);
         }
 
+        /// <summary>
+        /// 异步操作Sqlite
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public static Task DoAsync(Action<SqliteService> action) {
+            return Task.Run(() => {
+                using (var ctx = CreateSqliteService()) {
+                    action(ctx);
+                }
+            });
+        }
+
 
     }
 

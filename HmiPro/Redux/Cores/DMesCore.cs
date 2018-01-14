@@ -807,11 +807,16 @@ namespace HmiPro.Redux.Cores {
             var mqTasks = MqSchTasksDict[machineCode];
             var removeTask = mqTasks.FirstOrDefault(t => t.workcode == workCode);
             //移除已经完成的某个工单任务
-            mqTasks.Remove(removeTask);
-            //更新缓存
-            using (var ctx = SqliteHelper.CreateSqliteService()) {
-                ctx.SavePersist(new Persist($"task_{machineCode}", JsonConvert.SerializeObject(mqTasks)));
-            }
+            //fixed: 2018-01-14
+            // mqTasks 是界面数据，所以要用 Dispatcher
+            Application.Current.Dispatcher.Invoke(() => {
+                mqTasks.Remove(removeTask);
+                //更新缓存
+                SqliteHelper.DoAsync(ctx => {
+                    ctx.SavePersist(new Persist($"task_{machineCode}", JsonConvert.SerializeObject(mqTasks)));
+                });
+            });
+
         }
     }
 }
