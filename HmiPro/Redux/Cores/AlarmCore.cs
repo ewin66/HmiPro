@@ -48,12 +48,11 @@ namespace HmiPro.Redux.Cores {
                 }
                 historyAlarms.Add(alarmAdd);
             });
-            //通知报警历史记录改变
             //打开报警灯5秒
             App.Store.Dispatch(new AlarmActions.OpenAlarmLights(machineCode, 5000));
             //打开屏幕
             App.Store.Dispatch(new SysActions.OpenScreen());
-            //显示消息通知，10秒间隔只显示一次
+            //显示消息通知，相同通知10秒间隔只显示一次
             App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                 Title = "警报",
                 Content = machineCode + ":" + alarmAdd.message,

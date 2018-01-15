@@ -68,13 +68,6 @@ namespace HmiPro.Redux.Actions {
         }
 
 
-        [Obsolete("请使用Plc报警配置")]
-        public enum OdAlarmType {
-            //从Plc中读取最大最小值
-            OdThresholdPlc = 1,
-            Unknown = 2
-        }
-
         public struct CheckCpmBomAlarm : IAction {
             public string Type() => CHECK_CPM_BOM_ALARM;
             public AlarmBomCheck AlarmBomCheck;

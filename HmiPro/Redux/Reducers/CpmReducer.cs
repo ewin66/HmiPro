@@ -180,17 +180,19 @@ namespace HmiPro.Redux.Reducers {
         /// <param name="state"></param>
         /// <param name="intervalSec"></param>
         private static void updateCom485Interval(State state, int intervalSec) {
-            Task.Run(() => {
-                YUtil.SetInterval(intervalSec * 1000, () => {
-                    foreach (var pair in state.Com485StatusDict) {
-                        Ping ping = new Ping();
-                        var ret = ping.Send(pair.Key, 2000);
-                        if (ret?.Status != IPStatus.Success) {
-                            pair.Value.Status = SmSingleStatus.Offline;
-                            pair.Value.Time = DateTime.Now;
-                        }
+            void update() {
+                foreach (var pair in state.Com485StatusDict) {
+                    Ping ping = new Ping();
+                    var ret = ping.Send(pair.Key, 2000);
+                    if (ret?.Status != IPStatus.Success) {
+                        pair.Value.Status = SmSingleStatus.Offline;
+                        pair.Value.Time = DateTime.Now;
                     }
-                });
+                }
+            }
+            Task.Run(() => {
+                update();
+                YUtil.SetInterval(intervalSec * 1000, update);
             });
         }
 
