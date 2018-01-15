@@ -71,5 +71,13 @@ namespace HmiPro.ViewModels.Sys {
             YUtil.SetMonitorInState(YUtil.MonitorState.MonitorStateStandBy);
         }
 
+        [Command(Name = "ShowNotificationCommand")]
+        public void ShowNotification() {
+            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                Title = "测试通知",
+                Content = "测试通知信息成功",
+            }));
+        }
+
     }
 }

@@ -88,12 +88,12 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
             actionExecDict[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
             actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompleteSchAxis;
-
-            App.Store.Subscribe((state, action) => {
-                if (actionExecDict.TryGetValue(state.Type, out var exec)) {
-                    exec(state, action);
-                }
-            });
+            App.Store.Subscribe(actionExecDict);
+            //App.Store.Subscribe((state, action) => {
+            //    if (actionExecDict.TryGetValue(state.Type, out var exec)) {
+            //        exec(state, action);
+            //    }
+            //});
             //绑定全局的值
             SchTaskDoingDict = App.Store.GetState().DMesState.SchTaskDoingDict;
             MqSchTasksDict = App.Store.GetState().DMesState.MqSchTasksDict;

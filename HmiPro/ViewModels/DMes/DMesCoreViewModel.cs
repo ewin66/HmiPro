@@ -81,11 +81,12 @@ namespace HmiPro.ViewModels.DMes {
             Com485Tab.BindSource(status);
 
             //订阅派发事件
-            unsubscribe = App.Store.Subscribe((state, action) => {
-                if (actionExecDict.TryGetValue(action.Type(), out var exec)) {
-                    exec(state, action);
-                }
-            });
+            //unsubscribe = App.Store.Subscribe((state, action) => {
+            //    if (actionExecDict.TryGetValue(action.Type(), out var exec)) {
+            //        exec(state, action);
+            //    }
+            //});
+            unsubscribe = App.Store.Subscribe(actionExecDict);
         }
 
         /// <summary>

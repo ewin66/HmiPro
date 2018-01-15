@@ -69,12 +69,13 @@ namespace HmiPro.Redux.Cores {
         public void Init() {
             //绑定
             historyAlarmsDict = App.Store.GetState().AlarmState.AlarmsDict;
-            //派发
-            App.Store.Subscribe((state, action) => {
-                if (actionsExecDict.TryGetValue(action.Type(), out var exec)) {
-                    exec(state, action);
-                }
-            });
+            //订阅
+            App.Store.Subscribe(actionsExecDict);
+            //App.Store.Subscribe((state, action) => {
+            //    if (actionsExecDict.TryGetValue(action.Type(), out var exec)) {
+            //        exec(state, action);
+            //    }
+            //});
         }
     }
 }

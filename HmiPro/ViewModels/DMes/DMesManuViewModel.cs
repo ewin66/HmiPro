@@ -102,11 +102,12 @@ namespace HmiPro.ViewModels.DMes {
             }
 
             //监听系统信息
-            unsubscribe = App.Store.Subscribe((state, action) => {
-                if (actionsExecDict.TryGetValue(action.Type(), out var exec)) {
-                    exec(state, action);
-                }
-            });
+            unsubscribe = App.Store.Subscribe(actionsExecDict);
+            //unsubscribe = App.Store.Subscribe((state, action) => {
+            //    if (actionsExecDict.TryGetValue(action.Type(), out var exec)) {
+            //        exec(state, action);
+            //    }
+            //});
         }
 
 

@@ -75,11 +75,13 @@ namespace HmiPro.ViewModels {
             actionsExecDict[SysActions.SET_TOP_MESSAGE] = doSetTopMessage;
             actionsExecDict[SysActions.APP_INIT_COMPLETED] = whenAppInitCompleted;
 
-            Store.Subscribe((state, aciton) => {
-                if (actionsExecDict.TryGetValue(aciton.Type(), out var exec)) {
-                    exec(state, aciton);
-                }
-            });
+            Store.Subscribe(actionsExecDict);
+
+            //Store.Subscribe((state, aciton) => {
+            //    if (actionsExecDict.TryGetValue(aciton.Type(), out var exec)) {
+            //        exec(state, aciton);
+            //    }
+            //});
 
             //每一分钟检查一次与服务器的连接
             Task.Run(() => {

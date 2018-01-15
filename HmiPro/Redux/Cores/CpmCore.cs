@@ -63,12 +63,12 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[AlarmActions.OPEN_ALARM_LIGHTS] = doOpenAlarmLights;
             actionExecDict[AlarmActions.CLOSE_ALARM_LIGHTS] = doCloseAlarmLights;
             actionExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
-
-            App.Store.Subscribe((state, action) => {
-                if (actionExecDict.TryGetValue(state.Type, out var exec)) {
-                    exec(state, action);
-                }
-            });
+            App.Store.Subscribe(actionExecDict);
+            //App.Store.Subscribe((state, action) => {
+            //    if (actionExecDict.TryGetValue(state.Type, out var exec)) {
+            //        exec(state, action);
+            //    }
+            //});
 
         }
 
