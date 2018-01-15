@@ -22,7 +22,7 @@ namespace HmiPro.ViewModels.Sys {
         /// </summary>
         public virtual ObservableCollection<Navigator> Navigators { get; set; } = new ObservableCollection<Navigator>();
         public virtual INavigationService NavigationSerivce => null;
-        public static string NavMachineCodeInDoing;
+
 
         public NavigatorViewModel() {
             foreach (var pair in MachineConfig.MachineDict) {
@@ -30,7 +30,7 @@ namespace HmiPro.ViewModels.Sys {
                     MachineCode = pair.Key,
                     Url = pair.Key
                 };
-                if (nav.MachineCode == NavMachineCodeInDoing) {
+                if (nav.MachineCode == App.Store.GetState().ViewStoreState.NavView.DMesSelectedMachineCode) {
                     nav.IsSelected = true;
                 }
                 Navigators.Add(nav);
@@ -45,7 +45,7 @@ namespace HmiPro.ViewModels.Sys {
         private bool isSelected;
 
         public bool IsSelected {
-            get { return isSelected; }
+            get => isSelected;
             set {
                 if (isSelected != value) {
                     isSelected = value;

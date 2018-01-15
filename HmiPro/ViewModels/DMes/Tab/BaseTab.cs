@@ -19,7 +19,7 @@ namespace HmiPro.ViewModels.DMes.Tab {
             set {
                 if (value != header) {
                     header = value;
-                    OnPropertyChanged(nameof(Header));
+                    RaisePropertyChanged(nameof(Header));
 
                 }
             }
@@ -30,7 +30,7 @@ namespace HmiPro.ViewModels.DMes.Tab {
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+        protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }

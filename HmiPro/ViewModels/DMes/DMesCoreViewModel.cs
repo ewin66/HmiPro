@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.POCO;
+using HmiPro.Annotations;
 using HmiPro.Config;
 using HmiPro.Redux.Actions;
+using HmiPro.Redux.Cores;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
 using HmiPro.ViewModels.DMes.Tab;
@@ -23,10 +27,14 @@ namespace HmiPro.ViewModels.DMes {
     /// <date>2017-12-27</date>
     /// </summary>
     [POCOViewModel]
-    public class DMesCoreViewModel : IDocumentContent {
+    public class DMesCoreViewModel : IDocumentContent, INotifyPropertyChanged {
         public virtual IDispatcherService DispatcherService => null;
         public virtual INavigationService NavigationSerivce => null;
         public virtual string MachineCode { get; set; }
+
+
+        public virtual DMesCoreViewStore ViewStore { get; set; }
+
         public virtual ObservableCollection<BaseTab> ViewSource { get; set; } = new ObservableCollection<BaseTab>();
         public virtual CpmsTab CpmsTab { get; set; } = new CpmsTab() { Header = "参数" };
         public virtual SchTaskTab SchTaskTab { get; set; } = new SchTaskTab() { Header = "任务" };
@@ -49,7 +57,6 @@ namespace HmiPro.ViewModels.DMes {
             ViewSource.Add(ScanMaterialTab);
             ViewSource.Add(Com485Tab);
 
-            actionExecDict[AlarmActions.UPDATE_HISTORY_ALARMS] = whenUpdateHistoryAlarms;
             actionExecDict[DMesActions.RFID_ACCPET] = whenRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccpet;
         }
@@ -60,12 +67,12 @@ namespace HmiPro.ViewModels.DMes {
             //绑定实时参数
             var onlineCpmsDict = App.Store.GetState().CpmState.OnlineCpmsDict;
             CpmsTab.BindSource(MachineCode, onlineCpmsDict[MachineCode]);
-            //初始化报警
+            //绑定报警
             var alarmsDict = App.Store.GetState().AlarmState.AlarmsDict;
-            AlarmTab.Init(alarmsDict[MachineCode]);
+            AlarmTab.BindSource(MachineCode, alarmsDict[MachineCode]);
             //绑定任务
             var mqTaskDict = App.Store.GetState().DMesState.MqSchTasksDict;
-            SchTaskTab.BindSource(mqTaskDict[MachineCode]);
+            SchTaskTab.BindSource(MachineCode, mqTaskDict[MachineCode]);
             //初始化人员卡
             var mqEmpRfids = App.Store.GetState().DMesState.MqEmpRfidDict;
             SchTaskTab.InitEmployees(mqEmpRfids[MachineCode]);
@@ -78,14 +85,10 @@ namespace HmiPro.ViewModels.DMes {
             var com485Dict = App.Store.GetState().CpmState.Com485StatusDict;
             var status = com485Dict.Where(c => MachineConfig.MachineCodeToIpsDict[MachineCode].Contains(c.Key))
                 .Select(c => c.Value).ToList();
-            Com485Tab.BindSource(status);
+            Com485Tab.BindSource(MachineCode, status);
+            //绑定选中的tab
+            ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[MachineCode];
 
-            //订阅派发事件
-            //unsubscribe = App.Store.Subscribe((state, action) => {
-            //    if (actionExecDict.TryGetValue(action.Type(), out var exec)) {
-            //        exec(state, action);
-            //    }
-            //});
             unsubscribe = App.Store.Subscribe(actionExecDict);
         }
 
@@ -150,9 +153,10 @@ namespace HmiPro.ViewModels.DMes {
 
         [Command(Name = "NavigateCommand")]
         public void Navigate(Navigator nav) {
-            if (nav.MachineCode != NavigatorViewModel.NavMachineCodeInDoing) {
+            var navViewStore = App.Store.GetState().ViewStoreState.NavView;
+            if (nav.MachineCode != navViewStore.DMesSelectedMachineCode) {
+                App.Store.Dispatch(new ViewStoreActions.ChangeDMesSelectedMachineCode(nav.MachineCode));
                 var vm = DMesCoreViewModel.Create(nav.MachineCode);
-                NavigatorViewModel.NavMachineCodeInDoing = nav.MachineCode;
                 NavigationSerivce.Navigate("DMesCoreView", vm, null, this, false);
             }
 
@@ -172,5 +176,12 @@ namespace HmiPro.ViewModels.DMes {
 
         public IDocumentOwner DocumentOwner { get; set; }
         public object Title { get; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

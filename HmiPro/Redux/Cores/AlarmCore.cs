@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using HmiPro.Config;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Effects;
@@ -39,14 +40,15 @@ namespace HmiPro.Redux.Cores {
             }
             var historyAlarms = historyAlarmsDict[machineCode];
             var alarmRemove = historyAlarms.FirstOrDefault(a => a.code == alarmAdd.code);
-            AlarmActions.UpdateAction updateAction = AlarmActions.UpdateAction.Add;
-            if (alarmRemove != null) {
-                updateAction = AlarmActions.UpdateAction.Change;
-                historyAlarms.Remove(alarmRemove);
-            }
-            historyAlarms.Add(alarmAdd);
+            //fixed: 2018-01-15
+            // 直接调用 UI Dispatcher 来更新
+            Application.Current.Dispatcher.Invoke(() => {
+                if (alarmRemove != null) {
+                    historyAlarms.Remove(alarmRemove);
+                }
+                historyAlarms.Add(alarmAdd);
+            });
             //通知报警历史记录改变
-            App.Store.Dispatch(new AlarmActions.UpdateHistoryAlarms(machineCode, updateAction, alarmAdd, alarmRemove));
             //打开报警灯5秒
             App.Store.Dispatch(new AlarmActions.OpenAlarmLights(machineCode, 5000));
             //打开屏幕
@@ -71,11 +73,7 @@ namespace HmiPro.Redux.Cores {
             historyAlarmsDict = App.Store.GetState().AlarmState.AlarmsDict;
             //订阅
             App.Store.Subscribe(actionsExecDict);
-            //App.Store.Subscribe((state, action) => {
-            //    if (actionsExecDict.TryGetValue(action.Type(), out var exec)) {
-            //        exec(state, action);
-            //    }
-            //});
+            ;
         }
     }
 }

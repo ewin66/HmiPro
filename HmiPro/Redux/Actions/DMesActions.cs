@@ -52,6 +52,7 @@ namespace HmiPro.Redux.Actions {
         }
 
 
+
         public struct RfidAccpet : IAction {
             public string Type() => RFID_ACCPET;
             public RfidWhere RfidWhere;
@@ -69,6 +70,17 @@ namespace HmiPro.Redux.Actions {
             }
         }
 
+        public struct StartAxisSuccess : IAction {
+            public string Type() => START_SCH_TASK_AXIS_SUCCESS;
+            public string MachineCode;
+            public string AxisCode;
+
+            public StartAxisSuccess(string machineCode, string axisCode) {
+                MachineCode = machineCode;
+                AxisCode = axisCode;
+            }
+
+        }
 
         public struct StartSchTaskAxis : IAction {
             public string Type() => START_SCH_TASK_AXIS;

@@ -76,13 +76,6 @@ namespace HmiPro.ViewModels {
             actionsExecDict[SysActions.APP_INIT_COMPLETED] = whenAppInitCompleted;
 
             Store.Subscribe(actionsExecDict);
-
-            //Store.Subscribe((state, aciton) => {
-            //    if (actionsExecDict.TryGetValue(aciton.Type(), out var exec)) {
-            //        exec(state, aciton);
-            //    }
-            //});
-
             //每一分钟检查一次与服务器的连接
             Task.Run(() => {
                 YUtil.SetInterval(60000, () => {
@@ -104,23 +97,23 @@ namespace HmiPro.ViewModels {
             if (CmdOptions.GlobalOptions.MockVal) {
                 foreach (var pair in MachineConfig.MachineDict) {
                     var machineCode = pair.Key;
-                    Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode);
+                    //Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode);
                     YUtil.SetTimeout(3000, () => {
                         Mocks.MockDispatchers.DispatchMockAlarm(33);
                     });
 
-                    YUtil.SetTimeout(6000, () => {
-                        Mocks.MockDispatchers.DispatchMqMockScanMaterial(machineCode);
-                    });
+                    //YUtil.SetTimeout(6000, () => {
+                    //    Mocks.MockDispatchers.DispatchMqMockScanMaterial(machineCode);
+                    //});
 
-                    YUtil.SetTimeout(7000, () => {
-                        Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
-                        YUtil.SetTimeout(15000, () => {
-                            Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
-                        });
-                    });
+                    //YUtil.SetTimeout(7000, () => {
+                    //    Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
+                    //    YUtil.SetTimeout(15000, () => {
+                    //        Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
+                    //    });
+                    //});
 
-                    YUtil.SetTimeout(10000, () => {
+                    YUtil.SetTimeout(3000, () => {
                         for (int i = 0; i < 5; i++) {
                             MockDispatchers.DispatchMockSchTask(machineCode, i);
                         }

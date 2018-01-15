@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DevExpress.Xpf.CodeView;
+using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
 
 namespace HmiPro.ViewModels.DMes.Tab {
@@ -13,10 +14,12 @@ namespace HmiPro.ViewModels.DMes.Tab {
     /// </summary>
     public class Com485Tab : BaseTab {
 
-        public virtual ObservableCollection<Com485SingleStatus> Com485Status { get; set; }
+        public ObservableCollection<Com485SingleStatus> Com485Status { get; set; }
+        public DMesCoreViewStore ViewStore { get; set; }
 
-        public void BindSource(IList<Com485SingleStatus> status) {
+        public void BindSource(string machineCode, IList<Com485SingleStatus> status) {
             Com485Status = new ObservableCollection<Com485SingleStatus>();
+            ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[machineCode];
             foreach (var s in status) {
                 Com485Status.Add(s);
             }

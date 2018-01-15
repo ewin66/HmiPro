@@ -72,6 +72,7 @@ namespace HmiPro.ViewModels {
 
         async void afterConfigLoaded() {
             //== 初始化部分State
+            App.Store.Dispatch(new ViewStoreActions.Init());
             App.Store.Dispatch(new CpmActions.Init());
             App.Store.Dispatch(new AlarmActions.Init());
             App.Store.Dispatch(new OeeActions.Init());
@@ -86,8 +87,6 @@ namespace HmiPro.ViewModels {
             UnityIocService.ResolveDepend<CpmCore>().Init();
             UnityIocService.ResolveDepend<OeeCore>().Init();
             await UnityIocService.ResolveDepend<SchCore>().Init();
-
-
 
             var starHttpSystem = App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
             var startCpmServer = App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
@@ -191,8 +190,7 @@ namespace HmiPro.ViewModels {
         [Command(Name = "NavigateCommand")]
         public void Navigate(string viewName) {
             if (viewName == "DMesCoreView") {
-                var vm = DMesCoreViewModel.Create(MachineConfig.MachineDict.FirstOrDefault().Key);
-                NavigatorViewModel.NavMachineCodeInDoing = vm.MachineCode;
+                var vm = DMesCoreViewModel.Create(App.Store.GetState().ViewStoreState.NavView.DMesSelectedMachineCode);
                 NavigationSerivce.Navigate("DMesCoreView", vm, null, this, true);
             } else {
                 NavigationSerivce.Navigate(viewName, null, this, true);

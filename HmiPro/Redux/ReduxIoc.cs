@@ -30,7 +30,8 @@ namespace HmiPro.Redux {
                 .Part(s => s.MqState, MqReducer.Create())
                 .Part(s => s.AlarmState, AlarmReducer.Create())
                 .Part(s => s.OeeState, OeeReducer.Create())
-                .Part(s=>s.DMesState,DMesReducer.Create())
+                .Part(s => s.DMesState, DMesReducer.Create())
+                .Part(s => s.ViewStoreState, ViewStoreReducer.Create())
             ;
 
 
@@ -50,6 +51,7 @@ namespace HmiPro.Redux {
             UnityIocService.RegisterGlobalDepend<SchCore>();
             UnityIocService.RegisterGlobalDepend<OeeCore>();
             UnityIocService.RegisterGlobalDepend<AlarmCore>();
+            UnityIocService.RegisterGlobalDepend<ViewStoreCore>();
         }
 
     }

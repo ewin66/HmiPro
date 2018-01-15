@@ -14,10 +14,12 @@ namespace HmiPro.ViewModels.DMes.Tab {
     /// <author>ychost</author>
     /// </summary>
     public class AlarmTab : BaseTab {
-        public virtual ObservableCollection<MqAlarm> Alarms { get; set; } = new ObservableCollection<MqAlarm>();
+        public ObservableCollection<MqAlarm> Alarms { get; set; }
+        public DMesCoreViewStore ViewStore { get; set; }
 
-        public void Init(ObservableCollection<MqAlarm> alarms) {
-            Alarms.AddRange(alarms);
+        public void BindSource(string machinieCode, ObservableCollection<MqAlarm> alarms) {
+            Alarms = alarms;
+            ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[machinieCode];
         }
     }
 }

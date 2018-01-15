@@ -9,7 +9,6 @@
              xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
              xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
              mc:Ignorable="d"
-         
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <Style x:Key="BackgroundStyle" BasedOn="{StaticResource {dxgt:GridRowThemeKey ResourceKey=RowStyle}}" TargetType="{x:Type dxg:RowControl}">
@@ -17,7 +16,7 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <dxg:GridControl ItemsSource="{Binding Path=TaskAxisList}">
+    <dxg:GridControl ItemsSource="{Binding Path=TaskAxisList}" SelectedItem="{Binding Path=ViewStore.AxisSelectedRow}">
         <dxg:GridControl.View>
             <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False"
                              AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False"  

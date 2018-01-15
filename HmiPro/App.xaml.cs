@@ -95,6 +95,8 @@ namespace HmiPro {
             syncTime(canSync);
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
+            Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
+            Logger.Debug("浮点精度："+HmiConfig.MathRound);
 
         }
 

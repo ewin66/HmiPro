@@ -35,7 +35,7 @@
             </Grid.Resources>
             <sys:NavigatorView Grid.Row="0"/>
 
-            <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=ViewSource}" ItemHeaderTemplate="{StaticResource TabHeader}" >
+            <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=ViewSource}" ItemHeaderTemplate="{StaticResource TabHeader}" SelectedIndex="{Binding Path=ViewStore.TabSelectedIndex}" >
                 <dx:DXTabControl.Resources>
                     <!--采集参数页面-->
                     <DataTemplate DataType="{x:Type Model:CpmsTab}">
@@ -78,7 +78,7 @@
                                     </TextBlock>
                                 </DockPanel>
 
-                                <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" ItemHeaderTemplate="{StaticResource TabHeader}" >
+                                <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" SelectedIndex="{Binding Path=ViewStore.TaskTabSelectedIndex}" ItemHeaderTemplate="{StaticResource TabHeader}" >
                                     <dx:DXTabControl.Resources>
                                         <DataTemplate DataType="{x:Type dMes1:SchTaskAxisViewModel}">
                                             <dMes:SchTaskAxisView DataContext="{Binding Path=.}"/>
@@ -157,7 +157,7 @@
                                     <Setter Property="FontSize" Value="13"></Setter>
                                 </Style>
                             </Grid.Resources>
-                            <dxg:GridControl ItemsSource="{Binding Path=Alarms}" x:Name="AlarmGridControl">
+                            <dxg:GridControl ItemsSource="{Binding Path=Alarms}" x:Name="AlarmGridControl" SelectedItem="{Binding Path=ViewStore.AlarmSelectedRow}">
                                 <dxg:GridControl.View>
                                     <dxg:TableView  AllowResizing="False"  ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
                                 </dxg:GridControl.View>
@@ -182,7 +182,7 @@
                                     <Setter Property="FontSize" Value="13"></Setter>
                                 </Style>
                             </Grid.Resources>
-                            <dxg:GridControl ItemsSource="{Binding Path=Com485Status}" x:Name="AlarmGridControl">
+                            <dxg:GridControl ItemsSource="{Binding Path=Com485Status}" x:Name="AlarmGridControl" SelectedItem="{Binding Path=ViewStore.Com485SelectedRow}">
                                 <dxg:GridControl.View>
                                     <dxg:TableView  AllowResizing="False"  ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
                                 </dxg:GridControl.View>

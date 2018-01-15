@@ -132,7 +132,9 @@ namespace HmiPro.Redux.Patches {
                     listener(state, latestAction);
                 }
                 return () => {
-                    listeners -= listener;
+                    lock (storeLock) {
+                        listeners -= listener;
+                    }
                 };
             }
         }

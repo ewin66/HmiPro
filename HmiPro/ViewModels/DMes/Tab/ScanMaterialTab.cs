@@ -20,7 +20,7 @@ namespace HmiPro.ViewModels.DMes.Tab {
             set {
                 if (mqScanMaterial != value) {
                     mqScanMaterial = value;
-                    OnPropertyChanged(nameof(MqScanMaterial));
+                    RaisePropertyChanged(nameof(MqScanMaterial));
                 }
             }
         }

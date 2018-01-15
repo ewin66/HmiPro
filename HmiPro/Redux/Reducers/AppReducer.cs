@@ -15,6 +15,7 @@ namespace HmiPro.Redux.Reducers {
         public DMesReducer.State DMesState;
         public AlarmReducer.State AlarmState;
         public OeeReducer.State OeeState;
+        public ViewStoreReducer.Store ViewStoreState;
         /// <summary>
         /// 保存所有执行的动作，
         /// Actions:ExectedTime

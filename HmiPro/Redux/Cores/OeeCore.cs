@@ -32,12 +32,6 @@ namespace HmiPro.Redux.Cores {
 
         public void Init() {
             App.Store.Subscribe(actionExecDict);
-            //App.Store.Subscribe((state, action) => {
-            //    if (actionExecDict.TryGetValue(action.Type(), out var exec)) {
-            //        exec(state, action);
-            //    }
-            //});
-
         }
         /// <summary>
         /// 计算Oee

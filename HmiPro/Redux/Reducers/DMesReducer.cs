@@ -22,7 +22,8 @@ namespace HmiPro.Redux.Reducers {
             public IDictionary<string, MqScanMaterial> MqScanMaterialDict;
             public string MachineCode;
             //人员卡信息
-            public IDictionary<string,List<MqEmpRfid>> MqEmpRfidDict;
+            public IDictionary<string, List<MqEmpRfid>> MqEmpRfidDict;
+           
         }
 
         public static SimpleReducer<State> Create() {
@@ -35,7 +36,7 @@ namespace HmiPro.Redux.Reducers {
                     foreach (var pair in MachineConfig.MachineDict) {
                         state.SchTaskDoingDict[pair.Key] = new SchTaskDoing();
                         state.MqSchTasksDict[pair.Key] = new ObservableCollection<MqSchTask>();
-                        state.MqEmpRfidDict[pair.Key]= new List<MqEmpRfid>();
+                        state.MqEmpRfidDict[pair.Key] = new List<MqEmpRfid>();
                     }
                     return state;
                 });

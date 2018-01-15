@@ -6,52 +6,59 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DevExpress.Mvvm.UI;
+using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels.DMes.Tab {
-    public class SchTaskTab : BaseTab,INotifyPropertyChanged {
-        public virtual ObservableCollection<MqSchTask> MqSchTasks { get; set; }
+    public class SchTaskTab : BaseTab, INotifyPropertyChanged {
+        public ObservableCollection<MqSchTask> MqSchTasks { get; set; }
         public ObservableCollection<BaseTab> MqSchTaskDetails { get; set; } = new ObservableCollection<BaseTab>();
-        private MqSchTask schTask;
+        private MqSchTask _selectedTask;
 
         public string EmployeeStr { get; set; } = "/";
         private HashSet<string> employees = new HashSet<string>();
 
         public MqSchTask SelectedTask {
-            get => schTask;
+            get => _selectedTask;
             set {
-                if (schTask != value && value != null) {
+                if (_selectedTask != value && value != null) {
                     MqSchTaskDetails.Clear();
-                    schTask = value;
-                    SchTaskAxisViewModel = SchTaskAxisViewModel.Create(schTask.maccode, schTask.workcode, schTask.axisParam);
+                    _selectedTask = value;
+                    SchTaskAxisViewModel = SchTaskAxisViewModel.Create(_selectedTask.maccode, _selectedTask.workcode, _selectedTask.axisParam);
                     SchTaskAxisViewModel.Header = "任务";
-                    OnPropertyChanged(nameof(SchTaskAxisViewModel));
+                    RaisePropertyChanged(nameof(SchTaskAxisViewModel));
 
-                    CraftBomViewModel = CraftBomViewModel.Create(schTask.maccode, schTask.workcode, schTask.bom);
+                    CraftBomViewModel = CraftBomViewModel.Create(_selectedTask.maccode, _selectedTask.workcode, _selectedTask.bom);
                     CraftBomViewModel.Header = "Bom";
-                    OnPropertyChanged(nameof(CraftBomViewModel));
+                    RaisePropertyChanged(nameof(CraftBomViewModel));
 
                     MqSchTaskDetails.Add(SchTaskAxisViewModel);
                     MqSchTaskDetails.Add(CraftBomViewModel);
+                    RaisePropertyChanged(nameof(SelectedTask));
 
-                    OnPropertyChanged(nameof(SelectedTask));
+                    ViewStore.TaskSelectedWorkCode = _selectedTask.workcode;
+
                 }
             }
         }
 
         public SchTaskAxisViewModel SchTaskAxisViewModel { get; set; }
         public CraftBomViewModel CraftBomViewModel { get; set; }
+        public string MachineCode { get; set; }
+        public DMesCoreViewStore ViewStore { get; set; }
 
         /// <summary>
         /// 初始化任务数据
         /// </summary>
+        /// <param name="machineCode"></param>
         /// <param name="mqSchTasks">排产任务</param>
-        public void BindSource(ObservableCollection<MqSchTask> mqSchTasks) {
+        public void BindSource(string machineCode, ObservableCollection<MqSchTask> mqSchTasks) {
+            MachineCode = machineCode;
             MqSchTasks = mqSchTasks;
-            if (mqSchTasks.Count > 0) {
-                SelectedTask = mqSchTasks.FirstOrDefault();
-            }
+            //设置选中的工单
+            ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[machineCode];
+            SelectedTask = mqSchTasks.FirstOrDefault(t => t.workcode == ViewStore.TaskSelectedWorkCode) ?? mqSchTasks.FirstOrDefault();
         }
 
         /// <summary>
@@ -65,7 +72,7 @@ namespace HmiPro.ViewModels.DMes.Tab {
             } else {
                 EmployeeStr = "/";
             }
-            OnPropertyChanged(nameof(EmployeeStr));
+            RaisePropertyChanged(nameof(EmployeeStr));
         }
 
         /// <summary>
@@ -79,7 +86,7 @@ namespace HmiPro.ViewModels.DMes.Tab {
             } else {
                 EmployeeStr = "/";
             }
-            OnPropertyChanged(nameof(EmployeeStr));
+            RaisePropertyChanged(nameof(EmployeeStr));
         }
 
         /// <summary>

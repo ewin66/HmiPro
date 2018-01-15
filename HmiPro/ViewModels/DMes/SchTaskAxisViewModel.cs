@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.POCO;
@@ -17,6 +18,7 @@ namespace HmiPro.ViewModels.DMes {
         public virtual string MachineCode { get; set; }
         public virtual string WorkCode { get; set; }
         public virtual IList<MqTaskAxis> TaskAxisList { get; set; }
+        public DMesCoreViewStore ViewStore { get; set; }
 
         public SchTaskAxisViewModel() {
 
@@ -26,6 +28,8 @@ namespace HmiPro.ViewModels.DMes {
             MachineCode = machineCode;
             WorkCode = workCode;
             TaskAxisList = taskAxisList;
+            ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[machineCode];
+
         }
 
         [Command(Name = "StartTaskAxisDoingCommand")]

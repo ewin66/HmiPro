@@ -88,12 +88,9 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
             actionExecDict[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
             actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompleteSchAxis;
+
             App.Store.Subscribe(actionExecDict);
-            //App.Store.Subscribe((state, action) => {
-            //    if (actionExecDict.TryGetValue(state.Type, out var exec)) {
-            //        exec(state, action);
-            //    }
-            //});
+
             //绑定全局的值
             SchTaskDoingDict = App.Store.GetState().DMesState.SchTaskDoingDict;
             MqSchTasksDict = App.Store.GetState().DMesState.MqSchTasksDict;
@@ -107,6 +104,7 @@ namespace HmiPro.Redux.Cores {
                 RestoreTask();
             }
         }
+
 
         /// <summary>
         /// 完成某个排产轴任务
@@ -642,7 +640,7 @@ namespace HmiPro.Redux.Cores {
                 if (hasFound) {
                     //设置其它任务不能启动
                     SetOtherTaskAxisCanStart(machineCode, axisCode, false);
-                    App.Store.Dispatch(new SimpleAction(DMesActions.START_SCH_TASK_AXIS_SUCCESS));
+                    App.Store.Dispatch(new DMesActions.StartAxisSuccess(machineCode, axisCode));
                     var title = "启动任务成功";
                     if (isAutoStart) {
                         title = "自动 " + title;
@@ -810,6 +808,10 @@ namespace HmiPro.Redux.Cores {
             //fixed: 2018-01-14
             // mqTasks 是界面数据，所以要用 Dispatcher
             Application.Current.Dispatcher.Invoke(() => {
+                //先清空轴任务数据
+                removeTask.axisParam?.Clear();
+                removeTask.bom?.Clear();
+                //删除工单任务
                 mqTasks.Remove(removeTask);
                 //更新缓存
                 SqliteHelper.DoAsync(ctx => {

@@ -192,8 +192,10 @@
     <Compile Include="Redux\Actions\MqActions.cs" />
     <Compile Include="Redux\Actions\OeeActions.cs" />
     <Compile Include="Redux\Actions\SysActions.cs" />
+    <Compile Include="Redux\Actions\ViewStoreActions.cs" />
     <Compile Include="Redux\Cores\AlarmCore.cs" />
     <Compile Include="Redux\Cores\SchCore.cs" />
+    <Compile Include="Redux\Cores\ViewStoreCore.cs" />
     <Compile Include="Redux\Effects\CpmEffects.cs" />
     <Compile Include="Redux\Effects\DbEffects.cs" />
     <Compile Include="Redux\Effects\MockEffects.cs" />
@@ -201,6 +203,7 @@
     <Compile Include="Redux\Effects\SysEffects.cs" />
     <Compile Include="Redux\Models\AlarmBomCheck.cs" />
     <Compile Include="Redux\Models\Cpm.cs" />
+    <Compile Include="Redux\Models\ViewStoreModels.cs" />
     <Compile Include="Redux\Models\MachineState.cs" />
     <Compile Include="Redux\Models\MongoDoc.cs" />
     <Compile Include="Redux\Models\MqAlarm.cs" />
@@ -222,6 +225,7 @@
     <Compile Include="Redux\Reducers\MqReducer.cs" />
     <Compile Include="Redux\Reducers\OeeReducer.cs" />
     <Compile Include="Redux\Reducers\SysReducer.cs" />
+    <Compile Include="Redux\Reducers\ViewStoreReducer.cs" />
     <Compile Include="Redux\ReduxIoc.cs" />
     <Compile Include="Redux\Reducers\CpmReducer.cs" />
     <Compile Include="Redux\Cores\DMesCore.cs" />
@@ -700,7 +704,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

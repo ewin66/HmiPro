@@ -69,7 +69,7 @@ namespace HmiPro.ViewModels.DMes {
             foreach (var pair in alarmsDict) {
                 var machineCode = pair.Key;
                 if (AlarmTabDict.TryGetValue(machineCode, out var tab)) {
-                    tab.Init(pair.Value);
+                    tab.BindSource(machineCode, pair.Value);
                 }
             }
 
@@ -83,7 +83,7 @@ namespace HmiPro.ViewModels.DMes {
             var mqTasks = App.Store.GetState().DMesState.MqSchTasksDict;
             foreach (var pair in mqTasks) {
                 if (SchTaskTabDict.TryGetValue(pair.Key, out var tab)) {
-                    tab.BindSource(pair.Value);
+                    //tab.BindSource(pair.Value);
                 }
             }
             //初始化人员卡信息
@@ -103,11 +103,7 @@ namespace HmiPro.ViewModels.DMes {
 
             //监听系统信息
             unsubscribe = App.Store.Subscribe(actionsExecDict);
-            //unsubscribe = App.Store.Subscribe((state, action) => {
-            //    if (actionsExecDict.TryGetValue(action.Type(), out var exec)) {
-            //        exec(state, action);
-            //    }
-            //});
+
         }
 
 
