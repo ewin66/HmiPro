@@ -8,8 +8,9 @@
              xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
              xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
              xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="1080">
     <UserControl.Resources>
         <Style x:Key="BackgroundStyle" BasedOn="{StaticResource {dxgt:GridRowThemeKey ResourceKey=RowStyle}}" TargetType="{x:Type dxg:RowControl}">
             <Setter Property="Background" Value="Red">
@@ -27,7 +28,15 @@
             <dxg:GridColumn Width="0.5*" Header="序号" FieldName="Index"/>
             <dxg:GridColumn Width="*" Header="长度" FieldName="length"/>
             <dxg:GridColumn Width="*" Header="颜色" FieldName="color" />
-            <dxg:GridColumn Width="*" Header="完成率" FieldName="CompletedRateStr"/>
+            <dxg:GridColumn Width="*" Header="完成率" FieldName="CompletedRate"  >
+                <dxg:GridColumn.EditSettings>
+                    <dxe:ProgressBarEditSettings ContentDisplayMode="Value" DisplayFormat="{}{0:P}"  Orientation="Horizontal" Maximum="1" SmallStep="0.01" LargeStep="0.05" >
+                        <dxe:ProgressBarEditSettings.StyleSettings>
+                            <dxe:ProgressBarStyleSettings/>
+                        </dxe:ProgressBarEditSettings.StyleSettings>
+                    </dxe:ProgressBarEditSettings>
+                </dxg:GridColumn.EditSettings>
+            </dxg:GridColumn>
             <dxg:GridColumn Width="*" Header="状态" FieldName="State"/>
             <dxg:GridColumn Header="操作" Width="2*" FieldName="CanStart">
                 <dxg:GridColumn.DisplayTemplate>

@@ -312,7 +312,10 @@ namespace HmiPro.Redux.Models {
             get => _completeRate;
             set {
                 if (_completeRate != value) {
+
                     _completeRate = value;
+                    CompletedRatePercent = value * 100;
+                    OnPropertyChanged(nameof(CompletedRatePercent));
                     OnPropertyChanged(nameof(CompletedRate));
                     OnPropertyChanged(nameof(CompletedRateStr));
                     //if (_completeRate > 0.9) {
@@ -325,6 +328,8 @@ namespace HmiPro.Redux.Models {
                 }
             }
         }
+
+        public float CompletedRatePercent { get; set; }
 
         public string CompletedRateStr => (CompletedRate * 100).ToString("0.00") + "%";
 

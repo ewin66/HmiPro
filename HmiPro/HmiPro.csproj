@@ -245,10 +245,6 @@
       <DependentUpon>DMesCoreView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\DMes\DMesCoreViewModel.cs" />
-    <Compile Include="Views\DMes\DMesManuView.xaml.cs">
-      <DependentUpon>DMesManuView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ViewModels\DMes\DMesManuViewModel.cs" />
     <Compile Include="Views\DMes\GrafanaView.xaml.cs">
       <DependentUpon>GrafanaView.xaml</DependentUpon>
     </Compile>
@@ -319,10 +315,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DMes\DMesCoreView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\DMes\DMesManuView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

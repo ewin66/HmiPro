@@ -39,7 +39,7 @@ namespace HmiPro.Redux.Services {
                         HttpListener.Start();
                         HttpListener.BeginGetContext(processHttpContext, null);
                         return true;
-                    } catch (Exception e) {
+                    } catch {
                         return false;
                     }
                 });

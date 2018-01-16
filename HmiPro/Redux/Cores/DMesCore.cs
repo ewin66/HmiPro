@@ -121,7 +121,7 @@ namespace HmiPro.Redux.Cores {
                             task?.bom?.Clear();
                         }
                         state.DMesState.MqSchTasksDict[machineCode]?.Clear();
-                        state.DMesState.SchTaskDoingDict[machineCode]?.Init();
+                        state.DMesState.SchTaskDoingDict[machineCode]?.Clear();
                         state.MqState.MqSchTaskAccpetDict[machineCode] = null;
                         state.ViewStoreState.DMewCoreViewDict[machineCode].TaskSelectedWorkCode = null;
                         SqliteHelper.DoAsync(ctx => {
@@ -269,26 +269,26 @@ namespace HmiPro.Redux.Cores {
             var speedAction = (CpmActions.StateSpeedZeroAccept)action;
             var machineCode = speedAction.MachineCode;
             //速度为0的时候检查当前任务可否完成
-            checkCurrentAxisCanComplete(machineCode);
+            checkAxisCanComplete(machineCode);
         }
 
         /// <summary>
         /// 检查当前任务可否完成
         /// </summary>
         /// <param name="machineCode"></param>
-        private bool checkCurrentAxisCanComplete(string machineCode) {
+        private bool checkAxisCanComplete(string machineCode) {
             lock (SchTaskDoingLocks[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
                 if (!taskDoing.IsStarted) {
                     return false;
                 }
-                //一轴生成完成时候速度为0
-                if (taskDoing.AxisCompleteRate >= 0.98) {
+                // 完成率满足一定条件才行
+                if (taskDoing.AxisCompleteRate >= 0.90) {
                     App.Store.Dispatch(new DMesActions.CompletedSchAxis(machineCode, taskDoing?.MqSchAxis?.axiscode));
                     return true;
                     //调试完成的时候速度为0
                 } else if (taskDoing.AxisCompleteRate > 0) {
-                    //DebugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
+                    DebugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
                 }
                 return false;
 
@@ -591,7 +591,7 @@ namespace HmiPro.Redux.Cores {
                 var doingTask = SchTaskDoingDict[machineCode];
                 if (SchTaskDoingDict[machineCode].IsStarted) {
                     //记米数减小了，则去检查任务是否达完成条件
-                    if (noteMeter < doingTask.MeterWork && checkCurrentAxisCanComplete(machineCode) && noteMeter < 5) {
+                    if (noteMeter < doingTask.MeterWork && checkAxisCanComplete(machineCode) && noteMeter < 5) {
                         //任务已经完成
                     } else {
                         doingTask.MeterWork = noteMeter;

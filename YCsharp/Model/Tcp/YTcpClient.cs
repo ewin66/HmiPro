@@ -94,7 +94,7 @@ namespace YCsharp.Model.Tcp {
                 } else {
                     this.ClientState = YTcpClientState.DisConnect;
                 }
-            } catch (Exception e) {
+            } catch {
                 this.ClientState = YTcpClientState.DisConnect;
             }
         }
@@ -107,7 +107,7 @@ namespace YCsharp.Model.Tcp {
             try {
                 tcpClient.GetStream().BeginWrite(bytes, 0, bytes.Length, new AsyncCallback(sendBytesCallback),
                     null);
-            } catch (Exception e) {
+            } catch {
                 if (this.AutoReConnectWhenSendFaild) {
                     this.ReConnect();
                 }
@@ -136,7 +136,7 @@ namespace YCsharp.Model.Tcp {
                         Console.WriteLine("无法从流中获取数据");
                     }
                 }
-            } catch (Exception e) {
+            } catch {
                 this.OnStateChanged?.Invoke(YTcpClientState.ReadFaild);
             }
 

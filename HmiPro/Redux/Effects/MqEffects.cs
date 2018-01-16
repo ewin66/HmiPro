@@ -63,7 +63,7 @@ namespace HmiPro.Redux.Effects {
                                 mqService.AxisRfidAccpet)();
                             dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_SUCCESS, null));
                             return true;
-                        } catch (Exception e) {
+                        } catch {
                             dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_FAILED, null));
                         }
 

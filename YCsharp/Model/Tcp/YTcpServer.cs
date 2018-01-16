@@ -19,11 +19,6 @@ namespace YCsharp.Model.Tcp {
         #region Fields  
 
         /// <summary>  
-        /// 服务器程序允许的最大客户端连接数  
-        /// </summary>  
-        private int maxClient;
-
-        /// <summary>  
         /// 当前的连接的客户端数  
         /// </summary>  
         public int ClientCount { get; private set; }
@@ -166,7 +161,7 @@ namespace YCsharp.Model.Tcp {
 
                     listener.BeginAcceptTcpClient(
                         new AsyncCallback(HandleTcpClientAccepted), ar.AsyncState);
-                } catch (Exception e) {
+                } catch {
 
                 }
             }
@@ -246,7 +241,7 @@ namespace YCsharp.Model.Tcp {
             try {
                 ((TcpClient)ar.AsyncState).GetStream().EndWrite(ar);
                 RaiseCompletedSend(null);
-            } catch (Exception e) {
+            } catch {
                 Console.WriteLine("[Tcp] 发送数据异常");
             }
         }

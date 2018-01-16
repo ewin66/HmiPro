@@ -125,30 +125,6 @@ namespace HmiPro.ViewModels.DMes {
         }
 
         /// <summary>
-        /// 报警用的DataGrid每次都会add or remove 必须通过 UI 调度器
-        /// 这里是保持 UI 显示和 State 的报警数据一致
-        /// </summary>
-        void whenUpdateHistoryAlarms(AppState state, IAction action) {
-            var alarmAction = (AlarmActions.UpdateHistoryAlarms)action;
-            if (alarmAction.MachineCode != MachineCode) {
-                return;
-            }
-            DispatcherService.BeginInvoke(() => {
-                if (alarmAction.UpdateAction == AlarmActions.UpdateAction.Add) {
-                    AlarmTab.Alarms.Add(alarmAction.MqAlarmAdd);
-
-                } else if (alarmAction.UpdateAction == AlarmActions.UpdateAction.Change) {
-                    if (!AlarmTab.Alarms.Remove(alarmAction.MqAlarmRemove)) {
-                        //fixed:2017-12-22
-                        // 直接remove alarmActon.MqAlarmRemove 会失败
-                        var removeItem = AlarmTab.Alarms.FirstOrDefault(s => s.code == alarmAction.MqAlarmRemove.code);
-                        AlarmTab.Alarms.Remove(removeItem);
-                    }
-                    AlarmTab.Alarms.Add(alarmAction.MqAlarmAdd);
-                }
-            });
-        }
-        /// <summary>
         /// 扫描来料
         /// </summary>
         /// <param name="state"></param>

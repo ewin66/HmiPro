@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -249,6 +250,95 @@ namespace UnitTestPro.FuncTest {
             }
         }
 
+        [TestMethod]
+        public void GenericTest() {
+            List<int> intList = new List<int>();
+            intList.Add(1);
+            var objList = intList.OfType<object>().ToList();
+            objList.Add("hello");
+            objList.Add(2);
+            int a = 2;
+            switch (a) {
+                case 1:
+                    Console.WriteLine("ll");
+                    break;
+                default:
+                    break;
+            }
+
+            objList.ForEach(Console.Write);
+            Console.WriteLine();
+            intList.ForEach(Console.Write);
+        }
+
+        [TestMethod]
+        public void ExtendTest() {
+            Father father = new Father();
+            Son son = new Son();
+            father.DoVirtualMethod();
+            father.DoNormalMethod();
+            father.PrintFather();
+
+            son.DoVirtualMethod();
+            son.DoNormalMethod();
+            son.PrintSon();
+            son.PrintFather();
+
+            Father father2 = son;
+            father2.PrintFather();
+            father2.DoNormalMethod();
+        }
+
+    }
+
+
+    public class Father {
+        public string PubField;
+        private string priField;
+
+        public virtual void DoVirtualMethod() {
+            PubField = "father virual public";
+            priField = "father virtual private field";
+            Console.WriteLine("father virtual method");
+        }
+
+        public void DoNormalMethod() {
+            PubField = "father normal public";
+            priField = "father normal private";
+            Console.WriteLine("father normal method");
+        }
+
+        public string GetFatherPrivate() {
+            return this.priField;
+        }
+
+        public void PrintFather() {
+            Console.WriteLine($"Father: public:{PubField} ,private:{priField}");
+        }
+    }
+
+    public class Son : Father {
+        public string PubField;
+        private string priField;
+        public override void DoVirtualMethod() {
+            PubField = "son override public";
+            priField = " son override private";
+            Console.WriteLine("son override method");
+        }
+
+        public new void DoNormalMethod() {
+            PubField = "son new public";
+            priField = "son new private";
+            Console.WriteLine("son new method");
+        }
+
+        public string GetSonPrivate() {
+            return priField;
+        }
+
+        public void PrintSon() {
+            Console.WriteLine($"Son: public:{PubField} ,private:{priField}");
+        }
     }
 
 }

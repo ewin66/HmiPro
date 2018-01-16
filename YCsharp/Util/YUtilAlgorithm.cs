@@ -16,7 +16,6 @@ namespace YCsharp.Util {
         /// 计算平均值所需要的数据
         /// </summary>
         class YExecAvg {
-            public double Xn;
             public int N_1;
             public double Xn_1_Avg;
         }
@@ -57,7 +56,7 @@ namespace YCsharp.Util {
         /// 计算导数，横坐标的增量为1
         /// </summary>
         class YExecDer {
-            public double LatestVal=0;
+            public double LatestVal = 0;
         }
 
         public static Func<double, double> CreateExecDerFunc() {
@@ -78,8 +77,7 @@ namespace YCsharp.Util {
                 var ans = 0.0;
                 try {
                     ans = 1 / x;
-                }
-                catch {
+                } catch {
                     ans = double.MaxValue;
                 }
                 return ans;

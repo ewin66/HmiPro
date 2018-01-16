@@ -134,5 +134,10 @@ namespace HmiPro.Redux.Models {
             EndAxisRfids.Clear();
             //EmpRfids.Clear();
         }
+
+        public void Clear() {
+            Init();
+            MqSchTask = null;
+        }
     }
 }

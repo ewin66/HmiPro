@@ -63,7 +63,6 @@ namespace HmiPro.Redux.Patches {
     /// <date>2017-12-29 </date>
     /// </summary>
     public class LogDoc : MongoDoc {
-        public ObjectId Id { get; set; }
         public string Location { get; set; }
         public string Message { get; set; }
         public DateTime Time { get; set; }
