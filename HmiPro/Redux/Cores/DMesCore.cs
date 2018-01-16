@@ -88,6 +88,7 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
             actionExecDict[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
             actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompleteSchAxis;
+            actionExecDict[DMesActions.CLEAR_SCH_TASKS] = clearSchTasks;
 
             App.Store.Subscribe(actionExecDict);
 
@@ -105,6 +106,31 @@ namespace HmiPro.Redux.Cores {
             }
         }
 
+        /// <summary>
+        /// 清空机台任务
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void clearSchTasks(AppState state, IAction action) {
+            var dmesAction = (DMesActions.ClearSchTasks)action;
+            Application.Current.Dispatcher.Invoke(() => {
+                foreach (var machineCode in dmesAction.Machines) {
+                    lock (SchTaskDoingLocks[machineCode]) {
+                        foreach (var task in state.DMesState.MqSchTasksDict[machineCode]) {
+                            task?.axisParam?.Clear();
+                            task?.bom?.Clear();
+                        }
+                        state.DMesState.MqSchTasksDict[machineCode]?.Clear();
+                        state.DMesState.SchTaskDoingDict[machineCode]?.Init();
+                        state.MqState.MqSchTaskAccpetDict[machineCode] = null;
+                        state.ViewStoreState.DMewCoreViewDict[machineCode].TaskSelectedWorkCode = null;
+                        SqliteHelper.DoAsync(ctx => {
+                            ctx.RemovePersist("task_" + machineCode);
+                        });
+                    }
+                }
+            });
+        }
 
         /// <summary>
         /// 完成某个排产轴任务
@@ -565,7 +591,7 @@ namespace HmiPro.Redux.Cores {
                 var doingTask = SchTaskDoingDict[machineCode];
                 if (SchTaskDoingDict[machineCode].IsStarted) {
                     //记米数减小了，则去检查任务是否达完成条件
-                    if (noteMeter < doingTask.MeterWork && checkCurrentAxisCanComplete(machineCode)) {
+                    if (noteMeter < doingTask.MeterWork && checkCurrentAxisCanComplete(machineCode) && noteMeter < 5) {
                         //任务已经完成
                     } else {
                         doingTask.MeterWork = noteMeter;

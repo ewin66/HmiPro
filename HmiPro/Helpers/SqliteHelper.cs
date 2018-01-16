@@ -106,6 +106,14 @@ namespace HmiPro.Helpers {
             this.SaveChanges();
         }
 
+        public void RemovePersist(string key) {
+            var delPersist = Persists.FirstOrDefault(s => s.Key == key);
+            if (delPersist != null) {
+                Persists.Remove(delPersist);
+            }
+            SaveChanges();
+        }
+
         public void SavePersist(IList<Persist> persists) {
             Persists.AddRange(persists);
             this.SaveChanges();

@@ -59,6 +59,7 @@ namespace HmiPro.ViewModels.DMes {
 
             actionExecDict[DMesActions.RFID_ACCPET] = whenRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccpet;
+            actionExecDict[DMesActions.CLEAR_SCH_TASKS] = clearSchTask;
         }
 
 
@@ -112,6 +113,15 @@ namespace HmiPro.ViewModels.DMes {
                 var mqRfid = (MqEmpRfid)dmesAction.MqData;
                 SchTaskTab.RemoveEmployee(mqRfid.name);
             }
+        }
+
+        /// <summary>
+        /// 清空任务
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void clearSchTask(AppState state, IAction action) {
+            SchTaskTab.Clear();
         }
 
         /// <summary>

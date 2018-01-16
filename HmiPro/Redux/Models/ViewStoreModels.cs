@@ -79,7 +79,7 @@ namespace HmiPro.Redux.Models {
                 return currentTask?.axisParam?.FirstOrDefault(a => a?.axiscode == axisSelectedCode) ?? currentTask?.axisParam?.FirstOrDefault();
             }
             set {
-                if (value != null) {
+                if (axisSelectedCode != value?.axiscode) {
                     axisSelectedCode = value.axiscode;
                 }
             }

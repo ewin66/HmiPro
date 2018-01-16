@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using DevExpress.Mvvm.UI;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
@@ -41,6 +42,22 @@ namespace HmiPro.ViewModels.DMes.Tab {
 
                 }
             }
+        }
+
+        /// <summary>
+        /// 清空任务
+        /// </summary>
+        public void Clear() {
+            Application.Current.Dispatcher.Invoke(() => {
+                foreach (var detail in MqSchTaskDetails) {
+                    if (detail is CraftBomViewModel bomDetail) {
+                        bomDetail?.Clear();
+                    } else if (detail is SchTaskAxisViewModel axisDetail) {
+
+                    }
+                }
+                MqSchTaskDetails.Clear();
+            });
         }
 
         public SchTaskAxisViewModel SchTaskAxisViewModel { get; set; }

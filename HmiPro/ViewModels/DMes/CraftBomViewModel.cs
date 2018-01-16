@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.POCO;
 using HmiPro.Config;
+using HmiPro.Redux.Actions;
+using HmiPro.Redux.Reducers;
 using HmiPro.ViewModels.DMes.Tab;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels.DMes {
     [POCOViewModel]
-    public class CraftBomViewModel:BaseTab{
+    public class CraftBomViewModel : BaseTab {
         public virtual string MachineCode { get; set; }
         public virtual string WorkCode { get; set; }
         public virtual INavigationService NavigationSerivce => null;
         public virtual IList<Dictionary<string, object>> Boms { get; set; } = new List<Dictionary<string, object>>();
+
 
         /// <summary>
         /// 必须要无参数构造函数，不然导航会出错
@@ -49,6 +53,15 @@ namespace HmiPro.ViewModels.DMes {
         }
 
         /// <summary>
+        /// 清空Bom
+        /// </summary>
+        public void Clear() {
+            Application.Current.Dispatcher.Invoke(() => {
+                Boms.Clear();
+            });
+        }
+
+        /// <summary>
         /// 自动导入了 INotifyPropertyChanged
         /// 用Virutal就行
         /// </summary>
@@ -59,6 +72,6 @@ namespace HmiPro.ViewModels.DMes {
         public static CraftBomViewModel Create(string machineCode, string workcode, IList<Dictionary<string, object>> bom) {
             return ViewModelSource.Create(() => new CraftBomViewModel(machineCode, workcode, bom));
         }
-   
+
     }
 }

@@ -53,6 +53,7 @@ namespace HmiPro.Redux.Services {
         private void initCmdExecers() {
             HttpSystemCmdDict["update-app"] = execUpdateApp;
             HttpSystemCmdDict["get-state"] = execGetState;
+            HttpSystemCmdDict["clear-task"] = execClearSchTask;
         }
 
 
@@ -83,6 +84,14 @@ namespace HmiPro.Redux.Services {
             }
         }
 
+        /// <summary>
+        /// 清空所管理机台的所有任务
+        /// </summary>
+        /// <param name="response"></param>
+        private void execClearSchTask(HttpListenerResponse response) {
+            App.Store.Dispatch(new DMesActions.ClearSchTasks(MachineConfig.MachineDict.Keys.ToArray()));
+            outResponse(response, new HttpSystemRest() { Message = $"清空Hmi{MachineConfig.HmiName}任务成功" });
+        }
 
         private void execGetState(HttpListenerResponse responnse) {
             var rest = new HttpSystemRest();
