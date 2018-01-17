@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using HmiPro.Config;
@@ -57,6 +58,12 @@ namespace HmiPro.ViewModels.Sys {
             Task.Run(() => {
                 if (sysService.CheckUpdate()) {
                     sysService.StartUpdate();
+                } else {
+                    App.Store.Dispatch(
+                        new SysActions.ShowNotification(new SysNotificationMsg() {
+                            Title = "未检查到更新",
+                            Content = "本软件版本目前已是最新版"
+                        }));
                 }
             });
         }
@@ -68,7 +75,6 @@ namespace HmiPro.ViewModels.Sys {
 
         [Command(Name = "StandbyScreenCommand")]
         public void StandbyScreen() {
-            YUtil.SetMonitorInState(YUtil.MonitorState.MonitorStateStandBy);
         }
 
         [Command(Name = "ShowNotificationCommand")]
@@ -77,6 +83,11 @@ namespace HmiPro.ViewModels.Sys {
                 Title = "测试通知",
                 Content = "测试通知信息成功",
             }));
+        }
+
+        [Command(Name = "OskCommand")]
+        public void ShowKeyboardCommand() {
+            YUtil.CallOskAsync();
         }
 
     }

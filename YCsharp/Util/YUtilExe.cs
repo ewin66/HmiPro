@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -16,13 +17,8 @@ namespace YCsharp.Util {
         public static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
         [DllImport("user32")]
         public static extern void LockWorkStation();
-        [DllImport("user32")]
-        public static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
-        public enum MonitorState {
-            MonitorStateOn = -1,
-            MonitorStateOff = 2,
-            MonitorStateStandBy = 1
-        }
+
+
         /// <summary>
         /// 关机
         /// </summary>
@@ -58,26 +54,28 @@ namespace YCsharp.Util {
             } catch { }
         }
 
-        /// <summary>
-        /// 打开显示器
-        /// </summary>
-        /// <param name="state"></param>
-        public static void SetMonitorInState(MonitorState state) {
-            SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
-        }
+
 
         /// <summary>
         /// 执行命令
         /// </summary>
         /// <param name="exePath">接受命令的可执行文件</param>
         /// <param name="cmd">命令</param>
-        public static void ExecCmd(string exePath, string cmd) {
+        public static void Exec(string exePath, string cmd) {
             try {
                 System.Diagnostics.ProcessStartInfo startinfo = new System.Diagnostics.ProcessStartInfo(exePath, cmd);
                 System.Diagnostics.Process.Start(startinfo);
             } catch {
                 Console.WriteLine("执行命令 " + exePath + " " + cmd + " 异常");
             }
+        }
+        /// <summary>
+        /// 显示虚拟键盘
+        /// </summary>
+        public static void CallOskAsync() {
+            Task.Run(() => {
+                Exec(@"osk.exe", "");
+            });
         }
         /// <summary>
         /// 通过 NirCmd调用的方式关闭显示器
@@ -89,7 +87,7 @@ namespace YCsharp.Util {
                 return;
             }
             var task = Task.Run(() => {
-                ExecCmd(nirCmdPath, "monitor off");
+                Exec(nirCmdPath, "monitor off");
             });
             //1秒超时，之前有卡死的bug，目前这样修复
             task.Wait(1000);
@@ -105,7 +103,7 @@ namespace YCsharp.Util {
                 return;
             }
             var task = Task.Run(() => {
-                ExecCmd(nirCmdPath, "monitor on");
+                Exec(nirCmdPath, "monitor on");
             });
             //1秒超时，之前有卡死的bug，目前这样修复
             task.Wait(1000);

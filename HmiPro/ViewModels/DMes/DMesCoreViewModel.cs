@@ -41,6 +41,7 @@ namespace HmiPro.ViewModels.DMes {
         public virtual AlarmTab AlarmTab { get; set; } = new AlarmTab() { Header = "报警" };
         public virtual ScanMaterialTab ScanMaterialTab { get; set; } = new ScanMaterialTab() { Header = "来料" };
         public virtual Com485Tab Com485Tab { get; set; } = new Com485Tab() { Header = "通讯" };
+        public virtual DpmsTab DpmsTab { get; set; } = new DpmsTab() { Header = "设置" };
         private Unsubscribe unsubscribe;
         readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
         public virtual string Header { get; set; }
@@ -56,6 +57,7 @@ namespace HmiPro.ViewModels.DMes {
             ViewSource.Add(AlarmTab);
             ViewSource.Add(ScanMaterialTab);
             ViewSource.Add(Com485Tab);
+            ViewSource.Add(DpmsTab);
 
             actionExecDict[DMesActions.RFID_ACCPET] = whenRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccpet;
@@ -87,6 +89,10 @@ namespace HmiPro.ViewModels.DMes {
             var status = com485Dict.Where(c => MachineConfig.MachineCodeToIpsDict[MachineCode].Contains(c.Key))
                 .Select(c => c.Value).ToList();
             Com485Tab.BindSource(MachineCode, status);
+            //回填参数
+            var dpms = App.Store.GetState().DpmStore.DpmsDict;
+            DpmsTab.BindSource(dpms[MachineCode]);
+
             //绑定选中的tab
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[MachineCode];
 
@@ -146,6 +152,22 @@ namespace HmiPro.ViewModels.DMes {
                 NavigationSerivce.Navigate("DMesCoreView", vm, null, this, false);
             }
 
+        }
+
+        /// <summary>
+        /// 显示虚拟键盘
+        /// </summary>
+        [Command(Name = "CallOskCommand")]
+        public void CallOsk() {
+            YUtil.CallOskAsync();
+        }
+
+        /// <summary>
+        /// 提交回传参数
+        /// </summary>
+        [Command(Name = "SubmitDpmsCommand")]
+        public void SubmitDpms() {
+            App.Store.Dispatch(new DpmActions.Submit(MachineCode, DpmsTab.Dpms));
         }
 
         public static DMesCoreViewModel Create(string machineCode) {

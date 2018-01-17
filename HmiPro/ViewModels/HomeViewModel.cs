@@ -47,6 +47,17 @@ namespace HmiPro.ViewModels {
                 return;
             }
             IsFirstEntry = false;
+            if (HmiConfig.IsDevUserEnv) {
+                loadConfigBySetting();
+            } else {
+                loadConfigByDefine();
+            }
+        }
+
+        /// <summary>
+        /// 通过 Sqlite 中的设置数据来加载配置
+        /// </summary>
+        private void loadConfigBySetting() {
             using (var ctx = SqliteHelper.CreateSqliteService()) {
                 var setting = ctx.Settings.ToList().LastOrDefault();
                 if (setting == null) {
@@ -54,8 +65,6 @@ namespace HmiPro.ViewModels {
                 } else {
                     try {
                         MachineConfig.Load(setting.MachineXlsPath);
-                        //MachineConfig.LoadFromGlobal();
-
                         checkConfig();
                         afterConfigLoaded();
                     } catch (Exception e) {
@@ -70,6 +79,26 @@ namespace HmiPro.ViewModels {
             }
         }
 
+        /// <summary>
+        /// 通过 Global.xls中预定义的数据来加载配置
+        /// </summary>
+        void loadConfigByDefine() {
+            try {
+                MachineConfig.LoadFromGlobal();
+                checkConfig();
+                afterConfigLoaded();
+            } catch (Exception e) {
+                Logger.Error("程序配置出错", e);
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "配置出错",
+                    Content = e.Message
+                }));
+                MessageBox.Show("程序配置有问题，请联系管理员", "程序配置出错", MessageBoxButton.OK, MessageBoxImage.None);
+
+                App.Store.Dispatch(new SysActions.ShutdownApp());
+            }
+        }
+
         async void afterConfigLoaded() {
             //== 初始化部分State
             App.Store.Dispatch(new ViewStoreActions.Init());
@@ -77,6 +106,7 @@ namespace HmiPro.ViewModels {
             App.Store.Dispatch(new AlarmActions.Init());
             App.Store.Dispatch(new OeeActions.Init());
             App.Store.Dispatch(new DMesActions.Init());
+            App.Store.Dispatch(new DpmActions.Init());
 
             var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
@@ -86,7 +116,9 @@ namespace HmiPro.ViewModels {
             UnityIocService.ResolveDepend<AlarmCore>().Init();
             UnityIocService.ResolveDepend<CpmCore>().Init();
             UnityIocService.ResolveDepend<OeeCore>().Init();
+            UnityIocService.ResolveDepend<DpmCore>().Init();
             await UnityIocService.ResolveDepend<SchCore>().Init();
+
 
             var starHttpSystem = App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
             var startCpmServer = App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));

@@ -62,7 +62,7 @@ namespace HmiPro.Config {
                     setting.StartRfids = row["StartRfids"].ToString().Split('|');
                     setting.EndRfids = row["EndRfids"].ToString().Split('|');
                     setting.CpmModuleIps = row["CpmModuleIps"].ToString().Split('|');
-                   
+                    setting.DPms = row["Dpms"].ToString().Split('|');
                     MachineSettingDict[setting.Code] = setting;
                 }
 

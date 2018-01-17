@@ -48,6 +48,11 @@ namespace HmiPro.Config.Models {
         /// 模块ip
         /// </summary>
         public string[] CpmModuleIps { get; set; } = new string[0];
+        /// <summary>
+        /// 回填参数
+        /// </summary>
+        public string[] DPms { get; set; } = new string[0];
+
 
         /// <summary>
         /// Hmi本身的Ip

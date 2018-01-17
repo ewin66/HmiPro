@@ -50,7 +50,23 @@ namespace HmiPro.Redux.Actions {
         public static readonly string START_LISTEN_AXIS_RFID_SUCCESS = "[Mq] Start Listen Axis Rfid Success";
         public static readonly string START_LISTEN_AXIS_RFID_FAILED = "[Mq] Start Listen Axis Rfid Failed";
 
+        //上传回填参数
+        public static readonly string UPLOAD_DPMS = "[Mq] Upload Dpms";
+        public static readonly string UPLOAD_DPMS_SUCCESS = "[Mq] Upload Dpms Success";
+        public static readonly string UPLOAD_DPMS_FAILED = "[Mq] Upload Dpms Failed";
 
+
+
+        public struct UploadDpms : IAction {
+            public string Type() => UPLOAD_DPMS;
+            public string MachineCode;
+            public IList<MqUploadDpm> MqUploadDpms;
+
+            public UploadDpms(string machineCode, IList<MqUploadDpm> mqUploadDpms) {
+                MachineCode = machineCode;
+                MqUploadDpms = mqUploadDpms;
+            }
+        }
 
         public struct StartListenAxisRfid : IAction {
             public string Type() => START_LISTEN_AXIS_RFID;

@@ -25,17 +25,42 @@ namespace HmiPro.Redux.Effects {
         private readonly ActiveMqService activeMq;
         private readonly MqService mqService;
         public readonly LoggerService Logger;
+        /// <summary>
+        /// 监听排产任务
+        /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenSchTask, bool> StartListenSchTask;
+        /// <summary>
+        /// 上传实时参数
+        /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadCpms> UploadCpms;
+        /// <summary>
+        /// 上传报警数据
+        /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadAlarmMq> UploadAlarm;
+        /// <summary>
+        /// 周期上传实时参数
+        /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartUploadCpmsInterval> StartUploadCpmsInterval;
+        /// <summary>
+        /// 监听来料信息
+        /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenScanMaterial, bool> StartListenScanMaterial;
+        /// <summary>
+        /// 上传排产落轴数据
+        /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadSchTaskManu, bool> UploadSchTaskManu;
+        /// <summary>
+        /// 监听人员卡
+        /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenEmpRfid, bool> StartListenEmpRfid;
+        /// <summary>
+        /// 监听轴号卡
+        /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenAxisRfid, bool> StartListenAxisRfid;
-
-
-
+        /// <summary>
+        /// 上传回填数据（员工手工录入的数据）
+        /// </summary>
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadDpms, bool> UploadDpms;
 
         public MqEffects(MqService mqService) {
             UnityIocService.AssertIsFirstInject(GetType());
@@ -51,6 +76,32 @@ namespace HmiPro.Redux.Effects {
             initUploadSchTaskManu();
             initStartListenEmpRfid();
             initStartListenAxisRfid();
+            initUploadDpms();
+        }
+
+        void initUploadDpms() {
+            UploadDpms = App.Store.asyncAction<MqActions.UploadDpms, bool>(
+                async (dispatch, getState, instance) => {
+                    dispatch(instance);
+                    return await Task.Run(() => {
+                        try {
+                            activeMq.SendP2POneMessage(HmiConfig.QueueDpms, JsonConvert.SerializeObject(instance.MqUploadDpms));
+                            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                                Title = "提交成功"
+                            }));
+                            App.Store.Dispatch(new SimpleAction(MqActions.UPLOAD_DPMS_SUCCESS));
+                            return true;
+                        } catch {
+                            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                                Title = "提交失败",
+                                Content = "请检查网络连接或联系管理员"
+                            }));
+                            App.Store.Dispatch(new SimpleAction(MqActions.UPLOAD_DPMS_FAILED));
+                        }
+                        return false;
+                    });
+                }
+            );
         }
 
         void initStartListenAxisRfid() {
@@ -66,7 +117,6 @@ namespace HmiPro.Redux.Effects {
                         } catch {
                             dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_FAILED, null));
                         }
-
                         return false;
                     });
 

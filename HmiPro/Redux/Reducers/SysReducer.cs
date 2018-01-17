@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
@@ -69,6 +70,9 @@ namespace HmiPro.Redux.Reducers {
                  return state;
              }).When<SysActions.ShowNotification>((state, action) => {
                  state.NotificationMsg = action.Message;
+                 return state;
+             }).When<SysActions.ShutdownApp>((state, action) => {
+                Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
                  return state;
              });
         }

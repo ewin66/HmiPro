@@ -15,6 +15,7 @@
              xmlns:dMes1="clr-namespace:HmiPro.ViewModels.DMes"
              xmlns:controls="clr-namespace:HmiPro.Controls"
              xmlns:panels="clr-namespace:HmiPro.Controls.Panels"
+             xmlns:models="clr-namespace:HmiPro.Redux.Models"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
     <dxmvvm:Interaction.Behaviors>
@@ -53,6 +54,45 @@
                                 </DataTemplate>
                             </dxlc:FlowLayoutControl.ItemTemplate>
                         </dxlc:FlowLayoutControl>
+                    </DataTemplate>
+                    <!--回填参数-->
+                    <DataTemplate DataType="{x:Type Model:DpmsTab}">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                            <Grid HorizontalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Content="显示键盘" Width="200" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl},Path=DataContext.CallOskCommand}"></Button>
+                                <Button Grid.Column="1" Content="提交" Width="200" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl},Path=DataContext.SubmitDpmsCommand}"></Button>
+                            </Grid>
+                            <dxlc:FlowLayoutControl ItemsSource="{Binding Path=Dpms}" Orientation="Horizontal" BreakFlowToFit="True">
+                                <dxlc:FlowLayoutControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type models:Dpm}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock  VerticalAlignment="Center" TextAlignment="Center" Text="{Binding Path=Name}" 
+                                                        Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                        AncestorType={x:Type dxlc:FlowLayoutControl}},
+                                                                        Path=ActualWidth,
+                                                                        Converter={StaticResource ConverterCoef},
+                                                                        ConverterParameter=0.20 }"
+                                                        Grid.Column="0"></TextBlock>
+                                            <dxe:TextEdit Grid.Column="1" Text="{Binding Path=Value}"
+                                                          Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
+                                                                        AncestorType={x:Type dxlc:FlowLayoutControl}},
+                                                                        Path=ActualWidth,
+                                                                        Converter={StaticResource ConverterCoef},
+                                                                        ConverterParameter=0.20 }"
+                                                          ></dxe:TextEdit>
+                                        </Grid>
+                                    </DataTemplate>
+                                </dxlc:FlowLayoutControl.ItemTemplate>
+                            </dxlc:FlowLayoutControl>
+                        </StackPanel>
                     </DataTemplate>
                     <!--新任务页面-->
                     <DataTemplate DataType="{x:Type Model:SchTaskTab}">

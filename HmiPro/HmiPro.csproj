@@ -25,6 +25,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -188,12 +189,14 @@
     <Compile Include="Redux\Actions\CpmActions.cs" />
     <Compile Include="Redux\Actions\DbActions.cs" />
     <Compile Include="Redux\Actions\DMesActions.cs" />
+    <Compile Include="Redux\Actions\DpmActions.cs" />
     <Compile Include="Redux\Actions\MockActions.cs" />
     <Compile Include="Redux\Actions\MqActions.cs" />
     <Compile Include="Redux\Actions\OeeActions.cs" />
     <Compile Include="Redux\Actions\SysActions.cs" />
     <Compile Include="Redux\Actions\ViewStoreActions.cs" />
     <Compile Include="Redux\Cores\AlarmCore.cs" />
+    <Compile Include="Redux\Cores\DpmCore.cs" />
     <Compile Include="Redux\Cores\SchCore.cs" />
     <Compile Include="Redux\Cores\ViewStoreCore.cs" />
     <Compile Include="Redux\Effects\CpmEffects.cs" />
@@ -203,6 +206,8 @@
     <Compile Include="Redux\Effects\SysEffects.cs" />
     <Compile Include="Redux\Models\AlarmBomCheck.cs" />
     <Compile Include="Redux\Models\Cpm.cs" />
+    <Compile Include="Redux\Models\Dpm.cs" />
+    <Compile Include="Redux\Models\MqUploadDpm.cs" />
     <Compile Include="Redux\Models\ViewStoreModels.cs" />
     <Compile Include="Redux\Models\MachineState.cs" />
     <Compile Include="Redux\Models\MongoDoc.cs" />
@@ -222,6 +227,7 @@
     <Compile Include="Redux\Reducers\AlarmReducer.cs" />
     <Compile Include="Redux\Reducers\AppReducer.cs" />
     <Compile Include="Redux\Reducers\DMesReducer.cs" />
+    <Compile Include="Redux\Reducers\DpmReducer.cs" />
     <Compile Include="Redux\Reducers\MqReducer.cs" />
     <Compile Include="Redux\Reducers\OeeReducer.cs" />
     <Compile Include="Redux\Reducers\SysReducer.cs" />
@@ -237,6 +243,7 @@
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\Com485Tab.cs" />
     <Compile Include="ViewModels\DMes\Tab\CpmsTab.cs" />
+    <Compile Include="ViewModels\DMes\Tab\DpmsTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\ScanMaterialTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />

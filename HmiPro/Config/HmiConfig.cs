@@ -47,79 +47,79 @@ namespace HmiPro.Config {
         }
 
         //启动界面
-        [Required] public static  string StartView;
+        [Required] public static string StartView;
 
-        [Required] public static  string WindowStyle;
+        [Required] public static string WindowStyle;
         //更新地址
-        [Required] public static  string UpdateUrl;
+        [Required] public static string UpdateUrl;
 
-        [Required] public static  int CmdHttpPort;
+        [Required] public static int CmdHttpPort;
 
         //采集参数监控的ip地址
-        [Required] public static  string CpmTcpIp;
+        [Required] public static string CpmTcpIp;
 
         //端口
-        [Required] public static  int CpmTcpPort;
+        [Required] public static int CpmTcpPort;
 
         //更新Web看板数据周期
-        [Required] public static  int UploadWebBoardInterval;
+        [Required] public static int UploadWebBoardInterval;
 
         /// <summary>
         /// 上传属性数据
         /// </summary>
-        [Required] public static  string QueWebSrvPropSave;
+        [Required] public static string QueWebSrvPropSave;
 
         /// <summary>
         /// 上传异常
         /// </summary>
-        [Required] public static  string QueWebSrvException;
+        [Required] public static string QueWebSrvException;
 
         /// <summary>
         /// 上传压缩的采集参数
         /// </summary>
-        [Required] public static  string QueWebSrvZipParam;
+        [Required] public static string QueWebSrvZipParam;
 
         /// <summary>
         /// 呼叫叉车
         /// </summary>
-        [Required] public static  string QueCallForklift;
+        [Required] public static string QueCallForklift;
 
         /// <summary>
         /// 实时更新电子看板
         /// </summary>
-        [Required] public static  string QueUpdateWebBoard;
+        [Required] public static string QueUpdateWebBoard;
 
         /// <summary>
         /// 监听andorid的消息
         /// </summary>
-        [Required] public static  string TopicListenHandSet;
+        [Required] public static string TopicListenHandSet;
 
-        [Required] public static  string TopicEmpRfid;
+        [Required] public static string TopicEmpRfid;
 
         //上传电能
-        [Required] public static  string QueUploadPowerElec;
+        [Required] public static string QueUploadPowerElec;
         //采集参数超时，超过该时间未有采集参数则清空实时数据表
-        [Required] public static  int CpmTimeout;
+        [Required] public static int CpmTimeout;
 
 
-        [Required] public static  string QueUploadOee;
+        [Required] public static string QueUploadOee;
 
         /// <summary>
         /// mongodb连接
         /// </summary>
-        [Required] public static  string MongoConn;
+        [Required] public static string MongoConn;
         /// <summary>
         /// 中间件连接
         /// </summary>
-        [Required] public static  string MqConn;
+        [Required] public static string MqConn;
         /// <summary>
         /// 中间件登录名
         /// </summary>
-        [Required] public static  string MqUserName;
+        [Required] public static string MqUserName;
         /// <summary>
         /// 中间件登录密码
         /// </summary>
-        [Required] public static  string MqUserPwd;
+        [Required] public static string MqUserPwd;
         /// <summary>
         /// 保留小数位数
         /// </summary>
@@ -130,7 +130,7 @@ namespace HmiPro.Config {
         /// 这样便于动态区分环境
         /// </summary>
         [Required]
-        public static  string DevUser;
+        public static string DevUser;
         /// <summary>
         /// 是否在开发人员电脑上运行，开发人员是上面的DevUser </summary>
         [Required]
@@ -138,18 +138,18 @@ namespace HmiPro.Config {
         /// <summary>
         /// 时间服务器ip，端口使用默认123
         /// </summary>
-        [Required] public static  string NtpIp;
+        [Required] public static string NtpIp;
         //InfluxDb地址
-        [Required] public static  string InfluxDbIp;
+        [Required] public static string InfluxDbIp;
         //InfluxDb采集参数数据库名称
-        [Required] public static  string InfluxCpmDbName;
+        [Required] public static string InfluxCpmDbName;
 
-        [Required] public static  int CloseScreenInterval;
+        [Required] public static int CloseScreenInterval;
         //Mq发送消息超时
-        [Required] public static  int MqSendRequestTimeoutSec = 3;
+        [Required] public static int MqSendRequestTimeoutSec = 3;
         //一个工单任务最多存活的天数
         //比如工单的计划时间是5月7日，当前时间为5月20日，则认为任务过期作废
-        [Required] public static  int TaskPersistMaxDays = 7;
+        [Required] public static int TaskPersistMaxDays = 7;
         /// <summary>
         /// Bom表汉化字典
         /// </summary>
@@ -157,7 +157,9 @@ namespace HmiPro.Config {
 
         //== 来自外部命令行和约定配置
         public static string SqlitePath;
-        public static  string LogFolder = @"C:\HmiPro\Log\";
+        public static string LogFolder = @"C:\HmiPro\Log\";
+
+        public static string QueueDpms = "Input_Parameters_Machine";
 
 
     }
