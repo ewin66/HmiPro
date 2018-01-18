@@ -207,8 +207,8 @@
     <Compile Include="Redux\Models\AlarmBomCheck.cs" />
     <Compile Include="Redux\Models\Cpm.cs" />
     <Compile Include="Redux\Models\Dpm.cs" />
-    <Compile Include="Redux\Models\MqUploadDpm.cs" />
     <Compile Include="Redux\Models\MqUploadRest.cs" />
+    <Compile Include="Redux\Models\MqUploadDpm.cs" />
     <Compile Include="Redux\Models\ViewStoreModels.cs" />
     <Compile Include="Redux\Models\MachineState.cs" />
     <Compile Include="Redux\Models\MongoDoc.cs" />

@@ -32,6 +32,7 @@ namespace HmiPro.Redux.Actions {
         public static readonly string STATE_SPEED_DIFF_ZERO_ACCEPT = "[Cpm] State Speed Diff Zero Accept";
         public static readonly string STATE_SPEED_ZERRO_ACCEPT = "[Cpm] State Speed Zero Accept";
         public static readonly string OD_ACCPET = "[Cpm] Od Accept";
+        public static readonly string UNREGISTERED_IP_ACTIVE = "[Cpm] Unregistered Ip Active";
         //485串口状态更新
         //单节点状态
         public static readonly string COM_485_SINGLE_STATUS_ACCEPT = "[Cpm] Communication 485 Single  Status Accept";
@@ -85,6 +86,15 @@ namespace HmiPro.Redux.Actions {
             public StartServer(string ip, int port) {
                 Ip = ip;
                 Port = port;
+            }
+        }
+
+        public struct UnregIpActived : IAction {
+            public string Type() => UNREGISTERED_IP_ACTIVE;
+            public string Ip;
+
+            public UnregIpActived(string ip) {
+                this.Ip = ip;
             }
         }
 

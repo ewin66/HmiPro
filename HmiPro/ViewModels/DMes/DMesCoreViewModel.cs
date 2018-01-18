@@ -62,6 +62,7 @@ namespace HmiPro.ViewModels.DMes {
             actionExecDict[DMesActions.RFID_ACCPET] = whenRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccpet;
             actionExecDict[DMesActions.CLEAR_SCH_TASKS] = clearSchTask;
+            actionExecDict[CpmActions.UNREGISTERED_IP_ACTIVE] = unRegIpActived;
         }
 
 
@@ -97,6 +98,24 @@ namespace HmiPro.ViewModels.DMes {
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[MachineCode];
 
             unsubscribe = App.Store.Subscribe(actionExecDict);
+        }
+
+        /// <summary>
+        /// 未注册 Ip 有活动
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void unRegIpActived(AppState state, IAction action) {
+            var cpmAction = (CpmActions.UnregIpActived)action;
+            var status = Com485Tab.Com485Status.FirstOrDefault(c => c.Ip == cpmAction.Ip);
+            //添加未注册的 Ip 在界面上面显示
+            if (status == null) {
+                DispatcherService.BeginInvoke(() => {
+                    if (state.CpmState.Com485StatusDict.TryGetValue(cpmAction.Ip, out var s)) {
+                        Com485Tab.Com485Status.Add(s);
+                    }
+                });
+            }
         }
 
         /// <summary>

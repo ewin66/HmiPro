@@ -126,8 +126,7 @@ namespace HmiPro.Redux.Reducers {
                 //初始化所有ip的通讯状态为未知
                 foreach (var pair in MachineConfig.IpToMachineCodeDict) {
                     var ip = pair.Key;
-                    state.Com485StatusDict[ip] =
-                        new Com485SingleStatus() { Status = SmSingleStatus.Ok, Time = DateTime.Now, Ip = ip };
+                    state.Com485StatusDict[ip] = new Com485SingleStatus() { Status = SmSingleStatus.Ok, Time = DateTime.Now, Ip = ip };
                 }
                 //一分钟ping一次模块的ip，更新其离线状态
                 updateCom485Interval(state, 60);
@@ -146,7 +145,20 @@ namespace HmiPro.Redux.Reducers {
                 }
                 state.Com485StatusDict[action.Ip].Time = DateTime.Now;
                 return state;
-            }).When<CpmActions.CpmUpdateDiff>((state, action) => {
+            }).When<CpmActions.UnregIpActived>((state, action) => {
+                if (!state.Com485StatusDict.ContainsKey(action.Ip)) {
+                    state.Com485StatusDict[action.Ip] = new Com485SingleStatus() {
+                        Ip = action.Ip,
+                        Time = DateTime.Now,
+                        Status = SmSingleStatus.Unregistered
+                    };
+                } else {
+                    state.Com485StatusDict[action.Ip].Status = SmSingleStatus.Unregistered;
+                    state.Com485StatusDict[action.Ip].Time = DateTime.Now;
+                }
+                return state;
+            }).
+            When<CpmActions.CpmUpdateDiff>((state, action) => {
                 state.MachineCode = action.MachineCode;
                 state.UpdatedCpmsDiffDict[state.MachineCode] = action.CpmsDict;
                 return state;
@@ -279,6 +291,8 @@ namespace HmiPro.Redux.Reducers {
                         return "初始化";
                     case SmSingleStatus.Offline:
                         return "无法Ping通";
+                    case SmSingleStatus.Unregistered:
+                        return "未注册";
                     default:
                         return "初始化";
                 }

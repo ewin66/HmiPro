@@ -424,7 +424,10 @@ namespace YCsharp.Model.Procotol.SmParam {
         Error = 1,
         //通讯状态未知
         Unknown = 2,
-        Offline=3
+        //离线
+        Offline=3,
+        //未注册
+        Unregistered,
     }
 
 

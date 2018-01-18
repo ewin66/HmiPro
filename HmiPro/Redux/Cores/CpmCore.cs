@@ -158,6 +158,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="smModels"></param>
         void smModelsHandler(string ip, List<SmModel> smModels) {
             if (!MachineConfig.IpToMachineCodeDict.TryGetValue(ip, out var code)) {
+                App.Store.Dispatch(new CpmActions.UnregIpActived(ip));
                 Logger.Debug($"ip {ip} 未注册", ConsoleColor.Red);
                 return;
             }
