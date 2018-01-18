@@ -27,6 +27,8 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public float forceSpeed { get; set; }
 
+        public Dictionary<string,object> userInputParams { get; set; }
+
         private string _workCode;
         /// <summary>
         /// 工单编码

@@ -159,7 +159,7 @@ namespace HmiPro.Config {
         public static string SqlitePath;
         public static string LogFolder = @"C:\HmiPro\Log\";
 
-        public static string QueueDpms = "Input_Parameters_Machine";
+        public static string QueueDpms = "QUE_WEB_Command_Receive_p2p";
 
 
     }

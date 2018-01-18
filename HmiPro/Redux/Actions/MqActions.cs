@@ -60,9 +60,9 @@ namespace HmiPro.Redux.Actions {
         public struct UploadDpms : IAction {
             public string Type() => UPLOAD_DPMS;
             public string MachineCode;
-            public IList<MqUploadDpm> MqUploadDpms;
+            public MqUploadDpm MqUploadDpms;
 
-            public UploadDpms(string machineCode, IList<MqUploadDpm> mqUploadDpms) {
+            public UploadDpms(string machineCode,MqUploadDpm mqUploadDpms) {
                 MachineCode = machineCode;
                 MqUploadDpms = mqUploadDpms;
             }
