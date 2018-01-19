@@ -39,6 +39,10 @@ namespace HmiPro.Config.Models {
                     case CpmInfoMethodName.StdDev:
                         stdDevValArr = new float[3];
                         break;
+                    //根据时间计算导数
+                    case CpmInfoMethodName.DervativeByTime:
+                        derByTime = new CalcDerByTime();
+                        break;
                 }
             }
         }
@@ -58,7 +62,20 @@ namespace HmiPro.Config.Models {
         private float[] stdDevValArr;
         private float[] avgValArr;
         //上一个值，求导数用
+        //该倒数基于单位长度
         private float? lastValForDerivative;
+        private CalcDerByTime derByTime;
+
+        /// <summary>
+        /// 通过时间求取倒数值
+        /// 该倒数根据时间长度
+        /// </summary>
+        struct CalcDerByTime {
+            //上次的值
+            public float? LastValue;
+            //上次的时间
+            public DateTime LastTime;
+        }
 
         public float? ExecCalc(IDictionary<int, float> codeToValDict, int updateCode) {
             //更新的参数不属于计算依赖的参数
@@ -80,7 +97,8 @@ namespace HmiPro.Config.Models {
                     return execReciprocal(codeToValDict);
                 case CpmInfoMethodName.Derivative:
                     return execDerivative(codeToValDict);
-
+                case CpmInfoMethodName.DervativeByTime:
+                    return execDerivativeByTime(codeToValDict);
             }
             return execDefault(codeToValDict);
         }
@@ -153,6 +171,11 @@ namespace HmiPro.Config.Models {
             return (float)Math.Pow(SnPow2, 0.5);
         }
 
+        /// <summary>
+        /// 计算功率因素
+        /// </summary>
+        /// <param name="codeToValDict"></param>
+        /// <returns></returns>
         private float? execPowerFactory(IDictionary<int, float> codeToValDict) {
             var paramCodes = this.MethodParamInts;
             if (!codeToValDict.ContainsKey(paramCodes[0]) || !codeToValDict.ContainsKey(paramCodes[1])) {
@@ -168,6 +191,11 @@ namespace HmiPro.Config.Models {
             return (float)factory;
         }
 
+        /// <summary>
+        /// 计算平均值
+        /// </summary>
+        /// <param name="codeToValDict"></param>
+        /// <returns></returns>
         private float? execAvg(IDictionary<int, float> codeToValDict) {
             var paramCodes = this.MethodParamInts;
             if (!codeToValDict.ContainsKey(paramCodes[0])) {
@@ -196,6 +224,37 @@ namespace HmiPro.Config.Models {
             }
             return codeToValDict[Code];
         }
+
+        /// <summary>
+        /// 通过时间计算的倒数，时间单位为秒
+        /// </summary>
+        /// <param name="codeToValDict"></param>
+        /// <returns></returns>
+        private float? execDerivativeByTime(IDictionary<int, float> codeToValDict) {
+            var paramCodes = this.MethodParamInts;
+            if (!codeToValDict.ContainsKey(this.MethodParamInts[0])) {
+                return null;
+            }
+            var curVal = codeToValDict[paramCodes[0]];
+            var curTime = DateTime.Now;
+            //首次只是存储最新值
+            if (!derByTime.LastValue.HasValue) {
+                derByTime.LastValue = codeToValDict[paramCodes[0]];
+                derByTime.LastTime = curTime;
+                return null;
+            }
+            var diffVal = curVal - derByTime.LastValue.Value;
+            var diffSec = (curTime - derByTime.LastTime).TotalSeconds;
+            //更新历史值
+            derByTime.LastValue = codeToValDict[paramCodes[0]];
+            derByTime.LastTime = curTime;
+            //只计算正数，对于负数目前舍去
+            if (diffSec > 0 && diffVal > 0) {
+                return (float)(diffVal / diffSec);
+            }
+            return null;
+        }
+
 
         /// <summary>
         /// 计算导数
@@ -229,12 +288,9 @@ namespace HmiPro.Config.Models {
             }
             return null;
         }
-
-
     }
 
     public enum CpmInfoMethodName {
-
         //默认值
         Default = 0,
         //平均值
@@ -254,7 +310,10 @@ namespace HmiPro.Config.Models {
         //倒数
         Derivative = 8,
         //倒数
-        Reciprocal = 9
+        Reciprocal = 9,
+        //时间倒数
+        //比如：记米-->速度
+        DervativeByTime = 10
     }
 
     /// <summary>
@@ -310,14 +369,12 @@ namespace HmiPro.Config.Models {
                     if (string.IsNullOrEmpty(cpmStr.Name)) {
                         continue;
                     }
-
                     //名称
                     cpmInfo.Name = cpmStr.Name;
                     //编码
                     cpmInfo.Code = int.Parse(cpmStr.Code.Trim());
                     //单位
                     cpmInfo.Unit = cpmStr.Unit;
-
                     //算法
                     cpmInfo.MethodName = string.IsNullOrEmpty(cpmStr.MethodName) ? default(CpmInfoMethodName?) : (CpmInfoMethodName)int.Parse(cpmStr.MethodName);
                     //算法参数（字符串）

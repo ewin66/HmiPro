@@ -49,7 +49,7 @@ namespace HmiPro.Config.Models {
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeTime, Name = "Oee-时间效率" });
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeSpeed, Name = "Oee-速度效率" });
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeQuality, Name = "Oee-质量效率" });
-
+            validUnique(cpms);
             cpms.ForEach(cpm => {
                 CpmNameToCodeDict[cpm.Name] = cpm.Code;
                 //所有参数
@@ -98,11 +98,24 @@ namespace HmiPro.Config.Models {
                 }
 
             }
-
             validCodeMethodDict();
             validPlcAlarm();
         }
 
+        /// <summary>
+        /// 参数名称和参数编码不能重复
+        /// </summary>
+        /// <param name="cpms"></param>
+        void validUnique(List<CpmInfo> cpms) {
+            var repeatNames = cpms.GroupBy(c => c.Name).Where(c => c.Count() > 1).ToList();
+            if (repeatNames?.Count > 0) {
+                throw new Exception($"参数名: " + repeatNames.FirstOrDefault().Key + " 重复！");
+            }
+            var repeatCodes = cpms.GroupBy(c => c.Code).Where(c => c.Count() > 1).ToList();
+            if (repeatCodes?.Count > 0) {
+                throw new Exception($"参数编码：{repeatCodes.FirstOrDefault().Key} 重复！");
+            }
+        }
 
         /// <summary>
         /// 校验Plc报警配置
@@ -124,8 +137,5 @@ namespace HmiPro.Config.Models {
             }
 
         }
-
-
-
     }
 }

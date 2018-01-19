@@ -101,10 +101,13 @@ namespace HmiPro.Redux.Cores {
         /// <returns></returns>
         public float? CalcOeeSpeedEff(string machineCode, OeeActions.CalcOeeSpeedType oeeSpeedType) {
             var setting = GlobalConfig.MachineSettingDict[machineCode];
+
             if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedPlc) {
                 return CalcOeeSpeedEffByPlc(machineCode);
+
             } else if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedMq) {
                 return CalcOeeSpeedEffByMq(machineCode);
+
             } else if (oeeSpeedType == OeeActions.CalcOeeSpeedType.MaxSpeedSetting) {
                 return CalcOeeSpeedEffBySetting(machineCode, float.Parse(setting.OeeSpeedMax.ToString()));
             }
@@ -121,16 +124,36 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// <todo>通过从Mq获取到的最大速度来计算Oee速度效率</todo>
+        /// 通过排产任务来计算 Oee 速度效率
         /// </summary>
         /// <param name="machineCode"></param>
         /// <returns></returns>
         public float? CalcOeeSpeedEffByMq(string machineCode) {
-            return null;
+            //获取最大速度
+            var forceSpeed = App.Store.GetState().DMesState.SchTaskDoingDict[machineCode]?.MqSchTask?.forceSpeed;
+            if (!forceSpeed.HasValue) {
+                return null;
+            }
+            return CalcOeeSpeedEffBySetting(machineCode, forceSpeed.Value);
         }
 
+        /// <summary>
+        /// 通过设定值来计算速度效率
+        /// </summary>
+        /// <param name="machineCode"></param>
+        /// <param name="maxVal"></param>
+        /// <returns></returns>
         public float? CalcOeeSpeedEffBySetting(string machineCode, float maxVal) {
-            return App.Store.GetState().CpmState.StateSpeedDict[machineCode] / maxVal;
+            if (maxVal == 0) {
+                return null;
+            }
+            var setting = GlobalConfig.MachineSettingDict[machineCode];
+            var speedCode = MachineConfig.MachineDict[machineCode].CpmNameToCodeDict[setting.OeeSpeed];
+            var speedCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][speedCode];
+            if (speedCpm.ValueType == SmParamType.Signal) {
+                return (float)speedCpm.GetFloatVal() / maxVal;
+            }
+            return null;
         }
 
         /// <summary>

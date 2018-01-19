@@ -81,5 +81,6 @@ namespace HmiPro.Config {
             Load(configPath);
             Console.WriteLine("加载机台配置文件路径：-" + configPath);
         }
+
     }
 }

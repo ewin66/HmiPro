@@ -266,10 +266,10 @@ namespace HmiPro.Redux.Cores {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void whenSpeedZeroAccept(AppState state, IAction action) {
-            var speedAction = (CpmActions.StateSpeedZeroAccept)action;
-            var machineCode = speedAction.MachineCode;
-            //速度为0的时候检查当前任务可否完成
-            checkAxisCanComplete(machineCode);
+            //var speedAction = (CpmActions.StateSpeedZeroAccept)action;
+            //var machineCode = speedAction.MachineCode;
+            ////速度为0的时候检查当前任务可否完成
+            //checkAxisCanComplete(machineCode);
         }
 
         /// <summary>
@@ -809,6 +809,7 @@ namespace HmiPro.Redux.Cores {
                     Content = $"轴号 {axisCode} 任务达成"
                 }));
                 Logger.Info($"回传机台{machineCode},{axisCode}排产数据成功");
+                Logger.Info(JsonConvert.SerializeObject(uManu));
                 //上传落轴数据失败，对其进行缓存
             } else {
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
