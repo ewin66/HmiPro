@@ -26,7 +26,7 @@ namespace HmiPro.Views.DMes {
             //var dbUpperName = HmiDynamicConfig.DbName.ToUpper();
             var viewName = MachineConfig.HmiName;
             var placeholder = "machine_placeholder";
-            var suffixUrl = $"/dashboard/db/{placeholder}?refresh={refresh}&orgId=1";
+            var suffixUrl = $"/dashboard/db/{placeholder}?refresh={refresh}&orgId=1&kiosk";
             suffixUrl = suffixUrl.Replace(placeholder, viewName);
             this.WebBrowser.Navigate(preUrl + suffixUrl);
         }

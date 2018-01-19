@@ -44,9 +44,9 @@
                 <!--<dxlc:Tile Header="任务管理"  Style="{StaticResource HorizontalTile}" Background="#009688"  Command="{Binding NavigateCommand}" CommandParameter="SystemSettingViewDev" Margin="643,-480,-643,480">
                     <BitmapImage UriSource="{Binding Assets.IconTask}" />
                 </dxlc:Tile>-->
-                <dxlc:Tile Header="设置"  Style="{StaticResource HorizontalTile}" Background="#509688"  Command="{Binding JumpAppSettingViewCommand}" CommandParameter="设置程序信息">
+                <!--<dxlc:Tile Header="设置"  Style="{StaticResource HorizontalTile}" Background="#509688"  Command="{Binding JumpAppSettingViewCommand}" CommandParameter="设置程序信息">
                     <BitmapImage UriSource="{Binding Assets.IconSetting2}" />
-                </dxlc:Tile>
+                </dxlc:Tile>-->
                 <!--dxlc:Tile Header="质量检测"  Style="{StaticResource HorizontalTile}" Background="#009608"  Command="{Binding NavigateCommand}" CommandParameter="McQualityCheckView" >
                     <BitmapImage UriSource="{Binding Assets.IconQualityControl}" />
                 </>-->
