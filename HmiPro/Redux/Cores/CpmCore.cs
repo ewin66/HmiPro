@@ -127,12 +127,12 @@ namespace HmiPro.Redux.Cores {
             if (AlarmLightsStateDict[alarmAction.MachineCode] == AlarmLightsState.On) {
                 return;
             }
+            AlarmLightsStateDict[alarmAction.MachineCode] = AlarmLightsState.On;
             if (MachineConfig.AlarmIpDict.TryGetValue(alarmAction.MachineCode, out var ip)) {
                 SmParamTcp?.OpenAlarm(ip);
-                AlarmLightsStateDict[alarmAction.MachineCode] = AlarmLightsState.On;
+                //一定时间后关闭报警灯
                 YUtil.SetTimeout(alarmAction.LightMs, () => {
-                    SmParamTcp?.CloseAlarm(ip);
-                    AlarmLightsStateDict[alarmAction.MachineCode] = AlarmLightsState.Off;
+                    App.Store.Dispatch(new AlarmActions.CloseAlarmLights(alarmAction.MachineCode));
                 });
             } else {
                 Logger.Error($"机台 {alarmAction.MachineCode} 没有报警 ip");
@@ -144,6 +144,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         void doCloseAlarmLights(AppState state, IAction action) {
             var alarmAction = (AlarmActions.CloseAlarmLights)action;
+            AlarmLightsStateDict[alarmAction.MachineCode] = AlarmLightsState.Off;
             if (MachineConfig.AlarmIpDict.TryGetValue(alarmAction.MachineCode, out var ip)) {
                 SmParamTcp?.CloseAlarm(ip);
             } else {
@@ -183,7 +184,6 @@ namespace HmiPro.Redux.Cores {
             var cpmsRelate = new List<Cpm>();
             var cpms = new List<Cpm>();
             IDictionary<int, Cpm> updatedCpmsDiffDict = new Dictionary<int, Cpm>();
-            var setting = GlobalConfig.MachineSettingDict[machineCode];
             //简洁算法计算出来的参数
             cpmsDirect?.ForEach(cpm => {
                 //普通浮点参数
@@ -194,13 +194,30 @@ namespace HmiPro.Redux.Cores {
                     cpmsRelate.AddRange(relateCpms);
                     //Rfid卡
                 } else if (cpm.ValueType == SmParamType.StrRfid) {
-                    if (setting.StartRfids.Contains(cpm.Name)) {
-                        App.Store.Dispatch(new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
-                            DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.StartAxis));
-                    } else if (setting.EndRfids.Contains(cpm.Name)) {
-                        App.Store.Dispatch(new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
-                            DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.EndAxis));
+                    DMesActions.RfidAccpet rfidAccept = new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(), DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.Unknown);
 
+                    //放线卡
+                    if (DefinedParamCode.StartAxisRfid == cpm.Code) {
+                        rfidAccept.RfidType = DMesActions.RfidType.StartAxis;
+                        //收线卡
+                    } else if (DefinedParamCode.EndAxisRfid == cpm.Code) {
+                        rfidAccept.RfidType = DMesActions.RfidType.EndAxis;
+                        //人员卡
+                    } else if (DefinedParamCode.EmpRfid == cpm.Code) {
+                        rfidAccept.RfidType = DMesActions.RfidType.EmpStartMachine;
+                        rfidAccept.MqData = new MqEmpRfid() {
+                            employeeCode = rfidAccept.Rfid,
+                            macCode = machineCode,
+                            name = rfidAccept.Rfid,
+                            PrintTime = DateTime.Now,
+                            type = MqRfidType.EmpStartMachine
+                        };
+                        //物料卡
+                    } else if (DefinedParamCode.EmpRfid == cpm.Code) {
+
+                    }
+                    if (rfidAccept.RfidType != DMesActions.RfidType.Unknown) {
+                        App.Store.Dispatch(rfidAccept);
                     }
                     //485通讯状态
                 } else if (cpm.ValueType == SmParamType.SingleComStatus) {
@@ -245,14 +262,12 @@ namespace HmiPro.Redux.Cores {
                 //派发所有接受到的参数
                 App.Store.Dispatch(new CpmActions.CpmUpdatedAll(machineCode, cpms));
                 dispatchLogicSetting(machineCode, cpms);
-
             }
             if (updatedCpmsDiffDict.Count > 0) {
                 var diffCpms = updatedCpmsDiffDict.Values.ToList();
                 //所有变化的参数
                 App.Store.Dispatch(new CpmActions.CpmUpdateDiff(machineCode, updatedCpmsDiffDict));
                 dispatchDiffLogicSetting(machineCode, diffCpms);
-
             }
             //检查Mq的Bom表数据报警
             dispatchCheckBomAlarm(machineCode, cpms);

@@ -38,6 +38,13 @@ namespace HmiPro.Redux.Cores {
             if (alarmAdd == null) {
                 return;
             }
+            var key = alarmAction.MachineCode + alarmAdd.message;
+            if (AlarmActions.GenerateOneAlarm.LastGenerateTimeDict.TryGetValue(key, out var lastTime)) {
+                if ((DateTime.Now - lastTime).TotalSeconds < alarmAction.MinGapSec) {
+                    return;
+                }
+            }
+            AlarmActions.GenerateOneAlarm.LastGenerateTimeDict[key] = DateTime.Now;
             var historyAlarms = historyAlarmsDict[machineCode];
             var alarmRemove = historyAlarms.FirstOrDefault(a => a.code == alarmAdd.code);
             //fixed: 2018-01-15

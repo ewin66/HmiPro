@@ -20,13 +20,32 @@ namespace YCsharp.Service {
         private readonly string mqUserName;
         private readonly string mqUserPwd;
         private readonly TimeSpan requestTimeout;
+        private IConnectionFactory poolFactory;
+        private IConnection poolConnection;
+
 
         public ActiveMqService(string mqConn, string mqUserName, string mqUserPwd, TimeSpan requestTimeout) {
             this.mqConn = mqConn;
             this.mqUserName = mqUserName;
             this.mqUserPwd = mqUserPwd;
             this.requestTimeout = requestTimeout;
+            Uri uri = new Uri(mqConn);
+            poolFactory = new ConnectionFactory(uri);
+            poolConnection = poolFactory.CreateConnection(mqUserName, mqUserPwd);
+            poolConnection.ClientId = YUtil.GetUtcTimestampMs(DateTime.Now).ToString() + YUtil.RandGenerator();
+            poolConnection.Start();
         }
+
+        /// <summary>
+        /// 从连接池操作，提升效率
+        /// </summary>
+        /// <param name="action"></param>
+        public void OperateOneActionFromPool(Action<ISession, IConnection> action) {
+            using (ISession session = poolConnection.CreateSession()) {
+                action(session, poolConnection);
+            }
+        }
+
         /// <summary>
         /// 基础操作,只能执行一次动作
         /// </summary>
@@ -61,10 +80,10 @@ namespace YCsharp.Service {
         /// <param name="topic"></param>
         /// <param name="message"></param>
         public void PulishOneTopic(string topic, string message) {
-            this.OperateOneAction((session, conn) => {
+            this.OperateOneActionFromPool((session, conn) => {
                 using (IMessageProducer producer = session.CreateProducer(new ActiveMQTopic(topic))) {
                     producer.RequestTimeout = requestTimeout;
-                    conn.Start();
+                    //conn.Start();
                     //可以写入字符串，也可以是一个xml字符串等
                     var req = session.CreateTextMessage(message);
                     producer.Send(req);
@@ -89,11 +108,11 @@ namespace YCsharp.Service {
         /// <param name="queueName">队列名字</param>
         /// <param name="message">内容</param>
         public void SendP2POneMessage(string queueName, string message) {
-            this.OperateOneAction((session, conn) => {
+            this.OperateOneActionFromPool((session, conn) => {
                 IDestination destination = SessionUtil.GetDestination(session, queueName);
                 using (IMessageProducer producer = session.CreateProducer(destination)) {
                     producer.RequestTimeout = requestTimeout;
-                    conn.Start();
+                    //conn.Start();
                     ITextMessage request = session.CreateTextMessage(message);
                     producer.Send(request);
                 }
@@ -106,8 +125,8 @@ namespace YCsharp.Service {
         /// <param name="queueName"></param>
         /// <param name="onMessageReceived"></param>
         public void ListenP2PMessage(string queueName, Action<string> onMessageReceived) {
-            this.OperateOneAction((session, conn) => {
-                conn.Start();
+            this.OperateOneActionFromPool((session, conn) => {
+                //conn.Start();
                 IDestination destination = SessionUtil.GetDestination(session, queueName);
                 IMessageConsumer consumer = session.CreateConsumer(destination);
                 consumer.Listener += new MessageListener((msg) => {
@@ -115,7 +134,7 @@ namespace YCsharp.Service {
                     onMessageReceived.Invoke(text);
                 });
 
-            }, false);
+            });
         }
 
         /// <summary>
@@ -135,7 +154,7 @@ namespace YCsharp.Service {
         /// </summary>
         public Task ListenTopicAsync(string topic, string register, Action<string> onMessageReceived) {
             return Task.Run(() => {
-                this.ListenTopic(topic, register, onMessageReceived)();
+                this.ListenTopic(topic, register, onMessageReceived);
             });
         }
 
@@ -146,30 +165,25 @@ namespace YCsharp.Service {
         /// <param name="register">注册Id</param>
         /// <param name="onMessageReceived">接受事件</param>
         /// <returns></returns>
-        public Action ListenTopic(string topic, string register, Action<string> onMessageReceived) {
-            Uri uri = new Uri(mqConn);
-            IConnectionFactory factory = new ConnectionFactory(uri);
-            IConnection conn = factory.CreateConnection(mqUserName, mqUserPwd);
+        public void ListenTopic(string topic, string register, Action<string> onMessageReceived) {
+            //if (!string.IsNullOrEmpty(register)) {
+            //    poolConnection.ClientId = register + YUtil.GetUtcTimestampMs(DateTime.Now);
+            //}
+            //poolConnection.Start();
+            ISession session = poolConnection.CreateSession();
+            IMessageConsumer consumer = null;
             if (!string.IsNullOrEmpty(register)) {
-                conn.ClientId = register + YUtil.GetUtcTimestampMs(DateTime.Now);
+                consumer = session.CreateDurableConsumer(new ActiveMQTopic(topic), register, "receiver='" + register + "'", false);
+            } else {
+                var selector = "csharp" + YUtil.RandGenerator();
+                consumer = session.CreateDurableConsumer(new ActiveMQTopic(topic), selector, null, false);
             }
-            conn.Start();
-            return () => {
-                ISession session = conn.CreateSession();
-                IMessageConsumer consumer = null;
-                if (!string.IsNullOrEmpty(register)) {
-                    consumer = session.CreateDurableConsumer(new ActiveMQTopic(topic), register,
-                        "receiver='" + register + "'", false);
-                } else {
-                    consumer = session.CreateDurableConsumer(new ActiveMQTopic(topic), "csharp", null, false);
+            consumer.Listener += new MessageListener((msg) => {
+                ITextMessage message = msg as ITextMessage;
+                if (message != null) {
+                    onMessageReceived(message.Text);
                 }
-                consumer.Listener += new MessageListener((msg) => {
-                    ITextMessage message = msg as ITextMessage;
-                    if (message != null) {
-                        onMessageReceived(message.Text);
-                    }
-                });
-            };
+            });
 
         }
     }

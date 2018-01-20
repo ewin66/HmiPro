@@ -187,38 +187,31 @@ namespace HmiPro.ViewModels {
             var msg = ((SysActions.ShowNotification)action).Message;
             //两次相同通知时间间隔秒数>=MinGapSec 才能显示
             //默认都显示
-            bool canNotify = true;
+            var key = "Title: " + msg.Title + " Content: " + msg.Content;
             if (msg.MinGapSec.HasValue) {
-                var key = "Title: " + msg.Title + " Content: " + msg.Content;
                 if (SysNotificationMsg.NotifyTimeDict.TryGetValue(key, out var lastTime)) {
-                    if ((DateTime.Now - lastTime).TotalSeconds >= msg.MinGapSec.Value) {
-                        canNotify = true;
-                    } else {
-                        canNotify = false;
+                    if ((DateTime.Now - lastTime).TotalSeconds < msg.MinGapSec.Value) {
+                        return;
                     }
-
-                } else {
-                    SysNotificationMsg.NotifyTimeDict[key] = DateTime.Now;
-                    canNotify = true;
                 }
             }
-            if (canNotify) {
-                //保存消息日志
-                var logDetail = "Title: " + msg.Title + "\t Content: " + msg.Content;
-                if (!string.IsNullOrEmpty(msg.LogDetail)) {
-                    logDetail = msg.LogDetail;
-                }
-                Logger.Notify(logDetail);
-                DispatcherService.BeginInvoke(() => {
-                    INotification notification = NotifyNotificationService.CreatePredefinedNotification(msg.Title, msg.Content, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                    //Hmi没有播放声音设备
-                    if (HmiConfig.IsDevUserEnv) {
-                        SystemSounds.Exclamation.Play();
-                    }
-                    notification.ShowAsync();
-                });
+            SysNotificationMsg.NotifyTimeDict[key] = DateTime.Now;
+            //保存消息日志
+            var logDetail = "Title: " + msg.Title + "\t Content: " + msg.Content;
+            if (!string.IsNullOrEmpty(msg.LogDetail)) {
+                logDetail = msg.LogDetail;
             }
+            Logger.Notify(logDetail);
+            DispatcherService.BeginInvoke(() => {
+                INotification notification = NotifyNotificationService.CreatePredefinedNotification(msg.Title, msg.Content, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                //Hmi没有播放声音设备
+                if (HmiConfig.IsDevUserEnv) {
+                    SystemSounds.Exclamation.Play();
+                }
+                notification.ShowAsync();
+            });
         }
+
 
 
         /// <summary>

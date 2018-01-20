@@ -51,10 +51,8 @@ namespace HmiPro.Redux.Models {
         public static readonly string EmpEndWork = "下班";
         public static readonly string EmpStartMachine = "上机";
         public static readonly string EmpEndMachine = "下机";
-        public static readonly string AxisStart = "axis_begin";
-        public static readonly string AxisEnd = "axis_end";
-        public static readonly string AxisStart2 = "放线";
-        public static readonly string AxisEnd2 = "收线";
+        public static readonly string AxisStart = "放线";
+        public static readonly string AxisEnd = "收线";
     }
 
 }

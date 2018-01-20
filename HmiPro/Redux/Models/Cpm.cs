@@ -19,12 +19,13 @@ namespace HmiPro.Redux.Models {
     /// </summary>
     public static class DefinedParamCode {
         //放线Rfid
-        public static readonly int StartRfid = 1001;
+        public static readonly int StartAxisRfid = 0x3e8;
         //收线Rfid
-        public static readonly int EndRfid = 1002;
+        public static readonly int EndAxisRfid = 0x3e9;
         //人员Rfid
-        public static readonly int EmployeeRfied = -100;
-
+        public static readonly int EmpRfid = 0x3ea;
+        //物料卡
+        public static readonly int MaterialRfid = 0x3b;
         //Oee
         public static readonly int Oee = -100;
         public static readonly int OeeSpeed = -101;
@@ -32,7 +33,7 @@ namespace HmiPro.Redux.Models {
         public static readonly int OeeQuality = -103;
 
         public static bool IsRfidParam(int paramCode) {
-            return paramCode == StartRfid || paramCode == EndRfid || paramCode == EmployeeRfied;
+            return paramCode == StartAxisRfid || paramCode == EndAxisRfid || paramCode == EmpRfid || paramCode == MaterialRfid;
         }
     }
 

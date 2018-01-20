@@ -54,6 +54,15 @@ namespace HmiPro.Redux.Services {
             HttpSystemCmdDict["update-app"] = execUpdateApp;
             HttpSystemCmdDict["get-state"] = execGetState;
             HttpSystemCmdDict["clear-task"] = execClearSchTask;
+            HttpSystemCmdDict["close-app"] = execCloseApp;
+        }
+
+        private void execCloseApp(HttpListenerResponse response) {
+            var rest = new HttpSystemRest();
+            rest.DebugMessage = "即将关闭程序";
+            outResponse(response, rest);
+            App.Store.Dispatch(new SysActions.ShutdownApp());
+
         }
 
 

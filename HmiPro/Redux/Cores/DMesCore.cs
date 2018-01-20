@@ -209,8 +209,9 @@ namespace HmiPro.Redux.Cores {
             if (meter <= 0) {
                 return;
             }
+            MqAlarm mqAlarm;
             lock (SchTaskDoingLocks[alarmAction.MachineCode]) {
-                var mqAlarm = new MqAlarm() {
+                mqAlarm = new MqAlarm() {
                     machineCode = alarmAction.MachineCode,
                     alarmType = AlarmType.CpmErr,
                     axisCode = SchTaskDoingDict[alarmAction.MachineCode].MqSchAxis?.axiscode ?? "/",
@@ -223,8 +224,9 @@ namespace HmiPro.Redux.Cores {
                     meter = meter,
                     time = YUtil.GetUtcTimestampMs(DateTime.Now),
                 };
-                App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm));
             }
+            //Cpm 参数报警 10 秒触发一次
+            App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm, 10));
         }
 
         /// <summary>
@@ -303,32 +305,29 @@ namespace HmiPro.Redux.Cores {
         /// <param name="action"></param>
         void doRfidAccept(AppState state, IAction action) {
             var dmesAction = (DMesActions.RfidAccpet)action;
-            if (dmesAction.RfidWhere == DMesActions.RfidWhere.FromMq) {
-                if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine ||
-                    dmesAction.RfidType == DMesActions.RfidType.EmpEndMachine) {
-                    var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = "消息通知",
-                        Content = $" {mqEmpRfid.name} 打{mqEmpRfid.type}卡成功, {dmesAction.MachineCode} 机台"
-                    }));
-                } else {
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = "消息通知",
-                        Content = $"手持机扫卡成功"
-                    }));
-                }
+            if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine || dmesAction.RfidType == DMesActions.RfidType.EmpEndMachine) {
+                var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "消息通知",
+                    Content = $" {mqEmpRfid.name} 打{mqEmpRfid.type}卡成功, {dmesAction.MachineCode} 机台"
+                }));
+
+            } else {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "消息通知",
+                    Content = $"手持机扫卡成功"
+                }));
             }
+
             lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
                 var doingTask = SchTaskDoingDict[dmesAction.MachineCode];
-                var setting = GlobalConfig.MachineSettingDict[dmesAction.MachineCode];
 
                 //放线卡
                 if (dmesAction.RfidType == DMesActions.RfidType.StartAxis) {
                     doingTask.StartAxisRfids.Add(dmesAction.Rfid);
                     //非采集参数，也更新其Rfid数据
                     if (dmesAction.RfidWhere != DMesActions.RfidWhere.FromCpm) {
-                        if (state.CpmState.OnlineCpmsDict[dmesAction.MachineCode]
-                            .TryGetValue(DefinedParamCode.StartRfid, out var startRfidCpm)) {
+                        if (state.CpmState.OnlineCpmsDict[dmesAction.MachineCode].TryGetValue(DefinedParamCode.StartAxisRfid, out var startRfidCpm)) {
                             startRfidCpm.Value = dmesAction.Rfid;
                             startRfidCpm.ValueType = SmParamType.StrRfid;
                         }
@@ -339,22 +338,24 @@ namespace HmiPro.Redux.Cores {
                     //更新界面显示
                     if (dmesAction.RfidWhere != DMesActions.RfidWhere.FromCpm) {
                         if (state.CpmState.OnlineCpmsDict[dmesAction.MachineCode]
-                            .TryGetValue(DefinedParamCode.EndRfid, out var endRfidCpm)) {
+                            .TryGetValue(DefinedParamCode.EndAxisRfid, out var endRfidCpm)) {
                             endRfidCpm.Value = dmesAction.Rfid;
                             endRfidCpm.ValueType = SmParamType.StrRfid;
                         }
                     }
+
                     //人员上机卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine) {
                     var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
                     doingTask.EmpRfids.Add(dmesAction.Rfid);
                     //全局保存打卡信息
-                    var isPrinted = MqEmpRfidDict[dmesAction.MachineCode]
-                        .Exists(s => s.employeeCode == mqEmpRfid.name);
+                    var isPrinted = MqEmpRfidDict[dmesAction.MachineCode].Exists(s => s.employeeCode == mqEmpRfid.name);
+
                     //如果没有打上机卡，则添加到全局保存
                     if (!isPrinted) {
                         MqEmpRfidDict[dmesAction.MachineCode].Add(mqEmpRfid);
                     }
+
                     //人员下机卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EmpEndMachine) {
                     doingTask.EmpRfids.Remove(dmesAction.Rfid);

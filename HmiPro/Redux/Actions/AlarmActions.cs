@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -114,6 +115,12 @@ namespace HmiPro.Redux.Actions {
             public string MachineCode;
             public MqAlarm MqAlarm;
             public int MinGapSec;
+
+            /// <summary>
+            /// 上一次报警的时间点
+            /// </summary>
+            public static IDictionary<string, DateTime> LastGenerateTimeDict = new ConcurrentDictionary<string, DateTime>();
+
 
             public GenerateOneAlarm(string machineCode, MqAlarm alarm, int minGapSec = 0) {
                 MachineCode = machineCode;

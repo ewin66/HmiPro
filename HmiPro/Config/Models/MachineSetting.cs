@@ -74,15 +74,5 @@ namespace HmiPro.Config.Models {
         /// </summary>
         public string Od { get; set; } = "";
 
-        /// <summary>
-        /// 放线Rfid
-        /// </summary>
-        public string[] StartRfids { get; set; } = new string[0];
-
-        /// <summary>
-        /// 收线Rfid
-        /// </summary>
-        public string[] EndRfids { get; set; } = new string[0];
-
     }
 }

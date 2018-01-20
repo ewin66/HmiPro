@@ -111,11 +111,11 @@ namespace HmiPro.Redux.Effects {
                     return await Task.Run(() => {
                         try {
                             activeMq.ListenTopic(instance.TopicName, null,
-                                mqService.AxisRfidAccpet)();
+                                mqService.AxisRfidAccpet);
                             dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_SUCCESS, null));
                             return true;
-                        } catch {
-                            dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_FAILED, null));
+                        } catch (Exception e) {
+                            dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_FAILED,e));
                         }
                         return false;
                     });
@@ -131,7 +131,7 @@ namespace HmiPro.Redux.Effects {
                     dispatch(instance);
                     return await Task.Run(() => {
                         try {
-                            activeMq.ListenTopic(instance.TopicName, null, mqService.EmpRfidAccept)();
+                            activeMq.ListenTopic(instance.TopicName, null, mqService.EmpRfidAccept);
                             dispatch(new MqActions.StartListenEmpRfidSuccess());
                             return true;
                         } catch (Exception e) {

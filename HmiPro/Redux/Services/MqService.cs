@@ -81,9 +81,9 @@ namespace HmiPro.Redux.Services {
                     return;
                 }
                 DMesActions.RfidType type = DMesActions.RfidType.Unknown;
-                if (mqRfid.msgType == MqRfidType.AxisStart2) {
+                if (mqRfid.msgType == MqRfidType.AxisStart) {
                     type = DMesActions.RfidType.StartAxis;
-                } else if (mqRfid.msgType == MqRfidType.AxisEnd2) {
+                } else if (mqRfid.msgType == MqRfidType.AxisEnd) {
                     type = DMesActions.RfidType.EndAxis;
                 }
                 App.Store.Dispatch(new DMesActions.RfidAccpet(mqRfid.macCode, mqRfid.rfids,
