@@ -209,22 +209,7 @@ namespace HmiPro.Redux.Cores {
             if (meter <= 0) {
                 return;
             }
-            MqAlarm mqAlarm;
-            lock (SchTaskDoingLocks[alarmAction.MachineCode]) {
-                mqAlarm = new MqAlarm() {
-                    machineCode = alarmAction.MachineCode,
-                    alarmType = AlarmType.CpmErr,
-                    axisCode = SchTaskDoingDict[alarmAction.MachineCode].MqSchAxis?.axiscode ?? "/",
-                    code = alarmAction.CpmCode,
-                    CpmName = alarmAction.CpmName,
-                    message = alarmAction.Message,
-                    employees = SchTaskDoingDict[alarmAction.MachineCode]?.EmpRfids,
-                    endRfids = SchTaskDoingDict[alarmAction.MachineCode]?.EndAxisRfids,
-                    startRfids = SchTaskDoingDict[alarmAction.MachineCode]?.StartAxisRfids,
-                    meter = meter,
-                    time = YUtil.GetUtcTimestampMs(DateTime.Now),
-                };
-            }
+            MqAlarm mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName, alarmAction.Message);
             //Cpm 参数报警 10 秒触发一次
             App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm, 10));
         }
@@ -286,7 +271,7 @@ namespace HmiPro.Redux.Cores {
                 }
                 // 完成率满足一定条件才行
                 if (taskDoing.AxisCompleteRate >= 0.90) {
-                    App.Store.Dispatch(new DMesActions.CompletedSchAxis(machineCode, taskDoing?.MqSchAxis?.axiscode));
+                    CompleteOneAxis(machineCode, taskDoing?.MqSchAxis?.axiscode);
                     return true;
                     //调试完成的时候速度为0
                 } else if (taskDoing.AxisCompleteRate > 0) {
@@ -309,13 +294,15 @@ namespace HmiPro.Redux.Cores {
                 var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                     Title = "消息通知",
-                    Content = $" {mqEmpRfid.name} 打{mqEmpRfid.type}卡成功, {dmesAction.MachineCode} 机台"
+                    Content = $" {mqEmpRfid.name} 打{mqEmpRfid.type}卡成功, {dmesAction.MachineCode} 机台",
+                    MinGapSec = 10
                 }));
 
-            } else {
+            } else if (dmesAction.RfidWhere == DMesActions.RfidWhere.FromMq) {
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                     Title = "消息通知",
-                    Content = $"手持机扫卡成功"
+                    Content = $"手持机扫卡成功",
+                    MinGapSec = 10
                 }));
             }
 
@@ -795,12 +782,12 @@ namespace HmiPro.Redux.Cores {
                 //重新初始化
                 taskDoing.Init();
             }
+           
             //更新缓存
             using (var ctx = SqliteHelper.CreateSqliteService()) {
                 //移除已经完成的任务轴
                 //taskDoing.MqSchTask.axisParam.Remove(taskDoing.MqSchAxis);
-                ctx.SavePersist(new Persist("task_" + machineCode,
-                    JsonConvert.SerializeObject(MqSchTasksDict[machineCode])));
+                ctx.SavePersist(new Persist("task_" + machineCode, JsonConvert.SerializeObject(MqSchTasksDict[machineCode])));
             }
             var uploadResult = await App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
             if (uploadResult) {

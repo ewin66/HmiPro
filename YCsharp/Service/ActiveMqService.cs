@@ -15,6 +15,10 @@ namespace YCsharp.Service {
     /// <date>2017-09-30</date>
     /// <author>ychost</author>
     /// </summary>
+    /// <update>
+    /// <date>2018-01-20</date>
+    /// 
+    /// </update>
     public class ActiveMqService {
         private readonly string mqConn;
         private readonly string mqUserName;

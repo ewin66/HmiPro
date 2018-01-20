@@ -70,7 +70,7 @@ namespace HmiPro.Redux.Patches {
                 subscriptions?.Invoke(state);
                 listeners?.Invoke(state, latestAction);
                 if (actionListenersDict.TryGetValue(action.Type(), out var execs)) {
-                    execs.Invoke(state, latestAction);
+                    execs?.Invoke(state, latestAction);
                 }
             }
         }

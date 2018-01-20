@@ -202,7 +202,6 @@ namespace YCsharp.Model.Procotol.SmParam {
             if (singleStatusData.HasValue) {
                 return singleStatusData.Value;
             }
-            //var data = BitConverter.ToInt16(Data.Reverse().ToArray(), 0);
             var data = (int)Data[0];
             SmSingleStatus status = SmSingleStatus.Unknown;
             if (Enum.IsDefined(typeof(SmSingleStatus), data)) {

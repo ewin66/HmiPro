@@ -275,8 +275,7 @@ namespace UnitTestPro.FuncTest {
         public void ExtendTest() {
             Father father = new Father();
             Son son = new Son();
-            father.DoVirtualMethod();
-            father.DoNormalMethod();
+            father.DoVirtualMethod(); father.DoNormalMethod();
             father.PrintFather();
 
             son.DoVirtualMethod();
@@ -287,6 +286,43 @@ namespace UnitTestPro.FuncTest {
             Father father2 = son;
             father2.PrintFather();
             father2.DoNormalMethod();
+        }
+
+        [TestMethod]
+        public async Task LockDeadTest() {
+            object locker = new object();
+            object locker2 = new object();
+
+            async Task<Boolean> timeConsume() {
+                Console.WriteLine("time consume in");
+                return await Task.Run(() => {
+                    lock (locker)
+                    {
+                        Thread.Sleep(1000);
+                        Console.WriteLine("time consume execing");
+                        Thread.Sleep(1000);
+                        Console.WriteLine("time consume completed");
+                        return true;
+                    }
+                });
+            }
+
+            async Task dispatch() {
+                lock (locker2) {
+                    timeConsume();
+                }
+            }
+
+            for (int i = 0; i < 3; i++) {
+                await Task.Run(() => {
+                    lock (locker) {
+                      dispatch();
+                    }
+                });
+            }
+
+            Thread.Sleep(9000);
+
         }
 
     }

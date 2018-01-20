@@ -5,6 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace HmiPro.Redux.Models {
+    /// <summary>
+    /// 手持机扫描物料卡
+    /// <date>2017-12-25</date>
+    /// <author>ychost</author>
+    /// </summary>
     public class MqScanMaterial {
         /// <summary>
         /// 最终结果

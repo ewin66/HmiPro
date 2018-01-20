@@ -3,8 +3,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CommandLine;
@@ -34,6 +37,7 @@ namespace HmiPro {
         /// 设置程序启动时间
         /// </summary>
         public App() {
+
             AppState.ExectedActions["[App] Started"] = DateTime.Now;
         }
         public static LoggerService Logger;
@@ -61,6 +65,11 @@ namespace HmiPro {
         /// </summary>
         /// <param name="e"></param>
         protected override void OnStartup(StartupEventArgs e) {
+            if (processIsStarted()) {
+                MessageBox.Show("程序已经启动，请勿重复启动", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Current.Shutdown(0);
+                return;
+            }
             base.OnStartup(e);
             //移植日志输出初始化
             MuffleLogActions.ForEach(action => {
@@ -96,7 +105,7 @@ namespace HmiPro {
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
             Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
-            Logger.Debug("浮点精度："+HmiConfig.MathRound);
+            Logger.Debug("浮点精度：" + HmiConfig.MathRound);
 
         }
 
@@ -204,6 +213,52 @@ namespace HmiPro {
                 }
             }
         }
+
+
+        #region 如果用户多次启动程序则只显示第一次启动的程序，保证只有一个实例程序
+        /// <summary>
+        /// 检测进程是否存在，存在则显示已有的进程否则则关闭程序
+        /// <href>https://www.cnblogs.com/zhili/p/OnlyInstance.html</href>
+        /// </summary>
+        static bool processIsStarted() {
+            Process currentproc = Process.GetCurrentProcess();
+            Process[] processcollection = Process.GetProcessesByName(currentproc.ProcessName.Replace(".vshost", string.Empty));
+            if (processcollection.Length > 1) {
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 找到某个窗口与给出的类别名和窗口名相同窗口
+        /// 非托管定义为：http://msdn.microsoft.com/en-us/library/windows/desktop/ms633499(v=vs.85).aspx
+        /// </summary>
+        /// <param name="lpClassName">类别名</param>
+        /// <param name="lpWindowName">窗口名</param>
+        /// <returns>成功找到返回窗口句柄,否则返回null</returns>
+        [DllImport("user32.dll")]
+        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        /// <summary>
+        /// 切换到窗口并把窗口设入前台,类似 SetForegroundWindow方法的功能
+        /// </summary>
+        /// <param name="hWnd">窗口句柄</param>
+        /// <param name="fAltTab">True代表窗口正在通过Alt/Ctrl +Tab被切换</param>
+        [DllImport("user32.dll ", SetLastError = true)]
+        static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+
+        ///// <summary>
+        /////  设置窗口的显示状态
+        /////  Win32 函数定义为：http://msdn.microsoft.com/en-us/library/windows/desktop/ms633548(v=vs.85).aspx
+        ///// </summary>
+        ///// <param name="hWnd">窗口句柄</param>
+        ///// <param name="cmdShow">指示窗口如何被显示</param>
+        ///// <returns>如果窗体之前是可见，返回值为非零；如果窗体之前被隐藏，返回值为零</returns>
+        [DllImport("user32.dll", EntryPoint = "ShowWindow", CharSet = CharSet.Auto)]
+        public static extern int ShowWindow(IntPtr hwnd, int nCmdShow);
+        public const int SW_RESTORE = 9;
+        public static IntPtr formhwnd;
+        #endregion
     }
     /// <summary>
     /// 对频率较高的日志的打印频率进行抑制

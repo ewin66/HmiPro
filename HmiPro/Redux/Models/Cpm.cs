@@ -85,15 +85,10 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public bool IsException { get; set; } = false;
 
-        public void Update(object value, SmParamType valueType, DateTime pickTime) {
-            this.Value = value;
+        public void Update(object val, SmParamType valueType, DateTime pickTime) {
+            this.Value = val;
             this.ValueType = valueType;
             this.PickTime = pickTime;
-        }
-
-
-        public Cpm() {
-
         }
 
         public static List<Cpm> ConvertBySmModel(string code, SmModel sm) {
@@ -135,7 +130,6 @@ namespace HmiPro.Redux.Models {
                             cpm.Value = p.GetStrData();
                         }
                     } else if (p.ParamType == SmParamType.SingleComStatus) {
-                        Console.WriteLine("接受到底层485状态包");
                         cpm.value = p.GetSingleComStatus();
                     }
                     //暂时对如下数据类型不做处理

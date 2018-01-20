@@ -115,7 +115,7 @@ namespace HmiPro.Redux.Effects {
                             dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_SUCCESS, null));
                             return true;
                         } catch (Exception e) {
-                            dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_FAILED,e));
+                            dispatch(new SimpleAction(MqActions.START_LISTEN_AXIS_RFID_FAILED, e));
                         }
                         return false;
                     });
@@ -151,9 +151,10 @@ namespace HmiPro.Redux.Effects {
                     //dispatch(instance);
                     return await Task.Run(() => {
                         try {
-                            activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(instance.MqUploadManu));
+                            activeMq.SendP2POneMessage(instance.QueueName,
+                                JsonConvert.SerializeObject(instance.MqUploadManu));
                             return true;
-                        } catch (Exception e) {
+                        } catch {
 
                         }
                         return false;
@@ -162,19 +163,18 @@ namespace HmiPro.Redux.Effects {
         }
 
         void initUploadAlarm() {
-            UploadAlarm =
-                App.Store.asyncActionVoid<MqActions.UploadAlarmMq>(async (dispatch, getState, instance) => {
-                    await Task.Run(() => {
-                        dispatch(instance);
-                        try {
-                            activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(instance.MqAlarm));
-                            App.Store.Dispatch(new SimpleAction(MqActions.UPLOAD_ALARM_SUCCESS));
-                        } catch (Exception e) {
-                            App.Store.Dispatch(new SimpleAction(MqActions.UPLOAD_ALARM_FAILED));
-                            Logger.Error("上传报警到Mq失败", e);
-                        }
-                    });
+            UploadAlarm = App.Store.asyncActionVoid<MqActions.UploadAlarmMq>(async (dispatch, getState, instance) => {
+                await Task.Run(() => {
+                    dispatch(instance);
+                    try {
+                        activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(instance.MqAlarm));
+                        App.Store.Dispatch(new SimpleAction(MqActions.UPLOAD_ALARM_SUCCESS));
+                    } catch (Exception e) {
+                        App.Store.Dispatch(new SimpleAction(MqActions.UPLOAD_ALARM_FAILED));
+                        Logger.Error("上传报警到Mq失败", e);
+                    }
                 });
+            });
         }
 
         void initStartListenScanMaterial() {
@@ -270,7 +270,7 @@ namespace HmiPro.Redux.Effects {
                             uCpms.paramInfoList.Add(uInfo);
                         }
                         try {
-                            Console.WriteLine($"上传Mq：Speed {uCpms.macSpeed} Timeff: {uCpms.TimeEff},SpeedEff：{uCpms.SpeedEff},QualityEff：{uCpms.QualityEff}");
+                            //Console.WriteLine($"上传Mq：Speed {uCpms.macSpeed} Timeff: {uCpms.TimeEff},SpeedEff：{uCpms.SpeedEff},QualityEff：{uCpms.QualityEff}");
                             activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(uCpms));
                             App.Store.Dispatch(new MqActions.UploadCpmsSuccess());
                         } catch (Exception e) {

@@ -12,7 +12,5 @@ namespace HmiPro.Redux.Models {
     /// </summary>
     public class MqUploadRest {
 
-     
-
     }
 }
