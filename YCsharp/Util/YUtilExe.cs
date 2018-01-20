@@ -127,7 +127,7 @@ namespace YCsharp.Util {
         /// </summary>
         /// <param name="serviceName"></param>
         /// <returns></returns>
-        public static ServiceControllerStatus getWinServiceStatus(string serviceName) {
+        public static ServiceControllerStatus GetWinServiceStatus(string serviceName) {
             var service = ServiceController.GetServices();
             for (int i = 0; i < service.Length; i++) {
                 if (service[i].ServiceName.ToUpper().Equals(serviceName.ToUpper())) {
@@ -141,8 +141,8 @@ namespace YCsharp.Util {
         /// 启动 Windows 服务
         /// </summary>
         /// <param name="serviceName"></param>
-        public static void startWinService(string serviceName) {
-            if (!checkServiceIsExist(serviceName)) {
+        public static void StartWinService(string serviceName) {
+            if (!CheckServiceIsExist(serviceName)) {
                 return;
             }
             using (ServiceController control = new ServiceController(serviceName)) {
@@ -156,8 +156,8 @@ namespace YCsharp.Util {
         /// 停止 Windows 服务
         /// </summary>
         /// <param name="serviceName"></param>
-        public static void stopWinService(string serviceName) {
-            if (!checkServiceIsExist(serviceName)) {
+        public static void StopWinService(string serviceName) {
+            if (!CheckServiceIsExist(serviceName)) {
                 return;
             }
             using (ServiceController control = new ServiceController(serviceName)) {
@@ -168,14 +168,24 @@ namespace YCsharp.Util {
         }
 
         /// <summary>
+        /// 获取 .net 目录
+        /// </summary>
+        /// <returns></returns>
+        public static string GetDotNetFolder() {
+            var frameworkName = "Framework" + (Environment.Is64BitOperatingSystem ? "x64" : "");
+            return $@"C:\Windows\Microsoft.NET\{frameworkName}\v4.0.30319\";
+        }
+
+
+        /// <summary>
         /// 安装 Windows 服务
         /// </summary>
         /// <param name="servicePath"></param>
         /// <param name="serviceName"></param>
-        public static void installWinService(string servicePath, string serviceName) {
-            var installUtil = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe";
+        public static void InstallWinService(string servicePath, string serviceName) {
+            var installUtil = $@"{GetDotNetFolder()}\InstallUtil.exe";
             //服务已经安装了
-            if (checkServiceIsExist(serviceName)) {
+            if (CheckServiceIsExist(serviceName)) {
                 return;
             }
             //执行安装操作
@@ -186,9 +196,9 @@ namespace YCsharp.Util {
         /// 卸载 Windows 服务
         /// </summary>
         /// <param name="serviceName"></param>
-        public static void uninstallWinService(string serviceName) {
+        public static void UninstallWinService(string serviceName) {
             var installUtil = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe";
-            if (!checkServiceIsExist(serviceName)) {
+            if (!CheckServiceIsExist(serviceName)) {
                 return;
             }
             YUtil.Exec(installUtil, "/u " + serviceName);
@@ -199,7 +209,7 @@ namespace YCsharp.Util {
         /// </summary>
         /// <param name="serviceName"></param>
         /// <returns></returns>
-        public static bool checkServiceIsExist(string serviceName) {
+        public static bool CheckServiceIsExist(string serviceName) {
             var service = ServiceController.GetServices();
             for (int i = 0; i < service.Length; i++) {
                 //服务已经安装了，则忽略此次安装

@@ -13,16 +13,18 @@ namespace Daemon {
         public HmiDaemon() {
             InitializeComponent();
         }
+        private static readonly string logPath = "C:\\HmiPro\\Log\\daemon.txt";
 
         protected override void OnStart(string[] args) {
-            using (System.IO.StreamWriter sw = new System.IO.StreamWriter("C:\\log.txt", true)) {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss ") + "Start.");
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true)) {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss ") + "Hmi Daemon Start.");
             }
+
         }
 
         protected override void OnStop() {
-            using (System.IO.StreamWriter sw = new System.IO.StreamWriter("C:\\log.txt", true)) {
-                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss ") + "Stop.");
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(logPath, true)) {
+                sw.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss ") + "Hmi Daemon Stop.");
             }
         }
     }

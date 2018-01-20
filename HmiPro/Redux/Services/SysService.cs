@@ -13,6 +13,7 @@ using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
 using Newtonsoft.Json;
 using YCsharp.Service;
+using YCsharp.Util;
 
 namespace HmiPro.Redux.Services {
     public class SysService {
@@ -157,6 +158,8 @@ namespace HmiPro.Redux.Services {
         /// 执行更新
         /// </summary>
         public void StartUpdate() {
+            //先停止守护进程
+            YUtil.StopWinService(HmiConfig.DaemonName);
             AppUpdater.StartExternalUpdater();
         }
     }

@@ -103,7 +103,9 @@ namespace HmiPro {
             //同步时间
             syncTime(!HmiConfig.IsDevUserEnv);
             //启用守护进程
-            startDaemon();
+            if (!HmiConfig.IsDevUserEnv) {
+                startDaemonAndBuildPipe();
+            }
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
             Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
@@ -113,20 +115,24 @@ namespace HmiPro {
         /// <summary>
         /// 启动守护进程
         /// </summary>
-        void startDaemon() {
-            var daemonName = "HmiDaemon";
-            if (!YUtil.checkServiceIsExist(daemonName)) {
+        void startDaemonAndBuildPipe() {
+            if (!YUtil.CheckServiceIsExist(HmiConfig.DaemonName)) {
                 Logger.Debug("安装守护进程...");
-                YUtil.installWinService(YUtil.GetAbsolutePath(@".\daemon\Debug\Daemon.exe"), daemonName);
+                YUtil.InstallWinService(YUtil.GetAbsolutePath(@".\daemon\Debug\Daemon.exe"), HmiConfig.DaemonName);
                 Logger.Debug("安装守护进程完毕");
             } else {
-                if (YUtil.getWinServiceStatus(daemonName) != ServiceControllerStatus.Running) {
-                    YUtil.startWinService(daemonName);
-                    Logger.Debug("启动守护进程");
+                if (YUtil.GetWinServiceStatus(HmiConfig.DaemonName) != ServiceControllerStatus.Running) {
+                    Logger.Debug("启动守护进程..");
+                    YUtil.StartWinService(HmiConfig.DaemonName);
+                    Logger.Debug("启动守护进程成功");
                 } else {
                     Logger.Debug("守护进程已经启动");
                 }
             }
+
+            //Task.Run(() => {
+                
+            //});
         }
 
         /// <summary>

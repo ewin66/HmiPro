@@ -158,9 +158,8 @@ namespace HmiPro.Config {
         //== 来自外部命令行和约定配置
         public static string SqlitePath;
         public static string LogFolder = @"C:\HmiPro\Log\";
-
         public static string QueueDpms = "QUE_WEB_Command_Receive_p2p";
-
+        public static string DaemonName = "HmiDaemon";
 
     }
 
