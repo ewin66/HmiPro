@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace YCsharp.Util {
     public static partial class YUtil {
         [DllImport("user32")]
         public static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
+
         [DllImport("user32")]
         public static extern void LockWorkStation();
 
@@ -24,34 +26,43 @@ namespace YCsharp.Util {
         /// </summary>
         public static void ShutDown() {
             try {
-                System.Diagnostics.ProcessStartInfo startinfo = new System.Diagnostics.ProcessStartInfo("shutdown.exe", "-s -t 00");
+                System.Diagnostics.ProcessStartInfo startinfo =
+                    new System.Diagnostics.ProcessStartInfo("shutdown.exe", "-s -t 00");
                 System.Diagnostics.Process.Start(startinfo);
-            } catch { }
+            } catch {
+            }
         }
+
         /// <summary>
         /// 重启
         /// </summary>
         public static void Restart() {
             try {
-                System.Diagnostics.ProcessStartInfo startinfo = new System.Diagnostics.ProcessStartInfo("shutdown.exe", "-r -t 00");
+                System.Diagnostics.ProcessStartInfo startinfo =
+                    new System.Diagnostics.ProcessStartInfo("shutdown.exe", "-r -t 00");
                 System.Diagnostics.Process.Start(startinfo);
-            } catch { }
+            } catch {
+            }
         }
+
         /// <summary>
         /// 注销
         /// </summary>
         public static void LogOff() {
             try {
                 ExitWindowsEx(0, 0);
-            } catch { }
+            } catch {
+            }
         }
+
         /// <summary>
         /// 锁屏
         /// </summary>
         public static void LockPC() {
             try {
                 LockWorkStation();
-            } catch { }
+            } catch {
+            }
         }
 
 
@@ -69,6 +80,7 @@ namespace YCsharp.Util {
                 Console.WriteLine("执行命令 " + exePath + " " + cmd + " 异常");
             }
         }
+
         /// <summary>
         /// 显示虚拟键盘
         /// </summary>
@@ -77,6 +89,7 @@ namespace YCsharp.Util {
                 Exec(@"osk.exe", "");
             });
         }
+
         /// <summary>
         /// 通过 NirCmd调用的方式关闭显示器
         /// </summary>
@@ -107,6 +120,94 @@ namespace YCsharp.Util {
             });
             //1秒超时，之前有卡死的bug，目前这样修复
             task.Wait(1000);
+        }
+
+        /// <summary>
+        /// 获取 Windows 服务状态
+        /// </summary>
+        /// <param name="serviceName"></param>
+        /// <returns></returns>
+        public static ServiceControllerStatus getWinServiceStatus(string serviceName) {
+            var service = ServiceController.GetServices();
+            for (int i = 0; i < service.Length; i++) {
+                if (service[i].ServiceName.ToUpper().Equals(serviceName.ToUpper())) {
+                    return service[i].Status;
+                }
+            }
+            return ServiceControllerStatus.Stopped;
+        }
+
+        /// <summary>
+        /// 启动 Windows 服务
+        /// </summary>
+        /// <param name="serviceName"></param>
+        public static void startWinService(string serviceName) {
+            if (!checkServiceIsExist(serviceName)) {
+                return;
+            }
+            using (ServiceController control = new ServiceController(serviceName)) {
+                if (control.Status == ServiceControllerStatus.Stopped) {
+                    control.Start();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 停止 Windows 服务
+        /// </summary>
+        /// <param name="serviceName"></param>
+        public static void stopWinService(string serviceName) {
+            if (!checkServiceIsExist(serviceName)) {
+                return;
+            }
+            using (ServiceController control = new ServiceController(serviceName)) {
+                if (control.Status == System.ServiceProcess.ServiceControllerStatus.Running) {
+                    control.Stop();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 安装 Windows 服务
+        /// </summary>
+        /// <param name="servicePath"></param>
+        /// <param name="serviceName"></param>
+        public static void installWinService(string servicePath, string serviceName) {
+            var installUtil = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe";
+            //服务已经安装了
+            if (checkServiceIsExist(serviceName)) {
+                return;
+            }
+            //执行安装操作
+            YUtil.Exec(installUtil, servicePath);
+        }
+
+        /// <summary>
+        /// 卸载 Windows 服务
+        /// </summary>
+        /// <param name="serviceName"></param>
+        public static void uninstallWinService(string serviceName) {
+            var installUtil = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe";
+            if (!checkServiceIsExist(serviceName)) {
+                return;
+            }
+            YUtil.Exec(installUtil, "/u " + serviceName);
+        }
+
+        /// <summary>
+        /// 检查 Windows 服务是否存在
+        /// </summary>
+        /// <param name="serviceName"></param>
+        /// <returns></returns>
+        public static bool checkServiceIsExist(string serviceName) {
+            var service = ServiceController.GetServices();
+            for (int i = 0; i < service.Length; i++) {
+                //服务已经安装了，则忽略此次安装
+                if (service[i].ServiceName.ToUpper().Equals(serviceName.ToUpper())) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

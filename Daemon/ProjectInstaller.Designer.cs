@@ -1,4 +1,4 @@
-﻿namespace HmiDaemon {
+﻿namespace Daemon {
     partial class ProjectInstaller {
         /// <summary>
         /// 必需的设计器变量。
@@ -23,32 +23,32 @@
         /// 使用代码编辑器修改此方法的内容。
         /// </summary>
         private void InitializeComponent() {
-            this.daemonProcessInstaller = new System.ServiceProcess.ServiceProcessInstaller();
-            this.daemonInstaller = new System.ServiceProcess.ServiceInstaller();
+            this.serviceProcessInstaller1 = new System.ServiceProcess.ServiceProcessInstaller();
+            this.serviceInstaller1 = new System.ServiceProcess.ServiceInstaller();
             // 
-            // daemonProcessInstaller
+            // serviceProcessInstaller1
             // 
-            this.daemonProcessInstaller.Account = System.ServiceProcess.ServiceAccount.LocalSystem;
-            this.daemonProcessInstaller.Password = null;
-            this.daemonProcessInstaller.Username = null;
+            this.serviceProcessInstaller1.Account = System.ServiceProcess.ServiceAccount.LocalSystem;
+            this.serviceProcessInstaller1.Password = null;
+            this.serviceProcessInstaller1.Username = null;
             // 
-            // daemonInstaller
+            // serviceInstaller1
             // 
-            this.daemonInstaller.ServiceName = "DaemonService";
-            this.daemonInstaller.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
-            this.daemonInstaller.AfterInstall += new System.Configuration.Install.InstallEventHandler(this.hmiinstaller_AfterInstall);
+            this.serviceInstaller1.Description = "Hmi守护进程";
+            this.serviceInstaller1.DisplayName = "可以实时监测Hmi程序的状态";
+            this.serviceInstaller1.ServiceName = "HmiDaemon";
             // 
             // ProjectInstaller
             // 
             this.Installers.AddRange(new System.Configuration.Install.Installer[] {
-            this.daemonProcessInstaller,
-            this.daemonInstaller});
+            this.serviceProcessInstaller1,
+            this.serviceInstaller1});
 
         }
 
         #endregion
 
-        private System.ServiceProcess.ServiceProcessInstaller daemonProcessInstaller;
-        private System.ServiceProcess.ServiceInstaller daemonInstaller;
+        private System.ServiceProcess.ServiceProcessInstaller serviceProcessInstaller1;
+        private System.ServiceProcess.ServiceInstaller serviceInstaller1;
     }
 }

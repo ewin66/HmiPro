@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HmiPro", "HmiPro\HmiPro.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestPro", "UnitTestPro\UnitTestPro.csproj", "{B2E9EB74-9437-49FD-8B2B-4F89F41FF2A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HmiDaemon", "HmiDaemon\HmiDaemon.csproj", "{53213AB5-50EE-4125-8969-F61E797121FA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Daemon", "Daemon\Daemon.csproj", "{42BB23D6-6266-489A-89C3-768E7B91AA7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{B2E9EB74-9437-49FD-8B2B-4F89F41FF2A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2E9EB74-9437-49FD-8B2B-4F89F41FF2A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2E9EB74-9437-49FD-8B2B-4F89F41FF2A3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{53213AB5-50EE-4125-8969-F61E797121FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{53213AB5-50EE-4125-8969-F61E797121FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{53213AB5-50EE-4125-8969-F61E797121FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{53213AB5-50EE-4125-8969-F61E797121FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42BB23D6-6266-489A-89C3-768E7B91AA7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42BB23D6-6266-489A-89C3-768E7B91AA7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42BB23D6-6266-489A-89C3-768E7B91AA7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42BB23D6-6266-489A-89C3-768E7B91AA7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

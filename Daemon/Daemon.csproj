@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{53213AB5-50EE-4125-8969-F61E797121FA}</ProjectGuid>
+    <ProjectGuid>{42BB23D6-6266-489A-89C3-768E7B91AA7D}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>HmiDaemon</RootNamespace>
-    <AssemblyName>HmiDaemon</AssemblyName>
+    <RootNamespace>Daemon</RootNamespace>
+    <AssemblyName>Daemon</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\HmiPro\bin\Debug\daemon\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -51,11 +51,11 @@
     <Compile Include="ProjectInstaller.Designer.cs">
       <DependentUpon>ProjectInstaller.cs</DependentUpon>
     </Compile>
-    <Compile Include="DaemonService.cs">
+    <Compile Include="HmiDaemon.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="DaemonService.Designer.cs">
-      <DependentUpon>DaemonService.cs</DependentUpon>
+    <Compile Include="HmiDaemon.Designer.cs">
+      <DependentUpon>HmiDaemon.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,5 +1,5 @@
-﻿namespace HmiDaemon {
-    partial class DaemonService {
+﻿namespace Daemon {
+    partial class HmiDaemon {
         /// <summary> 
         /// 必需的设计器变量。
         /// </summary>
@@ -24,7 +24,7 @@
         /// </summary>
         private void InitializeComponent() {
             components = new System.ComponentModel.Container();
-            this.ServiceName = "Service1";
+            this.ServiceName = "HmiDaemon";
         }
 
         #endregion

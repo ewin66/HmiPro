@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -100,13 +101,32 @@ namespace HmiPro {
             //打印Redux系统的动作
             Store.Subscribe(logDebugActions);
             //同步时间
-            bool canSync = !HmiConfig.IsDevUserEnv;
-            syncTime(canSync);
+            syncTime(!HmiConfig.IsDevUserEnv);
+            //启用守护进程
+            startDaemon();
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
             Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
             Logger.Debug("浮点精度：" + HmiConfig.MathRound);
+        }
 
+        /// <summary>
+        /// 启动守护进程
+        /// </summary>
+        void startDaemon() {
+            var daemonName = "HmiDaemon";
+            if (!YUtil.checkServiceIsExist(daemonName)) {
+                Logger.Debug("安装守护进程...");
+                YUtil.installWinService(YUtil.GetAbsolutePath(@".\daemon\Debug\Daemon.exe"), daemonName);
+                Logger.Debug("安装守护进程完毕");
+            } else {
+                if (YUtil.getWinServiceStatus(daemonName) != ServiceControllerStatus.Running) {
+                    YUtil.startWinService(daemonName);
+                    Logger.Debug("启动守护进程");
+                } else {
+                    Logger.Debug("守护进程已经启动");
+                }
+            }
         }
 
         /// <summary>

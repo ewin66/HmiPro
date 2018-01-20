@@ -5,7 +5,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HmiDaemon {
+namespace Daemon {
     static class Program {
         /// <summary>
         /// 应用程序的主入口点。
@@ -14,7 +14,7 @@ namespace HmiDaemon {
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
-                new DaemonService()
+                new HmiDaemon()
             };
             ServiceBase.Run(ServicesToRun);
         }
