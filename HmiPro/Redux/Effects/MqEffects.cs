@@ -242,7 +242,7 @@ namespace HmiPro.Redux.Effects {
                         }
                         if (getState().CpmState.OnlineCpmsDict[machineCode]
                             .TryGetValue(cpmNameToCodeDict[setting.Od], out var od)) {
-                            uCpms.diameter = od.ToString();
+                            uCpms.diameter = od.Value.ToString();
                         }
                         uCpms.TimeEff = getState().OeeState.OeeDict[machineCode].TimeEff.ToString("0.00");
                         uCpms.SpeedEff = getState().OeeState.OeeDict[machineCode].SpeedEff.ToString("0.00");

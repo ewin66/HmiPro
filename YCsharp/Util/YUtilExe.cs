@@ -36,7 +36,7 @@ namespace YCsharp.Util {
         /// <summary>
         /// 重启
         /// </summary>
-        public static void Restart() {
+        public static void RestartPC() {
             try {
                 System.Diagnostics.ProcessStartInfo startinfo =
                     new System.Diagnostics.ProcessStartInfo("shutdown.exe", "-r -t 00");

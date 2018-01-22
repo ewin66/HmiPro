@@ -23,8 +23,9 @@
         /// 使用代码编辑器修改此方法的内容。
         /// </summary>
         private void InitializeComponent() {
+            System.ServiceProcess.ServiceInstaller serviceInstaller1;
             this.serviceProcessInstaller1 = new System.ServiceProcess.ServiceProcessInstaller();
-            this.serviceInstaller1 = new System.ServiceProcess.ServiceInstaller();
+            serviceInstaller1 = new System.ServiceProcess.ServiceInstaller();
             // 
             // serviceProcessInstaller1
             // 
@@ -34,21 +35,20 @@
             // 
             // serviceInstaller1
             // 
-            this.serviceInstaller1.Description = "Hmi守护进程";
-            this.serviceInstaller1.DisplayName = "可以实时监测Hmi程序的状态";
-            this.serviceInstaller1.ServiceName = "HmiDaemon";
+            serviceInstaller1.Description = "Hmi守护进程";
+            serviceInstaller1.DisplayName = "Hmi守护进程";
+            serviceInstaller1.ServiceName = "HmiDaemon";
             // 
             // ProjectInstaller
             // 
             this.Installers.AddRange(new System.Configuration.Install.Installer[] {
             this.serviceProcessInstaller1,
-            this.serviceInstaller1});
+            serviceInstaller1});
 
         }
 
         #endregion
 
         private System.ServiceProcess.ServiceProcessInstaller serviceProcessInstaller1;
-        private System.ServiceProcess.ServiceInstaller serviceInstaller1;
     }
 }

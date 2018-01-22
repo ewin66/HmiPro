@@ -27,26 +27,35 @@ namespace HmiPro.Redux.Effects {
             initWriteStringAsync();
         }
 
+
+        private void asyncSend(IAsyncResult iar) {
+            try {
+                // Get the pipe
+                NamedPipeClientStream pipeStream = (NamedPipeClientStream)iar.AsyncState;
+
+                // End the write
+                pipeStream.EndWrite(iar);
+                pipeStream.Flush();
+                pipeStream.Close();
+                pipeStream.Dispose();
+                App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_SUCCESS));
+                Logger.Info("写入管道成功",true,ConsoleColor.White,36000);
+            } catch (Exception e) {
+                Logger.Error("往管道写入数据失败", e);
+                App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_FAILED, e));
+            }
+        }
         private void initWriteStringAsync() {
             WriteString = App.Store.asyncAction<PipeActions.WriteRest, bool>(
                 async (dispatch, getState, instance) => {
                     return await Task.Run(() => {
                         dispatch(instance);
                         try {
-                            using (NamedPipeClientStream pipeClient = new NamedPipeClientStream(instance.PipeServerName, instance.PipeName, PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.None)) {
-                                Logger.Info("等待管道连接");
-                                //
-                                pipeClient.Connect(3000);
-                                using (StreamWriter sw = new StreamWriter(pipeClient)) {
-                                    var str = JsonConvert.SerializeObject(instance.RestData);
-                                    var utf8Bytes = Encoding.UTF8.GetBytes(str);
-                                    var utf8Str = Encoding.UTF8.GetString(utf8Bytes);
-                                    sw.WriteLine(utf8Str);
-                                    sw.Flush();
-                                }
-                            }
-                            App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_SUCCESS));
-                            Logger.Info("写入管道成功");
+                            NamedPipeClientStream pipeStream = new NamedPipeClientStream(instance.PipeServerName, instance.PipeName, PipeDirection.Out, PipeOptions.Asynchronous);
+                            pipeStream.Connect(3000);
+                            var str = JsonConvert.SerializeObject(instance.RestData);
+                            byte[] buffer = Encoding.UTF8.GetBytes(str);
+                            pipeStream.BeginWrite(buffer, 0, buffer.Length, asyncSend, pipeStream);
                             return true;
                         } catch (Exception e) {
                             App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_FAILED, e));

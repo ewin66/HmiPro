@@ -104,9 +104,9 @@ namespace HmiPro {
             //同步时间
             syncTime(!HmiConfig.IsDevUserEnv);
             //启用守护进程
-            if (!HmiConfig.IsDevUserEnv) {
-                startDaemonAndBuildPipe();
-            }
+            //if (!HmiConfig.IsDevUserEnv) {
+            //    startDaemonAndBuildPipe();
+            //}
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
             Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
@@ -222,6 +222,8 @@ namespace HmiPro {
                 var message = $"程序崩溃：{ue.ExceptionObject}\r\n当前可用内存：{YUtil.GetAvaliableMemoryByte() / 1000000} M\r\nApp.Store: {Newtonsoft.Json.JsonConvert.SerializeObject(App.Store)}";
                 //将错误日志写入mongoDb
                 Logger.ErrorWithDb(message, MachineConfig.HmiName);
+                //直接重启电脑
+                YUtil.RestartPC();
             };
         }
 

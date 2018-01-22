@@ -8,33 +8,37 @@ using System.IO.Pipes;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using Daemon.Models;
 using Newtonsoft.Json;
 using YCsharp.Service;
 using YCsharp.Util;
+using Timer = System.Timers.Timer;
 
 namespace Daemon {
     public partial class HmiDaemon : ServiceBase {
 
         private static readonly string logPath = "C:\\HmiPro\\Log\\Daemon\\";
         private static readonly string pipeName = "HmiDaemon";
-        private NamedPipeServerStream pipeServer;
-        private readonly int pipeInBufferSize = 4096;
-        private readonly int pipeOutBufferSize = 65535;
         public readonly LoggerService Logger;
         private readonly Encoding encoding = Encoding.UTF8;
         private DateTime hmiLastRunTime = DateTime.MinValue;
         private Timer keepHmiRunningTimer;
+        private NamedPipeServerStream pipeServer;
+        private readonly string hmiProcessName = "HmiPro";
+        private readonly string hmiExePath;
+
+
         /// <summary>
         /// Hmi 程序往管道写入的周期
         /// </summary>
-        private readonly TimeSpan hmiWriteInterval = TimeSpan.FromMilliseconds(60000);
+        private readonly int hmiWriteIntervalMs = 60000;
 
         public HmiDaemon() {
             InitializeComponent();
             Logger = new LoggerService(logPath) { DefaultLocation = "HmiDaemon" };
+            hmiExePath = YUtil.GetAbsolutePath(@"..\..\HmiPro.exe");
         }
 
         /// <summary>
@@ -42,50 +46,54 @@ namespace Daemon {
         /// </summary>
         /// <param name="args"></param>
         protected override void OnStart(string[] args) {
-            pipeServer = new NamedPipeServerStream
-            (
-                pipeName,
-                PipeDirection.InOut,
-                1,
-                PipeTransmissionMode.Message,
-                PipeOptions.Asynchronous | PipeOptions.WriteThrough,
-                pipeInBufferSize,
-                pipeOutBufferSize
-            );
-            pipeServer.BeginWaitForConnection(waitForConnectionCallback, pipeServer);
-            keepHmiRunningTimer = YUtil.SetInterval(hmiWriteInterval.TotalMilliseconds * 4, keepHmiRunning);
-            Logger.Info("Hmi Daemon 启动完毕");
+            StartPipeServer();
+            keepHmiRunningTimer = YUtil.SetInterval(hmiWriteIntervalMs * 4, keepHmiRunning);
+            Logger.Info("--Hmi Daemon 启动完毕--");
         }
+
         /// <summary>
-        /// 读取管道内容回调
+        /// 启动管道服务
         /// </summary>
-        /// <param name="ar"></param>
-        private void waitForConnectionCallback(IAsyncResult ar) {
-            var server = (NamedPipeServerStream)ar.AsyncState;
-            server.EndWaitForConnection(ar);
-            var data = new byte[pipeInBufferSize];
-            var count = server.Read(data, 0, pipeInBufferSize);
-            if (count > 0) {
-                // 通信双方可以约定好传输内容的形式，例子中我们传输简单文本信息。
-                string json = encoding.GetString(data, 0, count);
+        public void StartPipeServer() {
+            try {
+                pipeServer = new NamedPipeServerStream(pipeName, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+                pipeServer.BeginWaitForConnection(waitForConnectionCallBack, pipeServer);
+            } catch (Exception e) {
+                Logger.Error("开启管道服务失败", e);
+            }
+        }
+
+        /// <summary>
+        /// 管道服务处理逻辑
+        /// </summary>
+        /// <param name="iar"></param>
+        private void waitForConnectionCallBack(IAsyncResult iar) {
+            try {
+                NamedPipeServerStream server = (NamedPipeServerStream)iar.AsyncState;
+                server.EndWaitForConnection(iar);
+                byte[] buffer = new byte[65535];
+                server.Read(buffer, 0, 65535);
+                string json = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
                 var rest = JsonConvert.DeserializeObject<PipeRest>(json);
                 hmiLastRunTime = rest.WriteTime;
-                //心跳
-                if (rest.DataType == PipeDataType.HeartBeat) {
+                Logger.Info("Hmi 程序最后运行时间：" + rest.WriteTime, true, ConsoleColor.Black, 36000);
+                if (rest.DataType == PipeDataType.Event) {
 
                 }
-                Logger.Info("Hmi 最后运行时间：" + rest.WriteTime);
-
+                //一定要先端口连接
+                server.Disconnect();
+                //再连接
+                server.BeginWaitForConnection(waitForConnectionCallBack, server);
+            } catch (Exception e) {
+                Logger.Error("管道错误", e);
             }
-            server.BeginWaitForConnection(waitForConnectionCallback, pipeServer);
         }
 
         /// <summary>
         /// 关闭任务
         /// </summary>
         protected override void OnStop() {
-            pipeServer.Dispose();
-            Logger.Info("Hmi Daemon 停止");
+            Logger.Info("--Hmi Daemon 停止--");
             YUtil.ClearTimeout(keepHmiRunningTimer);
             keepHmiRunningTimer = null;
         }
@@ -97,11 +105,9 @@ namespace Daemon {
         private void keepHmiRunning() {
             //超过4次待在没收到消息
             //则认为程序已死
-            if ((DateTime.Now - hmiLastRunTime) > hmiWriteInterval.Add(hmiWriteInterval).Add(hmiWriteInterval).Add(hmiWriteInterval)) {
-                Logger.Error("Hmi 程序已经挂掉，准备重启程序");
+            if ((DateTime.Now - hmiLastRunTime).TotalMilliseconds > hmiWriteIntervalMs * 4) {
+                Logger.Error("Hmi 程序已经挂掉");
             }
         }
-
-
     }
 }
