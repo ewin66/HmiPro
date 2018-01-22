@@ -367,6 +367,7 @@ namespace YCsharp.Model.Procotol.SmParam {
         MultiComStatus,
         String,
         StrRfid,
+        Timeout,
         Unknown
     }
 

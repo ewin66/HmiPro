@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms.VisualStyles;
 using DevExpress.Xpf.WindowsUI;
 using HmiPro.Config;
@@ -194,28 +195,7 @@ namespace HmiPro.Redux.Cores {
                     cpmsRelate.AddRange(relateCpms);
                     //Rfid卡
                 } else if (cpm.ValueType == SmParamType.StrRfid) {
-                    DMesActions.RfidAccpet rfidAccept = new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(), DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.Unknown);
-
-                    //放线卡
-                    if (DefinedParamCode.StartAxisRfid == cpm.Code) {
-                        rfidAccept.RfidType = DMesActions.RfidType.StartAxis;
-                        //收线卡
-                    } else if (DefinedParamCode.EndAxisRfid == cpm.Code) {
-                        rfidAccept.RfidType = DMesActions.RfidType.EndAxis;
-                        //人员卡
-                    } else if (DefinedParamCode.EmpRfid == cpm.Code) {
-                        rfidAccept.RfidType = DMesActions.RfidType.EmpStartMachine;
-                        rfidAccept.MqData = new MqEmpRfid() {
-                            employeeCode = rfidAccept.Rfid,
-                            macCode = machineCode,
-                            name = rfidAccept.Rfid,
-                            PrintTime = DateTime.Now,
-                            type = MqRfidType.EmpStartMachine
-                        };
-                        //物料卡
-                    } else if (DefinedParamCode.EmpRfid == cpm.Code) {
-
-                    }
+                    var rfidAccept = classifyRfid(machineCode, cpm);
                     if (rfidAccept.RfidType != DMesActions.RfidType.Unknown) {
                         App.Store.Dispatch(rfidAccept);
                     }
@@ -273,6 +253,61 @@ namespace HmiPro.Redux.Cores {
             dispatchCheckBomAlarm(machineCode, cpms);
             //检查Plc上下限报警
             dispatchCheckPlcAlarm(machineCode, cpms);
+            //检查超时
+            checkCpmTimeout(HmiConfig.CpmTimeout);
+        }
+
+        /// <summary>
+        /// 为接受到的Rfid卡分类，有人员卡、收线卡、放线卡等等
+        /// </summary>
+        /// <param name="machineCode"></param>
+        /// <param name="cpm"></param>
+        private DMesActions.RfidAccpet classifyRfid(string machineCode, Cpm cpm) {
+
+            DMesActions.RfidAccpet rfidAccept = new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
+                DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.Unknown);
+            //放线卡
+            if (DefinedParamCode.StartAxisRfid == cpm.Code) {
+                rfidAccept.RfidType = DMesActions.RfidType.StartAxis;
+                //收线卡
+            } else if (DefinedParamCode.EndAxisRfid == cpm.Code) {
+                rfidAccept.RfidType = DMesActions.RfidType.EndAxis;
+                //人员卡
+            } else if (DefinedParamCode.EmpRfid == cpm.Code) {
+                rfidAccept.RfidType = DMesActions.RfidType.EmpStartMachine;
+                rfidAccept.MqData = new MqEmpRfid() {
+                    employeeCode = rfidAccept.Rfid,
+                    macCode = machineCode,
+                    name = rfidAccept.Rfid,
+                    PrintTime = DateTime.Now,
+                    type = MqRfidType.EmpStartMachine
+                };
+                //物料卡
+            } else if (DefinedParamCode.EmpRfid == cpm.Code) {
+            }
+            return rfidAccept;
+
+        }
+
+
+        /// <summary>
+        /// 检查参数超时，即参数之前有值，但是后来由于硬件掉线了没有值，这个时候应该更新参数的显示
+        /// 如果不更新则会一直显示掉线之前的值
+        /// </summary>
+        /// <param name="timeoutMs"></param>
+        private void checkCpmTimeout(int timeoutMs) {
+            foreach (var cpmsDict in OnlineCpmDict) {
+                foreach (var pair in cpmsDict.Value) {
+                    if (pair.Value.ValueType != SmParamType.Signal || pair.Value.ValueType != SmParamType.String) {
+                        continue;
+                    }
+                    var msDiff = Math.Abs((DateTime.Now - pair.Value.PickTime).TotalMilliseconds);
+                    if (msDiff > timeoutMs) {
+                        pair.Value.Value = "超时";
+                        pair.Value.ValueType = SmParamType.Timeout;
+                    }
+                }
+            }
         }
 
         /// <summary>
