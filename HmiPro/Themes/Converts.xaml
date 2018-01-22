@@ -16,5 +16,6 @@
     <converts:PercentConvert x:Key="PercentConvert" />
     <converts:CoefConverter x:Key="ConverterCoef"/>
     <converts:ImageConvert x:Key="ImageConvert"></converts:ImageConvert>
+    <converts:JavaTimeConvert x:Key="JavaTimeConvert"></converts:JavaTimeConvert>
 
 </ResourceDictionary>

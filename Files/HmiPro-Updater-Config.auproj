@@ -2,7 +2,7 @@
 <AuProject xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <UpdateInfo>
     <AppName>HmiPro</AppName>
-    <AppVersion>3.2.1333.6596</AppVersion>
+    <AppVersion>3.2.1357.6596</AppVersion>
     <FileExecuteBefore />
     <FileExecuteAfter>HmiPro.exe</FileExecuteAfter>
     <ExecuteTimeout>0</ExecuteTimeout>
@@ -1016,6 +1016,46 @@
     </ProjectItem>
     <ProjectItem>
       <Path>daemon\Debug\Apache.NMS.ActiveMQ.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Daemon.exe</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Daemon.exe.config</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Daemon.InstallLog</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Daemon.InstallState</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Daemon.pdb</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\YCsharp.exe</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\YCsharp.exe.config</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\YCsharp.pdb</Path>
       <UpdateMethod>Ignore</UpdateMethod>
       <FileVerificationLevel>None</FileVerificationLevel>
     </ProjectItem>

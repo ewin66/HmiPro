@@ -102,7 +102,7 @@ namespace HmiPro.Redux.Cores {
             }
             //恢复任务
             if (!CmdOptions.GlobalOptions.MockVal) {
-                RestoreTask();
+                restoreTask();
             }
         }
 
@@ -140,7 +140,7 @@ namespace HmiPro.Redux.Cores {
         void doCompleteSchAxis(AppState state, IAction action) {
             var dmesAction = (DMesActions.CompletedSchAxis)action;
             //完成一轴任务
-            CompleteOneAxis(dmesAction.MachineCode, dmesAction.AxisCode);
+            completeOneAxis(dmesAction.MachineCode, dmesAction.AxisCode);
             //自动开始下一轴任务
             lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
                 var nextAxisCode = SchTaskDoingDict[dmesAction.MachineCode]?.MqSchTask?.axisParam
@@ -271,11 +271,11 @@ namespace HmiPro.Redux.Cores {
                 }
                 // 完成率满足一定条件才行
                 if (taskDoing.AxisCompleteRate >= 0.90) {
-                    CompleteOneAxis(machineCode, taskDoing?.MqSchAxis?.axiscode);
+                    completeOneAxis(machineCode, taskDoing?.MqSchAxis?.axiscode);
                     return true;
                     //调试完成的时候速度为0
                 } else if (taskDoing.AxisCompleteRate > 0) {
-                    DebugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
+                    debugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
                 }
                 return false;
 
@@ -373,34 +373,42 @@ namespace HmiPro.Redux.Cores {
             var machineCode = state.MqState.MachineCode;
             var mqTasks = MqSchTasksDict[machineCode];
             var task = state.MqState.MqSchTaskAccpetDict[machineCode];
+            MqSchTask removeTask = null;
             lock (SchTaskDoingLocks[machineCode]) {
                 foreach (var cacheTask in mqTasks) {
                     if (cacheTask.workcode == task.workcode) {
-                        Logger.Error($"工单重复,{cacheTask.workcode}");
+                        //工单已经开始了不能冲掉
+                        if (SchTaskDoingDict[machineCode].WorkCode == task.workcode) {
+                            Logger.Error($"工单已经开始，无法替换,{cacheTask.workcode}");
+                            return;
+                        }
                         App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                            Title = "系统异常",
-                            Content = $"接收到重复任务，请联系管理员,工单 {task.workcode}"
+                            Title = "通知",
+                            Content = $"即将更新工单任务,工单 {task.workcode}"
                         }));
-                        return;
+                        //要被冲掉的工单
+                        removeTask = cacheTask;
+                        break;
                     }
                 }
                 //将任务添加到任务队列里面
                 //fix: 2018-01-04
                 // mqTasks被view引用了，所以用Ui线程来更新
                 Application.Current.Dispatcher.Invoke(() => {
+                    mqTasks.Remove(removeTask);
                     mqTasks.Add(task);
                 });
             }
-            //Sqlite存储很耗时间
-            using (var ctx = SqliteHelper.CreateSqliteService()) {
+            //更新任务缓存
+            SqliteHelper.DoAsync(ctx => {
                 ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(mqTasks)));
-            }
+            });
         }
 
         /// <summary>
         /// 从sqlite中恢复任务
         /// </summary>
-        public void RestoreTask() {
+        void restoreTask() {
             using (var ctx = SqliteHelper.CreateSqliteService()) {
                 foreach (var pair in MachineConfig.MachineDict) {
                     var key = "task_" + pair.Key;
@@ -595,14 +603,14 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        public void doStartSchTaskAxis(AppState state, IAction action) {
+        void doStartSchTaskAxis(AppState state, IAction action) {
             doStartSchTaskAxis(state, action, false);
         }
 
         /// <summary>
         /// 根据轴号设置当前任务开始
         /// </summary>
-        public void doStartSchTaskAxis(AppState state, IAction action, bool isAutoStart) {
+        void doStartSchTaskAxis(AppState state, IAction action, bool isAutoStart) {
             var startParam = (DMesActions.StartSchTaskAxis)action;
             var machineCode = startParam.MachineCode;
             var axisCode = startParam.AxisCode;
@@ -653,7 +661,7 @@ namespace HmiPro.Redux.Cores {
                 }
                 if (hasFound) {
                     //设置其它任务不能启动
-                    SetOtherTaskAxisCanStart(machineCode, axisCode, false);
+                    setOtherTaskAxisCanStart(machineCode, axisCode, false);
                     App.Store.Dispatch(new DMesActions.StartAxisSuccess(machineCode, axisCode));
                     var title = "启动任务成功";
                     if (isAutoStart) {
@@ -703,7 +711,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="machineCode">任务机台编码</param>
         /// <param name="startAxisCode">当前启动的轴任务</param>
         /// <param name="canStart">其它轴任务能否启动</param>
-        public void SetOtherTaskAxisCanStart(string machineCode, string startAxisCode, bool canStart) {
+        void setOtherTaskAxisCanStart(string machineCode, string startAxisCode, bool canStart) {
             var tasks = MqSchTasksDict[machineCode];
             foreach (var task in tasks) {
                 foreach (var axis in task.axisParam) {
@@ -720,7 +728,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="machineCode"></param>
         /// <param name="axisCode"></param>
-        public void DebugOneAxisEnd(string machineCode, string axisCode) {
+        void debugOneAxisEnd(string machineCode, string axisCode) {
             lock (SchTaskDoingLocks[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
                 if (taskDoing.IsStarted) {
@@ -734,7 +742,7 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 完成某轴
         /// </summary>
-        public async void CompleteOneAxis(string machineCode, string axisCode) {
+        async void completeOneAxis(string machineCode, string axisCode) {
             var taskDoing = SchTaskDoingDict[machineCode];
             MqUploadManu uManu = null;
             lock (SchTaskDoingLocks[machineCode]) {
@@ -751,13 +759,13 @@ namespace HmiPro.Redux.Cores {
                 taskDoing.MqSchAxis.IsCompleted = true;
                 taskDoing.MqSchAxis.CanStart = false;
                 taskDoing.EndTime = DateTime.Now;
-                SetOtherTaskAxisCanStart(machineCode, axisCode, true);
+                setOtherTaskAxisCanStart(machineCode, axisCode, true);
                 //更新当前任务完成进度
                 var completedAxis = taskDoing.MqSchTask.axisParam.Count(a => a.IsCompleted == true);
                 taskDoing.MqSchTask.CompletedRate = (float)completedAxis / taskDoing.MqSchTask.axisParam.Count;
                 //一个工单任务完成
                 if (taskDoing.MqSchTask.CompletedRate >= 1) {
-                    CompleteOneSchTask(machineCode, taskDoing.WorkCode);
+                    completeOneSchTask(machineCode, taskDoing.WorkCode);
                 }
                 uManu = new MqUploadManu() {
                     actualBeginTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
@@ -782,7 +790,7 @@ namespace HmiPro.Redux.Cores {
                 //重新初始化
                 taskDoing.Init();
             }
-           
+
             //更新缓存
             using (var ctx = SqliteHelper.CreateSqliteService()) {
                 //移除已经完成的任务轴
@@ -816,7 +824,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="machineCode"></param>
         /// <param name="workCode"></param>
-        public void CompleteOneSchTask(string machineCode, string workCode) {
+        void completeOneSchTask(string machineCode, string workCode) {
             var mqTasks = MqSchTasksDict[machineCode];
             var removeTask = mqTasks.FirstOrDefault(t => t.workcode == workCode);
             //移除已经完成的某个工单任务

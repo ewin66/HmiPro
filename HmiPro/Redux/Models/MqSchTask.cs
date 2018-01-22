@@ -65,6 +65,7 @@ namespace HmiPro.Redux.Models {
             set {
                 if (_psTime != value) {
                     _psTime = value;
+                    OnPropertyChanged(nameof(pstime));
                     PsTimeStr = YUtil.UtcTimestampToLocalTime(_psTime.time).ToString(DateTimeFormat);
                     OnPropertyChanged(nameof(PsTimeStr));
                 }
@@ -131,11 +132,13 @@ namespace HmiPro.Redux.Models {
             set {
                 if (_pdTime != value) {
                     _pdTime = value;
+                    OnPropertyChanged(nameof(pdtime));
                     PdTimeStr = YUtil.UtcTimestampToLocalTime(_pdTime.time).ToString(DateTimeFormat);
                     OnPropertyChanged(nameof(PdTimeStr));
                 }
             }
         }
+
 
         public string PdTimeStr { get; set; }
 

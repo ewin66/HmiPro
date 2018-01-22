@@ -168,7 +168,7 @@ namespace HmiPro.Redux.Cores {
             smModels?.ForEach(sm => {
                 //处理参数包
                 if (sm.PackageType == SmPackageType.ParamPackage) {
-                    paramPkgHandler(code, sm, ip);
+                    updateMachieCpms(code, sm, ip);
                 }
             });
         }
@@ -180,7 +180,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="machineCode"></param>
         /// <param name="sm"></param>
-        void paramPkgHandler(string machineCode, SmModel sm, string ip) {
+        void updateMachieCpms(string machineCode, SmModel sm, string ip) {
             var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm);
             var cpmsRelate = new List<Cpm>();
             var cpms = new List<Cpm>();
@@ -189,13 +189,13 @@ namespace HmiPro.Redux.Cores {
             cpmsDirect?.ForEach(cpm => {
                 //普通浮点参数
                 if (cpm.ValueType == SmParamType.Signal) {
-                    var floatVal = (float)cpm.Value;
+                    var floatVal = cpm.GetFloatVal();
                     onlineFloatDict[machineCode][cpm.Code] = floatVal;
                     var relateCpms = calcRelateCpm(machineCode, cpm.Code);
                     cpmsRelate.AddRange(relateCpms);
                     //Rfid卡
                 } else if (cpm.ValueType == SmParamType.StrRfid) {
-                    var rfidAccept = classifyRfid(machineCode, cpm);
+                    var rfidAccept = createRfid(machineCode, cpm);
                     if (rfidAccept.RfidType != DMesActions.RfidType.Unknown) {
                         App.Store.Dispatch(rfidAccept);
                     }
@@ -262,7 +262,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="machineCode"></param>
         /// <param name="cpm"></param>
-        private DMesActions.RfidAccpet classifyRfid(string machineCode, Cpm cpm) {
+        private DMesActions.RfidAccpet createRfid(string machineCode, Cpm cpm) {
 
             DMesActions.RfidAccpet rfidAccept = new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
                 DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.Unknown);
@@ -303,7 +303,7 @@ namespace HmiPro.Redux.Cores {
                     }
                     var msDiff = Math.Abs((DateTime.Now - pair.Value.PickTime).TotalMilliseconds);
                     if (msDiff > timeoutMs) {
-                        pair.Value.Value = "超时";
+                        pair.Value.Value = "暂无";
                         pair.Value.ValueType = SmParamType.Timeout;
                     }
                 }

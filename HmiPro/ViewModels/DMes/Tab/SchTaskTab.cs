@@ -59,7 +59,6 @@ namespace HmiPro.ViewModels.DMes.Tab {
                 MqSchTaskDetails.Clear();
             });
         }
-
         public SchTaskAxisViewModel SchTaskAxisViewModel { get; set; }
         public CraftBomViewModel CraftBomViewModel { get; set; }
         public string MachineCode { get; set; }

@@ -162,7 +162,7 @@ namespace HmiPro.Redux.Services {
             //先停止守护进程
             YUtil.StopWinService(HmiConfig.DaemonName);
             //睡一秒保证服务被停止了
-            Thread.Sleep(1000);
+            //Thread.Sleep(1000);
             AppUpdater.StartExternalUpdater();
         }
     }

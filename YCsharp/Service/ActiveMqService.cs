@@ -40,34 +40,6 @@ namespace YCsharp.Service {
             poolConnection.Start();
         }
 
-        /// <summary>
-        /// 从连接池操作，提升效率
-        /// </summary>
-        /// <param name="action"></param>
-        public void OperateOneActionFromPool(Action<ISession, IConnection> action) {
-            using (ISession session = poolConnection.CreateSession()) {
-                action(session, poolConnection);
-            }
-        }
-
-        /// <summary>
-        /// 基础操作,只能执行一次动作
-        /// </summary>
-        public void OperateOneAction(Action<ISession, IConnection> action, bool autoDispose = true) {
-            Uri uri = new Uri(mqConn);
-            IConnectionFactory factory = new ConnectionFactory(uri);
-            if (autoDispose) {
-                using (IConnection conn = factory.CreateConnection(mqUserName, mqUserPwd)) {
-                    using (ISession session = conn.CreateSession()) {
-                        action(session, conn);
-                    }
-                }
-            } else {
-                IConnection conn = factory.CreateConnection(mqUserName, mqUserPwd);
-                ISession session = conn.CreateSession();
-                action(session, conn);
-            }
-        }
 
         /// <summary>
         /// 发送主题
@@ -84,7 +56,7 @@ namespace YCsharp.Service {
         /// <param name="topic"></param>
         /// <param name="message"></param>
         public void PulishOneTopic(string topic, string message) {
-            this.OperateOneActionFromPool((session, conn) => {
+            using (var session = poolConnection.CreateSession()) {
                 using (IMessageProducer producer = session.CreateProducer(new ActiveMQTopic(topic))) {
                     producer.RequestTimeout = requestTimeout;
                     //conn.Start();
@@ -92,7 +64,7 @@ namespace YCsharp.Service {
                     var req = session.CreateTextMessage(message);
                     producer.Send(req);
                 }
-            });
+            }
         }
 
         /// <summary>
@@ -112,7 +84,7 @@ namespace YCsharp.Service {
         /// <param name="queueName">队列名字</param>
         /// <param name="message">内容</param>
         public void SendP2POneMessage(string queueName, string message) {
-            this.OperateOneActionFromPool((session, conn) => {
+            using (var session = poolConnection.CreateSession()) {
                 IDestination destination = SessionUtil.GetDestination(session, queueName);
                 using (IMessageProducer producer = session.CreateProducer(destination)) {
                     producer.RequestTimeout = requestTimeout;
@@ -120,7 +92,7 @@ namespace YCsharp.Service {
                     ITextMessage request = session.CreateTextMessage(message);
                     producer.Send(request);
                 }
-            });
+            }
         }
 
         /// <summary>
@@ -129,15 +101,13 @@ namespace YCsharp.Service {
         /// <param name="queueName"></param>
         /// <param name="onMessageReceived"></param>
         public void ListenP2PMessage(string queueName, Action<string> onMessageReceived) {
-            this.OperateOneActionFromPool((session, conn) => {
-                //conn.Start();
-                IDestination destination = SessionUtil.GetDestination(session, queueName);
-                IMessageConsumer consumer = session.CreateConsumer(destination);
-                consumer.Listener += new MessageListener((msg) => {
-                    string text = (msg as ITextMessage)?.Text;
-                    onMessageReceived.Invoke(text);
-                });
-
+            //注意这里因为有回调，所以不能用 using
+            var session = poolConnection.CreateSession();
+            IDestination destination = SessionUtil.GetDestination(session, queueName);
+            IMessageConsumer consumer = session.CreateConsumer(destination);
+            consumer.Listener += new MessageListener((msg) => {
+                string text = (msg as ITextMessage)?.Text;
+                onMessageReceived.Invoke(text);
             });
         }
 
@@ -170,10 +140,6 @@ namespace YCsharp.Service {
         /// <param name="onMessageReceived">接受事件</param>
         /// <returns></returns>
         public void ListenTopic(string topic, string register, Action<string> onMessageReceived) {
-            //if (!string.IsNullOrEmpty(register)) {
-            //    poolConnection.ClientId = register + YUtil.GetUtcTimestampMs(DateTime.Now);
-            //}
-            //poolConnection.Start();
             ISession session = poolConnection.CreateSession();
             IMessageConsumer consumer = null;
             if (!string.IsNullOrEmpty(register)) {
