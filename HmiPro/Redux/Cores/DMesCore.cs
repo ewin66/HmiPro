@@ -613,14 +613,18 @@ namespace HmiPro.Redux.Cores {
         void doStartSchTaskAxis(AppState state, IAction action, bool isAutoStart) {
             var startParam = (DMesActions.StartSchTaskAxis)action;
             var machineCode = startParam.MachineCode;
+            //准备工作
+            if (!validTaskPrepare(machineCode)) {
+                //
+            }
             var axisCode = startParam.AxisCode;
             //搜索任务
             lock (SchTaskDoingLocks[machineCode]) {
                 bool hasFound = false;
                 var mqTasks = MqSchTasksDict[machineCode];
-                foreach (var st in mqTasks) {
-                    for (var i = 0; i < st.axisParam.Count; i++) {
-                        var axis = st.axisParam[i];
+                foreach (var mqTask in mqTasks) {
+                    for (var i = 0; i < mqTask.axisParam.Count; i++) {
+                        var axis = mqTask.axisParam[i];
                         if (axis.axiscode == axisCode) {
                             //重复启动任务
                             if (axis.IsStarted == true) {
@@ -650,7 +654,7 @@ namespace HmiPro.Redux.Cores {
                             //    }));
                             //    return;
                             //}
-                            setSchTaskDoing(taskDoing, st, axis, i);
+                            setSchTaskDoing(taskDoing, mqTask, axis, i);
                             hasFound = true;
                             break;
                         }
@@ -681,6 +685,44 @@ namespace HmiPro.Redux.Cores {
                     App.Store.Dispatch(new SimpleAction(DMesActions.START_SCH_TASK_AXIS_FAILED));
                 }
             }
+        }
+        /// <summary>
+        /// 检查任务准备工作是否做好
+        /// </summary>
+        bool validTaskPrepare(string machineCode) {
+            bool isValid = true;
+            lock (SchTaskDoingLocks[machineCode]) {
+                var taskDoing = SchTaskDoingDict[machineCode];
+                if (taskDoing.StartAxisRfids?.Count < 1) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "警告",
+                        Content = $"请扫描 {machineCode} 的放线盘"
+                    }));
+                    isValid = false;
+                }
+                if (taskDoing.EndAxisRfids?.Count < 1) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "警告",
+                        Content = $"请扫描 {machineCode} 的收线盘"
+                    }));
+                    isValid = false;
+                }
+                if (taskDoing.EmpRfids?.Count < 1) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "警告",
+                        Content = $"请打 {machineCode} 的上机卡"
+                    }));
+                    isValid = false;
+                }
+            }
+            //校验不通过打开报警灯
+            if (!isValid) {
+                //打开显示器
+                App.Store.Dispatch(new SysActions.OpenScreen());
+                //打开报警灯
+                App.Store.Dispatch(new AlarmActions.OpenAlarmLights(machineCode, 5000));
+            }
+            return isValid;
         }
 
         /// <summary>
