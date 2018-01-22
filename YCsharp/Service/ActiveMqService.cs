@@ -24,8 +24,8 @@ namespace YCsharp.Service {
         private readonly string mqUserName;
         private readonly string mqUserPwd;
         private readonly TimeSpan requestTimeout;
-        private IConnectionFactory poolFactory;
-        private IConnection poolConnection;
+        private readonly IConnectionFactory poolFactory;
+        private readonly IConnection poolConnection;
 
 
         public ActiveMqService(string mqConn, string mqUserName, string mqUserPwd, TimeSpan requestTimeout) {
@@ -37,6 +37,7 @@ namespace YCsharp.Service {
             poolFactory = new ConnectionFactory(uri);
             poolConnection = poolFactory.CreateConnection(mqUserName, mqUserPwd);
             poolConnection.ClientId = YUtil.GetUtcTimestampMs(DateTime.Now).ToString() + YUtil.RandGenerator();
+            poolConnection.RequestTimeout = requestTimeout;
             poolConnection.Start();
         }
 
@@ -59,7 +60,6 @@ namespace YCsharp.Service {
             using (var session = poolConnection.CreateSession()) {
                 using (IMessageProducer producer = session.CreateProducer(new ActiveMQTopic(topic))) {
                     producer.RequestTimeout = requestTimeout;
-                    //conn.Start();
                     //可以写入字符串，也可以是一个xml字符串等
                     var req = session.CreateTextMessage(message);
                     producer.Send(req);
@@ -88,7 +88,6 @@ namespace YCsharp.Service {
                 IDestination destination = SessionUtil.GetDestination(session, queueName);
                 using (IMessageProducer producer = session.CreateProducer(destination)) {
                     producer.RequestTimeout = requestTimeout;
-                    //conn.Start();
                     ITextMessage request = session.CreateTextMessage(message);
                     producer.Send(request);
                 }

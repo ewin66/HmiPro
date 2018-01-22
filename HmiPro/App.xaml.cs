@@ -81,32 +81,25 @@ namespace HmiPro {
             ExceptionHelper.Init();
             //配置解析外部命令
             configInit(e);
-            //加载全局配置
+            //配置全局服务
             GlobalConfig.Load(YUtil.GetAbsolutePath(".\\Profiles\\Global.xls"));
-            //配置日志路径
             LoggerHelper.Init(HmiConfig.LogFolder);
-            //配置Sqlite路径
             SqliteHelper.Init(HmiConfig.SqlitePath);
-            //配置ActiveMq
             ActiveMqHelper.Init(HmiConfig.MqConn, HmiConfig.MqUserName, HmiConfig.MqUserPwd);
-            //配置MongoDb
             MongoHelper.Init(HmiConfig.MongoConn);
-            //配置InfluxDb保存实时数据
             InfluxDbHelper.Init($"http://{HmiConfig.InfluxDbIp}:8086", HmiConfig.InfluxCpmDbName);
-            //配置Redux
             ReduxIoc.Init();
-            //初始化全局的Store
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
-            //初始化全局的日志
+
             Logger = LoggerHelper.CreateLogger("App");
             //打印Redux系统的动作
             Store.Subscribe(logDebugActions);
             //同步时间
             syncTime(!HmiConfig.IsDevUserEnv);
-            //启用守护进程
-            //if (!HmiConfig.IsDevUserEnv) {
-            //    startDaemonAndBuildPipe();
-            //}
+            if (!HmiConfig.IsDevUserEnv) {
+                YUtil.Exec(@"sc.exe", "delete HmiDaemon");
+                Logger.Debug("删除 Daemon 服务 成功");
+            }
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
             Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
@@ -134,8 +127,8 @@ namespace HmiPro {
             var pipeEffects = UnityIocService.ResolveDepend<PipeEffects>();
             //往管道里面发送心跳
             YUtil.SetInterval(HmiConfig.PipeHeartbeatMs, () => {
-                var rest = new PipeRest(){DataType = PipeDataType.HeartBeat};
-                PipeActions.WriteRest writeData = new PipeActions.WriteRest(rest, "HmiDaemon");
+                var rest = new PipeRest() { DataType = PipeDataType.HeartBeat };
+                PipeActions.WriteRest writeData = new PipeActions.WriteRest(rest, HmiConfig.DaemonName);
                 App.Store.Dispatch(pipeEffects.WriteString(writeData));
             });
         }

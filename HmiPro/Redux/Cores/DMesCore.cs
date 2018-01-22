@@ -260,10 +260,10 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 检查当前任务可否完成
+        /// 检查当前任务可否完成，还是调试完毕
         /// </summary>
         /// <param name="machineCode"></param>
-        private bool checkAxisCanComplete(string machineCode) {
+        private bool isCompleteOrDebugEnd(string machineCode) {
             lock (SchTaskDoingLocks[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
                 if (!taskDoing.IsStarted) {
@@ -271,14 +271,9 @@ namespace HmiPro.Redux.Cores {
                 }
                 // 完成率满足一定条件才行
                 if (taskDoing.AxisCompleteRate >= 0.90) {
-                    completeOneAxis(machineCode, taskDoing?.MqSchAxis?.axiscode);
                     return true;
-                    //调试完成的时候速度为0
-                } else if (taskDoing.AxisCompleteRate > 0) {
-                    debugOneAxisEnd(machineCode, taskDoing?.MqSchAxis.axiscode);
                 }
                 return false;
-
             }
         }
 
@@ -584,15 +579,20 @@ namespace HmiPro.Redux.Cores {
             var machineCode = meterAction.MachineCode;
             var noteMeter = meterAction.Meter;
             lock (SchTaskDoingLocks[machineCode]) {
-                var doingTask = SchTaskDoingDict[machineCode];
+                var taskDoing = SchTaskDoingDict[machineCode];
                 if (SchTaskDoingDict[machineCode].IsStarted) {
                     //记米数减小了，则去检查任务是否达完成条件
-                    if (noteMeter < doingTask.MeterWork && checkAxisCanComplete(machineCode) && noteMeter < 5) {
+                    if (noteMeter < taskDoing.MeterWork && noteMeter < 5) {
+                        if (isCompleteOrDebugEnd(machineCode)) {
+                            completeOneAxis(machineCode, taskDoing?.MqSchAxis?.axiscode);
+                        } else {
+                            debugOneAxisEnd(machineCode, taskDoing?.MqSchAxis?.axiscode);
+                        }
                         //任务已经完成
                     } else {
-                        doingTask.MeterWork = noteMeter;
-                        var rate = noteMeter / doingTask.MeterPlan;
-                        doingTask.AxisCompleteRate = rate;
+                        taskDoing.MeterWork = noteMeter;
+                        var rate = noteMeter / taskDoing.MeterPlan;
+                        taskDoing.AxisCompleteRate = rate;
                     }
                 }
             }
