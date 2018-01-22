@@ -60,7 +60,7 @@ namespace HmiPro.Config {
                     setting.Spark = row["Spark"].ToString();
                     setting.Od = row["Od"].ToString();
                     setting.CpmModuleIps = row["CpmModuleIps"].ToString().Split('|');
-                    setting.DPms = row["Dpms"].ToString().Split('|');
+                    setting.DPms = row["Dpms"].ToString().Split(new string[]{"|"},StringSplitOptions.RemoveEmptyEntries);
                     MachineSettingDict[setting.Code] = setting;
                 }
 

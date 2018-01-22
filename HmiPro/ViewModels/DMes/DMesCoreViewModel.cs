@@ -159,6 +159,14 @@ namespace HmiPro.ViewModels.DMes {
             if (mqAction.MachineCode != MachineCode) {
                 return;
             }
+            //来料出问题
+            if (mqAction.ScanMaterial?.type == false) {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "警告",
+                    Content = $"{mqAction.MachineCode} 来料错误，请检查",
+                }));
+                App.Store.Dispatch(new AlarmActions.OpenAlarmLights(mqAction.MachineCode, 5000));
+            }
             ScanMaterialTab.Update(mqAction.ScanMaterial);
         }
 

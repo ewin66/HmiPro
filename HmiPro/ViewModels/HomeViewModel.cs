@@ -93,7 +93,7 @@ namespace HmiPro.ViewModels {
                     Title = "配置出错",
                     Content = e.Message
                 }));
-                MessageBox.Show("程序配置有问题，请联系管理员", "程序配置出错", MessageBoxButton.OK, MessageBoxImage.None);
+                MessageBox.Show("读取配置失败，请检查网络连接", "网络异常", MessageBoxButton.OK, MessageBoxImage.None);
 
                 App.Store.Dispatch(new SysActions.ShutdownApp());
             }
