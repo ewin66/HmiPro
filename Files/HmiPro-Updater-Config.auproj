@@ -2,7 +2,7 @@
 <AuProject xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <UpdateInfo>
     <AppName>HmiPro</AppName>
-    <AppVersion>3.1.1079.6584</AppVersion>
+    <AppVersion>3.1.1321.6596</AppVersion>
     <FileExecuteBefore />
     <FileExecuteAfter>HmiPro.exe</FileExecuteAfter>
     <ExecuteTimeout>0</ExecuteTimeout>
@@ -911,6 +911,111 @@
     </ProjectItem>
     <ProjectItem>
       <Path>ja\DevExpress.Xpf.Grid.v17.1.Core.resources.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Apache.NMS.ActiveMQ.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Apache.NMS.ActiveMQ.pdb</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Apache.NMS.ActiveMQ.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Apache.NMS.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Apache.NMS.pdb</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Apache.NMS.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\ICSharpCode.SharpZipLib.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\NeoSmart.AsyncLock.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Newtonsoft.Json.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Newtonsoft.Json.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\NPOI.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\NPOI.OOXML.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\NPOI.OpenXml4Net.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\NPOI.OpenXmlFormats.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\NPOI.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\System.ValueTuple.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\System.ValueTuple.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Unity.Abstractions.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Unity.Abstractions.pdb</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Unity.Container.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>daemon\Debug\Unity.Container.pdb</Path>
       <UpdateMethod>Ignore</UpdateMethod>
       <FileVerificationLevel>None</FileVerificationLevel>
     </ProjectItem>

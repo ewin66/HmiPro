@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using FSLib.App.SimpleUpdater;
 using HmiPro.Config;
@@ -160,6 +161,8 @@ namespace HmiPro.Redux.Services {
         public void StartUpdate() {
             //先停止守护进程
             YUtil.StopWinService(HmiConfig.DaemonName);
+            //睡一秒保证服务被停止了
+            Thread.Sleep(1000);
             AppUpdater.StartExternalUpdater();
         }
     }

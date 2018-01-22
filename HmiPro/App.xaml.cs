@@ -19,6 +19,7 @@ using HmiPro.Helpers;
 using HmiPro.Redux;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Effects;
+using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
 using HmiPro.Views.Dx;
@@ -120,6 +121,7 @@ namespace HmiPro {
                 Logger.Debug("安装守护进程...");
                 YUtil.InstallWinService(YUtil.GetAbsolutePath(@".\daemon\Debug\Daemon.exe"), HmiConfig.DaemonName);
                 Logger.Debug("安装守护进程完毕");
+                return;
             } else {
                 if (YUtil.GetWinServiceStatus(HmiConfig.DaemonName) != ServiceControllerStatus.Running) {
                     Logger.Debug("启动守护进程..");
@@ -129,10 +131,13 @@ namespace HmiPro {
                     Logger.Debug("守护进程已经启动");
                 }
             }
-
-            //Task.Run(() => {
-                
-            //});
+            var pipeEffects = UnityIocService.ResolveDepend<PipeEffects>();
+            //往管道里面发送心跳
+            YUtil.SetInterval(HmiConfig.PipeHeartbeatMs, () => {
+                var rest = new PipeRest(){DataType = PipeDataType.HeartBeat};
+                PipeActions.WriteRest writeData = new PipeActions.WriteRest(rest, "HmiDaemon");
+                App.Store.Dispatch(pipeEffects.WriteString(writeData));
+            });
         }
 
         /// <summary>

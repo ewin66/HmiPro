@@ -233,13 +233,16 @@ namespace HmiPro.Redux.Effects {
                     foreach (var pair in cpmsDict) {
                         var machineCode = pair.Key;
                         var machineCpms = pair.Value;
-
                         MqUploadCpms uCpms = new MqUploadCpms();
                         uCpms.machineCode = machineCode;
                         var setting = GlobalConfig.MachineSettingDict[machineCode];
                         var cpmNameToCodeDict = MachineConfig.MachineDict[machineCode].CpmNameToCodeDict;
                         if (getState().CpmState.OnlineCpmsDict[machineCode].TryGetValue(cpmNameToCodeDict[setting.MqNeedSpeed], out var speedCpm)) {
                             uCpms.macSpeed = speedCpm.Value;
+                        }
+                        if (getState().CpmState.OnlineCpmsDict[machineCode]
+                            .TryGetValue(cpmNameToCodeDict[setting.Od], out var od)) {
+                            uCpms.diameter = od.ToString();
                         }
                         uCpms.TimeEff = getState().OeeState.OeeDict[machineCode].TimeEff.ToString("0.00");
                         uCpms.SpeedEff = getState().OeeState.OeeDict[machineCode].SpeedEff.ToString("0.00");
