@@ -143,8 +143,10 @@ namespace HmiPro.ViewModels {
                 App.Store.Dispatch(
                     mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(HmiConfig.TopicListenHandSet)));
             startListenMqDict["rfidAxisTask"] = axisRfidTAsk;
+
             var tasks = new List<Task<bool>>() { starHttpSystem, startCpmServer };
             tasks.AddRange(startListenMqDict.Values);
+
             await Task.Run(() => {
                 //等等所有任务完成
                 var timeout = 60000 * 10;

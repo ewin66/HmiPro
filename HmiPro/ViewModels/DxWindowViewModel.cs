@@ -79,7 +79,7 @@ namespace HmiPro.ViewModels {
             //每一分钟检查一次与服务器的连接
             Task.Run(() => {
                 YUtil.SetInterval(60000, () => {
-                    checkNotwork(HmiConfig.InfluxDbIp);
+                    checkNetwork(HmiConfig.InfluxDbIp);
                 });
             });
         }
@@ -136,7 +136,7 @@ namespace HmiPro.ViewModels {
         /// 检查与某个ip的连接状况，并显示在window顶部
         /// </summary>
         /// <param name="ip"></param>
-        void checkNotwork(string ip) {
+        void checkNetwork(string ip) {
             Ping pingSender = new Ping();
             PingReply reply = pingSender.Send(ip, 1000);
             if (reply.Status != IPStatus.Success) {

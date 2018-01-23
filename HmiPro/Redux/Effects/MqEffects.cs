@@ -148,7 +148,6 @@ namespace HmiPro.Redux.Effects {
         void initUploadSchTaskManu() {
             UploadSchTaskManu = App.Store.asyncAction<MqActions.UploadSchTaskManu, bool>(
                 async (dispatch, getState, instance) => {
-                    //dispatch(instance);
                     return await Task.Run(() => {
                         try {
                             activeMq.SendP2POneMessage(instance.QueueName,
@@ -164,8 +163,8 @@ namespace HmiPro.Redux.Effects {
 
         void initUploadAlarm() {
             UploadAlarm = App.Store.asyncActionVoid<MqActions.UploadAlarmMq>(async (dispatch, getState, instance) => {
+                dispatch(instance);
                 await Task.Run(() => {
-                    dispatch(instance);
                     try {
                         activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(instance.MqAlarm));
                         App.Store.Dispatch(new SimpleAction(MqActions.UPLOAD_ALARM_SUCCESS));
@@ -180,8 +179,8 @@ namespace HmiPro.Redux.Effects {
         void initStartListenScanMaterial() {
             StartListenScanMaterial =
                 App.Store.asyncAction<MqActions.StartListenScanMaterial, bool>(async (dispatch, getState, instance) => {
+                    dispatch(instance);
                     return await Task.Run(() => {
-                        dispatch(instance);
                         try {
                             activeMq.ListenP2PMessage(instance.QueueName, json => {
                                 mqService.ScanMaterialAccept(instance.MachineCode, json);
@@ -199,8 +198,8 @@ namespace HmiPro.Redux.Effects {
         void initSchTaskEffect() {
             StartListenSchTask =
                 App.Store.asyncAction<MqActions.StartListenSchTask, bool>(async (dispatch, getState, instance) => {
+                    dispatch(instance);
                     var result = await Task.Run(() => {
-                        dispatch(instance);
                         try {
                             activeMq.ListenP2PMessage(instance.QueueName, this.mqService.SchTaskAccept);
                             dispatch(new MqActions.StartListenSchTaskSuccess(instance.MachineCode));
@@ -217,8 +216,8 @@ namespace HmiPro.Redux.Effects {
         void initStartUploadCpmsIntervalEffect() {
             StartUploadCpmsInterval =
                 App.Store.asyncActionVoid<MqActions.StartUploadCpmsInterval>(async (dipatch, getState, instance) => {
+                    dipatch(instance);
                     await Task.Run(() => {
-                        dipatch(instance);
                         YUtil.SetInterval(instance.Interval, () => {
                             App.Store.Dispatch(UploadCpms(new MqActions.UploadCpms(getState().CpmState.OnlineCpmsDict, instance.QueueName)));
                         });

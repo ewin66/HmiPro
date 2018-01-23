@@ -22,7 +22,7 @@ namespace HmiPro.Redux.Reducers {
         }
 
         /// <summary>
-        /// 
+        /// 创建 Reducer 
         /// </summary>
         /// <returns></returns>
         public static SimpleReducer<Store> Create() {
@@ -34,7 +34,7 @@ namespace HmiPro.Redux.Reducers {
                         var machineCode = pair.Key;
                         state.DpmsDict[machineCode] = new ObservableCollection<Dpm>();
                         foreach (var name in pair.Value.DPms) {
-                            state.DpmsDict[machineCode].Add(new Dpm() { Name = name, Value = "暂无" });
+                            state.DpmsDict[machineCode].Add(new Dpm() { Name = name, Value = "" });
                         }
                     }
                     return state;

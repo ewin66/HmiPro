@@ -32,14 +32,13 @@ namespace HmiPro.Redux.Effects {
             try {
                 // Get the pipe
                 NamedPipeClientStream pipeStream = (NamedPipeClientStream)iar.AsyncState;
-
                 // End the write
                 pipeStream.EndWrite(iar);
                 pipeStream.Flush();
                 pipeStream.Close();
                 pipeStream.Dispose();
                 App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_SUCCESS));
-                Logger.Info("写入管道成功",true,ConsoleColor.White,36000);
+                Logger.Info("写入管道成功", true, ConsoleColor.White, 36000);
             } catch (Exception e) {
                 Logger.Error("往管道写入数据失败", e);
                 App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_FAILED, e));
@@ -48,8 +47,8 @@ namespace HmiPro.Redux.Effects {
         private void initWriteStringAsync() {
             WriteString = App.Store.asyncAction<PipeActions.WriteRest, bool>(
                 async (dispatch, getState, instance) => {
+                    dispatch(instance);
                     return await Task.Run(() => {
-                        dispatch(instance);
                         try {
                             NamedPipeClientStream pipeStream = new NamedPipeClientStream(instance.PipeServerName, instance.PipeName, PipeDirection.Out, PipeOptions.Asynchronous);
                             pipeStream.Connect(3000);

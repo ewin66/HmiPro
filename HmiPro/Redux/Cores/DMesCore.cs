@@ -673,10 +673,13 @@ namespace HmiPro.Redux.Cores {
                     } else {
                         title = "手动 " + title;
                     }
+                    //通知服务器任务开始了
+                    notifyServerAxisStarted(machineCode,axisCode);
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = title,
                         Content = $"机台 {machineCode} 轴号： {axisCode}"
                     }));
+
                 } else {
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "启动任务失败，请联系管理员",
@@ -686,6 +689,39 @@ namespace HmiPro.Redux.Cores {
                 }
             }
         }
+
+        /// <summary>
+        /// 通知服务器任务开始了
+        /// </summary>
+        /// <param name="machineCode"></param>
+        void notifyServerAxisStarted(string machineCode, string axisCode) {
+            MqUploadManu uManu = null;
+            lock (SchTaskDoingLocks[machineCode]) {
+                var taskDoing = SchTaskDoingDict[machineCode];
+                uManu = new MqUploadManu() {
+                    actualBeginTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
+                    actualEndTime = YUtil.GetUtcTimestampMs(taskDoing.EndTime),
+                    axisName = axisCode,
+                    macCode = machineCode,
+                    axixLen = taskDoing.MeterPlan,
+                    courseCode = taskDoing.WorkCode,
+                    empRfid = string.Join(",", taskDoing.EmpRfids),
+                    rfids_begin = string.Join(",", taskDoing.StartAxisRfids),
+                    rfid_end = string.Join(",", taskDoing.EndAxisRfids),
+                    acutalDispatchTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
+                    mqType = "no",
+                    step = taskDoing.Step,
+                    testLen = taskDoing.MeterDebug,
+                    testTime = taskDoing.DebugTimestampMs,
+                    speed = taskDoing.SpeedAvg,
+                    seqCode = taskDoing.MqSchAxis.seqcode,
+                    status = "开始生产",
+                };
+            }
+            mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu));
+        }
+
+
         /// <summary>
         /// 检查任务准备工作是否做好
         /// </summary>

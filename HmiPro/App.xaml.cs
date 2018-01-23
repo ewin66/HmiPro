@@ -90,16 +90,15 @@ namespace HmiPro {
             InfluxDbHelper.Init($"http://{HmiConfig.InfluxDbIp}:8086", HmiConfig.InfluxCpmDbName);
             ReduxIoc.Init();
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
-
             Logger = LoggerHelper.CreateLogger("App");
             //打印Redux系统的动作
             Store.Subscribe(logDebugActions);
             //同步时间
             syncTime(!HmiConfig.IsDevUserEnv);
-            if (!HmiConfig.IsDevUserEnv) {
-                YUtil.Exec(@"sc.exe", "delete HmiDaemon");
-                Logger.Debug("删除 Daemon 服务 成功");
-            }
+            //if (!HmiConfig.IsDevUserEnv) {
+            //    YUtil.Exec(@"sc.exe", "delete HmiDaemon");
+            //    Logger.Debug("删除 Daemon 服务 成功");
+            //}
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
             Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
@@ -204,11 +203,11 @@ namespace HmiPro {
                 HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
                 Console.WriteLine("当前运行模式：-" + opt.Mode);
                 AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
-                //设置全局配置
+                //保留启动参数
                 CmdOptions.GlobalOptions = opt;
-            }).WithNotParsed(err => {
-                throw new Exception("参数异常" + e);
-            });
+            }).WithNotParsed(err =>
+                throw new Exception("启动参数异常" + err)
+            );
 
             //记录程序崩溃日志
             AppDomain.CurrentDomain.UnhandledException += (s, ue) => {
@@ -241,7 +240,6 @@ namespace HmiPro {
         }
 
 
-        #region 如果用户多次启动程序则只显示第一次启动的程序，保证只有一个实例程序
         /// <summary>
         /// 检测进程是否存在，存在则显示已有的进程否则则关闭程序
         /// <href>https://www.cnblogs.com/zhili/p/OnlyInstance.html</href>
@@ -254,37 +252,6 @@ namespace HmiPro {
             }
             return false;
         }
-
-        /// <summary>
-        /// 找到某个窗口与给出的类别名和窗口名相同窗口
-        /// 非托管定义为：http://msdn.microsoft.com/en-us/library/windows/desktop/ms633499(v=vs.85).aspx
-        /// </summary>
-        /// <param name="lpClassName">类别名</param>
-        /// <param name="lpWindowName">窗口名</param>
-        /// <returns>成功找到返回窗口句柄,否则返回null</returns>
-        [DllImport("user32.dll")]
-        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-        /// <summary>
-        /// 切换到窗口并把窗口设入前台,类似 SetForegroundWindow方法的功能
-        /// </summary>
-        /// <param name="hWnd">窗口句柄</param>
-        /// <param name="fAltTab">True代表窗口正在通过Alt/Ctrl +Tab被切换</param>
-        [DllImport("user32.dll ", SetLastError = true)]
-        static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
-
-        ///// <summary>
-        /////  设置窗口的显示状态
-        /////  Win32 函数定义为：http://msdn.microsoft.com/en-us/library/windows/desktop/ms633548(v=vs.85).aspx
-        ///// </summary>
-        ///// <param name="hWnd">窗口句柄</param>
-        ///// <param name="cmdShow">指示窗口如何被显示</param>
-        ///// <returns>如果窗体之前是可见，返回值为非零；如果窗体之前被隐藏，返回值为零</returns>
-        [DllImport("user32.dll", EntryPoint = "ShowWindow", CharSet = CharSet.Auto)]
-        public static extern int ShowWindow(IntPtr hwnd, int nCmdShow);
-        public const int SW_RESTORE = 9;
-        public static IntPtr formhwnd;
-        #endregion
     }
     /// <summary>
     /// 对频率较高的日志的打印频率进行抑制

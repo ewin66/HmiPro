@@ -92,9 +92,10 @@ namespace HmiPro.Redux.Effects {
         }
 
 
-        private static readonly AsyncLock cpmCacheLock = new AsyncLock();
-
-        private static IDictionary<string, CpmCache> cpmCacheDict = new Dictionary<string, CpmCache>();
+        /// <summary>
+        /// cpm 缓存字典
+        /// </summary>
+        private static readonly IDictionary<string, CpmCache> cpmCacheDict = new Dictionary<string, CpmCache>();
 
         /// <summary>
         /// 上传采集参数到时态数据库
@@ -103,28 +104,28 @@ namespace HmiPro.Redux.Effects {
             UploadCpmsInfluxDb = App.Store.asyncActionVoid<DbActions.UploadCpmsInfluxDb>(
               async (dispatch, getState, instance) => {
                   dispatch(instance);
-                  using (await cpmCacheLock.LockAsync()) {
-                      if (!cpmCacheDict.ContainsKey(instance.MachineCode)) {
-                          cpmCacheDict[instance.MachineCode] = new CpmCache(1024);
-                      }
-                      var cache = cpmCacheDict[instance.MachineCode];
-                      //缓存
-                      foreach (var cpm in instance.Cpms) {
-                          cache.Add(cpm);
-                      }
-                      //上传周期同与mq保持一致
-                      if ((DateTime.Now - cache.LastUploadTime).TotalMilliseconds > HmiConfig.UploadWebBoardInterval || cache.DataCount > 900) {
-                          await Task.Run(() => {
-                              bool success = InfluxDbHelper.GetInfluxDbService().WriteCpms(instance.MachineCode, cache.Caches, 0, cache.DataCount);
-                              cache.LastUploadTime = DateTime.Now;
-                              cache.Clear();
-                              if (success) {
-                                  App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbSuccess());
-                              } else {
-                                  App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbFailed());
-                              }
-                          });
-                      }
+                  if (!cpmCacheDict.ContainsKey(instance.MachineCode)) {
+                      cpmCacheDict[instance.MachineCode] = new CpmCache(1024);
+                  }
+                  var cache = cpmCacheDict[instance.MachineCode];
+                  //缓存
+                  foreach (var cpm in instance.Cpms) {
+                      cache.Add(cpm);
+                  }
+                  //上传周期同与mq保持一致
+                  if ((DateTime.Now - cache.LastUploadTime).TotalMilliseconds > HmiConfig.UploadWebBoardInterval || cache.DataCount > 900) {
+                      await Task.Run(() => {
+                          var upCaches = cache.Caches;
+                          var upCount = cache.DataCount;
+                          cache.Clear();
+                          cache.LastUploadTime = DateTime.Now;
+                          bool success = InfluxDbHelper.GetInfluxDbService().WriteCpms(instance.MachineCode, upCaches, 0, upCount);
+                          if (success) {
+                              App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbSuccess());
+                          } else {
+                              App.Store.Dispatch(new DbActions.UploadCpmsInfluxDbFailed());
+                          }
+                      });
                   }
               });
         }
@@ -140,15 +141,19 @@ namespace HmiPro.Redux.Effects {
         }
 
         public void Add(Cpm cpm) {
-            //超限
-            if (DataCount >= Caches.Length) {
-                DataCount = Caches.Length - 1;
+            lock (this) {
+                //超限
+                if (DataCount >= Caches.Length) {
+                    DataCount = Caches.Length - 1;
+                }
+                Caches[DataCount++] = cpm;
             }
-            Caches[DataCount++] = cpm;
         }
 
         public void Clear() {
-            DataCount = 0;
+            lock (this) {
+                DataCount = 0;
+            }
         }
     }
 }
