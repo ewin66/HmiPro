@@ -148,10 +148,10 @@ namespace HmiPro.Redux.Effects {
         void initUploadSchTaskManu() {
             UploadSchTaskManu = App.Store.asyncAction<MqActions.UploadSchTaskManu, bool>(
                 async (dispatch, getState, instance) => {
+                    dispatch(instance);
                     return await Task.Run(() => {
                         try {
-                            activeMq.SendP2POneMessage(instance.QueueName,
-                                JsonConvert.SerializeObject(instance.MqUploadManu));
+                            activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(instance.MqUploadManu));
                             return true;
                         } catch {
 

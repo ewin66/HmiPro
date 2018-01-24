@@ -154,9 +154,9 @@ namespace HmiPro.Config {
         /// Bom表汉化字典
         /// </summary>
         public static IDictionary<string, string> CraftBomZhsDict;
+        public static string SqlitePath;
 
         //== 来自外部命令行和约定配置
-        public static string SqlitePath;
         public static string LogFolder = @"C:\HmiPro\Log\";
         public static string QueueDpms = "QUE_WEB_Command_Receive_p2p";
         public static string DaemonName = "HmiDaemon";

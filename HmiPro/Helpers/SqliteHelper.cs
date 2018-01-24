@@ -49,8 +49,6 @@ namespace HmiPro.Helpers {
                 }
             });
         }
-
-
     }
 
     /// <summary>

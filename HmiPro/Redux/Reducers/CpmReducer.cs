@@ -85,6 +85,8 @@ namespace HmiPro.Redux.Reducers {
             /// 最后打开报警灯时间
             /// </summary>
             public IDictionary<string, AlarmLightsState> AlarmLightsStateDict;
+
+            public IDictionary<string, object> MachineStateLockDict;
         }
 
         public static SimpleReducer<State> Create() {
@@ -100,6 +102,7 @@ namespace HmiPro.Redux.Reducers {
                 state.StateSpeedDict = new ConcurrentDictionary<string, float>();
                 state.PreStateSpeedDict = new Dictionary<string, float>();
                 state.AlarmLightsStateDict = new ConcurrentDictionary<string, AlarmLightsState>();
+                state.MachineStateLockDict = new Dictionary<string, object>();
                 state.Logger = LoggerHelper.CreateLogger(typeof(CpmReducer).ToString());
                 foreach (var pair in MachineConfig.MachineDict) {
                     var machineCode = pair.Key;
@@ -122,6 +125,7 @@ namespace HmiPro.Redux.Reducers {
                     state.PreStateSpeedDict[machineCode] = 0f;
                     state.SparkDiffDict[machineCode] = 0f;
                     state.AlarmLightsStateDict[machineCode] = AlarmLightsState.Off;
+                    state.MachineStateLockDict[machineCode] = new object();
                 }
                 //初始化所有ip的通讯状态为未知
                 foreach (var pair in MachineConfig.IpToMachineCodeDict) {
@@ -174,9 +178,12 @@ namespace HmiPro.Redux.Reducers {
                 state.MachineCode = action.MachineCode;
                 state.SparkDiffDict[action.MachineCode] = action.Spark;
                 return state;
-            }).When<CpmActions.StateSpeedAccept>((state, action) =>
-                        //更新机台状态
-                        updateMachineState(action, state)
+            }).When<CpmActions.StateSpeedAccept>((state, action) => {
+                //更新机台状态
+                lock (state.MachineStateLockDict[action.MachineCode]) {
+                    return updateMachineState(action, state);
+                }
+            }
             //更新ip的485状态
             ).When<CpmActions.Com485SingleStatusAccept>((state, action) => {
                 state.Com485StatusDict[action.Ip].Status = action.Status;
@@ -241,7 +248,7 @@ namespace HmiPro.Redux.Reducers {
                 };
             }
             //赋值前一个速度
-            state.PreStateSpeedDict[action.MachineCode] = action.Speed;
+            state.PreStateSpeedDict[action.MachineCode] = currentSpeed;
             if (newMachineState == null) {
                 return state;
             }

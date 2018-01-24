@@ -73,6 +73,7 @@ namespace HmiPro.Config.Models {
         /// Od值
         /// </summary>
         public string Od { get; set; } = "";
+   
 
     }
 }

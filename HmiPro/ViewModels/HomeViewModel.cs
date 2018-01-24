@@ -139,10 +139,10 @@ namespace HmiPro.ViewModels {
             startListenMqDict["rfidEmpTask"] = empRfidTask;
 
             //监听轴号卡
-            var axisRfidTAsk =
+            var axisRfidTask =
                 App.Store.Dispatch(
                     mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(HmiConfig.TopicListenHandSet)));
-            startListenMqDict["rfidAxisTask"] = axisRfidTAsk;
+            startListenMqDict["rfidAxisTask"] = axisRfidTask;
 
             var tasks = new List<Task<bool>>() { starHttpSystem, startCpmServer };
             tasks.AddRange(startListenMqDict.Values);

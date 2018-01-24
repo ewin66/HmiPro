@@ -24,6 +24,8 @@ namespace HmiPro.Config {
         /// </example>
         /// </summary>
         public static IDictionary<string, string> IpToHmiDict;
+        //栈板机台
+        public static string[] PalletMachineCodes = new string[0];
 
         public static void Load(string path) {
             path = YUtil.GetAbsolutePath(path);
@@ -59,8 +61,8 @@ namespace HmiPro.Config {
                     setting.NoteMeter = row["NoteMeter"].ToString();
                     setting.Spark = row["Spark"].ToString();
                     setting.Od = row["Od"].ToString();
-                    setting.CpmModuleIps = row["CpmModuleIps"].ToString().Split('|');
-                    setting.DPms = row["Dpms"].ToString().Split(new string[]{"|"},StringSplitOptions.RemoveEmptyEntries);
+                    setting.CpmModuleIps = row["CpmModuleIps"].ToString().Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+                    setting.DPms = row["Dpms"].ToString().Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
                     MachineSettingDict[setting.Code] = setting;
                 }
 
@@ -74,6 +76,18 @@ namespace HmiPro.Config {
                             MachineSettingDict[s] = new MachineSetting();
                         }
                     }
+                }
+
+                var otherDt = xlsOp.ExcelToDataTable("其它配置", true);
+                foreach (DataRow row in otherDt.Rows) {
+                    var name = row["Name"].ToString().ToUpper();
+                    var value = row["Value"].ToString().ToUpper();
+                    //RC、RF这种收线盘不贴卡，放栈板上面的
+                    //即它们的收线盘的 Rfid 就是栈板的 Rfid，多个收线盘共用一个 Rfid
+                    if (name == "栈板机台") {
+                        PalletMachineCodes = value.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+                    }
+
                 }
             }
         }

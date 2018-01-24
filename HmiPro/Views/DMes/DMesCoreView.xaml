@@ -13,8 +13,6 @@
              xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
              xmlns:dMes="clr-namespace:HmiPro.Views.DMes"
              xmlns:dMes1="clr-namespace:HmiPro.ViewModels.DMes"
-             xmlns:controls="clr-namespace:HmiPro.Controls"
-             xmlns:panels="clr-namespace:HmiPro.Controls.Panels"
              xmlns:models="clr-namespace:HmiPro.Redux.Models"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
@@ -113,6 +111,7 @@
                                     <RowDefinition Height="*"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" Orientation="Horizontal" Height="32">
+                                    <TextBlock Margin="0,0,20,0"  FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Path=PalletVisibility}" ><Run>当前栈板轴数: </Run>  <Run Text="{Binding Path=Pallet.AxisNum,Mode=OneWay}"/></TextBlock>
                                     <TextBlock Margin="0,0,20,0"  FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" ><Run>上机人员: </Run>  <Run Text="{Binding Path=EmployeeStr,Mode=OneWay}"/></TextBlock>
                                     <TextBlock  Margin="0,0,20,0"  FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"><Run>总轴数: </Run>  <Run Text="{Binding Path=SelectedTask.axisParam.Count,Mode=OneWay}"/></TextBlock>
                                     <TextBlock  Margin="0,0,20,0"  FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">

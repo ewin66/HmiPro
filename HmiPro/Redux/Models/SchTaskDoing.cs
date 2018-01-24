@@ -130,8 +130,8 @@ namespace HmiPro.Redux.Models {
             MeterWork = -1;
             DebugTimestampMs = 0;
             MqSchAxisIndex = -1;
-            StartAxisRfids.Clear();
-            EndAxisRfids.Clear();
+            //StartAxisRfids.Clear();
+            //EndAxisRfids.Clear();
             //EmpRfids.Clear();
         }
 

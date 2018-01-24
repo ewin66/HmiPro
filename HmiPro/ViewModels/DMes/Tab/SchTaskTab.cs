@@ -7,8 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using DevExpress.Mvvm.UI;
+using HmiPro.Config;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
+using HmiPro.Redux.Reducers;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels.DMes.Tab {
@@ -16,6 +18,23 @@ namespace HmiPro.ViewModels.DMes.Tab {
         public ObservableCollection<MqSchTask> MqSchTasks { get; set; }
         public ObservableCollection<BaseTab> MqSchTaskDetails { get; set; } = new ObservableCollection<BaseTab>();
         private MqSchTask _selectedTask;
+        private Visibility palletVisibility = Visibility.Collapsed;
+        /// <summary>
+        /// 是否含有栈板
+        /// </summary>
+        public Visibility PalletVisibility {
+            get => palletVisibility;
+            set {
+                if (palletVisibility != value) {
+                    palletVisibility = value;
+                    RaisePropertyChanged(nameof(PalletVisibility));
+                }
+            }
+        }
+
+        public Pallet Pallet { get; set; }
+    
+
 
         public string EmployeeStr { get; set; } = "/";
         private HashSet<string> employees = new HashSet<string>();
@@ -78,6 +97,11 @@ namespace HmiPro.ViewModels.DMes.Tab {
             //设置选中的工单
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[machineCode];
             SetDefaultSelected();
+            //绑定栈板
+            if (GlobalConfig.PalletMachineCodes.Contains(machineCode)) {
+                PalletVisibility = Visibility.Visible;
+                Pallet = App.Store.GetState().DMesState.PalletDict[machineCode];
+            }
         }
 
         /// <summary>

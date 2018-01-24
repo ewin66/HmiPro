@@ -38,16 +38,15 @@ namespace HmiPro.ViewModels {
         public readonly LoggerService Logger;
         public readonly StorePro<AppState> Store;
         public readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
-
-        private string topMessage;
+        public static string CurTopMessage = "";
         /// <summary>
         /// 窗体顶部显示的提示信息，如：网络断开连接等等
         /// </summary>
         public string TopMessage {
-            get => topMessage;
+            get => CurTopMessage;
             set {
-                if (topMessage != value) {
-                    topMessage = value;
+                if (CurTopMessage != value) {
+                    CurTopMessage = value;
                     RaisePropertiesChanged(nameof(TopMessage));
                 }
             }
@@ -143,7 +142,9 @@ namespace HmiPro.ViewModels {
                 Store.Dispatch(new SysActions.SetTopMessage(
                     $"与服务器 {ip} 连接断开，请联系管理员 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}", Visibility.Visible));
             } else {
-                Store.Dispatch(new SysActions.SetTopMessage("", Visibility.Collapsed));
+                if (TopMessage.Contains("连接断开")) {
+                    Store.Dispatch(new SysActions.SetTopMessage("", Visibility.Collapsed));
+                }
             }
         }
 

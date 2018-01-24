@@ -60,12 +60,12 @@ namespace HmiPro.Redux.Cores {
         /// <returns></returns>
         public float? CalcOeeTimeEff(string machineCode, IList<MachineState> machineStates) {
             float? timeEff = null;
-            float currentSpeed = 0;
-            currentSpeed = App.Store.GetState().CpmState.StateSpeedDict[machineCode];
+            float stateSpeed = 0;
+            stateSpeed = App.Store.GetState().CpmState.StateSpeedDict[machineCode];
             //删除上一班的机台状态数据
             var workTime = YUtil.GetKeystoneWorkTime();
             removeBeforeWorkTime(machineStates, workTime);
-            var runTimeSec = getMachineRunTimeSec(machineStates, currentSpeed);
+            var runTimeSec = getMachineRunTimeSec(machineStates, stateSpeed);
             var debugTimeSec = getMachineDebugTimeSec();
             //计算时间效率
             if (runTimeSec < 0) {
@@ -134,6 +134,10 @@ namespace HmiPro.Redux.Cores {
             if (!forceSpeed.HasValue) {
                 return null;
             }
+            if (forceSpeed.Value == 0) {
+                Logger.Debug($"机台 {machineCode} 的 forceSpeed 为0，无法计算 Oee 速度效率");
+                return null;
+            }
             return CalcOeeSpeedEffBySetting(machineCode, forceSpeed.Value);
         }
 
@@ -194,8 +198,8 @@ namespace HmiPro.Redux.Cores {
         /// 获取机台开机运行时间
         /// </summary>
         /// <returns></returns>
-        private double getMachineRunTimeSec(IList<MachineState> machineStates, float currentSpeed) {
-            double runTimeSec = -1;
+        private double getMachineRunTimeSec(IList<MachineState> machineStates, float stateSpeed) {
+            double runTimeSec = 0;
             //开工时间
             var workTime = YUtil.GetKeystoneWorkTime();
             //只有一个状态的情况
@@ -233,7 +237,7 @@ namespace HmiPro.Redux.Cores {
                 //没有保留的历史状态
             } else if (machineStates.Count == 0) {
                 //机台当前正在运转，则认为从上班时间到现在未停过机
-                if (currentSpeed > 0) {
+                if (stateSpeed > 0) {
                     runTimeSec = (DateTime.Now - workTime).TotalSeconds;
                     //机台未运转，则认为从上班时间到现在未开过机
                 } else {

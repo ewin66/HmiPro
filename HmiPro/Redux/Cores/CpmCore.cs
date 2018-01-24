@@ -348,18 +348,20 @@ namespace HmiPro.Redux.Cores {
                 if (cpm.ValueType != SmParamType.Signal) {
                     continue;
                 }
-                if (setting.OeeSpeed == cpm.Name) {
-                    App.Store.Dispatch(new CpmActions.OeeSpeedAccept(machineCode, cpm.GetFloatVal()));
-                }
-                if (setting.NoteMeter == cpm.Name) {
-                    App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, cpm.GetFloatVal()));
-                }
                 if (setting.StateSpeed == cpm.Name) {
                     App.Store.Dispatch(new CpmActions.StateSpeedAccept(machineCode, cpm.GetFloatVal()));
                     if (cpm.GetFloatVal() == 0) {
                         App.Store.Dispatch(new CpmActions.StateSpeedZeroAccept(machineCode));
                     }
                 }
+                //会计算Oee
+                if (setting.OeeSpeed == cpm.Name) {
+                    App.Store.Dispatch(new CpmActions.OeeSpeedAccept(machineCode, cpm.GetFloatVal()));
+                }
+                if (setting.NoteMeter == cpm.Name) {
+                    App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, cpm.GetFloatVal()));
+                }
+
                 if (setting.Od == cpm.Name) {
                     App.Store.Dispatch(new CpmActions.OdAccept(machineCode, cpm.GetFloatVal()));
                 }
