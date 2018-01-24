@@ -38,10 +38,47 @@ namespace HmiPro.ViewModels {
     /// <author>ychost</author>
     /// </summary>
     public class DxWindowViewModel : ViewModelBase {
+
         public readonly LoggerService Logger;
+        /// <summary>
+        /// 程序的全局的核心数据和事件存储
+        /// </summary>
         public readonly StorePro<AppState> Store;
+        /// <summary>
+        /// 事件派发器
+        /// </summary>
         public readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
-        public static string CurTopMessage = "";
+        /// <summary>
+        /// 顶部红色警告栏的内容
+        /// 其它地方可能会访问到，所以设置成了全局的
+        /// </summary>
+        public static string CurTopMessage { get; private set; } = "";
+        /// <summary>
+        /// 页面加载事件命令
+        /// </summary>
+        ICommand onViewLoadedCommand; public ICommand OnViewLoadedCommand {
+            get {
+                if (onViewLoadedCommand == null)
+                    onViewLoadedCommand = new DelegateCommand(OnViewLoaded);
+                return onViewLoadedCommand;
+            }
+        }
+        /// <summary>
+        /// FormView 等 Modal 加载服务
+        /// </summary>
+        public virtual IDialogService DialogService {
+            get { return GetService<IDialogService>(); }
+
+        }
+        /// <summary>
+        /// UI 线程调度器，可自动切换到 UI 线程
+        /// </summary>
+        public virtual IDispatcherService DispatcherService => GetService<IDispatcherService>();
+        public virtual INotificationService NotifyNotificationService => GetService<INotificationService>();
+        /// <summary>
+        /// 导航服务，注册在 MainWindows.xaml中
+        /// </summary>
+        public INavigationService NavigationService { get { return GetService<INavigationService>(); } }
         /// <summary>
         /// 窗体顶部显示的提示信息，如：网络断开连接等等
         /// </summary>
@@ -54,7 +91,9 @@ namespace HmiPro.ViewModels {
                 }
             }
         }
-
+        /// <summary>
+        /// 窗体顶部警告栏可见状态
+        /// </summary>
         private Visibility topMessageVisibility = Visibility.Collapsed;
         public Visibility TopMessageVisibility {
             get => topMessageVisibility;
@@ -66,19 +105,21 @@ namespace HmiPro.ViewModels {
             }
         }
 
-
-
+        /// <summary>
+        /// 初始化日志、Store、定时器等等
+        /// </summary>
         public DxWindowViewModel() {
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+            //初始化事件派发
             actionsExecDict[SysActions.SHOW_NOTIFICATION] = doShowNotification;
             actionsExecDict[SysActions.SHOW_SETTING_VIEW] = doShowSettingView;
             actionsExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
             actionsExecDict[SysActions.SET_TOP_MESSAGE] = doSetTopMessage;
             actionsExecDict[SysActions.APP_INIT_COMPLETED] = whenAppInitCompleted;
             actionsExecDict[SysActions.SHOW_FORM_VIEW] = doShowFormView;
-
             Store.Subscribe(actionsExecDict);
+
             //每一分钟检查一次与服务器的连接
             Task.Run(() => {
                 YUtil.SetInterval(60000, () => {
@@ -97,6 +138,7 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void whenAppInitCompleted(AppState state, IAction action) {
+            //模拟动作
             if (CmdOptions.GlobalOptions.MockVal) {
                 foreach (var pair in MachineConfig.MachineDict) {
                     var machineCode = pair.Key;
@@ -143,15 +185,13 @@ namespace HmiPro.ViewModels {
             Ping pingSender = new Ping();
             PingReply reply = pingSender.Send(ip, 1000);
             if (reply.Status != IPStatus.Success) {
-                Store.Dispatch(new SysActions.SetTopMessage(
-                    $"与服务器 {ip} 连接断开，请联系管理员 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}", Visibility.Visible));
+                Store.Dispatch(new SysActions.SetTopMessage($"与服务器 {ip} 连接断开，请联系管理员 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}", Visibility.Visible));
             } else {
                 if (TopMessage.Contains("连接断开")) {
                     Store.Dispatch(new SysActions.SetTopMessage("", Visibility.Collapsed));
                 }
             }
         }
-
 
         /// <summary>
         /// 设置window顶部错误，消息，一般用来显示网络状况问题
@@ -174,6 +214,11 @@ namespace HmiPro.ViewModels {
             //Logger.Debug($@"Oee 时间效率 {oeeAction.TimeEff ?? 1}, 速度效率：{oeeAction.SpeedEff ?? 1}，质量效率：{oeeAction.QualityEff ?? 1}", ConsoleColor.Yellow);
         }
 
+        /// <summary>
+        /// 显示 FormView，一般是用作让用户输入一些数据，布局采用的 DataLayoutControl
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
         void doShowFormView(AppState state, IAction action) {
             var sysAction = (SysActions.ShowFormView)action;
             //弹出键盘
@@ -231,32 +276,6 @@ namespace HmiPro.ViewModels {
             });
         }
 
-
-
-        /// <summary>
-        /// 页面加载事件命令
-        /// </summary>
-        ICommand onViewLoadedCommand; public ICommand OnViewLoadedCommand {
-            get {
-                if (onViewLoadedCommand == null)
-                    onViewLoadedCommand = new DelegateCommand(OnViewLoaded);
-                return onViewLoadedCommand;
-            }
-        }
-
-        public virtual IDialogService DialogService {
-            get { return GetService<IDialogService>(); }
-
-        }
-
-        public virtual IDispatcherService DispatcherService => GetService<IDispatcherService>();
-        public virtual INotificationService NotifyNotificationService => GetService<INotificationService>();
-        /// <summary>
-        /// 导航服务，注册在 MainWindows.xaml中
-        /// </summary>
-        public INavigationService NavigationService { get { return GetService<INavigationService>(); } }
-
-
         /// <summary>
         /// 导航函数
         /// </summary>
@@ -272,6 +291,11 @@ namespace HmiPro.ViewModels {
             Navigate("HomeView");
         }
 
+        /// <summary>
+        /// 派发了用户点击「确定」或者「取消」的事件
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="formCtrls"></param>
         public void JumFormView(string title, object formCtrls) {
             UICommand okCmd = new UICommand() {
                 Caption = "确定",
@@ -286,7 +310,7 @@ namespace HmiPro.ViewModels {
             var formViewModel = FormViewModel.Create(title, formCtrls);
             var resultCmd = DialogService.ShowDialog(new List<UICommand>() { okCmd, cancelCmd }, title, nameof(FormView),
                 formViewModel);
-
+            //派发事件，可根据 FormCtrls 的 Type 来确定逻辑
             if (resultCmd == okCmd) {
                 App.Store.Dispatch(new SysActions.FormViewPressedOk(title, formViewModel.FormCtrls));
             } else {
@@ -322,7 +346,6 @@ namespace HmiPro.ViewModels {
 
             var resultCommand = DialogService.ShowDialog(new List<UICommand>() { okCommand, cancelCommand },
                 title, nameof(SettingView), settingViewModel);
-
             if (resultCommand == okCommand) {
                 try {
                     using (var ctx = SqliteHelper.CreateSqliteService()) {

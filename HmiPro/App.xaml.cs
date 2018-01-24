@@ -39,7 +39,6 @@ namespace HmiPro {
         /// 设置程序启动时间
         /// </summary>
         public App() {
-
             AppState.ExectedActions["[App] Started"] = DateTime.Now;
         }
         public static LoggerService Logger;

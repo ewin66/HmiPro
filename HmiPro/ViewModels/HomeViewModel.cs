@@ -32,20 +32,43 @@ namespace HmiPro.ViewModels {
     /// </summary>
     [POCOViewModel]
     public class HomeViewModel {
+        /// <summary>
+        /// 程序的资源路径，主要使用了里面的图片资源
+        /// </summary>
         public virtual Assets Assets { get; set; } = AssetsHelper.GetAssets();
+        /// <summary>
+        /// HomeView 是由 DxWindow 导航而来，所以这里的 NavigationService 可以直接使用
+        /// </summary>
         public virtual INavigationService NavigationSerivce => null;
+        /// <summary>
+        /// 判断是否是首次加载 HomeViewModel 
+        /// </summary>
         public static bool IsFirstEntry = true;
+        /// <summary>
+        /// 日志
+        /// </summary>
         public readonly LoggerService Logger;
+        /// <summary>
+        /// 「设置」菜单目前在生产环境是隐藏了的，现在采用的是约定的方式，所以隐藏「设置」，但是开发环境还是打开了的，方便配置
+        /// </summary>
         public Visibility SettingViewVisibility { get; set; } = Visibility.Collapsed;
+        /// <summary>
+        /// UI 线程调度器
+        /// </summary>
         public virtual IDispatcherService DispatcherService => null;
 
+        /// <summary>
+        /// 决定「设置」菜单是否显示
+        /// </summary>
         public HomeViewModel() {
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             if (HmiConfig.IsDevUserEnv) {
                 SettingViewVisibility = Visibility.Visible;
             }
         }
-
+        /// <summary>
+        /// 加载配置文件只能加载一次
+        /// </summary>
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
             if (!IsFirstEntry) {
@@ -104,6 +127,9 @@ namespace HmiPro.ViewModels {
             }
         }
 
+        /// <summary>
+        /// 配置文件加载成功之后执行的一些初始化
+        /// </summary>
         async void afterConfigLoaded() {
             //== 初始化部分State
             App.Store.Dispatch(new ViewStoreActions.Init());
@@ -124,9 +150,12 @@ namespace HmiPro.ViewModels {
             UnityIocService.ResolveDepend<DpmCore>().Init();
             await UnityIocService.ResolveDepend<SchCore>().Init();
 
-
+            //启动 Http 服务系统
             var starHttpSystem = App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
+            //启动 参数采集 系统
             var startCpmServer = App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
+
+            //== 启动一些 Mq 的监听任务
             Dictionary<string, Task<bool>> startListenMqDict = new Dictionary<string, Task<bool>>();
             foreach (var pair in MachineConfig.MachineDict) {
                 //监听排产任务
@@ -152,9 +181,10 @@ namespace HmiPro.ViewModels {
             var tasks = new List<Task<bool>>() { starHttpSystem, startCpmServer };
             tasks.AddRange(startListenMqDict.Values);
 
+            //检查各项任务启动情况
             await Task.Run(() => {
                 //等等所有任务完成
-                var timeout = 60000 * 10;
+                var timeout = 60000;
                 if (CmdOptions.GlobalOptions.MockVal) {
                     timeout = 3000;
                 }
@@ -219,8 +249,8 @@ namespace HmiPro.ViewModels {
         /// 检查配置
         /// </summary>
         void checkConfig() {
-        }
 
+        }
 
         /// <summary>
         /// 页面跳转命令
@@ -236,10 +266,13 @@ namespace HmiPro.ViewModels {
             }
         }
 
+        /// <summary>
+        /// 显示「设置」Modal 界面
+        /// </summary>
         [Command(Name = "JumpAppSettingViewCommand")]
         public void JumpAppSetting() {
-            //App.Store.Dispatch(new SysActions.ShowSettingView());
-            App.Store.Dispatch(new SysActions.ShowFormView("测试", new BaseFormCtrl()));
+            App.Store.Dispatch(new SysActions.ShowSettingView());
+            //App.Store.Dispatch(new SysActions.ShowFormView("测试", new BaseFormCtrl()));
         }
     }
 }
