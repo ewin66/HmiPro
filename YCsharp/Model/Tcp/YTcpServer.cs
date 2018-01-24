@@ -62,12 +62,15 @@ namespace YCsharp.Model.Tcp {
 
         public List<YTcpSrvClientState> Clicents => this.clients;
 
-        #endregion
+        /// <summary>
+        /// 
+        /// </summary>
+        public static object ClientLock = new object();
 
-        #region 构造函数  
-
+        /// <summary>
+        /// 
+        /// </summary>
         public readonly LoggerService Logger;
-
         /// <summary>
         /// tcp服务需要ip和端口
         /// </summary>
@@ -133,7 +136,9 @@ namespace YCsharp.Model.Tcp {
                 IsRunning = false;
                 listener.Stop();
                 //关闭所有客户端连接  
-                CloseAllClient();
+                lock (ClientLock) {
+                    CloseAllClient();
+                }
             }
         }
 
@@ -147,14 +152,11 @@ namespace YCsharp.Model.Tcp {
                 try {
                     TcpClient client = listener.EndAcceptTcpClient(ar);
                     byte[] buffer = new byte[client.ReceiveBufferSize];
-                    YTcpSrvClientState state
-                        = new YTcpSrvClientState(client, buffer);
-                    lock (clients) {
+                    YTcpSrvClientState state = new YTcpSrvClientState(client, buffer);
+                    lock (ClientLock) {
                         clients.Add(state);
-                        RaiseClientConnected(state);
                     }
-
-
+                    RaiseClientConnected(state);
                     NetworkStream stream = state.NetworkStream;
                     //开始异步读取数据  
                     stream.BeginRead(state.Buffer, 0, state.Buffer.Length, HandleDataReceived, state);
@@ -185,9 +187,15 @@ namespace YCsharp.Model.Tcp {
                 if (recv == 0) {
                     // connection has been closed  
                     string ip = state.TcpClientIP;
-                    clients.Remove(state);
-                    //触发客户端连接断开事件  
-                    RaiseClientDisconnected(state, ip);
+                    try {
+                        lock (ClientLock) {
+                            clients.Remove(state);
+                        }
+                        //触发客户端连接断开事件  
+                        RaiseClientDisconnected(state, ip);
+                    } catch (Exception e) {
+                        Logger.Error("客户端移除异常", e);
+                    }
                     return;
                 }
 
@@ -195,7 +203,7 @@ namespace YCsharp.Model.Tcp {
                 byte[] buff = new byte[recv];
                 Buffer.BlockCopy(state.Buffer, 0, buff, 0, recv);
                 state.BufferCount = recv;
-                //触发数据收到事件  
+                //触发数据收到事件  ：
                 RaiseDataReceived(state);
                 // continue listening for tcp datagram packets  
                 try {
@@ -369,8 +377,10 @@ namespace YCsharp.Model.Tcp {
         public void Close(YTcpSrvClientState state) {
             if (state != null) {
                 state.Close();
-                clients.Remove(state);
-                ClientCount--;
+                lock (ClientLock) {
+                    clients.Remove(state);
+                    ClientCount--;
+                }
                 //TODO 触发关闭事件  
             }
         }
