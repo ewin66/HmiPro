@@ -63,6 +63,7 @@ namespace HmiPro.ViewModels.DMes {
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccpet;
             actionExecDict[DMesActions.CLEAR_SCH_TASKS] = clearSchTask;
             actionExecDict[CpmActions.UNREGISTERED_IP_ACTIVE] = unRegIpActived;
+            actionExecDict[MqActions.SCH_TASK_REPLACED] = whenSchTaskReplaced;
         }
 
 
@@ -98,6 +99,22 @@ namespace HmiPro.ViewModels.DMes {
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[MachineCode];
 
             unsubscribe = App.Store.Subscribe(actionExecDict);
+        }
+
+
+        /// <summary>
+        /// 有工单被顶掉，更新选中的任务
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenSchTaskReplaced(AppState state, IAction action) {
+            var mqAction = (MqActions.SchTaskReplaced)action;
+            //设置默认选中的工单任务
+            if (mqAction.MachineCode == MachineCode) {
+                DispatcherService.BeginInvoke(() => {
+                    SchTaskTab.SetDefaultSelected();
+                });
+            }
         }
 
         /// <summary>

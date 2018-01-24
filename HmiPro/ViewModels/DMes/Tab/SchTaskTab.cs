@@ -23,14 +23,17 @@ namespace HmiPro.ViewModels.DMes.Tab {
         public MqSchTask SelectedTask {
             get => _selectedTask;
             set {
-                if (_selectedTask != value && value != null) {
+                if (_selectedTask != value) {
                     MqSchTaskDetails.Clear();
                     _selectedTask = value;
-                    SchTaskAxisViewModel = SchTaskAxisViewModel.Create(_selectedTask.maccode, _selectedTask.workcode, _selectedTask.axisParam);
+                    if (_selectedTask == null) {
+                        return;
+                    }
+                    SchTaskAxisViewModel = SchTaskAxisViewModel.Create(_selectedTask?.maccode, _selectedTask?.workcode, _selectedTask?.axisParam);
                     SchTaskAxisViewModel.Header = "任务";
                     RaisePropertyChanged(nameof(SchTaskAxisViewModel));
 
-                    CraftBomViewModel = CraftBomViewModel.Create(_selectedTask.maccode, _selectedTask.workcode, _selectedTask.bom);
+                    CraftBomViewModel = CraftBomViewModel.Create(_selectedTask?.maccode, _selectedTask?.workcode, _selectedTask?.bom);
                     CraftBomViewModel.Header = "Bom";
                     RaisePropertyChanged(nameof(CraftBomViewModel));
 
@@ -38,7 +41,7 @@ namespace HmiPro.ViewModels.DMes.Tab {
                     MqSchTaskDetails.Add(CraftBomViewModel);
                     RaisePropertyChanged(nameof(SelectedTask));
 
-                    ViewStore.TaskSelectedWorkCode = _selectedTask.workcode;
+                    ViewStore.TaskSelectedWorkCode = _selectedTask?.workcode;
 
                 }
             }
@@ -74,7 +77,14 @@ namespace HmiPro.ViewModels.DMes.Tab {
             MqSchTasks = mqSchTasks;
             //设置选中的工单
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[machineCode];
-            SelectedTask = mqSchTasks.FirstOrDefault(t => t.workcode == ViewStore.TaskSelectedWorkCode) ?? mqSchTasks.FirstOrDefault();
+            SetDefaultSelected();
+        }
+
+        /// <summary>
+        /// 设置默认选中任务
+        /// </summary>
+        public void SetDefaultSelected() {
+            SelectedTask = MqSchTasks.FirstOrDefault(t => t.workcode == ViewStore.TaskSelectedWorkCode) ?? MqSchTasks.FirstOrDefault();
         }
 
         /// <summary>

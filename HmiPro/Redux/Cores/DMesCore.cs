@@ -277,7 +277,6 @@ namespace HmiPro.Redux.Cores {
             }
         }
 
-
         /// <summary>
         /// 处理接收到的Rfid数据
         /// </summary>
@@ -300,10 +299,8 @@ namespace HmiPro.Redux.Cores {
                     MinGapSec = 10
                 }));
             }
-
             lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
                 var doingTask = SchTaskDoingDict[dmesAction.MachineCode];
-
                 //放线卡
                 if (dmesAction.RfidType == DMesActions.RfidType.StartAxis) {
                     doingTask.StartAxisRfids.Add(dmesAction.Rfid);
@@ -325,7 +322,6 @@ namespace HmiPro.Redux.Cores {
                             endRfidCpm.ValueType = SmParamType.StrRfid;
                         }
                     }
-
                     //人员上机卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine) {
                     var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
@@ -347,8 +343,28 @@ namespace HmiPro.Redux.Cores {
                     //从全局打卡信息中移除
                     MqEmpRfidDict[dmesAction.MachineCode].Remove(removeItem);
                 }
-            }
 
+                //更新 参数 界面上面的 Rfid 值
+                var employees = string.Join(",", (from c in MqEmpRfidDict[dmesAction.MachineCode] select c.name).ToList());
+                var startRfids = string.Join(",", doingTask.StartAxisRfids);
+                var endRfids = string.Join(",", doingTask.EndAxisRfids);
+                setCpmRfid(dmesAction.MachineCode, DefinedParamCode.EmpRfid, employees);
+                setCpmRfid(dmesAction.MachineCode, DefinedParamCode.StartAxisRfid, startRfids);
+                setCpmRfid(dmesAction.MachineCode, DefinedParamCode.EndAxisRfid, endRfids);
+            }
+        }
+
+        /// <summary>
+        /// 设置 参数 界面上面的 Rfid 卡显示值
+        /// </summary>
+        /// <param name="machineCode"></param>
+        /// <param name="cpmCode"></param>
+        /// <param name="value"></param>
+        void setCpmRfid(string machineCode, int cpmCode, string value) {
+            if (App.Store.GetState().CpmState.OnlineCpmsDict[machineCode].TryGetValue(cpmCode, out var cpm)) {
+                cpm.Value = value;
+                cpm.ValueType = SmParamType.StrRfid;
+            }
         }
 
         /// <summary>
@@ -365,24 +381,25 @@ namespace HmiPro.Redux.Cores {
         /// 接受到新的任务
         /// </summary>
         void whenSchTaskAccept(AppState state, IAction action) {
-            var machineCode = state.MqState.MachineCode;
-            var mqTasks = MqSchTasksDict[machineCode];
-            var task = state.MqState.MqSchTaskAccpetDict[machineCode];
-            MqSchTask removeTask = null;
+            var mqAction = (MqActions.SchTaskAccept)action;
+            var machineCode = mqAction.MqSchTask.maccode;
+            var allTasks = MqSchTasksDict[machineCode];
+            var taskAccept = mqAction.MqSchTask;
+            MqSchTask taskRemove = null;
             lock (SchTaskDoingLocks[machineCode]) {
-                foreach (var cacheTask in mqTasks) {
-                    if (cacheTask.workcode == task.workcode) {
+                foreach (var task in allTasks) {
+                    if (task.workcode == taskAccept.workcode) {
                         //工单已经开始了不能冲掉
-                        if (SchTaskDoingDict[machineCode].WorkCode == task.workcode) {
-                            Logger.Error($"工单已经开始，无法替换,{cacheTask.workcode}");
+                        if (SchTaskDoingDict[machineCode].WorkCode == taskAccept.workcode) {
+                            Logger.Error($"工单已经开始，无法替换,{task.workcode}");
                             return;
                         }
                         App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                             Title = "通知",
-                            Content = $"即将更新工单任务,工单 {task.workcode}"
+                            Content = $"即将更新工单任务,工单 {taskAccept.workcode}"
                         }));
-                        //要被冲掉的工单
-                        removeTask = cacheTask;
+                        //要被冲掉的任务
+                        taskRemove = task;
                         break;
                     }
                 }
@@ -390,13 +407,17 @@ namespace HmiPro.Redux.Cores {
                 //fix: 2018-01-04
                 // mqTasks被view引用了，所以用Ui线程来更新
                 Application.Current.Dispatcher.Invoke(() => {
-                    mqTasks.Remove(removeTask);
-                    mqTasks.Add(task);
+                    allTasks.Remove(taskRemove);
+                    allTasks.Add(taskAccept);
                 });
+                //有任务被顶掉了
+                if (taskRemove != null) {
+                    App.Store.Dispatch(new MqActions.SchTaskReplaced(machineCode));
+                }
             }
             //更新任务缓存
             SqliteHelper.DoAsync(ctx => {
-                ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(mqTasks)));
+                ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(allTasks)));
             });
         }
 
@@ -674,7 +695,7 @@ namespace HmiPro.Redux.Cores {
                         title = "手动 " + title;
                     }
                     //通知服务器任务开始了
-                    notifyServerAxisStarted(machineCode,axisCode);
+                    notifyServerAxisStarted(machineCode, axisCode);
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = title,
                         Content = $"机台 {machineCode} 轴号： {axisCode}"
@@ -703,7 +724,7 @@ namespace HmiPro.Redux.Cores {
                     actualEndTime = YUtil.GetUtcTimestampMs(taskDoing.EndTime),
                     axisName = axisCode,
                     macCode = machineCode,
-                    axixLen = taskDoing.MeterPlan,
+                    axixLen = taskDoing.MeterWork,
                     courseCode = taskDoing.WorkCode,
                     empRfid = string.Join(",", taskDoing.EmpRfids),
                     rfids_begin = string.Join(",", taskDoing.StartAxisRfids),
@@ -850,7 +871,7 @@ namespace HmiPro.Redux.Cores {
                     actualEndTime = YUtil.GetUtcTimestampMs(taskDoing.EndTime),
                     axisName = axisCode,
                     macCode = machineCode,
-                    axixLen = taskDoing.MeterPlan,
+                    axixLen = taskDoing.MeterWork,
                     courseCode = taskDoing.WorkCode,
                     empRfid = string.Join(",", taskDoing.EmpRfids),
                     rfids_begin = string.Join(",", taskDoing.StartAxisRfids),
@@ -867,6 +888,8 @@ namespace HmiPro.Redux.Cores {
 
                 //重新初始化
                 taskDoing.Init();
+                setCpmRfid(machineCode, DefinedParamCode.StartAxisRfid, "");
+                setCpmRfid(machineCode, DefinedParamCode.EndAxisRfid, "");
             }
 
             //更新缓存

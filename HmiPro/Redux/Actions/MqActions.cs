@@ -19,6 +19,7 @@ namespace HmiPro.Redux.Actions {
         public static readonly string START_LISTEN_SCH_TASK_SUCCESS = "[Mq] Start Listen Schedule Task Success";
         public static readonly string START_LISTEN_SCH_TASK_FAILED = "[Mq] Start Listen Schedule Task Failed";
         public static readonly string SCH_TASK_ACCEPT = "[Mq] Schedule Task Accept";
+        public static readonly string SCH_TASK_REPLACED = "[Mq] Schedule Task Replaced";
 
         //监听来料信息
         public static readonly string SCAN_MATERIAL_ACCEPT = "[Mq] Scan Material Accept";
@@ -56,13 +57,22 @@ namespace HmiPro.Redux.Actions {
         public static readonly string UPLOAD_DPMS_FAILED = "[Mq] Upload Dpms Failed";
 
 
+        public struct SchTaskReplaced : IAction {
+            public string Type() => SCH_TASK_REPLACED;
+            public string MachineCode;
+
+            public SchTaskReplaced(string machineCode) {
+                MachineCode = machineCode;
+            }
+        }
+
 
         public struct UploadDpms : IAction {
             public string Type() => UPLOAD_DPMS;
             public string MachineCode;
             public MqUploadDpm MqUploadDpms;
 
-            public UploadDpms(string machineCode,MqUploadDpm mqUploadDpms) {
+            public UploadDpms(string machineCode, MqUploadDpm mqUploadDpms) {
                 MachineCode = machineCode;
                 MqUploadDpms = mqUploadDpms;
             }

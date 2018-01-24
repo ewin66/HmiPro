@@ -35,7 +35,7 @@ namespace HmiPro.Redux.Services {
                 for (var i = 0; i < schTask.axisParam.Count; i++) {
                     schTask.axisParam[i].Index = i + 1;
                 }
-
+                Logger.Info("接受到任务数据：" + json);
                 App.Store.Dispatch(new MqActions.SchTaskAccept(schTask));
             } catch (Exception e) {
                 Logger.Error("排产任务反序列异常，json数据为：" + json, e);

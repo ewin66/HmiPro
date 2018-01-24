@@ -105,7 +105,6 @@ namespace HmiPro.Redux.Cores {
                     SmParamTcp = new YSmParamTcp(ip, port, LoggerHelper.CreateLogger("YSmParamTcp"));
                     SmParamTcp.OnDataReceivedAction += smModelsHandler;
                     OnlineCpmDict = App.Store.GetState().CpmState.OnlineCpmsDict;
-
                 }
                 SmParamTcp.Start();
             });
@@ -215,12 +214,14 @@ namespace HmiPro.Redux.Cores {
             //fixed:2017-10-20
             //      一包参数的时间应该一致
             var pickTime = DateTime.Now;
-
             void updateDiff(Cpm cpm) {
                 cpm.PickTime = pickTime;
                 //直接更新，会更新界面的数据
                 if (OnlineCpmDict[machineCode].TryGetValue(cpm.Code, out var storeCpm)) {
-                    storeCpm.Update(cpm.Value, cpm.ValueType, pickTime);
+                    //Rfid 数据是在 DMesCore 更新
+                    if (!DefinedParamCode.IsRfidParam(cpm.Code)) {
+                        storeCpm.Update(cpm.Value, cpm.ValueType, pickTime);
+                    }
                 } else {
                     Logger.Error($"参数 {cpm.Code} 未注册", 3600);
                 }
@@ -263,7 +264,6 @@ namespace HmiPro.Redux.Cores {
         /// <param name="machineCode"></param>
         /// <param name="cpm"></param>
         private DMesActions.RfidAccpet createRfid(string machineCode, Cpm cpm) {
-
             DMesActions.RfidAccpet rfidAccept = new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
                 DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.Unknown);
             //放线卡

@@ -38,6 +38,9 @@ namespace HmiPro.ViewModels.DMes {
         /// </summary>
         private IList<Dictionary<string, object>> makeZhsBom(IList<Dictionary<string, object>> boms) {
             IList<Dictionary<string, object>> zhsBoms = new List<Dictionary<string, object>>();
+            if (boms == null) {
+                return zhsBoms;
+            }
             foreach (var bom in boms) {
                 var zshBom = new Dictionary<string, object>();
                 foreach (var pair in bom) {

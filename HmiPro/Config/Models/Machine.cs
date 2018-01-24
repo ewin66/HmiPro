@@ -48,7 +48,7 @@ namespace HmiPro.Config.Models {
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.StartAxisRfid, Name = "放线卡" });
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.EndAxisRfid, Name = "收线卡" });
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.EmpRfid, Name = "人员卡" });
-            cpms.Add(new CpmInfo() { Code = DefinedParamCode.MaterialRfid, Name = "物料卡" });
+            //cpms.Add(new CpmInfo() { Code = DefinedParamCode.MaterialRfid, Name = "物料卡" });
 
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.Oee, Name = "Oee" });
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeTime, Name = "Oee-时间效率" });
