@@ -18,7 +18,10 @@ using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
 using HmiPro.ViewModels;
+using HmiPro.ViewModels.DMes.Form;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 using NeoSmart.AsyncLock;
 using Newtonsoft.Json;
 using YCsharp.Model.Procotol.SmParam;
@@ -93,6 +96,7 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
             actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompleteSchAxis;
             actionExecDict[DMesActions.CLEAR_SCH_TASKS] = clearSchTasks;
+            actionExecDict[SysActions.FORM_VIEW_PRESSED_OK] = doFormViewPressedOk;
 
             App.Store.Subscribe(actionExecDict);
 
@@ -110,6 +114,48 @@ namespace HmiPro.Redux.Cores {
             if (!CmdOptions.GlobalOptions.MockVal) {
                 restoreTask();
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doFormViewPressedOk(AppState state, IAction action) {
+            var sysAction = (SysActions.FormViewPressedOk)action;
+            if (sysAction.FormCtrls != null && sysAction.FormCtrls is PalletFormCtrls ctrls) {
+                confirmPalletAxisNum(ctrls);
+            }
+        }
+
+
+        /// <summary>
+        /// 确认栈板Rfid与轴数目的关系
+        /// </summary>
+        /// <param name="ctrls"></param>
+        void confirmPalletAxisNum(PalletFormCtrls ctrls) {
+            var machinieCode = ctrls.MachineCode;
+            if (!PalletDict.ContainsKey(machinieCode)) {
+                return;
+            }
+            var pallet = new Pallet();
+            pallet.AxisNum = ctrls.AxisNum;
+            pallet.Rfid = ctrls.Rfid;
+
+            //todo 呼叫叉车
+
+            //保存栈板Rfid 和 轴数量之间的关系
+            var filter = new FilterDefinitionBuilder<Pallet>().Where(s => s.Rfid == pallet.Rfid);
+            var options = new UpdateOptions() { IsUpsert = true };
+            var updater = Builders<Pallet>.Update.Set(s => s.AxisNum, pallet.AxisNum);
+            MongoHelper.GetMongoService().GetDatabase(machinieCode).GetCollection<Pallet>("Pallets").UpdateOneAsync(filter, updater, options);
+            //App.Store.Dispatch(dbEffects.UploadDocToMongo(new DbActions.UploadDocToMongo(machinieCode, "Pallet", pallet)));
+            //清空栈板轴数量
+            PalletDict[machinieCode].AxisNum = 0;
+            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                Title = "通知",
+                Content = "该功能未开放，还在测试中..."
+            }));
         }
 
         /// <summary>
@@ -276,7 +322,7 @@ namespace HmiPro.Redux.Cores {
                     return false;
                 }
                 // 完成率满足一定条件才行
-                if (taskDoing.AxisCompleteRate >= 0.98) {
+                if (taskDoing.AxisCompleteRate >= 0.90) {
                     return true;
                 }
                 return false;
@@ -319,19 +365,19 @@ namespace HmiPro.Redux.Cores {
                     //收线盘只有一个
                     if (!doingTask.EndAxisRfids.Contains(dmesAction.Rfid)) {
                         //换盘了
-                        if (doingTask.EndAxisRfids.Count > 0) {
-                            //任务已经开始，但是换盘了，则任务当前任务结束了
-                            if (SchTaskDoingDict[dmesAction.MachineCode].IsStarted) {
-                                App.Store.Dispatch(new DMesActions.CompletedSchAxis(dmesAction.MachineCode, SchTaskDoingDict[dmesAction.MachineCode]?.MqSchAxis?.axiscode));
-                            }
-                            //如果使用的是栈板，则清空栈板数据
-                            //包括放线盘，收线盘
-                            if (PalletDict.ContainsKey(dmesAction.MachineCode)) {
-                                PalletDict[dmesAction.MachineCode].AxisNum = 0;
-                                PalletDict[dmesAction.MachineCode].Rfid = dmesAction.Rfid;
-                                doingTask.StartAxisRfids.Clear();
-                            }
-                        }
+                        //if (doingTask.EndAxisRfids.Count > 0) {
+                        //    //任务已经开始，但是换盘了，则任务当前任务结束了
+                        //    if (SchTaskDoingDict[dmesAction.MachineCode].IsStarted) {
+                        //        App.Store.Dispatch(new DMesActions.CompletedSchAxis(dmesAction.MachineCode, SchTaskDoingDict[dmesAction.MachineCode]?.MqSchAxis?.axiscode));
+                        //    }
+                        //    //如果使用的是栈板，则清空栈板数据
+                        //    //包括放线盘，收线盘
+                        //    if (PalletDict.ContainsKey(dmesAction.MachineCode)) {
+                        //        PalletDict[dmesAction.MachineCode].AxisNum = 0;
+                        //        PalletDict[dmesAction.MachineCode].Rfid = dmesAction.Rfid;
+                        //        doingTask.StartAxisRfids.Clear();
+                        //    }
+                        //}
                         doingTask.EndAxisRfids.Clear();
                         doingTask.EndAxisRfids.Add(dmesAction.Rfid);
                     }

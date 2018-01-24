@@ -236,12 +236,19 @@ namespace HmiPro.Redux.Effects {
                         uCpms.machineCode = machineCode;
                         var setting = GlobalConfig.MachineSettingDict[machineCode];
                         var cpmNameToCodeDict = MachineConfig.MachineDict[machineCode].CpmNameToCodeDict;
-                        if (getState().CpmState.OnlineCpmsDict[machineCode].TryGetValue(cpmNameToCodeDict[setting.MqNeedSpeed], out var speedCpm)) {
-                            uCpms.macSpeed = speedCpm.Value;
+                        //fix: 2018-1-24
+                        if (cpmNameToCodeDict.ContainsKey(setting.MqNeedSpeed)) {
+                            if (getState().CpmState.OnlineCpmsDict[machineCode]
+                                .TryGetValue(cpmNameToCodeDict[setting.MqNeedSpeed], out var speedCpm)) {
+                                uCpms.macSpeed = speedCpm.Value;
+                            }
                         }
-                        if (getState().CpmState.OnlineCpmsDict[machineCode]
-                            .TryGetValue(cpmNameToCodeDict[setting.Od], out var od)) {
-                            uCpms.diameter = od.Value.ToString();
+                        // fix: 2018-1-24
+                        if (cpmNameToCodeDict.ContainsKey(setting.Od)) {
+                            if (getState().CpmState.OnlineCpmsDict[machineCode]
+                                .TryGetValue(cpmNameToCodeDict[setting.Od], out var od)) {
+                                uCpms.diameter = od.Value.ToString();
+                            }
                         }
                         uCpms.TimeEff = getState().OeeState.OeeDict[machineCode].TimeEff.ToString("0.00");
                         uCpms.SpeedEff = getState().OeeState.OeeDict[machineCode].SpeedEff.ToString("0.00");

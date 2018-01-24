@@ -6,11 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using DevExpress.Mvvm.DataAnnotations;
+using DevExpress.Mvvm.POCO;
 using DevExpress.Mvvm.UI;
 using HmiPro.Config;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
+using HmiPro.ViewModels.DMes.Form;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels.DMes.Tab {
@@ -33,7 +36,14 @@ namespace HmiPro.ViewModels.DMes.Tab {
         }
 
         public Pallet Pallet { get; set; }
-    
+
+        public SchTaskTab() {
+
+        }
+
+        public SchTaskTab(string header) {
+            Header = header;
+        }
 
 
         public string EmployeeStr { get; set; } = "/";
@@ -149,5 +159,27 @@ namespace HmiPro.ViewModels.DMes.Tab {
             }
         }
 
+        /// <summary>
+        /// 显示确定栈板上面轴数量
+        /// </summary>
+        [Command(Name = "ShowPalletViewCommand")]
+        public void ShowPalletFormView() {
+            if (!GlobalConfig.PalletMachineCodes.Contains(MachineCode)) {
+                return;
+            }
+            var pallet = App.Store.GetState().DMesState.PalletDict[MachineCode];
+            if (string.IsNullOrEmpty(pallet.Rfid)) {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "警告",
+                    Content = "未扫描栈板的Rfid"
+                }));
+            }
+            var formCtrls = new PalletFormCtrls(MachineCode, pallet.Rfid,pallet.AxisNum);
+            App.Store.Dispatch(new SysActions.ShowFormView("确认栈板轴数量", formCtrls));
+        }
+
+        public static SchTaskTab Create(string header) {
+            return ViewModelSource.Create(() => new SchTaskTab(header));
+        }
     }
 }

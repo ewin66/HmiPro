@@ -5,7 +5,10 @@
                     xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
                     xmlns:helpers="clr-namespace:HmiPro.Helpers"
                     xmlns:models="clr-namespace:HmiPro.Redux.Models"
-                    xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm">
+                    xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+                    xmlns:internal="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/internal"
+                    xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+                    xmlns:themeKeys="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/themekeys">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Converts.xaml" />
@@ -92,4 +95,29 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <ControlTemplate x:Key="{themeKeys:PageViewElementsThemeKey ResourceKey=Template, IsThemeIndependent=True}" TargetType="dxwui:PageView">
+        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Margin="{TemplateBinding Padding}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid Margin="0,0" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ItemsPresenter HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0"/>
+                    <internal:NavigationHeaderControl Grid.Column="1" Margin="0,30,40,20" VerticalAlignment="Center" x:Name="PART_NavigationHeader" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                                    BackCommand="{TemplateBinding BackCommand}" ShowBackButton="{TemplateBinding ShowBackButton}"/>
+                </Grid>
+                <internal:ViewPresenter Grid.Row="1"
+                                      Content="{TemplateBinding SelectedContent}" ContentTemplate="{TemplateBinding SelectedContentTemplate}"
+                                      ContentTemplateSelector="{TemplateBinding SelectedContentTemplateSelector}"
+                                      AnimationDirection="{TemplateBinding AnimationDirection}"
+                                      AnimationType="{TemplateBinding AnimationType}"
+                                      AnimationSpeedRatio="{TemplateBinding AnimationSpeedRatio}"/>
+            </Grid>
+        </Border>
+    </ControlTemplate>
 </ResourceDictionary>

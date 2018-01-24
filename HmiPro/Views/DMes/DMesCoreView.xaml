@@ -34,9 +34,11 @@
                 </DataTemplate>
             </Grid.Resources>
             <sys:NavigatorView Grid.Row="0"/>
-
+            <dxwui:PageView Grid.Row="1" ShowBackButton="False"  Padding="0,0,0,0"  ItemTemplate="{StaticResource TabHeader}" ItemsSource="{Binding Path=ViewSource}" SelectedIndex="{Binding Path=ViewStore.TabSelectedIndex}">
+                <dxwui:PageView.Resources>
+                    <!--</dxwui:PageView>
             <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=ViewSource}" ItemHeaderTemplate="{StaticResource TabHeader}" SelectedIndex="{Binding Path=ViewStore.TabSelectedIndex}" >
-                <dx:DXTabControl.Resources>
+                <dx:DXTabControl.Resources>-->
                     <!--采集参数页面-->
                     <DataTemplate DataType="{x:Type Model:CpmsTab}">
                         <dxlc:FlowLayoutControl ItemsSource="{Binding Path=Cpms}" x:Name="CtrlInstParam" Orientation="Horizontal">
@@ -107,16 +109,17 @@
                             <dMes:TaskSelectPanel DockPanel.Dock="Left" DataContext="{Binding Path=.}"/>
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="32"></RowDefinition>
+                                    <RowDefinition Height="Auto"></RowDefinition>
                                     <RowDefinition Height="*"></RowDefinition>
                                 </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" Orientation="Horizontal" Height="32">
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" Height="Auto">
                                     <TextBlock Margin="0,0,20,0"  FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding Path=PalletVisibility}" ><Run>当前栈板轴数: </Run>  <Run Text="{Binding Path=Pallet.AxisNum,Mode=OneWay}"/></TextBlock>
                                     <TextBlock Margin="0,0,20,0"  FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" ><Run>上机人员: </Run>  <Run Text="{Binding Path=EmployeeStr,Mode=OneWay}"/></TextBlock>
                                     <TextBlock  Margin="0,0,20,0"  FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"><Run>总轴数: </Run>  <Run Text="{Binding Path=SelectedTask.axisParam.Count,Mode=OneWay}"/></TextBlock>
                                     <TextBlock  Margin="0,0,20,0"  FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center">
                                      <Run Text="{Binding Path=SelectedTask.pstime,Mode=OneWay,Converter={StaticResource JavaTimeConvert},ConverterParameter='yyyy-MM-dd HH:mm'}"/><Run>--</Run><Run Text="{Binding SelectedTask.pdtime,Mode=OneWay,Converter={StaticResource JavaTimeConvert},ConverterParameter='yyyy-MM-dd HH:mm'}"/>
                                     </TextBlock>
+                                    <Button Visibility="{Binding Path=PalletVisibility}" Content="叉走栈板" Command="{Binding ShowPalletViewCommand}"></Button>
                                 </StackPanel>
 
                                 <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" SelectedIndex="{Binding Path=ViewStore.TaskTabSelectedIndex}" ItemHeaderTemplate="{StaticResource TabHeader}" >
@@ -235,8 +238,10 @@
                             </dxg:GridControl>
                         </Grid>
                     </DataTemplate>
-                </dx:DXTabControl.Resources>
-            </dx:DXTabControl>
+                    <!--</dx:DXTabControl.Resources>
+            </dx:DXTabControl>-->
+                </dxwui:PageView.Resources>
+            </dxwui:PageView>
 
         </Grid>
     </dxwui:PageAdornerControl>

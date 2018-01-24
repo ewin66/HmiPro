@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 using DevExpress.Mvvm;
 using DevExpress.Xpf.WindowsUI;
 using HmiPro.Redux.Models;
+using HmiPro.Views.Sys;
 
 namespace HmiPro.Redux.Actions {
     /// <summary>
@@ -30,6 +32,44 @@ namespace HmiPro.Redux.Actions {
         public static readonly string STOP_CLOSE_SCREEN_TIMER = "[Sys] Stop Turn Off Screen Timer";
         public static readonly string SHOW_NOTIFICATION = "[Sys] Show Notification";
         public static readonly string SET_TOP_MESSAGE = "[Sys] Show Top Message";
+        public static readonly string SHOW_FORM_VIEW = "[Sys] Show Form View";
+        public static readonly string FORM_VIEW_PRESSED_OK = "[Sys] Form View Pressed Ok";
+        public static readonly string FORM_VIEW_PRESSED_CANCEL = "[Sys] Form View Pressed Cancel";
+
+        public struct FormViewPressedCancel : IAction {
+            public string Type() => FORM_VIEW_PRESSED_CANCEL;
+            public object FormCtrls;
+            public string Title;
+
+            public FormViewPressedCancel(string title, object formCtrls) {
+                Title = title;
+                FormCtrls = formCtrls;
+            }
+        }
+
+
+        public struct FormViewPressedOk : IAction {
+            public string Type() => FORM_VIEW_PRESSED_OK;
+            public object FormCtrls;
+            public string Title;
+
+
+            public FormViewPressedOk(string title, object formCtrls) {
+                Title = title;
+                FormCtrls = formCtrls;
+            }
+        }
+
+        public struct ShowFormView : IAction {
+            public string Type() => SHOW_FORM_VIEW;
+            public object FormCtrls;
+            public string Title;
+
+            public ShowFormView(string title, object formCtrls) {
+                Title = title;
+                FormCtrls = formCtrls;
+            }
+        }
 
         public struct SetTopMessage : IAction {
             public string Type() => SET_TOP_MESSAGE;

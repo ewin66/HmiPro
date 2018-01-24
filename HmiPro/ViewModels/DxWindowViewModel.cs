@@ -7,6 +7,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.UI;
@@ -27,6 +28,8 @@ using FluentScheduler;
 using HmiPro.Mocks;
 using HmiPro.Redux.Services;
 using YCsharp.Util;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
 
 namespace HmiPro.ViewModels {
     /// <summary>
@@ -73,6 +76,7 @@ namespace HmiPro.ViewModels {
             actionsExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
             actionsExecDict[SysActions.SET_TOP_MESSAGE] = doSetTopMessage;
             actionsExecDict[SysActions.APP_INIT_COMPLETED] = whenAppInitCompleted;
+            actionsExecDict[SysActions.SHOW_FORM_VIEW] = doShowFormView;
 
             Store.Subscribe(actionsExecDict);
             //每一分钟检查一次与服务器的连接
@@ -97,9 +101,9 @@ namespace HmiPro.ViewModels {
                 foreach (var pair in MachineConfig.MachineDict) {
                     var machineCode = pair.Key;
                     //Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode);
-                    YUtil.SetTimeout(3000, () => {
-                        Mocks.MockDispatchers.DispatchMockAlarm(33);
-                    });
+                    //YUtil.SetTimeout(3000, () => {
+                    //    Mocks.MockDispatchers.DispatchMockAlarm(33);
+                    //});
 
                     //YUtil.SetTimeout(6000, () => {
                     //    Mocks.MockDispatchers.DispatchMqMockScanMaterial(machineCode);
@@ -112,11 +116,11 @@ namespace HmiPro.ViewModels {
                     //    });
                     //});
 
-                    YUtil.SetTimeout(3000, () => {
-                        for (int i = 0; i < 5; i++) {
-                            MockDispatchers.DispatchMockSchTask(machineCode, i);
-                        }
-                    });
+                    //YUtil.SetTimeout(3000, () => {
+                    //    for (int i = 0; i < 1; i++) {
+                    //        MockDispatchers.DispatchMockSchTask(machineCode, i);
+                    //    }
+                    //});
                 }
             }
 
@@ -170,13 +174,27 @@ namespace HmiPro.ViewModels {
             //Logger.Debug($@"Oee 时间效率 {oeeAction.TimeEff ?? 1}, 速度效率：{oeeAction.SpeedEff ?? 1}，质量效率：{oeeAction.QualityEff ?? 1}", ConsoleColor.Yellow);
         }
 
+        void doShowFormView(AppState state, IAction action) {
+            var sysAction = (SysActions.ShowFormView)action;
+            //弹出键盘
+            YUtil.CallOskAsync();
+            DispatcherService.BeginInvoke(() => {
+                JumFormView(sysAction.Title, sysAction.FormCtrls);
+            });
+        }
+
         /// <summary>
         /// 显示设置界面
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
         void doShowSettingView(AppState state, IAction action) {
-            JumpAppSettingView("程序设置");
+            //fix: 2018-1-24
+            //如果不换线程会阻塞其它线程
+            //因为如果用户不点击确定或者取消，线程一直处于等待状态
+            DispatcherService.BeginInvoke(() => {
+                JumpAppSettingView("程序设置");
+            });
         }
 
         /// <summary>
@@ -252,6 +270,28 @@ namespace HmiPro.ViewModels {
         /// </summary>
         public void OnViewLoaded() {
             Navigate("HomeView");
+        }
+
+        public void JumFormView(string title, object formCtrls) {
+            UICommand okCmd = new UICommand() {
+                Caption = "确定",
+                IsCancel = false,
+                IsDefault = false
+            };
+            UICommand cancelCmd = new UICommand() {
+                Caption = "取消",
+                IsCancel = true,
+                IsDefault = true
+            };
+            var formViewModel = FormViewModel.Create(title, formCtrls);
+            var resultCmd = DialogService.ShowDialog(new List<UICommand>() { okCmd, cancelCmd }, title, nameof(FormView),
+                formViewModel);
+
+            if (resultCmd == okCmd) {
+                App.Store.Dispatch(new SysActions.FormViewPressedOk(title, formViewModel.FormCtrls));
+            } else {
+                App.Store.Dispatch(new SysActions.FormViewPressedCancel(title, formViewModel.FormCtrls));
+            }
         }
 
         /// <summary>

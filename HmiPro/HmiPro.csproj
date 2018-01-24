@@ -188,6 +188,7 @@
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Redux\Actions\AlarmActions.cs" />
     <Compile Include="Redux\Actions\AppActions.cs" />
+    <Compile Include="Redux\Actions\CallActions.cs" />
     <Compile Include="Redux\Actions\CpmActions.cs" />
     <Compile Include="Redux\Actions\DbActions.cs" />
     <Compile Include="Redux\Actions\DMesActions.cs" />
@@ -245,6 +246,7 @@
     <Compile Include="Redux\Services\MqService.cs" />
     <Compile Include="Redux\Cores\OeeCore.cs" />
     <Compile Include="Redux\Services\SysService.cs" />
+    <Compile Include="ViewModels\DMes\Form\PalletFormCtrls.cs" />
     <Compile Include="ViewModels\DMes\Tab\AlarmTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\Com485Tab.cs" />
@@ -253,6 +255,7 @@
     <Compile Include="ViewModels\DMes\Tab\ScanMaterialTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />
+    <Compile Include="ViewModels\Sys\FormViewModel.cs" />
     <Compile Include="ViewModels\Sys\SelectableViewModel.cs" />
     <Compile Include="Views\DMes\DMesCoreView.xaml.cs">
       <DependentUpon>DMesCoreView.xaml</DependentUpon>
@@ -294,6 +297,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Views\Sys\FormView.xaml.cs">
+      <DependentUpon>FormView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Sys\NavigatorView.xaml.cs">
       <DependentUpon>NavigatorView.xaml</DependentUpon>
@@ -367,6 +373,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Sys\FormView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Sys\NavigatorView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -394,7 +404,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Properties\Licenses.licx" />
+    <None Include="Properties\Licenses.licx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -712,7 +722,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

@@ -14,6 +14,7 @@ using HmiPro.Redux.Actions;
 using HmiPro.Redux.Cores;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
+using HmiPro.ViewModels.DMes.Form;
 using HmiPro.ViewModels.DMes.Tab;
 using HmiPro.ViewModels.Sys;
 using Reducto;
@@ -37,7 +38,7 @@ namespace HmiPro.ViewModels.DMes {
 
         public virtual ObservableCollection<BaseTab> ViewSource { get; set; } = new ObservableCollection<BaseTab>();
         public virtual CpmsTab CpmsTab { get; set; } = new CpmsTab() { Header = "参数" };
-        public virtual SchTaskTab SchTaskTab { get; set; } = new SchTaskTab() { Header = "任务" };
+        public virtual SchTaskTab SchTaskTab { get; set; } = SchTaskTab.Create("任务");
         public virtual AlarmTab AlarmTab { get; set; } = new AlarmTab() { Header = "报警" };
         public virtual ScanMaterialTab ScanMaterialTab { get; set; } = new ScanMaterialTab() { Header = "来料" };
         public virtual Com485Tab Com485Tab { get; set; } = new Com485Tab() { Header = "通讯" };
@@ -197,6 +198,8 @@ namespace HmiPro.ViewModels.DMes {
             }
 
         }
+
+
 
         /// <summary>
         /// 显示虚拟键盘

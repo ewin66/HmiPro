@@ -36,9 +36,14 @@ namespace HmiPro.ViewModels {
         public virtual INavigationService NavigationSerivce => null;
         public static bool IsFirstEntry = true;
         public readonly LoggerService Logger;
+        public Visibility SettingViewVisibility { get; set; } = Visibility.Collapsed;
+        public virtual IDispatcherService DispatcherService => null;
 
         public HomeViewModel() {
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
+            if (HmiConfig.IsDevUserEnv) {
+                SettingViewVisibility = Visibility.Visible;
+            }
         }
 
         [Command(Name = "OnLoadedCommand")]
@@ -233,7 +238,8 @@ namespace HmiPro.ViewModels {
 
         [Command(Name = "JumpAppSettingViewCommand")]
         public void JumpAppSetting() {
-            App.Store.Dispatch(new SysActions.ShowSettingView());
+            //App.Store.Dispatch(new SysActions.ShowSettingView());
+            App.Store.Dispatch(new SysActions.ShowFormView("测试", new BaseFormCtrl()));
         }
     }
 }

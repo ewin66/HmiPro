@@ -24,10 +24,10 @@ namespace HmiPro {
             InitializeComponent();
             //开发电脑
             if (HmiConfig.IsDevUserEnv) {
-                //WindowStyle = WindowStyle.None;
+                WindowStyle = WindowStyle.None;
                 WindowState = WindowState.Maximized;
-                Width = 800;
-                Height = 600;
+                //Width = 800;
+                //Height = 600;
                 Topmost = false;
                 //生产电脑
             } else {

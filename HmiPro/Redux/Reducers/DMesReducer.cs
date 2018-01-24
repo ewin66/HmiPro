@@ -60,7 +60,7 @@ namespace HmiPro.Redux.Reducers {
     /// <summary>
     /// 栈板
     /// </summary>
-    public class Pallet : INotifyPropertyChanged {
+    public class Pallet : MongoDoc, INotifyPropertyChanged {
 
         private int axisNum;
 
