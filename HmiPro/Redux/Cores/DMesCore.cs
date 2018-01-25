@@ -154,7 +154,8 @@ namespace HmiPro.Redux.Cores {
                 machineCode = machinieCode,
                 callType = MqCallType.Forklift,
                 callAction = MqCallAction.MovePallet,
-                CallId = Guid.NewGuid().GetHashCode()
+                CallId = Guid.NewGuid().GetHashCode(),
+                callArgs = pallet.Rfid
             };
             var callSuccess = await App.Store.Dispatch(mqEffects.CallSystem(new MqActions.CallSystem(machinieCode, mqCall)));
             if (callSuccess) {
@@ -228,7 +229,7 @@ namespace HmiPro.Redux.Cores {
             var mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName,
                 $"ip {alarmAction.Ip} 485故障");
             //1小时记录一次485故障到文件
-            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障", 3600);
+            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障", 36000);
             //485故障暂时不考虑上报
             //App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm));
         }

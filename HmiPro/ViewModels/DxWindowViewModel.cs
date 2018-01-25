@@ -33,7 +33,7 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace HmiPro.ViewModels {
     /// <summary>
-    /// 程序窗体模型
+    /// 负责初始化 MachineConfig，订阅跑马灯信息，检查与服务器的连接等等
     /// <date>2017-12-17</date>
     /// <author>ychost</author>
     /// </summary>
@@ -41,11 +41,11 @@ namespace HmiPro.ViewModels {
         /// <summary>
         /// 日志
         /// </summary>
-        public readonly LoggerService Logger;
+        public LoggerService Logger;
         /// <summary>
         /// 程序的全局的核心数据和事件存储
         /// </summary>
-        public readonly StorePro<AppState> Store;
+        public StorePro<AppState> Store;
         /// <summary>
         /// 事件派发器
         /// </summary>
@@ -113,12 +113,34 @@ namespace HmiPro.ViewModels {
         /// </summary>
         public double MarqueeHiehgit { get; set; }
         /// <summary>
+        /// LoadingControl 所在外围 Grid 的高度
+        /// </summary>
+        public double LoadingGridHeight { get; set; }
+        /// <summary>
+        /// 加载界面是否显示
+        /// </summary>
+        public Visibility LoadinngGridVisibility { get; set; } = Visibility.Visible;
+        /// <summary>
         /// 初始化日志、Store、定时器等等
         /// </summary>
         public DxWindowViewModel() {
-            Logger = LoggerHelper.CreateLogger(GetType().ToString());
+            LoadingGridHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
+        }
+
+        /// <summary>
+        /// 程序启动后跳转到主页
+        /// </summary>
+        public void OnViewLoaded() {
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
-            MarqueeMessagesDict = Store.GetState().SysState.MarqueeMessagesDict;
+            lock (MarqueeLock) {
+                MarqueeMessagesDict = Store.GetState().SysState.MarqueeMessagesDict;
+            }
+            //每一分钟检查一次与服务器的连接
+            Task.Run(() => {
+                YUtil.SetInterval(60000, () => {
+                    checkNetwork(HmiConfig.InfluxDbIp);
+                });
+            });
             //初始化事件派发
             actionsExecDict[SysActions.SHOW_NOTIFICATION] = doShowNotification;
             actionsExecDict[SysActions.SHOW_SETTING_VIEW] = doShowSettingView;
@@ -127,21 +149,24 @@ namespace HmiPro.ViewModels {
             actionsExecDict[SysActions.SHOW_FORM_VIEW] = doShowFormView;
             actionsExecDict[SysActions.ADD_MARQUEE_MESSAGE] = doAddMarqueeMessage;
             actionsExecDict[SysActions.DEL_MARQUEE_MESSAGE] = doDelMarqueeMessage;
+            actionsExecDict[SysActions.APP_XAML_INITED] = whenAppXamlInited;
             Store.Subscribe(actionsExecDict);
+        }
 
-            //每一分钟检查一次与服务器的连接
-            Task.Run(() => {
-                YUtil.SetInterval(60000, () => {
-                    checkNetwork(HmiConfig.InfluxDbIp);
-                });
-            });
-
-            YUtil.SetInterval(2000, t => {
-                App.Store.Dispatch(new SysActions.AddMarqueeMessage(t.ToString(), "测试" + t));
-                if (t > 5) {
-                    App.Store.Dispatch(new SysActions.DelMarqueeMessage((t - 5).ToString()));
-                }
-            },10);
+        /// <summary>
+        /// App.xaml.cs 中的任务初始化完成
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        async void whenAppXamlInited(AppState state, IAction action) {
+            Logger = LoggerHelper.CreateLogger(GetType().ToString());
+            var loadEffects = UnityIocService.ResolveDepend<LoadEffects>();
+            await App.Store.Dispatch(loadEffects.LoadMachineConfig(new LoadActions.LoadMachieConfig()));
+            Navigate("HomeView");
+            LoadingGridHeight = 0;
+            RaisePropertyChanged(nameof(LoadingGridHeight));
+            LoadinngGridVisibility = Visibility.Collapsed;
+            RaisePropertyChanged(nameof(LoadinngGridVisibility));
         }
 
         /// <summary>
@@ -326,12 +351,7 @@ namespace HmiPro.ViewModels {
             NavigationService.Navigate(target, null, this, true);
         }
 
-        /// <summary>
-        /// 程序启动后跳转到主页
-        /// </summary>
-        public void OnViewLoaded() {
-            Navigate("HomeView");
-        }
+
 
         /// <summary>
         /// 派发了用户点击「确定」或者「取消」的事件

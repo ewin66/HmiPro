@@ -78,7 +78,7 @@ namespace YCsharp.Model.Procotol {
                                     ActionCache[pair.Key] = SmAction.NoAction;
                                 } catch {
                                     canClear = false;
-                                    Logger.Error($"发送命令 {Enum.GetName(typeof(SmAction), pair.Value)} 异常 {pair.Key}");
+                                    Logger.Error($"发送命令 {Enum.GetName(typeof(SmAction), pair.Value)} 异常 {pair.Key}", 24 * 3600);
                                 }
                             }
                         }

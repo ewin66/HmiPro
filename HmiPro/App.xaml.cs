@@ -31,6 +31,7 @@ using YCsharp.Util;
 namespace HmiPro {
     /// <summary>
     /// App.xaml 的交互逻辑
+    /// 负责解析启动命令、初始化 GlobalConfig， HmiConfig，Store，各种 Helper、记录所有的 Action、等等
     /// <date>2017-12-17</date>
     /// <author>ychost</author>
     /// </summary>
@@ -72,14 +73,21 @@ namespace HmiPro {
                 return;
             }
             base.OnStartup(e);
-            //移植日志输出初始化
-            MuffleLogActions.ForEach(action => {
-                MuffleLogDict[action] = new Mufflog();
+
+            //这是系统的核心，只能在主线程初始化，后面的逻辑都依赖 Store
+            ReduxIoc.Init();
+            Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+
+            //异步初始化，直接进入 DxWindow
+            Task.Run(() => {
+                init(e);
             });
-            //配置程序未处理异常提示
-            ExceptionHelper.Init();
+        }
+
+        void init(StartupEventArgs e) {
             //配置解析外部命令
             configInit(e);
+            ExceptionHelper.Init();
             //配置全局服务
             GlobalConfig.Load(YUtil.GetAbsolutePath(".\\Profiles\\Global.xls"));
             LoggerHelper.Init(HmiConfig.LogFolder);
@@ -87,22 +95,26 @@ namespace HmiPro {
             ActiveMqHelper.Init(HmiConfig.MqConn, HmiConfig.MqUserName, HmiConfig.MqUserPwd);
             MongoHelper.Init(HmiConfig.MongoConn);
             InfluxDbHelper.Init($"http://{HmiConfig.InfluxDbIp}:8086", HmiConfig.InfluxCpmDbName);
-            ReduxIoc.Init();
-            Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+
             Logger = LoggerHelper.CreateLogger("App");
-            //打印Redux系统的动作
-            Store.Subscribe(logDebugActions);
+            Logger.Debug("准备同步时间...");
             //同步时间
             syncTime(!HmiConfig.IsDevUserEnv);
-            //if (!HmiConfig.IsDevUserEnv) {
-            //    YUtil.Exec(@"sc.exe", "delete HmiDaemon");
-            //    Logger.Debug("删除 Daemon 服务 成功");
-            //}
             Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
             Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
             Logger.Debug("浮点精度：" + HmiConfig.MathRound);
+
+            //减缓频率的日志输出初始化
+            MuffleLogActions.ForEach(action => {
+                MuffleLogDict[action] = new Mufflog();
+            });
+            //打印Redux系统的动作
+            Store.Subscribe(logDebugActions);
+            //通知 DxWindow 加载完成
+            Store.Dispatch(new SysActions.AppXamlInited());
         }
+
 
         /// <summary>
         /// 启动守护进程
@@ -179,18 +191,21 @@ namespace HmiPro {
                 var configFolder = opt.ProfilesFolder + "\\" + opt.Mode;
                 opt.ConfigFolder = configFolder;
                 var assetsFolder = opt.ProfilesFolder + @"\Assets";
+
+                Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
+                Console.WriteLine("配置文件夹：-" + opt.ProfilesFolder);
+                Console.WriteLine("显示 Splash -" + opt.ShowSplash);
+                //启动画面
+                if (bool.Parse(opt.ShowSplash)) {
+                    //DXSplashScreen.Show<SplashScreenView>();
+                    //DXSplashScreen.SetState(SplashState.Default);
+                    //DXSplashScreen.Close();
+                }
                 //开机自启
                 YUtil.SetAppAutoStart(GetType().ToString(), bool.Parse(opt.AutoSatrt));
                 //显示Console框
                 if (bool.Parse(opt.ShowConsole)) {
                     ConsoleHelper.Show();
-                }
-                Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
-                Console.WriteLine("配置文件夹：-" + opt.ProfilesFolder);
-                //启动画面
-                if (bool.Parse(opt.ShowSplash)) {
-                    DXSplashScreen.Show<SplashScreenView>();
-                    DXSplashScreen.SetState(SplashState.Default);
                 }
                 //全局配置文件
                 var configFile = configFolder + $@"\Hmi.Config.{opt.Config}.json";
@@ -213,8 +228,10 @@ namespace HmiPro {
                 var message = $"程序崩溃：{ue.ExceptionObject}\r\n当前可用内存：{YUtil.GetAvaliableMemoryByte() / 1000000} M\r\nApp.Store: {Newtonsoft.Json.JsonConvert.SerializeObject(App.Store)}";
                 //将错误日志写入mongoDb
                 Logger.ErrorWithDb(message, MachineConfig.HmiName);
-                //直接重启电脑
-                YUtil.RestartPC();
+                if (!HmiConfig.IsDevUserEnv) {
+                    //直接重启电脑
+                    YUtil.RestartPC();
+                }
             };
         }
 
@@ -224,17 +241,19 @@ namespace HmiPro {
         private void syncTime(bool canSync) {
             //非开发环境才同步时间
             if (canSync) {
-                try {
-                    //获取服务器时间
-                    var ntpTime = YUtil.GetNtpTime(HmiConfig.NtpIp);
-                    //时间差超过10秒才同步时间
-                    if (Math.Abs((DateTime.Now - ntpTime).TotalSeconds) > 10) {
-                        YUtil.SetLoadTimeByDateTime(ntpTime);
+                Task.Run(() => {
+                    try {
+                        //获取服务器时间
+                        var ntpTime = YUtil.GetNtpTime(HmiConfig.NtpIp);
+                        //时间差超过10秒才同步时间
+                        if (Math.Abs((DateTime.Now - ntpTime).TotalSeconds) > 10) {
+                            YUtil.SetLoadTimeByDateTime(ntpTime);
+                        }
+                        Logger.Info($"同步时间成功: {ntpTime}");
+                    } catch (Exception e) {
+                        Logger.Error("获取服务器时间失败", e);
                     }
-                    Logger.Info($"同步时间成功: {ntpTime}");
-                } catch (Exception e) {
-                    Logger.Error("获取服务器时间失败", e);
-                }
+                });
             }
         }
 

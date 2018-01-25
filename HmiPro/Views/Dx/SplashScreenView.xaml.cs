@@ -22,13 +22,11 @@ namespace HmiPro.Views.Dx {
         }
     }
 
-    public class SplashState
-    {
+    public class SplashState {
         public string LoadingTxt { get; set; }
         public string Copyright { get; set; }
 
-        public static SplashState Default = new SplashState()
-        {
+        public static SplashState Default = new SplashState() {
             LoadingTxt = "加载中...",
             Copyright = "Copyright @ 2017-2017 电科智联"
         };

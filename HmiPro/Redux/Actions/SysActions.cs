@@ -44,6 +44,12 @@ namespace HmiPro.Redux.Actions {
         public static readonly string MARQUEE_APP_START_TIMEOUT = "[Marquee Id] App Start Timeout";
 
 
+        public static readonly string APP_XAML_INITED = "[Sys] App Xaml Inited";
+
+        public struct AppXamlInited : IAction {
+            public string Type() => APP_XAML_INITED;
+        }
+
         public struct AddMarqueeMessage : IAction {
             public string Type() => ADD_MARQUEE_MESSAGE;
             public string Message;

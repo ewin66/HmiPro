@@ -134,7 +134,7 @@ namespace HmiPro.Config {
         /// <summary>
         /// 是否在开发人员电脑上运行，开发人员是上面的DevUser </summary>
         [Required]
-        public static bool IsDevUserEnv;
+        public static bool IsDevUserEnv = true;
         /// <summary>
         /// 时间服务器ip，端口使用默认123
         /// </summary>

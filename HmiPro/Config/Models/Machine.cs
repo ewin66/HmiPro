@@ -114,11 +114,11 @@ namespace HmiPro.Config.Models {
         void validUnique(List<CpmInfo> cpms) {
             var repeatNames = cpms.GroupBy(c => c.Name).Where(c => c.Count() > 1).ToList();
             if (repeatNames?.Count > 0) {
-                throw new Exception($"参数名: " + repeatNames.FirstOrDefault().Key + " 重复！");
+                throw new Exception($"机台 {Code} 参数名: " + repeatNames.FirstOrDefault().Key + " 重复！");
             }
             var repeatCodes = cpms.GroupBy(c => c.Code).Where(c => c.Count() > 1).ToList();
             if (repeatCodes?.Count > 0) {
-                throw new Exception($"参数编码：{repeatCodes.FirstOrDefault().Key} 重复！");
+                throw new Exception($"机台 {Code} 参数编码：{repeatCodes.FirstOrDefault().Key} 重复！");
             }
         }
 

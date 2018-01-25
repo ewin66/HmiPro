@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
     xmlns:navigation="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/navigation"
     xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
@@ -14,6 +15,9 @@
     dx:ThemeManager.ThemeName="TouchlineDark"
     Title="Hmi Pro Dev By Ychost"
     Topmost="True"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="600" d:DesignWidth="800"
     >
 
     <dx:DXWindow.DataContext>
@@ -33,7 +37,6 @@
                 </Style>
             </dx:DialogService.DialogStyle>
         </dx:DialogService>
-        <!--<dxwui:WinUIMessageBoxService/>-->
         <dxmvvm:NotificationService x:Name="AppNotificationService" UseWin8NotificationsIfAvailable="False" PredefinedNotificationDuration="Long" PredefinedNotificationTemplate="ShortHeaderAndTwoTextFields"   />
         <dxmvvm:DispatcherService />
         <navigation:FrameNavigationService Frame="{Binding ElementName=frame}"  />
@@ -41,13 +44,17 @@
     </dxmvvm:Interaction.Behaviors>
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Border Height="{Binding Path=MarqueeHiehgit}" Background="Red" Visibility="{Binding Path=MarqueeVisibility}">
+        <Grid Height="{Binding Path=LoadingGridHeight}" Visibility="{Binding Path=LoadinngGridVisibility}">
+            <controls:ViewLoadingControl  Grid.Row="0"  Height="150" Width="150" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+        <Border Grid.Row="1" Height="{Binding Path=MarqueeHiehgit}" Background="Red" Visibility="{Binding Path=MarqueeVisibility}">
             <controls:MarqueeTextControl Height="28"  MarqueeTimeInSeconds="10" MarqueeType="RightToLeft"  ContentFontSize="22"  ContentText="{Binding Path=MarqueeText}" Foreground="White"></controls:MarqueeTextControl>
         </Border>
-        <dxwui:NavigationFrame Grid.Row="1"  x:Name="frame" AnimationType="SlideHorizontal" BackNavigationMode="Root" />
+        <dxwui:NavigationFrame Grid.Row="2"  x:Name="frame" AnimationType="SlideHorizontal" BackNavigationMode="Root" />
     </Grid>
 
 </dx:DXWindow>

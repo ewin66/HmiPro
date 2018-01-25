@@ -167,6 +167,9 @@
     <Compile Include="Controls\Panels\DpiResizingPanel.cs" />
     <Compile Include="Controls\Panels\FilterUnselectionBehavior.cs" />
     <Compile Include="Controls\TileLayoutControlExt.cs" />
+    <Compile Include="Controls\ViewLoadingControl.xaml.cs">
+      <DependentUpon>ViewLoadingControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\VisualStateControl.cs" />
     <Compile Include="Converts\CoefConvert.cs" />
     <Compile Include="Converts\ImageConvert.cs" />
@@ -195,6 +198,7 @@
     <Compile Include="Redux\Actions\DbActions.cs" />
     <Compile Include="Redux\Actions\DMesActions.cs" />
     <Compile Include="Redux\Actions\DpmActions.cs" />
+    <Compile Include="Redux\Actions\LoadActions.cs" />
     <Compile Include="Redux\Actions\MockActions.cs" />
     <Compile Include="Redux\Actions\MqActions.cs" />
     <Compile Include="Redux\Actions\OeeActions.cs" />
@@ -207,6 +211,7 @@
     <Compile Include="Redux\Cores\ViewStoreCore.cs" />
     <Compile Include="Redux\Effects\CpmEffects.cs" />
     <Compile Include="Redux\Effects\DbEffects.cs" />
+    <Compile Include="Redux\Effects\LoadEffects.cs" />
     <Compile Include="Redux\Effects\MockEffects.cs" />
     <Compile Include="Redux\Effects\MqEffects.cs" />
     <Compile Include="Redux\Effects\PipeEffects.cs" />
@@ -317,6 +322,10 @@
     </Compile>
     <Compile Include="ViewModels\Sys\TestViewModel.cs" />
     <Page Include="Controls\MarqueeTextControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ViewLoadingControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -729,7 +738,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />
