@@ -38,9 +38,14 @@ namespace YCsharp.Service {
             poolConnection = poolFactory.CreateConnection(mqUserName, mqUserPwd);
             poolConnection.ClientId = YUtil.GetUtcTimestampMs(DateTime.Now).ToString() + YUtil.RandGenerator();
             poolConnection.RequestTimeout = requestTimeout;
-            poolConnection.Start();
         }
 
+        /// <summary>
+        /// 请务必先调用该方法
+        /// </summary>
+        public void Start() {
+            poolConnection.Start();
+        }
 
         /// <summary>
         /// 发送主题

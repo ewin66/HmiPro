@@ -42,6 +42,7 @@ namespace HmiPro.Redux.Actions {
         public static readonly string MARQUEE_PUNCH_START_MACHINE = "[Marquee Id] Punch Start Machine";
         public static readonly string MARQUEE_PING_IP_FAILED = "[Marquee Id] Ping Ip Failed";
         public static readonly string MARQUEE_APP_START_TIMEOUT = "[Marquee Id] App Start Timeout";
+        public static readonly string MARQUEE_LOG_FOLDER_TOO_LARGE = "[Marquee Id] Log Folder Too Large";
 
 
         public static readonly string APP_XAML_INITED = "[Sys] App Xaml Inited";

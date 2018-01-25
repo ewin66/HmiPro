@@ -99,6 +99,8 @@ namespace HmiPro.Redux.Effects {
             var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
+            //连接服务器
+            mqEffects.Start();
 
             UnityIocService.ResolveDepend<DMesCore>().Init();
             UnityIocService.ResolveDepend<AlarmCore>().Init();

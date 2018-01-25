@@ -77,7 +77,6 @@ namespace HmiPro {
             //这是系统的核心，只能在主线程初始化，后面的逻辑都依赖 Store
             ReduxIoc.Init();
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
-
             //异步初始化，直接进入 DxWindow
             Task.Run(() => {
                 init(e);

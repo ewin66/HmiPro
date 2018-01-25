@@ -135,12 +135,6 @@ namespace HmiPro.ViewModels {
             lock (MarqueeLock) {
                 MarqueeMessagesDict = Store.GetState().SysState.MarqueeMessagesDict;
             }
-            //每一分钟检查一次与服务器的连接
-            Task.Run(() => {
-                YUtil.SetInterval(60000, () => {
-                    checkNetwork(HmiConfig.InfluxDbIp);
-                });
-            });
             //初始化事件派发
             actionsExecDict[SysActions.SHOW_NOTIFICATION] = doShowNotification;
             actionsExecDict[SysActions.SHOW_SETTING_VIEW] = doShowSettingView;
@@ -159,14 +153,27 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         async void whenAppXamlInited(AppState state, IAction action) {
+            //每一分钟检查一次与服务器的连接
+            YUtil.SetInterval(60000, () => {
+                checkNetwork(HmiConfig.InfluxDbIp);
+            });
+            //软件启动的时候检查一次
+            checkLogFolderSize(HmiConfig.LogFolder);
+            //每个小时检查一下日志文件夹大小
+            YUtil.SetInterval(3600000, () => {
+                checkLogFolderSize(HmiConfig.LogFolder);
+            });
+            //加载MachineConfig
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             var loadEffects = UnityIocService.ResolveDepend<LoadEffects>();
             await App.Store.Dispatch(loadEffects.LoadMachineConfig(new LoadActions.LoadMachieConfig()));
-            Navigate("HomeView");
+            //隐藏加载界面
             LoadingGridHeight = 0;
             RaisePropertyChanged(nameof(LoadingGridHeight));
             LoadinngGridVisibility = Visibility.Collapsed;
             RaisePropertyChanged(nameof(LoadinngGridVisibility));
+            //进入主界面
+            Navigate("HomeView");
         }
 
         /// <summary>
@@ -253,6 +260,22 @@ namespace HmiPro.ViewModels {
                         sysService.StartUpdate();
                     }
                 });
+            }
+        }
+
+        /// <summary>
+        /// 检查日志文件夹大小
+        /// </summary>
+        /// <param name="logFolder"></param>
+        void checkLogFolderSize(string logFolder) {
+            logFolder = YUtil.GetAbsolutePath(logFolder);
+            var bytes = YUtil.GetDirectorySizeByte(logFolder);
+            var mBytes = bytes / (1024 * 1024);
+            //日志文件超过了 1 G
+            if (mBytes > 1024) {
+                Logger.ErrorWithDb($"日志文件夹大小：{mBytes} M", MachineConfig.HmiName);
+                App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_LOG_FOLDER_TOO_LARGE,
+                    $"日志文件过大 {mBytes} M，请及时清理"));
             }
         }
 

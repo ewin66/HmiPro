@@ -88,6 +88,12 @@ namespace HmiPro.Redux.Effects {
             initCallSystem();
         }
 
+        /// <summary>
+        /// 连接服务器
+        /// </summary>
+        public void Start() {
+            activeMq.Start();
+        }
 
         void initCallSystem() {
             CallSystem = App.Store.asyncAction<MqActions.CallSystem, bool>(
