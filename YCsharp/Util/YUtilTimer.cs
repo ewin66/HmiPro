@@ -56,40 +56,29 @@ namespace YCsharp.Util {
             timer.Elapsed += delegate (object sender, System.Timers.ElapsedEventArgs e) {
                 action(++i);
             };
-
+            RecoveryTimeout(timer);
             return timer;
         }
 
         /// <summary>
-        /// 实现类似js的setInterval,单位毫秒
-        /// 采用的是闭包
-        /// <example>
-        ///  SetInterval(1000,()=>{},3)();
-        /// </example>
+        /// 可控制 Interval 的次数
         /// </summary>
         /// <param name="interval"></param>
         /// <param name="action"></param>
-        /// <param name="cycleTimes">循环次数 -1 位无穷</param>
-        public static Func<Timer> SetInterval(double interval, Action action, int cycleTimes) {
-            if (cycleTimes == -1) {
-                return () => SetInterval(interval, action);
-            }
+        /// <param name="cycleTimes"></param>
+        /// <returns></returns>
+        public static Timer SetInterval(double interval, Action<int> action, int cycleTimes) {
             Timer timer = new Timer(interval);
-            if (cycleTimes > 0) {
-                return () => {
-                    if (cycleTimes > 0) {
-                        timer.Elapsed += (s, e) => {
-                            action();
-                            if (--cycleTimes == 0) {
-                                ClearTimeout(timer);
-                            }
-                        };
-                        RecoveryTimeout(timer);
-                    }
-                    return timer;
-                };
-            }
-            return () => timer;
+            int times = 0;
+            timer.Elapsed += (s, e) => {
+                if (++times < cycleTimes) {
+                    action(times);
+                } else {
+                    YUtil.ClearTimeout(timer);
+                }
+            };
+            RecoveryTimeout(timer);
+            return timer;
         }
 
         /// <summary>

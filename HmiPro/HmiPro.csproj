@@ -160,6 +160,9 @@
     <Compile Include="Config\Models\MachineSetting.cs" />
     <Compile Include="Config\Models\Machine.cs" />
     <Compile Include="Config\Models\Setting.cs" />
+    <Compile Include="Controls\MarqueeTextControl.xaml.cs">
+      <DependentUpon>MarqueeTextControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\Panels\DeviceDetector.cs" />
     <Compile Include="Controls\Panels\DpiResizingPanel.cs" />
     <Compile Include="Controls\Panels\FilterUnselectionBehavior.cs" />
@@ -313,6 +316,10 @@
       <DependentUpon>TestView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\Sys\TestViewModel.cs" />
+    <Page Include="Controls\MarqueeTextControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DxWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

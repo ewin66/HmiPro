@@ -12,7 +12,6 @@ namespace YCsharp.Model.Procotol.SmParam {
     /// <author>ychost</author>
     /// </summary>
     public class SmAnalysis : IDisposable {
-
         private YDynamicBuffer socketBuffer;
         public readonly LoggerService Logger;
         public SmAnalysis(YDynamicBuffer buffer, LoggerService logger) {
@@ -148,7 +147,6 @@ namespace YCsharp.Model.Procotol.SmParam {
             return bytes;
         }
 
-
         /// <summary>
         /// 包解码
         /// </summary>
@@ -233,9 +231,7 @@ namespace YCsharp.Model.Procotol.SmParam {
         public void Dispose() {
             socketBuffer = null;
         }
-
     }
-
 
     /// <summary>
     /// 基础工具类

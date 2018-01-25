@@ -31,10 +31,38 @@ namespace HmiPro.Redux.Actions {
         public static readonly string START_CLOSE_SCREEN_TIMER = "[Sys] Start Turn Off Screen Timer";
         public static readonly string STOP_CLOSE_SCREEN_TIMER = "[Sys] Stop Turn Off Screen Timer";
         public static readonly string SHOW_NOTIFICATION = "[Sys] Show Notification";
-        public static readonly string SET_TOP_MESSAGE = "[Sys] Show Top Message";
+        public static readonly string ADD_MARQUEE_MESSAGE = "[Sys] Add Marquee Message";
+        public static readonly string DEL_MARQUEE_MESSAGE = "[Sys] Delete Marquee Message";
         public static readonly string SHOW_FORM_VIEW = "[Sys] Show Form View";
         public static readonly string FORM_VIEW_PRESSED_OK = "[Sys] Form View Pressed Ok";
         public static readonly string FORM_VIEW_PRESSED_CANCEL = "[Sys] Form View Pressed Cancel";
+
+        //跑马灯内容的一些 Id
+        public static readonly string MARQUEE_SCAN_END_AXIS_RFID = "[Marquee Id] Scan End Axis Rfid";
+        public static readonly string MARQUEE_PUNCH_START_MACHINE = "[Marquee Id] Punch Start Machine";
+        public static readonly string MARQUEE_PING_IP_FAILED = "[Marquee Id] Ping Ip Failed";
+        public static readonly string MARQUEE_APP_START_TIMEOUT = "[Marquee Id] App Start Timeout";
+
+
+        public struct AddMarqueeMessage : IAction {
+            public string Type() => ADD_MARQUEE_MESSAGE;
+            public string Message;
+            public string Id;
+
+            public AddMarqueeMessage(string id, string message) {
+                Message = message;
+                Id = id;
+            }
+        }
+
+        public struct DelMarqueeMessage : IAction {
+            public string Type() => DEL_MARQUEE_MESSAGE;
+            public string Id;
+
+            public DelMarqueeMessage(string id) {
+                Id = id;
+            }
+        }
 
         public struct FormViewPressedCancel : IAction {
             public string Type() => FORM_VIEW_PRESSED_CANCEL;
@@ -71,16 +99,6 @@ namespace HmiPro.Redux.Actions {
             }
         }
 
-        public struct SetTopMessage : IAction {
-            public string Type() => SET_TOP_MESSAGE;
-            public string Message;
-            public Visibility Visibility;
-
-            public SetTopMessage(string message, Visibility visibility) {
-                Message = message;
-                Visibility = visibility;
-            }
-        }
 
         public struct ShowNotification : IAction {
             public string Type() => SHOW_NOTIFICATION;

@@ -38,7 +38,9 @@ namespace HmiPro.ViewModels {
     /// <author>ychost</author>
     /// </summary>
     public class DxWindowViewModel : ViewModelBase {
-
+        /// <summary>
+        /// 日志
+        /// </summary>
         public readonly LoggerService Logger;
         /// <summary>
         /// 程序的全局的核心数据和事件存储
@@ -48,11 +50,26 @@ namespace HmiPro.ViewModels {
         /// 事件派发器
         /// </summary>
         public readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
+
+        private string marqueeText;
         /// <summary>
-        /// 顶部红色警告栏的内容
-        /// 其它地方可能会访问到，所以设置成了全局的
+        /// 跑马灯文字内容信息，如果文字内容为空，则隐藏显示
         /// </summary>
-        public static string CurTopMessage { get; private set; } = "";
+        public string MarqueeText {
+            get => marqueeText;
+            set {
+                if (marqueeText != value) {
+                    marqueeText = value;
+                    RaisePropertyChanged(nameof(MarqueeText));
+                    if (string.IsNullOrEmpty(value)) {
+                        MarqueeHiehgit = 0;
+                    } else {
+                        MarqueeHiehgit = 30;
+                    }
+                    RaisePropertyChanged(nameof(MarqueeHiehgit));
+                }
+            }
+        }
         /// <summary>
         /// 页面加载事件命令
         /// </summary>
@@ -74,50 +91,42 @@ namespace HmiPro.ViewModels {
         /// UI 线程调度器，可自动切换到 UI 线程
         /// </summary>
         public virtual IDispatcherService DispatcherService => GetService<IDispatcherService>();
+        /// <summary>
+        /// 可显示右上角的通知内容
+        /// </summary>
         public virtual INotificationService NotifyNotificationService => GetService<INotificationService>();
         /// <summary>
         /// 导航服务，注册在 MainWindows.xaml中
         /// </summary>
         public INavigationService NavigationService { get { return GetService<INavigationService>(); } }
         /// <summary>
-        /// 窗体顶部显示的提示信息，如：网络断开连接等等
+        /// 跑马灯内容信息
         /// </summary>
-        public string TopMessage {
-            get => CurTopMessage;
-            set {
-                if (CurTopMessage != value) {
-                    CurTopMessage = value;
-                    RaisePropertiesChanged(nameof(TopMessage));
-                }
-            }
-        }
+        public IDictionary<string, string> MarqueeMessagesDict;
         /// <summary>
-        /// 窗体顶部警告栏可见状态
+        /// 跑马灯用的是 SortedDictionary 不支持并发，所以要手工对 Add，Remove 上锁
         /// </summary>
-        private Visibility topMessageVisibility = Visibility.Collapsed;
-        public Visibility TopMessageVisibility {
-            get => topMessageVisibility;
-            set {
-                if (topMessageVisibility != value) {
-                    topMessageVisibility = value;
-                    RaisePropertiesChanged(nameof(TopMessageVisibility));
-                }
-            }
-        }
+        public object MarqueeLock = new object();
 
+        /// <summary>
+        /// 设置跑马灯高度，这里用高度而不用 Visibility 是因为 Visibility 设置成 Collpased 会导致 跑马灯效果失效
+        /// </summary>
+        public double MarqueeHiehgit { get; set; }
         /// <summary>
         /// 初始化日志、Store、定时器等等
         /// </summary>
         public DxWindowViewModel() {
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+            MarqueeMessagesDict = Store.GetState().SysState.MarqueeMessagesDict;
             //初始化事件派发
             actionsExecDict[SysActions.SHOW_NOTIFICATION] = doShowNotification;
             actionsExecDict[SysActions.SHOW_SETTING_VIEW] = doShowSettingView;
             actionsExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
-            actionsExecDict[SysActions.SET_TOP_MESSAGE] = doSetTopMessage;
             actionsExecDict[SysActions.APP_INIT_COMPLETED] = whenAppInitCompleted;
             actionsExecDict[SysActions.SHOW_FORM_VIEW] = doShowFormView;
+            actionsExecDict[SysActions.ADD_MARQUEE_MESSAGE] = doAddMarqueeMessage;
+            actionsExecDict[SysActions.DEL_MARQUEE_MESSAGE] = doDelMarqueeMessage;
             Store.Subscribe(actionsExecDict);
 
             //每一分钟检查一次与服务器的连接
@@ -126,6 +135,52 @@ namespace HmiPro.ViewModels {
                     checkNetwork(HmiConfig.InfluxDbIp);
                 });
             });
+
+            YUtil.SetInterval(2000, t => {
+                App.Store.Dispatch(new SysActions.AddMarqueeMessage(t.ToString(), "测试" + t));
+                if (t > 5) {
+                    App.Store.Dispatch(new SysActions.DelMarqueeMessage((t - 5).ToString()));
+                }
+            },10);
+        }
+
+        /// <summary>
+        /// 通过内容 Id 删除跑马灯里面对应的文字
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doDelMarqueeMessage(AppState state, IAction action) {
+            var marquee = (SysActions.DelMarqueeMessage)action;
+            lock (MarqueeLock) {
+                if (MarqueeMessagesDict.Remove(marquee.Id)) {
+                    updateMarqueeMessages();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 添加跑马灯的文字内容，每个内容有唯一 Id 标识
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doAddMarqueeMessage(AppState state, IAction action) {
+            var marquee = (SysActions.AddMarqueeMessage)action;
+            lock (MarqueeLock) {
+                MarqueeMessagesDict[marquee.Id] = marquee.Message;
+                updateMarqueeMessages();
+            }
+        }
+
+        /// <summary>
+        /// 更新跑马灯文字显示内容
+        /// </summary>
+        void updateMarqueeMessages() {
+            StringBuilder stringBuilder = new StringBuilder();
+            int i = 1;
+            foreach (var pair in MarqueeMessagesDict) {
+                stringBuilder.Append($"{i++}. {pair.Value}  ");
+            }
+            MarqueeText = stringBuilder.ToString();
         }
 
         /// <summary>
@@ -165,7 +220,6 @@ namespace HmiPro.ViewModels {
                     //});
                 }
             }
-
             //启动完毕则检查更新
             if (!HmiConfig.IsDevUserEnv) {
                 Task.Run(() => {
@@ -185,23 +239,11 @@ namespace HmiPro.ViewModels {
             Ping pingSender = new Ping();
             PingReply reply = pingSender.Send(ip, 1000);
             if (reply.Status != IPStatus.Success) {
-                Store.Dispatch(new SysActions.SetTopMessage($"与服务器 {ip} 连接断开，请联系管理员 {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}", Visibility.Visible));
+                var message = $"与服务器 {ip} 连接断开，请联系管理员";
+                App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_PING_IP_FAILED + ip, message));
             } else {
-                if (TopMessage.Contains("连接断开")) {
-                    Store.Dispatch(new SysActions.SetTopMessage("", Visibility.Collapsed));
-                }
+                App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_PING_IP_FAILED + ip));
             }
-        }
-
-        /// <summary>
-        /// 设置window顶部错误，消息，一般用来显示网络状况问题
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
-        void doSetTopMessage(AppState state, IAction action) {
-            var sysActionn = (SysActions.SetTopMessage)action;
-            TopMessage = sysActionn.Message;
-            TopMessageVisibility = sysActionn.Visibility;
         }
 
         /// <summary>

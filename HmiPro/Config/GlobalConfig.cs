@@ -16,6 +16,9 @@ namespace HmiPro.Config {
     /// <date>2018-01-09</date>
     /// </summary>
     public static class GlobalConfig {
+        /// <summary>
+        /// 所有机台的全局设定
+        /// </summary>
         public static IDictionary<string, MachineSetting> MachineSettingDict;
         /// <summary>
         /// Hmi电脑的ip
@@ -24,9 +27,15 @@ namespace HmiPro.Config {
         /// </example>
         /// </summary>
         public static IDictionary<string, string> IpToHmiDict;
-        //栈板机台
+        /// <summary>
+        /// 含栈板的机台
+        /// </summary>
         public static string[] PalletMachineCodes = new string[0];
 
+        /// <summary>
+        /// 加载 Globa.xls 配置文件
+        /// </summary>
+        /// <param name="path"></param>
         public static void Load(string path) {
             path = YUtil.GetAbsolutePath(path);
             MachineSettingDict = new Dictionary<string, MachineSetting>();
@@ -36,6 +45,9 @@ namespace HmiPro.Config {
                 foreach (DataRow row in speedDt.Rows) {
                     MachineSetting setting = new MachineSetting();
                     setting.Code = row["Code"].ToString();
+                    if (string.IsNullOrEmpty(setting.Code)) {
+                        continue;
+                    }
                     setting.OeeSpeed = row["OeeSpeed"].ToString();
                     var oeeSpeedMax = row["OeeSpeedMax"].ToString();
                     if (!string.IsNullOrEmpty(oeeSpeedMax) && !string.IsNullOrEmpty(setting.OeeSpeed)) {
@@ -63,6 +75,7 @@ namespace HmiPro.Config {
                     setting.Od = row["Od"].ToString();
                     setting.CpmModuleIps = row["CpmModuleIps"].ToString().Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
                     setting.DPms = row["Dpms"].ToString().Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+                    setting.StartTrayNum = int.Parse(row["StartTrayNum"].ToString());
                     MachineSettingDict[setting.Code] = setting;
                 }
 

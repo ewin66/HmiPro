@@ -35,8 +35,6 @@ namespace HmiPro {
                 WindowStyle = WindowStyle.None;
                 WindowState = WindowState.Maximized;
             }
-
-
             //每一秒回收一次垃圾
             DispatcherTimer timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             timer.Tick += (d, e) => { GC.Collect(); };

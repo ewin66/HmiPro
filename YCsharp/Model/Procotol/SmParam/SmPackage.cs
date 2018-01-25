@@ -11,8 +11,6 @@ namespace YCsharp.Model.Procotol.SmParam {
     /// <author>ychost</author>
     /// </summary>
     public static class SmPackage {
-
-
         /// <summary>
         /// 判断缓存中的数据是什么包
         /// </summary>
@@ -35,11 +33,8 @@ namespace YCsharp.Model.Procotol.SmParam {
             } catch {
 
             }
-
             return SmPackageType.ErrorPackage;
-            ;
         }
-
 
         /// <summary>
         /// 判断是否为一普通个包，因为没有转义所以包内容可能和帧头，帧尾重复
@@ -254,6 +249,7 @@ namespace YCsharp.Model.Procotol.SmParam {
             package.Add((byte)SmFrame.End);
             return package.ToArray();
         }
+
         /// <summary>
         /// 构建动态加密包，此包要分三次发给嵌入式
         /// </summary>

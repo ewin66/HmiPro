@@ -141,7 +141,8 @@ namespace HmiPro.Redux.Cores {
             var pallet = new Pallet();
             pallet.AxisNum = ctrls.AxisNum;
             pallet.Rfid = ctrls.Rfid;
-
+            //清空栈板轴数量
+            PalletDict[machinieCode].AxisNum = 0;
 
             //保存栈板Rfid 和 轴数量之间的关系
             var filter = new FilterDefinitionBuilder<Pallet>().Where(s => s.Rfid == pallet.Rfid);
@@ -149,12 +150,11 @@ namespace HmiPro.Redux.Cores {
             var updater = Builders<Pallet>.Update.Set(s => s.AxisNum, pallet.AxisNum);
             MongoHelper.GetMongoService().GetDatabase(machinieCode).GetCollection<Pallet>("Pallets").UpdateOneAsync(filter, updater, options);
 
-            //清空栈板轴数量
-            PalletDict[machinieCode].AxisNum = 0;
             var mqCall = new MqCall() {
                 machineCode = machinieCode,
                 callType = MqCallType.Forklift,
-                callAction = MqCallAction.MovePallet
+                callAction = MqCallAction.MovePallet,
+                CallId = Guid.NewGuid().GetHashCode()
             };
             var callSuccess = await App.Store.Dispatch(mqEffects.CallSystem(new MqActions.CallSystem(machinieCode, mqCall)));
             if (callSuccess) {
@@ -355,6 +355,12 @@ namespace HmiPro.Redux.Cores {
                     Content = $" {mqEmpRfid.name} 打{mqEmpRfid.type}卡成功, {dmesAction.MachineCode} 机台",
                     MinGapSec = 10
                 }));
+                //打了上机卡，清除未打上机卡警告
+                if (mqEmpRfid.type == MqRfidType.EmpStartMachine) {
+                    App.Store.Dispatch(
+                        new SysActions.DelMarqueeMessage(
+                            SysActions.MARQUEE_PUNCH_START_MACHINE + dmesAction.MachineCode));
+                }
 
             } else if (dmesAction.RfidWhere == DMesActions.RfidWhere.FromMq) {
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
@@ -367,13 +373,18 @@ namespace HmiPro.Redux.Cores {
                 var doingTask = SchTaskDoingDict[dmesAction.MachineCode];
                 //放线卡
                 if (dmesAction.RfidType == DMesActions.RfidType.StartAxis) {
+                    //如果是带有栈板的机台，则只有一个放线盘，每当放线盘更改的时候都应该清空放线卡数据
+                    if (PalletDict.ContainsKey(dmesAction.MachineCode)) {
+                        if (!doingTask.StartAxisRfids.Contains(dmesAction.Rfid)) {
+                            doingTask.StartAxisRfids.Clear();
+                        }
+                    }
                     doingTask.StartAxisRfids.Add(dmesAction.Rfid);
                     //收线卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EndAxis) {
-                    //清除警告信息
-                    if (DxWindowViewModel.CurTopMessage.Contains("栈板")) {
-                        App.Store.Dispatch(new SysActions.SetTopMessage("", Visibility.Collapsed));
-                    }
+                    //清除栈板警告
+                    App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_END_AXIS_RFID + dmesAction.MachineCode));
+
                     //收线盘只有一个
                     if (!doingTask.EndAxisRfids.Contains(dmesAction.Rfid)) {
                         //换盘了
@@ -833,19 +844,22 @@ namespace HmiPro.Redux.Cores {
                     var message = $"请扫描 {machineCode} 的 {endAxisType}";
                     if (GlobalConfig.PalletMachineCodes.Contains(machineCode)) {
                         message = message.Replace(endAxisType, "栈板");
-                        App.Store.Dispatch(new SysActions.SetTopMessage(message, Visibility.Visible));
                     }
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "警告",
                         Content = message
                     }));
                     isValid = false;
+                    App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_SCAN_END_AXIS_RFID + machineCode, message));
                 }
                 if (taskDoing.EmpRfids?.Count < 1) {
+                    var message = $"请打 {machineCode} 的上机卡";
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "警告",
-                        Content = $"请打 {machineCode} 的上机卡"
+                        Content = message
                     }));
+
+                    App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_PUNCH_START_MACHINE + machineCode, message));
                     isValid = false;
                 }
             }

@@ -73,7 +73,9 @@ namespace HmiPro.Config.Models {
         /// Od值
         /// </summary>
         public string Od { get; set; } = "";
-   
-
+        /// <summary>
+        /// 放线盘的数量
+        /// </summary>
+        public int StartTrayNum { get; set; } = 1;
     }
 }

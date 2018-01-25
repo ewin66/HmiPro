@@ -8,6 +8,7 @@
     xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
     xmlns:viewModels="clr-namespace:HmiPro.ViewModels"
     xmlns:View="clr-namespace:HmiPro.Views.Dx"
+    xmlns:controls="clr-namespace:HmiPro.Controls"
     ShowIcon="False"
     ShowTitle="False"
     dx:ThemeManager.ThemeName="TouchlineDark"
@@ -43,8 +44,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Border Background="Red" Height="30" Visibility="{Binding Path=TopMessageVisibility}" >
-            <TextBlock Text="{Binding TopMessage}" FontSize="22" HorizontalAlignment="Center"></TextBlock>
+        <Border Height="{Binding Path=MarqueeHiehgit}" Background="Red" Visibility="{Binding Path=MarqueeVisibility}">
+            <controls:MarqueeTextControl Height="28"  MarqueeTimeInSeconds="10" MarqueeType="RightToLeft"  ContentFontSize="22"  ContentText="{Binding Path=MarqueeText}" Foreground="White"></controls:MarqueeTextControl>
         </Border>
         <dxwui:NavigationFrame Grid.Row="1"  x:Name="frame" AnimationType="SlideHorizontal" BackNavigationMode="Root" />
     </Grid>

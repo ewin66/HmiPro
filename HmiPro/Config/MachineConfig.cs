@@ -13,7 +13,7 @@ using YCsharp.Util;
 
 namespace HmiPro.Config {
     /// <summary>
-    /// 机台配置
+    /// 机台采集参数配置
     /// <date>2017-12-18</date>
     /// <author>ychost</author>
     /// </summary>

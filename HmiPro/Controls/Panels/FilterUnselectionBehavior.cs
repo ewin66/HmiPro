@@ -10,6 +10,9 @@ using DevExpress.Xpf.Grid;
 using DevExpress.Xpf.Navigation;
 
 namespace HmiPro.Controls.Panels {
+    /// <summary>
+    /// <author>DevExpress</author>
+    /// </summary>
     public class FilterUnselectionBehavior : Behavior<TileBar> {
         bool selectFilterEnable = true;
 

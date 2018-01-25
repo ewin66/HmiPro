@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,10 +39,15 @@ namespace HmiPro.Redux.Reducers {
             /// </summary>
             public SysNotificationMsg NotificationMsg;
 
+            /// <summary>
+            /// 用来表示消息的Id，就能在 Add 之后 在其它地方获到 Remove 需要的 Message
+            /// </summary>
+            public IDictionary<string, string> MarqueeMessagesDict { get; set; }
+
         }
 
         public static SimpleReducer<State> Create() {
-            return new SimpleReducer<State>(() => new State() { IsScreenLight = true })
+            return new SimpleReducer<State>(() => new State() { IsScreenLight = true, MarqueeMessagesDict = new SortedDictionary<string, string>() })
              .When<SysActions.StartHttpSystemSuccess>((state, action) => {
                  state.HttpSystemIsStarted = true;
                  return state;
@@ -72,7 +78,7 @@ namespace HmiPro.Redux.Reducers {
                  state.NotificationMsg = action.Message;
                  return state;
              }).When<SysActions.ShutdownApp>((state, action) => {
-                Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
+                 Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
                  return state;
              });
         }

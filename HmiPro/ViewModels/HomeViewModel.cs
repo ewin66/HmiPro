@@ -190,7 +190,8 @@ namespace HmiPro.ViewModels {
                 }
                 var isStartedOk = Task.WaitAll(tasks.ToArray(), timeout);
                 if (!isStartedOk) {
-                    App.Store.Dispatch(new SysActions.SetTopMessage("启动超时，请检查网络连接", Visibility.Visible));
+                    App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_APP_START_TIMEOUT,
+                        "软件启动超时，请检查网络连接"));
                     if (CmdOptions.GlobalOptions.MockVal) {
                         App.Store.Dispatch(new SysActions.AppInitCompleted());
                     }

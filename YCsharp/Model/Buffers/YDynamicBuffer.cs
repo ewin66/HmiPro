@@ -21,17 +21,14 @@ namespace YCsharp.Model.Buffers {
             DataCount = 0;
             this.BufferSize = bufferSize;
             Buffer = new byte[bufferSize];
-
         }
 
-
-        public int GetDataCount() //获得当前写入的字节数
-        {
+        //获得当前写入的字节数
+        public int GetDataCount() {
             return DataCount;
         }
-
-        public int GetReserveCount() //获得剩余的字节数
-        {
+        //获得剩余的字节数
+        public int GetReserveCount() {
             return Buffer.Length - DataCount;
         }
 
@@ -62,8 +59,6 @@ namespace YCsharp.Model.Buffers {
             DataCount = 0;
         }
 
-
-
         /// <summary>
         /// 清空offset到指定字节的数据
         /// </summary>
@@ -79,7 +74,6 @@ namespace YCsharp.Model.Buffers {
             this.Clear(offset, count);
         }
 
-
         /// <summary>
         /// 写入buffer，常用
         /// </summary>
@@ -87,12 +81,12 @@ namespace YCsharp.Model.Buffers {
         /// <param name="offset"></param>
         /// <param name="count"></param>
         public void WriteBuffer(byte[] buffer, int offset, int count) {
-            if (GetReserveCount() >= count) //缓冲区空间够，不需要申请
-            {
+            //缓冲区空间够，不需要申请
+            if (GetReserveCount() >= count) {
                 Array.Copy(buffer, offset, Buffer, DataCount, count);
                 DataCount = DataCount + count;
-            } else //缓冲区空间不够，需要申请更大的内存，并进行移位
-            {
+                //缓冲区空间不够，需要申请更大的内存，并进行移位
+            } else {
                 int totalSize = Buffer.Length + count - GetReserveCount(); //总大小-空余大小
                 byte[] tmpBuffer = new byte[totalSize];
                 Array.Copy(Buffer, 0, tmpBuffer, 0, DataCount); //复制以前的数据
@@ -121,11 +115,13 @@ namespace YCsharp.Model.Buffers {
         /// <param name="convert"></param>
         public void WriteShort(short value, bool convert) {
             if (convert) {
-                value = System.Net.IPAddress.HostToNetworkOrder(value); //NET是小头结构，网络字节是大头结构，需要客户端和服务器约定好
+                //NET是小头结构，网络字节是大头结构，需要客户端和服务器约定好
+                value = System.Net.IPAddress.HostToNetworkOrder(value);
             }
             byte[] tmpBuffer = BitConverter.GetBytes(value);
             WriteBuffer(tmpBuffer);
         }
+
         /// <summary>
         /// 写入整形
         /// </summary>
@@ -133,11 +129,13 @@ namespace YCsharp.Model.Buffers {
         /// <param name="convert"></param>
         public void WriteInt(int value, bool convert) {
             if (convert) {
-                value = System.Net.IPAddress.HostToNetworkOrder(value); //NET是小头结构，网络字节是大头结构，需要客户端和服务器约定好
+                //NET是小头结构，网络字节是大头结构，需要客户端和服务器约定好
+                value = System.Net.IPAddress.HostToNetworkOrder(value);
             }
             byte[] tmpBuffer = BitConverter.GetBytes(value);
             WriteBuffer(tmpBuffer);
         }
+
         /// <summary>
         /// 写入长整形
         /// </summary>
@@ -145,7 +143,8 @@ namespace YCsharp.Model.Buffers {
         /// <param name="convert"></param>
         public void WriteLong(long value, bool convert) {
             if (convert) {
-                value = System.Net.IPAddress.HostToNetworkOrder(value); //NET是小头结构，网络字节是大头结构，需要客户端和服务器约定好
+                //NET是小头结构，网络字节是大头结构，需要客户端和服务器约定好
+                value = System.Net.IPAddress.HostToNetworkOrder(value);
             }
             byte[] tmpBuffer = BitConverter.GetBytes(value);
             WriteBuffer(tmpBuffer);
@@ -155,8 +154,8 @@ namespace YCsharp.Model.Buffers {
         /// 以utf8写入字符串
         /// </summary>
         /// <param name="value"></param>
-        public void WriteString(string value) //文本全部转成UTF8，UTF8兼容性好
-        {
+        public void WriteString(string value) {
+            //文本全部转成UTF8，UTF8兼容性好
             byte[] tmpBuffer = Encoding.UTF8.GetBytes(value);
             WriteBuffer(tmpBuffer);
         }

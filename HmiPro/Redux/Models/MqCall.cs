@@ -27,6 +27,10 @@ namespace HmiPro.Redux.Models {
         /// 呼叫参数，暂时没有使用
         /// </summary>
         public object callArgs{ get; set; }
+        /// <summary>
+        /// 呼叫Id
+        /// </summary>
+        public int CallId { get; set; }
     }
 
     /// <summary>
