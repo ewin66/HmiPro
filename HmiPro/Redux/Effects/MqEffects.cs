@@ -61,7 +61,15 @@ namespace HmiPro.Redux.Effects {
         /// 上传回填数据（员工手工录入的数据）
         /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadDpms, bool> UploadDpms;
+        /// <summary>
+        /// 呼叫叉车、维修等等
+        /// </summary>
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.CallSystem, bool> CallSystem;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mqService"></param>
         public MqEffects(MqService mqService) {
             UnityIocService.AssertIsFirstInject(GetType());
 
@@ -77,6 +85,25 @@ namespace HmiPro.Redux.Effects {
             initStartListenEmpRfid();
             initStartListenAxisRfid();
             initUploadDpms();
+            initCallSystem();
+        }
+
+
+        void initCallSystem() {
+            CallSystem = App.Store.asyncAction<MqActions.CallSystem, bool>(
+                async (dispatch, getState, instance) => {
+                    dispatch(instance);
+                    return await Task.Run(() => {
+                        try {
+                            activeMq.SendP2POneMessage(HmiConfig.QueueCallSystem, JsonConvert.SerializeObject(instance.MqCall));
+                            dispatch(new SimpleAction(MqActions.CALL_SYSTEM_SUCCESS));
+                            return true;
+                        } catch (Exception e) {
+                            dispatch(new SimpleAction(MqActions.CALL_SYSTEM_FAILED, e));
+                        }
+                        return false;
+                    });
+                });
         }
 
         void initUploadDpms() {

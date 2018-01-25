@@ -102,12 +102,12 @@ namespace YCsharp.Model.Procotol.SmParam {
         /// </summary>
         /// <returns></returns>
         public bool IsSignalData() {
-            return DataType == (byte) EmsocketDataType.ReverseFloat ||
-                   DataType == (byte) EmsocketDataType.Int ||
-                   DataType == (byte) EmsocketDataType.Float4321 ||
-                   DataType == (byte) EmsocketDataType.Float3412 ||
-                   DataType == (byte) EmsocketDataType.Int3412 ||
-                   DataType == (byte) EmsocketDataType.Float2143;
+            return DataType == (byte)EmsocketDataType.Float1234 ||
+                   DataType == (byte)EmsocketDataType.Int4321 ||
+                   DataType == (byte)EmsocketDataType.Float4321 ||
+                   DataType == (byte)EmsocketDataType.Float3412 ||
+                   DataType == (byte)EmsocketDataType.Int3412 ||
+                   DataType == (byte)EmsocketDataType.Float2143;
         }
 
         /// <summary>
@@ -244,70 +244,83 @@ namespace YCsharp.Model.Procotol.SmParam {
         /// </summary>
         /// <returns></returns>
         public Single GetSignalData(int mathRound = 4) {
-            if (!this.IsSignalData()) {
-                throw new Exception("数据类型不是浮点");
-            }
-            if (singleData.HasValue) {
-                return singleData.Value;
-            }
-
-            var dataCopy = new byte[Data.Length];
-            Array.Copy(Data, dataCopy, Data.Length);
-            double val = 0.00d;
-            //逆序浮点计算 1234 ==> 4321
-            if (DataType == (byte)EmsocketDataType.ReverseFloat) {
-                var data = this.Data.Reverse().ToArray();
-                val = BitConverter.ToSingle(data, 0);
-                //整形计算
-            } else if (DataType == (byte)EmsocketDataType.Int) {
-                //转成"12d54f"
-                var str = BitConverter.ToString(Data, 0).Replace("-", "");
-                //反转
-                val = Convert.ToInt32(str, 16);
-                //添加小数
-                if (FloatPlace > 0) {
-                    val = (val / (Math.Pow(10, FloatPlace)));
+            lock (this) {
+                if (!this.IsSignalData()) {
+                    throw new Exception("数据类型不是浮点");
                 }
-            } else if (DataType == (byte)EmsocketDataType.Int3412) {
-                var tmp = Data[0];
-                Data[0] = Data[1];
-                Data[1] = tmp;
-                tmp = Data[2];
-                Data[2] = Data[3];
-                Data[3] = tmp;
-                val = BitConverter.ToInt32(Data, 0);
-                if (FloatPlace > 0) {
-                    val = (val / (Math.Pow(10, FloatPlace)));
+                if (singleData.HasValue) {
+                    return singleData.Value;
                 }
-            } else if (DataType == (byte)EmsocketDataType.Float2143) {
-                var tmp = Data[0];
-                Data[0] = Data[2];
-                Data[2] = tmp;
-                tmp = Data[1];
-                Data[1] = Data[3];
-                Data[3] = tmp;
-                val = BitConverter.ToSingle(Data, 0);
-            }
-              //普通顺序 4321
-              else if (DataType == (byte)EmsocketDataType.Float4321) {
-                val = BitConverter.ToSingle(Data, 0);
-                //乱序1 3412 ==> 4321
-            } else if (DataType == (byte)EmsocketDataType.Float3412) {
-                var tmp = Data[0];
-                Data[0] = Data[1];
-                Data[1] = tmp;
-                tmp = Data[2];
-                Data[2] = Data[3];
-                Data[3] = tmp;
-                val = BitConverter.ToSingle(this.Data, 0);
-            }
-            singleData = (Single)val;
+                var dataCopy = new byte[Data.Length];
+                Array.Copy(Data, dataCopy, Data.Length);
+                double val = 0.00d;
+                //逆序浮点计算 1234 ==> 4321
+                if (DataType == (byte)EmsocketDataType.Float1234) {
+                    var data = this.Data.Reverse().ToArray();
+                    val = BitConverter.ToSingle(data, 0);
+                    //整形计算
+                } else if (DataType == (byte)EmsocketDataType.Int4321) {
+                    //转成"12d54f"
+                    var str = BitConverter.ToString(Data, 0).Replace("-", "");
+                    //反转
+                    val = Convert.ToInt32(str, 16);
+                    //添加小数
+                    if (FloatPlace > 0) {
+                        val = (val / (Math.Pow(10, FloatPlace)));
+                    }
+                } else if (DataType == (byte)EmsocketDataType.Int1234) {
+                    //1234 ==> 4321
+                    var tmp = Data[0];
+                    Data[0] = Data[3];
+                    Data[3] = tmp;
+                    tmp = Data[1];
+                    Data[1] = Data[2];
+                    Data[2] = tmp;
+                    val = BitConverter.ToInt32(Data, 0);
+                    if (FloatPlace > 0) {
+                        val = (val / (Math.Pow(10, FloatPlace)));
+                    }
+                } else if (DataType == (byte)EmsocketDataType.Int3412) {
+                    //3412 ==> 4321
+                    var tmp = Data[0];
+                    Data[0] = Data[1];
+                    Data[1] = tmp;
+                    tmp = Data[2];
+                    Data[2] = Data[3];
+                    Data[3] = tmp;
+                    val = BitConverter.ToInt32(Data, 0);
+                    if (FloatPlace > 0) {
+                        val = (val / (Math.Pow(10, FloatPlace)));
+                    }
+                } else if (DataType == (byte)EmsocketDataType.Float2143) {
+                    //2143 ==> 4321
+                    var tmp = Data[0];
+                    Data[0] = Data[2];
+                    Data[2] = tmp;
+                    tmp = Data[1];
+                    Data[1] = Data[3];
+                    Data[3] = tmp;
+                    val = BitConverter.ToSingle(Data, 0);
+                    //普通顺序 4321
+                } else if (DataType == (byte)EmsocketDataType.Float4321) {
+                    val = BitConverter.ToSingle(Data, 0);
+                    //乱序1 3412 ==> 4321
+                } else if (DataType == (byte)EmsocketDataType.Float3412) {
+                    var tmp = Data[0];
+                    Data[0] = Data[1];
+                    Data[1] = tmp;
+                    tmp = Data[2];
+                    Data[2] = Data[3];
+                    Data[3] = tmp;
+                    val = BitConverter.ToSingle(this.Data, 0);
+                }
+                singleData = (Single)val;
 
-            //复位Data
-            Data = dataCopy;
-            return (float)Math.Round(val, mathRound);
+                //复位Data
+                Data = dataCopy;
+                return (float)Math.Round(val, mathRound);
+            }
         }
-
     }
 
     /// <summary>
@@ -425,7 +438,7 @@ namespace YCsharp.Model.Procotol.SmParam {
         //通讯状态未知
         Unknown = 2,
         //离线
-        Offline=3,
+        Offline = 3,
         //未注册
         Unregistered,
     }

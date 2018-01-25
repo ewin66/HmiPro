@@ -56,6 +56,25 @@ namespace HmiPro.Redux.Actions {
         public static readonly string UPLOAD_DPMS_SUCCESS = "[Mq] Upload Dpms Success";
         public static readonly string UPLOAD_DPMS_FAILED = "[Mq] Upload Dpms Failed";
 
+        /// <summary>
+        /// 呼叫系统，呼叫叉车、维修等等
+        /// </summary>
+        public static readonly string CALL_SYSTEM = "[Call] Call System";
+        public static readonly string CALL_SYSTEM_SUCCESS = "[Call] Call System Success";
+        public static readonly string CALL_SYSTEM_FAILED = "[Call] Call System Failed";
+
+        public struct CallSystem : IAction {
+            public string Type() => CALL_SYSTEM;
+            public string MachineCode;
+            public MqCall MqCall;
+
+            public CallSystem(string machineCode, MqCall call) {
+                MachineCode = machineCode;
+                MqCall = call;
+            }
+        }
+
+
 
         public struct SchTaskReplaced : IAction {
             public string Type() => SCH_TASK_REPLACED;

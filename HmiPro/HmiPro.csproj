@@ -188,7 +188,6 @@
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Redux\Actions\AlarmActions.cs" />
     <Compile Include="Redux\Actions\AppActions.cs" />
-    <Compile Include="Redux\Actions\CallActions.cs" />
     <Compile Include="Redux\Actions\CpmActions.cs" />
     <Compile Include="Redux\Actions\DbActions.cs" />
     <Compile Include="Redux\Actions\DMesActions.cs" />
@@ -212,6 +211,7 @@
     <Compile Include="Redux\Models\AlarmBomCheck.cs" />
     <Compile Include="Redux\Models\Cpm.cs" />
     <Compile Include="Redux\Models\Dpm.cs" />
+    <Compile Include="Redux\Models\MqCall.cs" />
     <Compile Include="Redux\Models\MqUploadRest.cs" />
     <Compile Include="Redux\Models\MqUploadDpm.cs" />
     <Compile Include="Redux\Models\PipeRest.cs" />
@@ -722,7 +722,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

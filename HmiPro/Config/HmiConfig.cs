@@ -164,7 +164,10 @@ namespace HmiPro.Config {
         /// 往Pipe里面发送心跳时间间隔
         /// </summary>
         public static int PipeHeartbeatMs = 60000;
-
+        /// <summary>
+        /// 呼叫系统
+        /// </summary>
+        public static string QueueCallSystem = "call";
     }
 
 }

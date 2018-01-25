@@ -75,7 +75,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="dxwui:PageAdornerControl" >
                     <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}">
-                        <Grid Margin="42,-5,32,42">
+                        <Grid Margin="5,-5,5,42">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />

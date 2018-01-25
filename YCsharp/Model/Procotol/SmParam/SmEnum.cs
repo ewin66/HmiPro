@@ -88,9 +88,9 @@ namespace YCsharp.Model.Procotol.SmParam {
     public enum EmsocketDataType {
         //逆序浮点 1234 ==> 4321
         //注释：在byte中的逆序为转换的时候需要reverse
-        ReverseFloat = 0,
+        Float1234 = 0,
         //整形
-        Int = 1,
+        Int4321 = 1,
         //普通浮点 4321 ==>4321
         Float4321 = 3,
         //整形逆序：3421==>4321
@@ -100,6 +100,8 @@ namespace YCsharp.Model.Procotol.SmParam {
         Float3412 = 5,
         //2143==>4321
         Float2143 = 6,
+        //1234 ==> 4321
+        Int1234 =7,
         //字符串类型，应用Ascii转换
         StrAscii = 2,
         //8位机台号+1状态号+12位卡号

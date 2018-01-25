@@ -133,7 +133,7 @@ namespace HmiPro.Redux.Cores {
         /// 确认栈板Rfid与轴数目的关系
         /// </summary>
         /// <param name="ctrls"></param>
-        void confirmPalletAxisNum(PalletFormCtrls ctrls) {
+        async void confirmPalletAxisNum(PalletFormCtrls ctrls) {
             var machinieCode = ctrls.MachineCode;
             if (!PalletDict.ContainsKey(machinieCode)) {
                 return;
@@ -142,20 +142,32 @@ namespace HmiPro.Redux.Cores {
             pallet.AxisNum = ctrls.AxisNum;
             pallet.Rfid = ctrls.Rfid;
 
-            //todo 呼叫叉车
 
             //保存栈板Rfid 和 轴数量之间的关系
             var filter = new FilterDefinitionBuilder<Pallet>().Where(s => s.Rfid == pallet.Rfid);
             var options = new UpdateOptions() { IsUpsert = true };
             var updater = Builders<Pallet>.Update.Set(s => s.AxisNum, pallet.AxisNum);
             MongoHelper.GetMongoService().GetDatabase(machinieCode).GetCollection<Pallet>("Pallets").UpdateOneAsync(filter, updater, options);
-            //App.Store.Dispatch(dbEffects.UploadDocToMongo(new DbActions.UploadDocToMongo(machinieCode, "Pallet", pallet)));
+
             //清空栈板轴数量
             PalletDict[machinieCode].AxisNum = 0;
-            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                Title = "通知",
-                Content = "该功能未开放，还在测试中..."
-            }));
+            var mqCall = new MqCall() {
+                machineCode = machinieCode,
+                callType = MqCallType.Forklift,
+                callAction = MqCallAction.MovePallet
+            };
+            var callSuccess = await App.Store.Dispatch(mqEffects.CallSystem(new MqActions.CallSystem(machinieCode, mqCall)));
+            if (callSuccess) {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "通知",
+                    Content = "呼叫成功"
+                }));
+            } else {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "警告",
+                    Content = "呼叫叉车失败"
+                }));
+            }
         }
 
         /// <summary>
