@@ -5,6 +5,7 @@ using System.Linq;
 using System.Media;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -107,7 +108,6 @@ namespace HmiPro.ViewModels {
         /// 跑马灯用的是 SortedDictionary 不支持并发，所以要手工对 Add，Remove 上锁
         /// </summary>
         public object MarqueeLock = new object();
-
         /// <summary>
         /// 设置跑马灯高度，这里用高度而不用 Visibility 是因为 Visibility 设置成 Collpased 会导致 跑马灯效果失效
         /// </summary>
@@ -116,6 +116,10 @@ namespace HmiPro.ViewModels {
         /// LoadingControl 所在外围 Grid 的高度
         /// </summary>
         public double LoadingGridHeight { get; set; }
+        /// <summary>
+        /// 加载文字内容
+        /// </summary>
+        public string LoadingText { get; set; } = "正在检查更新... 30%";
         /// <summary>
         /// 加载界面是否显示
         /// </summary>
@@ -144,7 +148,20 @@ namespace HmiPro.ViewModels {
             actionsExecDict[SysActions.ADD_MARQUEE_MESSAGE] = doAddMarqueeMessage;
             actionsExecDict[SysActions.DEL_MARQUEE_MESSAGE] = doDelMarqueeMessage;
             actionsExecDict[SysActions.APP_XAML_INITED] = whenAppXamlInited;
+            actionsExecDict[SysActions.SET_LOADING_MESSAGE] = doSetLoadingMessage;
             Store.Subscribe(actionsExecDict);
+        }
+
+
+        /// <summary>
+        /// 设置加载内容信息，比如 正在加载配置文件... 30%
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doSetLoadingMessage(AppState state, IAction action) {
+            var loadMessage = (SysActions.SetLoadingMessage)action;
+            LoadingText = loadMessage.Message + "  " + loadMessage.Percent.ToString("p1");
+            RaisePropertyChanged(nameof(LoadingText));
         }
 
         /// <summary>
@@ -153,27 +170,28 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         async void whenAppXamlInited(AppState state, IAction action) {
-            //每一分钟检查一次与服务器的连接
-            YUtil.SetInterval(60000, () => {
-                checkNetwork(HmiConfig.InfluxDbIp);
-            });
-            //软件启动的时候检查一次
-            checkLogFolderSize(HmiConfig.LogFolder);
-            //每个小时检查一下日志文件夹大小
-            YUtil.SetInterval(3600000, () => {
-                checkLogFolderSize(HmiConfig.LogFolder);
-            });
+            //启动完毕则检查更新
+            bool isFoundUpdate = false;
+            if (!HmiConfig.IsDevUserEnv) {
+                isFoundUpdate = await Task.Run(() => {
+                    var sysService = UnityIocService.ResolveDepend<SysService>();
+                    if (sysService.CheckUpdate()) {
+                        App.Store.Dispatch(new SysActions.SetLoadingMessage("正在准备更新程序...", 0.3));
+                        Thread.Sleep(2000);
+                        sysService.StartUpdate();
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+            }
+            if (isFoundUpdate) {
+                return;
+            }
             //加载MachineConfig
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             var loadEffects = UnityIocService.ResolveDepend<LoadEffects>();
             await App.Store.Dispatch(loadEffects.LoadMachineConfig(new LoadActions.LoadMachieConfig()));
-            //隐藏加载界面
-            LoadingGridHeight = 0;
-            RaisePropertyChanged(nameof(LoadingGridHeight));
-            LoadinngGridVisibility = Visibility.Collapsed;
-            RaisePropertyChanged(nameof(LoadinngGridVisibility));
-            //进入主界面
-            Navigate("HomeView");
         }
 
         /// <summary>
@@ -227,39 +245,55 @@ namespace HmiPro.ViewModels {
         void whenAppInitCompleted(AppState state, IAction action) {
             //模拟动作
             if (CmdOptions.GlobalOptions.MockVal) {
-                foreach (var pair in MachineConfig.MachineDict) {
-                    var machineCode = pair.Key;
-                    //Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode);
-                    //YUtil.SetTimeout(3000, () => {
-                    //    Mocks.MockDispatchers.DispatchMockAlarm(33);
-                    //});
-
-                    //YUtil.SetTimeout(6000, () => {
-                    //    Mocks.MockDispatchers.DispatchMqMockScanMaterial(machineCode);
-                    //});
-
-                    //YUtil.SetTimeout(7000, () => {
-                    //    Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
-                    //    YUtil.SetTimeout(15000, () => {
-                    //        Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
-                    //    });
-                    //});
-
-                    //YUtil.SetTimeout(3000, () => {
-                    //    for (int i = 0; i < 1; i++) {
-                    //        MockDispatchers.DispatchMockSchTask(machineCode, i);
-                    //    }
-                    //});
-                }
+                dispatchMockActions();
             }
-            //启动完毕则检查更新
-            if (!HmiConfig.IsDevUserEnv) {
-                Task.Run(() => {
-                    var sysService = UnityIocService.ResolveDepend<SysService>();
-                    if (sysService.CheckUpdate()) {
-                        sysService.StartUpdate();
-                    }
-                });
+            //每一分钟检查一次与服务器的连接
+            YUtil.SetInterval(60000, () => {
+                checkNetwork(HmiConfig.InfluxDbIp);
+            });
+            //软件启动的时候检查一次
+            checkLogFolderSize(HmiConfig.LogFolder);
+            //每个小时检查一下日志文件夹大小
+            YUtil.SetInterval(3600000, () => {
+                checkLogFolderSize(HmiConfig.LogFolder);
+            });
+            //隐藏加载界面
+            LoadingGridHeight = 0;
+            RaisePropertyChanged(nameof(LoadingGridHeight));
+            LoadinngGridVisibility = Visibility.Collapsed;
+            RaisePropertyChanged(nameof(LoadinngGridVisibility));
+            //进入主界面
+            Navigate("HomeView");
+
+        }
+
+        /// <summary>
+        /// 触发一些模拟数据
+        /// </summary>
+        void dispatchMockActions() {
+            foreach (var pair in MachineConfig.MachineDict) {
+                var machineCode = pair.Key;
+                //Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode);
+                //YUtil.SetTimeout(3000, () => {
+                //    Mocks.MockDispatchers.DispatchMockAlarm(33);
+                //});
+
+                //YUtil.SetTimeout(6000, () => {
+                //    Mocks.MockDispatchers.DispatchMqMockScanMaterial(machineCode);
+                //});
+
+                //YUtil.SetTimeout(7000, () => {
+                //    Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpStartMachine);
+                //    YUtil.SetTimeout(15000, () => {
+                //        Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode, MqRfidType.EmpEndMachine);
+                //    });
+                //});
+
+                //YUtil.SetTimeout(3000, () => {
+                //    for (int i = 0; i < 1; i++) {
+                //        MockDispatchers.DispatchMockSchTask(machineCode, i);
+                //    }
+                //});
             }
         }
 

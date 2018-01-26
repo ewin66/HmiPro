@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using HmiPro.Config;
@@ -20,9 +21,14 @@ namespace HmiPro.Redux.Effects {
         public StorePro<AppState>.AsyncActionNeedsParam<LoadActions.LoadMachieConfig, bool> LoadMachineConfig;
         public LoggerService Logger;
 
+
         public LoadEffects() {
             initLoadMachineConfig();
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
+        }
+
+        void sleep(int time) {
+            Thread.Sleep(time);
         }
 
         void initLoadMachineConfig() {
@@ -30,6 +36,7 @@ namespace HmiPro.Redux.Effects {
                 async (dispatch, getState, instance) => {
                     dispatch(instance);
                     return await Task.Run(() => {
+                        App.Store.Dispatch(new SysActions.SetLoadingMessage("正在加载机台配置...", 0.4));
                         if (HmiConfig.IsDevUserEnv) {
                             loadConfigBySetting();
                         } else {
@@ -79,7 +86,9 @@ namespace HmiPro.Redux.Effects {
                     Title = "配置出错",
                     Content = e.Message
                 }));
-                MessageBox.Show("读取配置失败，请检查网络连接", "网络异常", MessageBoxButton.OK, MessageBoxImage.None);
+                var message = "机台配置文件出错，请检查网络连接";
+                App.Store.Dispatch(new SysActions.SetLoadingMessage(message, 0.5));
+                MessageBox.Show(message, "网络异常", MessageBoxButton.OK, MessageBoxImage.None);
                 App.Store.Dispatch(new SysActions.ShutdownApp());
             }
         }
@@ -88,6 +97,8 @@ namespace HmiPro.Redux.Effects {
         /// 配置文件加载成功之后执行的一些初始化
         /// </summary>
         async void afterConfigLoaded() {
+            App.Store.Dispatch(new SysActions.SetLoadingMessage("正在初始化系统核心...", 0.5));
+
             //== 初始化部分State
             App.Store.Dispatch(new ViewStoreActions.Init());
             App.Store.Dispatch(new CpmActions.Init());
@@ -99,8 +110,6 @@ namespace HmiPro.Redux.Effects {
             var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
-            //连接服务器
-            mqEffects.Start();
 
             UnityIocService.ResolveDepend<DMesCore>().Init();
             UnityIocService.ResolveDepend<AlarmCore>().Init();
@@ -109,11 +118,21 @@ namespace HmiPro.Redux.Effects {
             UnityIocService.ResolveDepend<DpmCore>().Init();
             await UnityIocService.ResolveDepend<SchCore>().Init();
 
+            App.Store.Dispatch(new SysActions.SetLoadingMessage("正在连接到服务器...", 0.6));
+            //连接服务器
+            mqEffects.Start();
+            //给钱优化...
+            sleep(2000);
+            App.Store.Dispatch(new SysActions.SetLoadingMessage("正在启动系统核心...", 0.7));
+            sleep(500);
             //启动 Http 服务系统
             var starHttpSystem = App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
+            App.Store.Dispatch(new SysActions.SetLoadingMessage("正在启动系统核心...", 0.75));
+            sleep(500);
             //启动 参数采集 系统
             var startCpmServer = App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
-
+            App.Store.Dispatch(new SysActions.SetLoadingMessage("正在启动系统核心...", 0.80));
+            sleep(500);
             //== 启动一些 Mq 的监听任务
             Dictionary<string, Task<bool>> startListenMqDict = new Dictionary<string, Task<bool>>();
             foreach (var pair in MachineConfig.MachineDict) {
@@ -125,17 +144,23 @@ namespace HmiPro.Redux.Effects {
                 var smQueueName = $@"JUDGE_MATER_{pair.Key}";
                 var smTask = App.Store.Dispatch(mqEffects.StartListenScanMaterial(new MqActions.StartListenScanMaterial(pair.Key, smQueueName)));
                 startListenMqDict[smQueueName] = smTask;
-
             }
+
+            App.Store.Dispatch(new SysActions.SetLoadingMessage("正在启动系统核心...", 0.85));
+            sleep(500);
             //监听人员打卡
             var empRfidTask = App.Store.Dispatch(mqEffects.StartListenEmpRfid(new MqActions.StartListenEmpRfid(HmiConfig.TopicEmpRfid)));
             startListenMqDict["rfidEmpTask"] = empRfidTask;
 
+            App.Store.Dispatch(new SysActions.SetLoadingMessage("正在启动系统核心...", 0.9));
+            sleep(500);
             //监听轴号卡
             var axisRfidTask =
                 App.Store.Dispatch(
                     mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(HmiConfig.TopicListenHandSet)));
             startListenMqDict["rfidAxisTask"] = axisRfidTask;
+            App.Store.Dispatch(new SysActions.SetLoadingMessage("正在启动系统核心...", 0.95));
+            sleep(500);
 
             var tasks = new List<Task<bool>>() { starHttpSystem, startCpmServer };
             tasks.AddRange(startListenMqDict.Values);
@@ -143,63 +168,65 @@ namespace HmiPro.Redux.Effects {
             //检查各项任务启动情况
             await Task.Run(() => {
                 //等等所有任务完成
-                var timeout = 60000;
-                if (CmdOptions.GlobalOptions.MockVal) {
-                    timeout = 3000;
-                }
-                var isStartedOk = Task.WaitAll(tasks.ToArray(), timeout);
+                var isStartedOk = Task.WaitAll(tasks.ToArray(), 30000);
                 if (!isStartedOk) {
-                    App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_APP_START_TIMEOUT,
-                        "软件启动超时，请检查网络连接"));
-                    if (CmdOptions.GlobalOptions.MockVal) {
-                        App.Store.Dispatch(new SysActions.AppInitCompleted());
-                    }
+                    var message = "系统核心启动超时，请检查网络连接";
+                    App.Store.Dispatch(new SysActions.SetLoadingMessage(message, 0.95));
                     return;
                 }
 
                 //是否启动完成Cpm服务
                 var isCpmServer = startCpmServer.Result;
                 if (!isCpmServer) {
+                    var message = "参数采集核心启动失败";
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "启动失败",
-                        Content = $"参数采集服务 {HmiConfig.CpmTcpIp}:{HmiConfig.CpmTcpPort} 启动失败，请检查"
+                        Content = message
                     }));
+                    App.Store.Dispatch(new SysActions.SetLoadingMessage(message, 0.95));
+                    return;
                 }
                 //是否启动完成Http解析系统
                 var isHttpSystem = starHttpSystem.Result;
                 if (!isHttpSystem) {
+                    var message = "Http 核心启动失败";
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "启动失败",
-                        Content = $"Http {HmiConfig.CmdHttpPort} 端口服务启动失败，请检查"
+                        Content = message
                     }));
+                    App.Store.Dispatch(new SysActions.SetLoadingMessage(message, 0.95));
+                    return;
                 }
                 //是否完成监听Mq
                 foreach (var pair in startListenMqDict) {
                     var isStartListenMq = pair.Value.Result;
-                    if (pair.Key.ToUpper().Contains("QUEUE") && (!isStartListenMq)) {
-                        App.Store.Dispatch(new SysActions.ShowNotification(
-                            new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 排产队列 {pair.Key} 失败，请检查" }));
-
-                    } else if (pair.Key.ToUpper().Contains("JUDGE_MATER") && (!isStartListenMq)) {
-                        App.Store.Dispatch(new SysActions.ShowNotification(
-                            new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 扫描来料队列 {pair.Key} 失败，请检查" }));
-
-                    } else if (pair.Key.ToUpper().Contains("RFIDEMP") && (!isStartListenMq)) {
-                        App.Store.Dispatch(new SysActions.ShowNotification(
-                             new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 人员打卡 数据失败，请检查" }));
-
-                    } else if (pair.Key.ToUpper().Contains("RFIDAXIS") && (!isStartListenMq)) {
-                        App.Store.Dispatch(new SysActions.ShowNotification(
-                             new SysNotificationMsg() { Title = "启动失败", Content = $"监听Mq 线盘卡失败，请检查" }));
+                    var mqKey = pair.Key.ToUpper();
+                    if (!isStartListenMq) {
+                        string failedMessage = string.Empty;
+                        if (mqKey.Contains("QUEUE")) {
+                            failedMessage = $"监听Mq 排产队列 {pair.Key} 失败，请检查";
+                        } else if (mqKey.Contains("JUDGE_MATER")) {
+                            failedMessage = $"监听Mq 扫描来料队列 {pair.Key} 失败，请检查";
+                        } else if (mqKey.Contains("RFIDEMP")) {
+                            failedMessage = $"监听mq 人员打卡 数据失败，请检查";
+                        } else if (mqKey.Contains("RFIDAXIS")) {
+                            failedMessage = $"监听Mq 线盘卡失败，请检查";
+                        }
+                        if (!string.IsNullOrEmpty(failedMessage)) {
+                            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() { Title = "系统启动失败", Content = failedMessage }));
+                            App.Store.Dispatch(new SysActions.SetLoadingMessage(failedMessage, 0.95));
+                            return;
+                        }
                     }
                 }
 
-                var version = YUtil.GetAppVersion(Assembly.GetExecutingAssembly());
-                App.Store.Dispatch(
-                    new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = "系统启动完毕",
-                        Content = $"版本:{version}"
-                    }));
+                //var version = YUtil.GetAppVersion(Assembly.GetExecutingAssembly());
+                //App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                //    Title = "系统启动完毕",
+                //    Content = $"版本:{version}"
+                //}));
+                App.Store.Dispatch(new SysActions.SetLoadingMessage("系统核心启动完毕，正在渲染界面...", 1));
+                sleep(1000);
                 //初始化完成
                 App.Store.Dispatch(new SysActions.AppInitCompleted());
             });

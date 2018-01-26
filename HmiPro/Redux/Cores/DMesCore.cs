@@ -358,9 +358,7 @@ namespace HmiPro.Redux.Cores {
                 }));
                 //打了上机卡，清除未打上机卡警告
                 if (mqEmpRfid.type == MqRfidType.EmpStartMachine) {
-                    App.Store.Dispatch(
-                        new SysActions.DelMarqueeMessage(
-                            SysActions.MARQUEE_PUNCH_START_MACHINE + dmesAction.MachineCode));
+                    App.Store.Dispatch( new SysActions.DelMarqueeMessage( SysActions.MARQUEE_PUNCH_START_MACHINE + dmesAction.MachineCode));
                 }
 
             } else if (dmesAction.RfidWhere == DMesActions.RfidWhere.FromMq) {
@@ -374,6 +372,8 @@ namespace HmiPro.Redux.Cores {
                 var doingTask = SchTaskDoingDict[dmesAction.MachineCode];
                 //放线卡
                 if (dmesAction.RfidType == DMesActions.RfidType.StartAxis) {
+                    //清除跑马灯警告消息
+                    App.Store.Dispatch( new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_START_AXIS_RFID + dmesAction.MachineCode));
                     //如果是带有栈板的机台，则只有一个放线盘，每当放线盘更改的时候都应该清空放线卡数据
                     if (PalletDict.ContainsKey(dmesAction.MachineCode)) {
                         if (!doingTask.StartAxisRfids.Contains(dmesAction.Rfid)) {
@@ -383,9 +383,8 @@ namespace HmiPro.Redux.Cores {
                     doingTask.StartAxisRfids.Add(dmesAction.Rfid);
                     //收线卡
                 } else if (dmesAction.RfidType == DMesActions.RfidType.EndAxis) {
-                    //清除栈板警告
+                    //清除跑马灯警告消息
                     App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_END_AXIS_RFID + dmesAction.MachineCode));
-
                     //收线盘只有一个
                     if (!doingTask.EndAxisRfids.Contains(dmesAction.Rfid)) {
                         //换盘了
@@ -834,11 +833,13 @@ namespace HmiPro.Redux.Cores {
             lock (SchTaskDoingLocks[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
                 if (taskDoing.StartAxisRfids?.Count < 1) {
+                    var message = $"请扫描 {machineCode} 的放线盘";
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                         Title = "警告",
-                        Content = $"请扫描 {machineCode} 的放线盘"
+                        Content = message
                     }));
                     isValid = false;
+                    App.Store.Dispatch( new SysActions.AddMarqueeMessage(SysActions.MARQUEE_SCAN_START_AXIS_RFID + machineCode, message));
                 }
                 if (taskDoing.EndAxisRfids?.Count < 1) {
                     var endAxisType = "收线盘";

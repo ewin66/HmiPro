@@ -90,5 +90,10 @@ namespace HmiPro.ViewModels.Sys {
             YUtil.CallOskAsync();
         }
 
+        [Command(Name = "CloseAppCommand")]
+        public void CloseApp() {
+            App.Store.Dispatch(new SysActions.ShutdownApp());
+        }
+
     }
 }

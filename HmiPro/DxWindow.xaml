@@ -16,6 +16,7 @@
     Title="Hmi Pro Dev By Ychost"
     Topmost="True"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
     mc:Ignorable="d"
     d:DesignHeight="600" d:DesignWidth="800"
     >
@@ -48,9 +49,14 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid Height="{Binding Path=LoadingGridHeight}" Visibility="{Binding Path=LoadinngGridVisibility}">
-            <controls:ViewLoadingControl  Grid.Row="0"  Height="150" Width="150" HorizontalAlignment="Center" VerticalAlignment="Center" />
-        </Grid>
+        <dxlc:LayoutControl Orientation="Vertical" Height="{Binding Path=LoadingGridHeight}" Visibility="{Binding Path=LoadinngGridVisibility}">
+            <dxlc:LayoutItem HorizontalAlignment="Center" VerticalAlignment="Center">
+                <controls:ViewLoadingControl  Grid.Row="0"  Height="150" Width="150"  />
+            </dxlc:LayoutItem>
+            <dxlc:LayoutItem  HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Path=LoadingText}" FontSize="22" Foreground="White" ></TextBlock>
+            </dxlc:LayoutItem>
+        </dxlc:LayoutControl>
         <Border Grid.Row="1" Height="{Binding Path=MarqueeHiehgit}" Background="Red" Visibility="{Binding Path=MarqueeVisibility}">
             <controls:MarqueeTextControl Height="28"  MarqueeTimeInSeconds="10" MarqueeType="RightToLeft"  ContentFontSize="22"  ContentText="{Binding Path=MarqueeText}" Foreground="White"></controls:MarqueeTextControl>
         </Border>

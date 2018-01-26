@@ -39,13 +39,27 @@ namespace HmiPro.Redux.Actions {
 
         //跑马灯内容的一些 Id
         public static readonly string MARQUEE_SCAN_END_AXIS_RFID = "[Marquee Id] Scan End Axis Rfid";
+        public static readonly string MARQUEE_SCAN_START_AXIS_RFID = "[Marquee Id] Scan Start Axis Rfid";
         public static readonly string MARQUEE_PUNCH_START_MACHINE = "[Marquee Id] Punch Start Machine";
         public static readonly string MARQUEE_PING_IP_FAILED = "[Marquee Id] Ping Ip Failed";
         public static readonly string MARQUEE_APP_START_TIMEOUT = "[Marquee Id] App Start Timeout";
         public static readonly string MARQUEE_LOG_FOLDER_TOO_LARGE = "[Marquee Id] Log Folder Too Large";
 
+        public static readonly string SET_LOADING_MESSAGE = "[Sys] Set Loading Message";
 
         public static readonly string APP_XAML_INITED = "[Sys] App Xaml Inited";
+
+
+        public struct SetLoadingMessage : IAction {
+            public string Type() => SET_LOADING_MESSAGE;
+            public string Message;
+            public double Percent;
+
+            public SetLoadingMessage(string message, double percent) {
+                Message = message;
+                Percent = percent;
+            }
+        }
 
         public struct AppXamlInited : IAction {
             public string Type() => APP_XAML_INITED;
