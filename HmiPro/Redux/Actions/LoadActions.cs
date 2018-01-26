@@ -11,7 +11,15 @@ namespace HmiPro.Redux.Actions {
     /// <date>2018-1-25</date>
     /// </summary>
     public static class LoadActions {
+        public static readonly string LOAD_GLOBAL_CONFIG = "[Load] Load Global Config";
+
         public static readonly string LOAD_MACHINE_CONFIG = "[Load] Machine Config";
+
+
+        public struct LoadGlobalConfig : IAction {
+            public string Type() => LOAD_GLOBAL_CONFIG;
+        }
+
         public struct LoadMachieConfig : IAction {
             public string Type() => LOAD_MACHINE_CONFIG;
         }

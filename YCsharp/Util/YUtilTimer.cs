@@ -71,7 +71,7 @@ namespace YCsharp.Util {
             Timer timer = new Timer(interval);
             int times = 0;
             timer.Elapsed += (s, e) => {
-                if (++times < cycleTimes) {
+                if (++times <= cycleTimes) {
                     action(times);
                 } else {
                     YUtil.ClearTimeout(timer);

@@ -31,7 +31,7 @@ using YCsharp.Util;
 namespace HmiPro {
     /// <summary>
     /// App.xaml 的交互逻辑
-    /// 负责解析启动命令、初始化 GlobalConfig， HmiConfig，Store，各种 Helper、记录所有的 Action、等等
+    /// 解析命令、初始化 HmiConfig、初始化 Redux、打印所有的 Action、LoggerHelper、AssetsHelper 这两个依赖较少的 Helper
     /// <date>2017-12-17</date>
     /// <author>ychost</author>
     /// </summary>
@@ -59,7 +59,6 @@ namespace HmiPro {
             DbActions.UPLOAD_CPMS_INFLUXDB_SUCCESS,
             AlarmActions.CHECK_CPM_BOM_ALARM,
         };
-
         public static IDictionary<string, Mufflog> MuffleLogDict = new ConcurrentDictionary<string, Mufflog>();
 
         /// <summary>
@@ -67,80 +66,31 @@ namespace HmiPro {
         /// </summary>
         /// <param name="e"></param>
         protected override void OnStartup(StartupEventArgs e) {
-            if (processIsStarted()) {
-                MessageBox.Show("程序已经启动，请勿重复启动", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
-                Current.Shutdown(0);
-                return;
-            }
             base.OnStartup(e);
-
-            //这是系统的核心，只能在主线程初始化，后面的逻辑都依赖 Store
             ReduxIoc.Init();
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+
             //异步初始化，直接进入 DxWindow
             Task.Run(() => {
-                init(e);
+                hmiConfigInit(e);
+                initSubscribe();
+                //通知 DxWindow 初始化完毕
+                Store.Dispatch(new SysActions.AppXamlInited());
             });
         }
-
-        void init(StartupEventArgs e) {
-            //配置解析外部命令
-            configInit(e);
-            ExceptionHelper.Init();
-            //配置全局服务
-            GlobalConfig.Load(YUtil.GetAbsolutePath(".\\Profiles\\Global.xls"));
-            LoggerHelper.Init(HmiConfig.LogFolder);
-            SqliteHelper.Init(HmiConfig.SqlitePath);
-            ActiveMqHelper.Init(HmiConfig.MqConn, HmiConfig.MqUserName, HmiConfig.MqUserPwd);
-            MongoHelper.Init(HmiConfig.MongoConn);
-            InfluxDbHelper.Init($"http://{HmiConfig.InfluxDbIp}:8086", HmiConfig.InfluxCpmDbName);
-
-            Logger = LoggerHelper.CreateLogger("App");
-            Logger.Debug("准备同步时间...");
-            //同步时间
-            syncTime(!HmiConfig.IsDevUserEnv);
-            Logger.Debug("当前操作系统：" + YUtil.GetOsVersion());
-            Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
-            Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
-            Logger.Debug("浮点精度：" + HmiConfig.MathRound);
-
-            //减缓频率的日志输出初始化
-            MuffleLogActions.ForEach(action => {
-                MuffleLogDict[action] = new Mufflog();
-            });
-            //打印Redux系统的动作
-            Store.Subscribe(logDebugActions);
-            //通知 DxWindow 加载完成
-            Store.Dispatch(new SysActions.AppXamlInited());
-        }
-
 
         /// <summary>
-        /// 启动守护进程
+        /// 程序初始化完毕之后才订阅打印日志
         /// </summary>
-        void startDaemonAndBuildPipe() {
-            if (!YUtil.CheckServiceIsExist(HmiConfig.DaemonName)) {
-                Logger.Debug("安装守护进程...");
-                YUtil.InstallWinService(YUtil.GetAbsolutePath(@".\daemon\Debug\Daemon.exe"), HmiConfig.DaemonName);
-                Logger.Debug("安装守护进程完毕");
-                return;
-            } else {
-                if (YUtil.GetWinServiceStatus(HmiConfig.DaemonName) != ServiceControllerStatus.Running) {
-                    Logger.Debug("启动守护进程..");
-                    YUtil.StartWinService(HmiConfig.DaemonName);
-                    Logger.Debug("启动守护进程成功");
-                } else {
-                    Logger.Debug("守护进程已经启动");
-                }
-            }
-            var pipeEffects = UnityIocService.ResolveDepend<PipeEffects>();
-            //往管道里面发送心跳
-            YUtil.SetInterval(HmiConfig.PipeHeartbeatMs, () => {
-                var rest = new PipeRest() { DataType = PipeDataType.HeartBeat };
-                PipeActions.WriteRest writeData = new PipeActions.WriteRest(rest, HmiConfig.DaemonName);
-                App.Store.Dispatch(pipeEffects.WriteString(writeData));
+        void initSubscribe() {
+            Logger = LoggerHelper.CreateLogger("App");
+            //减缓频率的日志输出初始化
+            MuffleLogActions.ForEach(a => {
+                MuffleLogDict[a] = new Mufflog();
             });
+            Store.Subscribe(logDebugActions);
         }
+
 
         /// <summary>
         /// 输出Action动作
@@ -184,7 +134,7 @@ namespace HmiPro {
         /// 处理命令
         /// </summary>
         /// <param name="e"></param>
-        void configInit(StartupEventArgs e) {
+        void hmiConfigInit(StartupEventArgs e) {
             Parser.Default.ParseArguments<CmdOptions>(e.Args).WithParsed(opt => {
                 opt.ProfilesFolder = YUtil.GetAbsolutePath(opt.ProfilesFolder);
                 var configFolder = opt.ProfilesFolder + "\\" + opt.Mode;
@@ -194,12 +144,6 @@ namespace HmiPro {
                 Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
                 Console.WriteLine("配置文件夹：-" + opt.ProfilesFolder);
                 Console.WriteLine("显示 Splash -" + opt.ShowSplash);
-                //启动画面
-                if (bool.Parse(opt.ShowSplash)) {
-                    //DXSplashScreen.Show<SplashScreenView>();
-                    //DXSplashScreen.SetState(SplashState.Default);
-                    //DXSplashScreen.Close();
-                }
                 //开机自启
                 YUtil.SetAppAutoStart(GetType().ToString(), bool.Parse(opt.AutoSatrt));
                 //显示Console框
@@ -216,6 +160,7 @@ namespace HmiPro {
                 HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
                 Console.WriteLine("当前运行模式：-" + opt.Mode);
                 AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
+                LoggerHelper.Init(YUtil.GetAbsolutePath(HmiConfig.LogFolder));
                 //保留启动参数
                 CmdOptions.GlobalOptions = opt;
             }).WithNotParsed(err =>
@@ -232,42 +177,6 @@ namespace HmiPro {
                     YUtil.RestartPC();
                 }
             };
-        }
-
-        /// <summary>
-        /// 与服务器同步时间
-        /// </summary>
-        private void syncTime(bool canSync) {
-            //非开发环境才同步时间
-            if (canSync) {
-                Task.Run(() => {
-                    try {
-                        //获取服务器时间
-                        var ntpTime = YUtil.GetNtpTime(HmiConfig.NtpIp);
-                        //时间差超过10秒才同步时间
-                        if (Math.Abs((DateTime.Now - ntpTime).TotalSeconds) > 10) {
-                            YUtil.SetLoadTimeByDateTime(ntpTime);
-                        }
-                        Logger.Info($"同步时间成功: {ntpTime}");
-                    } catch (Exception e) {
-                        Logger.Error("获取服务器时间失败", e);
-                    }
-                });
-            }
-        }
-
-
-        /// <summary>
-        /// 检测进程是否存在，存在则显示已有的进程否则则关闭程序
-        /// <href>https://www.cnblogs.com/zhili/p/OnlyInstance.html</href>
-        /// </summary>
-        static bool processIsStarted() {
-            Process currentproc = Process.GetCurrentProcess();
-            Process[] processcollection = Process.GetProcessesByName(currentproc.ProcessName.Replace(".vshost", string.Empty));
-            if (processcollection.Length > 1) {
-                return true;
-            }
-            return false;
         }
     }
     /// <summary>

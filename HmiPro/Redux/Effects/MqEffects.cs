@@ -152,10 +152,7 @@ namespace HmiPro.Redux.Effects {
                         }
                         return false;
                     });
-
-
                 });
-
         }
 
         void initStartListenEmpRfid() {

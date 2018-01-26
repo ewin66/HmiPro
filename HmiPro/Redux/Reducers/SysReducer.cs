@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using HmiPro.Helpers;
@@ -78,7 +80,16 @@ namespace HmiPro.Redux.Reducers {
                  state.NotificationMsg = action.Message;
                  return state;
              }).When<SysActions.ShutdownApp>((state, action) => {
+                 ActiveMqHelper.GetActiveMqService().Close();
                  Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
+                 return state;
+             }).When<SysActions.RestartApp>((state, action) => {
+                 ActiveMqHelper.GetActiveMqService().Close();
+                 Application.Current.Dispatcher.Invoke(() => {
+                     //System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
+                     YUtil.Exec(Application.ResourceAssembly.Location, " --wait " + action.WaitSec);
+                     Application.Current.Shutdown();
+                 });
                  return state;
              });
         }

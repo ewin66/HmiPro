@@ -24,8 +24,8 @@ namespace YCsharp.Service {
         private readonly string mqUserName;
         private readonly string mqUserPwd;
         private readonly TimeSpan requestTimeout;
-        private readonly IConnectionFactory poolFactory;
-        private readonly IConnection poolConnection;
+        private IConnectionFactory poolFactory;
+        private IConnection poolConnection;
 
 
         public ActiveMqService(string mqConn, string mqUserName, string mqUserPwd, TimeSpan requestTimeout) {
@@ -33,17 +33,17 @@ namespace YCsharp.Service {
             this.mqUserName = mqUserName;
             this.mqUserPwd = mqUserPwd;
             this.requestTimeout = requestTimeout;
-            Uri uri = new Uri(mqConn);
-            poolFactory = new ConnectionFactory(uri);
-            poolConnection = poolFactory.CreateConnection(mqUserName, mqUserPwd);
-            poolConnection.ClientId = YUtil.GetUtcTimestampMs(DateTime.Now).ToString() + YUtil.RandGenerator();
-            poolConnection.RequestTimeout = requestTimeout;
         }
 
         /// <summary>
         /// 请务必先调用该方法
         /// </summary>
         public void Start() {
+            Uri uri = new Uri(mqConn);
+            poolFactory = new ConnectionFactory(uri);
+            poolConnection = poolFactory.CreateConnection(mqUserName, mqUserPwd);
+            poolConnection.ClientId = Guid.NewGuid().ToString();
+            poolConnection.RequestTimeout = requestTimeout;
             poolConnection.Start();
         }
 
@@ -159,6 +159,10 @@ namespace YCsharp.Service {
                 }
             });
 
+        }
+
+        public void Close() {
+            poolConnection.Close();
         }
     }
 }

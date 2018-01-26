@@ -31,5 +31,20 @@ namespace YCsharp.Util {
             IPAddress[] ipadrlist = Dns.GetHostAddresses(name);
             return ipadrlist.Select(ip => ip.ToString()).ToArray();
         }
+
+        /// <summary>
+        /// 关闭进程
+        /// </summary>
+        /// <param name="processName"></param>
+        public static void KillProcess(string processName) {
+            try {
+                System.Diagnostics.Process[] ps = System.Diagnostics.Process.GetProcessesByName(processName);
+                foreach (System.Diagnostics.Process p in ps) {
+                    p.Kill();
+                }
+            } catch (Exception ex) {
+                Console.WriteLine("关闭进程失败" + ex);
+            }
+        }
     }
 }

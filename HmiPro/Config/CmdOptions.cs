@@ -31,6 +31,10 @@ namespace HmiPro.Config {
         public string Config { get; set; }
         [Option(longName: "hmi", Default = "", HelpText = "指定Hmi名称如：DE_DF")]
         public string HmiName { get; set; }
+        [Option(longName: "wait", Default = "0", HelpText = "程序延迟启动，单位 秒")]
+        public string Wait { get; set; }
+
+        public int WaitSec => int.Parse(Wait);
         public bool MockVal => bool.Parse(Mock);
 
         public string ConfigFolder;

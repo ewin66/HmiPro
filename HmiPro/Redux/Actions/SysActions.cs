@@ -19,20 +19,27 @@ namespace HmiPro.Redux.Actions {
     public static class SysActions {
         public static readonly string SHOW_SETTING_VIEW = "[Sys] Show Setting View";
         public static readonly string SHUTDOWN_APP = "[Sys] Shutdown App";
+
         public static readonly string START_HTTP_SYSTEM = "[Sys] Start Http System";
         public static readonly string START_HTTP_SYSTEM_SUCCESS = "[Sys] Start Http System Success";
         public static readonly string START_HTTP_SYSTEM_FAILED = "[Sys] Start Http System Failed";
         public static readonly string HTTP_SYSTEM_INVOKE = "[Sys] Http System Invoke";
+
         public static readonly string FIND_UPDATED_VERSION = "[Sys] Find Updated Version";
         public static readonly string NOT_FIND_UPDATED_VERSION = "[Sys] Not Find Updated Version";
+
         public static readonly string APP_INIT_COMPLETED = "[Sys] App Init Completed";
+
         public static readonly string CLOSE_SCREEN = "[Sys] Close Screen";
         public static readonly string OPEN_SCREEN = "[Sys] Open Screen";
         public static readonly string START_CLOSE_SCREEN_TIMER = "[Sys] Start Turn Off Screen Timer";
         public static readonly string STOP_CLOSE_SCREEN_TIMER = "[Sys] Stop Turn Off Screen Timer";
+
         public static readonly string SHOW_NOTIFICATION = "[Sys] Show Notification";
+
         public static readonly string ADD_MARQUEE_MESSAGE = "[Sys] Add Marquee Message";
         public static readonly string DEL_MARQUEE_MESSAGE = "[Sys] Delete Marquee Message";
+
         public static readonly string SHOW_FORM_VIEW = "[Sys] Show Form View";
         public static readonly string FORM_VIEW_PRESSED_OK = "[Sys] Form View Pressed Ok";
         public static readonly string FORM_VIEW_PRESSED_CANCEL = "[Sys] Form View Pressed Cancel";
@@ -48,6 +55,21 @@ namespace HmiPro.Redux.Actions {
         public static readonly string SET_LOADING_MESSAGE = "[Sys] Set Loading Message";
 
         public static readonly string APP_XAML_INITED = "[Sys] App Xaml Inited";
+
+        public static readonly string RESTART_APP = "[Sys] Restart App";
+
+
+        public struct RestartApp : IAction {
+            public string Type() => RESTART_APP;
+            /// <summary>
+            /// 程序延迟启动多少秒
+            /// </summary>
+            public int WaitSec;
+
+            public RestartApp(int waitSec) {
+                WaitSec = waitSec;
+            }
+        }
 
 
         public struct SetLoadingMessage : IAction {

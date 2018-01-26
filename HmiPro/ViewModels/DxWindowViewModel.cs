@@ -119,7 +119,7 @@ namespace HmiPro.ViewModels {
         /// <summary>
         /// 加载文字内容
         /// </summary>
-        public string LoadingText { get; set; } = "正在检查更新... 30%";
+        public string LoadingText { get; set; } = "检查更新... 5%";
         /// <summary>
         /// 加载界面是否显示
         /// </summary>
@@ -170,13 +170,14 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         async void whenAppXamlInited(AppState state, IAction action) {
+            var loadEffects = UnityIocService.ResolveDepend<LoadEffects>();
             //启动完毕则检查更新
             bool isFoundUpdate = false;
             if (!HmiConfig.IsDevUserEnv) {
                 isFoundUpdate = await Task.Run(() => {
                     var sysService = UnityIocService.ResolveDepend<SysService>();
                     if (sysService.CheckUpdate()) {
-                        App.Store.Dispatch(new SysActions.SetLoadingMessage("正在准备更新程序...", 0.3));
+                        App.Store.Dispatch(new SysActions.SetLoadingMessage("正在准备更新程序...", 0.1));
                         Thread.Sleep(2000);
                         sysService.StartUpdate();
                         return true;
@@ -190,7 +191,7 @@ namespace HmiPro.ViewModels {
             }
             //加载MachineConfig
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
-            var loadEffects = UnityIocService.ResolveDepend<LoadEffects>();
+            await App.Store.Dispatch(loadEffects.LoadGlobalConfig(new LoadActions.LoadGlobalConfig()));
             await App.Store.Dispatch(loadEffects.LoadMachineConfig(new LoadActions.LoadMachieConfig()));
         }
 
