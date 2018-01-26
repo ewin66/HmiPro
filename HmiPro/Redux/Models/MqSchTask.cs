@@ -27,7 +27,7 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public float forceSpeed { get; set; }
 
-        public Dictionary<string,object> userInputParams { get; set; }
+        public Dictionary<string, object> userInputParams { get; set; }
 
         private string _workCode;
         /// <summary>
@@ -264,6 +264,33 @@ namespace HmiPro.Redux.Models {
     }
 
     public class MqTaskAxis : INotifyPropertyChanged {
+        private DateTime? _startTime;
+        /// <summary>
+        /// 轴任务开始时间
+        /// </summary>
+        public DateTime? StartTime {
+            get => _startTime;
+            set {
+                if (_startTime != value) {
+                    _startTime = value;
+                    OnPropertyChanged(nameof(StartTime));
+                    OnPropertyChanged(nameof(StartTimeStr));
+                }
+            }
+        }
+
+        public string StartTimeStr {
+            get {
+                if (IsStarted == false) {
+                    return "/";
+                }
+                if (StartTime.HasValue) {
+                    return StartTime.Value.ToString("MM-dd HH:mm");
+                }
+                return "/";
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -411,10 +438,6 @@ namespace HmiPro.Redux.Models {
         }
 
         public bool CanCompleted { get; set; } = false;
-
-
-
-
 
         public event PropertyChangedEventHandler PropertyChanged;
 

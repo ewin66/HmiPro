@@ -264,7 +264,9 @@ namespace HmiPro.ViewModels {
             LoadinngGridVisibility = Visibility.Collapsed;
             RaisePropertyChanged(nameof(LoadinngGridVisibility));
             //进入主界面
-            Navigate("HomeView");
+            App.Current.Dispatcher.Invoke(() => {
+                Navigate("HomeView");
+            });
 
         }
 

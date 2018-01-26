@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Documents;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
+using DevExpress.Xpf.Core;
 using HmiPro.Config;
 using HmiPro.Config.Models;
 using HmiPro.Helpers;
@@ -65,7 +66,9 @@ namespace HmiPro.ViewModels {
 
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
-
+            try {
+                DXSplashScreen.Close();
+            } catch { }
         }
 
         /// <summary>

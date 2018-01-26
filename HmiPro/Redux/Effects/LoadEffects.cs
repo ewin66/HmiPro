@@ -55,9 +55,9 @@ namespace HmiPro.Redux.Effects {
         /// <param name="sleepms"></param>
         void updateLoadingMessage(string message, double percent, int sleepms = 400) {
             App.Store.Dispatch(new SysActions.SetLoadingMessage(message, percent));
-            //if (!HmiConfig.IsDevUserEnv) {
-            Thread.Sleep(sleepms);
-            //}
+            if (!HmiConfig.IsDevUserEnv) {
+                Thread.Sleep(sleepms);
+            }
         }
 
         /// <summary>
@@ -102,10 +102,10 @@ namespace HmiPro.Redux.Effects {
             updateLoadingMessage("正在准备系统资源文件", 0.15);
             Thread.Sleep(CmdOptions.GlobalOptions.WaitSec * 1000);
 
-            updateLoadingMessage("正在检查系统启动环境...", 0.18);
+            updateLoadingMessage("正在检查系统启动环境...", 0.17);
             if (processIsStarted()) {
                 var message = "系统重复启动异常";
-                App.Store.Dispatch(new SysActions.SetLoadingMessage(message, 0.15));
+                App.Store.Dispatch(new SysActions.SetLoadingMessage(message, 0.18));
                 Thread.Sleep(1000);
                 MessageBox.Show(message, "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
                 App.Store.Dispatch(new SysActions.ShutdownApp());

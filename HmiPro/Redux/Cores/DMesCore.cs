@@ -358,7 +358,7 @@ namespace HmiPro.Redux.Cores {
                 }));
                 //打了上机卡，清除未打上机卡警告
                 if (mqEmpRfid.type == MqRfidType.EmpStartMachine) {
-                    App.Store.Dispatch( new SysActions.DelMarqueeMessage( SysActions.MARQUEE_PUNCH_START_MACHINE + dmesAction.MachineCode));
+                    App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_PUNCH_START_MACHINE + dmesAction.MachineCode));
                 }
 
             } else if (dmesAction.RfidWhere == DMesActions.RfidWhere.FromMq) {
@@ -373,7 +373,7 @@ namespace HmiPro.Redux.Cores {
                 //放线卡
                 if (dmesAction.RfidType == DMesActions.RfidType.StartAxis) {
                     //清除跑马灯警告消息
-                    App.Store.Dispatch( new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_START_AXIS_RFID + dmesAction.MachineCode));
+                    App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_START_AXIS_RFID + dmesAction.MachineCode));
                     //如果是带有栈板的机台，则只有一个放线盘，每当放线盘更改的时候都应该清空放线卡数据
                     if (PalletDict.ContainsKey(dmesAction.MachineCode)) {
                         if (!doingTask.StartAxisRfids.Contains(dmesAction.Rfid)) {
@@ -839,7 +839,7 @@ namespace HmiPro.Redux.Cores {
                         Content = message
                     }));
                     isValid = false;
-                    App.Store.Dispatch( new SysActions.AddMarqueeMessage(SysActions.MARQUEE_SCAN_START_AXIS_RFID + machineCode, message));
+                    App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_SCAN_START_AXIS_RFID + machineCode, message));
                 }
                 if (taskDoing.EndAxisRfids?.Count < 1) {
                     var endAxisType = "收线盘";
@@ -895,6 +895,7 @@ namespace HmiPro.Redux.Cores {
             taskDoing.CalcAvgSpeed = YUtil.CreateExecAvgFunc();
             axis.IsStarted = true;
             axis.State = MqSchTaskAxisState.Doing;
+            axis.StartTime = DateTime.Now;
         }
 
         /// <summary>

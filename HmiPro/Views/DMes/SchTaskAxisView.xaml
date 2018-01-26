@@ -37,7 +37,8 @@
                     </dxe:ProgressBarEditSettings>
                 </dxg:GridColumn.EditSettings>
             </dxg:GridColumn>
-            <dxg:GridColumn Width="*" Header="状态" FieldName="State"/>
+            <!--<dxg:GridColumn Width="*" Header="状态" FieldName="State"/>-->
+            <dxg:GridColumn Width="*" Header="开始时间" FieldName="StartTimeStr"/>
             <dxg:GridColumn Header="操作" Width="2*" FieldName="CanStart">
                 <dxg:GridColumn.DisplayTemplate>
                     <ControlTemplate>
