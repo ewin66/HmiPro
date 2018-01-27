@@ -108,12 +108,13 @@ namespace HmiPro.Redux.Patches {
         /// 首次订阅的时候直接返回状态
         /// </summary>
         /// <param name="subscription"></param>
+        /// <param name="useLatest">是否订阅的时候就派遣最近的 Action</param>
         /// <returns></returns>
-        public new Unsubscribe Subscribe(StateChangedSubscriber<T> subscription) {
+        public new Unsubscribe Subscribe(StateChangedSubscriber<T> subscription, bool useLatest = true) {
             lock (storeLock) {
                 subscriptions += subscription;
                 //立即返回存储的状态
-                if (state.Type != null) {
+                if (state.Type != null && useLatest) {
                     subscription(state);
                 }
                 return () => { subscriptions -= subscription; };
@@ -124,11 +125,12 @@ namespace HmiPro.Redux.Patches {
         /// 普通订阅方式，可以接受任何 action
         /// </summary>
         /// <param name="listener"></param>
+        /// <param name="useLatest">是否订阅的时候就派遣最近的 Action</param>
         /// <returns></returns>
-        public Unsubscribe Subscribe(Action<T, IAction> listener) {
+        public Unsubscribe Subscribe(Action<T, IAction> listener, bool useLatest = true) {
             lock (storeLock) {
                 listeners += listener;
-                if (state.Type != null && latestAction != null) {
+                if (state.Type != null && latestAction != null && useLatest) {
                     listener(state, latestAction);
                 }
                 return () => {
@@ -143,8 +145,9 @@ namespace HmiPro.Redux.Patches {
         /// 指定某些特定 Action 的订阅
         /// </summary>
         /// <param name="execActionsDict"></param>
+        /// <param name="useLatest">是否在订阅的时候就派发最近的 action</param>
         /// <returns></returns>
-        public Unsubscribe Subscribe(IDictionary<string, Action<T, IAction>> execActionsDict) {
+        public Unsubscribe Subscribe(IDictionary<string, Action<T, IAction>> execActionsDict, bool useLatest = true) {
             lock (storeLock) {
                 foreach (var pair in execActionsDict) {
                     if (!actionListenersDict.ContainsKey(pair.Key)) {
@@ -153,7 +156,7 @@ namespace HmiPro.Redux.Patches {
                         actionListenersDict[pair.Key] += pair.Value;
                     }
                     //订阅的时候就派发记录最新动作
-                    if (latestAction?.Type() == pair.Key) {
+                    if (latestAction?.Type() == pair.Key && useLatest) {
                         pair.Value.Invoke(state, latestAction);
                     }
                 }

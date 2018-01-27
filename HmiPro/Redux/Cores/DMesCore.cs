@@ -123,7 +123,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="action"></param>
         void doFormViewPressedOk(AppState state, IAction action) {
             var sysAction = (SysActions.FormViewPressedOk)action;
-            if (sysAction.FormCtrls != null && sysAction.FormCtrls is PalletFormCtrls ctrls) {
+            if (sysAction.Form != null && sysAction.Form is PalletConfirmForm ctrls) {
                 confirmPalletAxisNum(ctrls);
             }
         }
@@ -133,7 +133,7 @@ namespace HmiPro.Redux.Cores {
         /// 确认栈板Rfid与轴数目的关系
         /// </summary>
         /// <param name="ctrls"></param>
-        async void confirmPalletAxisNum(PalletFormCtrls ctrls) {
+        async void confirmPalletAxisNum(PalletConfirmForm ctrls) {
             var machinieCode = ctrls.MachineCode;
             if (!PalletDict.ContainsKey(machinieCode)) {
                 return;

@@ -11,6 +11,7 @@ using WindowsInput;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
+using HmiPro.Redux.Services;
 using Reducto;
 using YCsharp.Util;
 using Application = System.Windows.Application;
@@ -100,11 +101,14 @@ namespace HmiPro.Redux.Reducers {
                  return state;
              }).When<SysActions.ReturnDesktop>((state, action) => {
                  //通过快捷键的方式来显示桌面
+                 //http://inputsimulator.codeplex.com/
                  InputSimulator.SimulateModifiedKeyStroke(VirtualKeyCode.LWIN, VirtualKeyCode.VK_D);
                  return state;
              }).When<SysActions.HideTaskBar>((state, action) => {
+                 YUtil.HideTaskBar();
                  return state;
              }).When<SysActions.ShowTaskBar>((state, action) => {
+                 YUtil.ShowTaskBar();
                  return state;
              });
         }

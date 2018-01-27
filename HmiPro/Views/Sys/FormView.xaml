@@ -16,7 +16,7 @@
         <dxmvvm:ApplicationJumpListService />
     </dxmvvm:Interaction.Behaviors>
     <Grid MinWidth="840" >
-        <dxlc:DataLayoutControl CurrentItem="{Binding Path=FormCtrls}">
+        <dxlc:DataLayoutControl CurrentItem="{Binding Path=Form}">
 
         </dxlc:DataLayoutControl>
     </Grid>

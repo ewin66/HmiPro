@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -46,5 +47,52 @@ namespace YCsharp.Util {
                 Console.WriteLine("关闭进程失败" + ex);
             }
         }
+
+        #region 任务栏显示/隐藏
+        [DllImport("user32.dll")]
+        private static extern int FindWindow(string className, string windowText);
+
+        [DllImport("user32.dll")]
+        private static extern int ShowWindow(int hwnd, int command);
+
+        [DllImport("user32.dll")]
+        public static extern int FindWindowEx(int parentHandle, int childAfter, string className, int windowTitle);
+
+        [DllImport("user32.dll")]
+        private static extern int GetDesktopWindow();
+
+        private const int SW_HIDE = 0;
+        private const int SW_SHOW = 1;
+
+        public static int Handle {
+            get {
+                return FindWindow("Shell_TrayWnd", "");
+            }
+        }
+
+        public static int HandleOfStartButton {
+            get {
+                int handleOfDesktop = GetDesktopWindow();
+                int handleOfStartButton = FindWindowEx(handleOfDesktop, 0, "button", 0);
+                return handleOfStartButton;
+            }
+        }
+
+        /// <summary>
+        /// 显示任务栏
+        /// </summary>
+        public static void ShowTaskBar() {
+            ShowWindow(Handle, SW_SHOW);
+            ShowWindow(HandleOfStartButton, SW_SHOW);
+        }
+
+        /// <summary>
+        /// 隐藏任务栏
+        /// </summary>
+        public static void HideTaskBar() {
+            ShowWindow(Handle, SW_HIDE);
+            ShowWindow(HandleOfStartButton, SW_HIDE);
+        }
+        #endregion
     }
 }

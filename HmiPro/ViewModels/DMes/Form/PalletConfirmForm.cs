@@ -11,8 +11,8 @@ namespace HmiPro.ViewModels.DMes.Form {
     ///<author>ychost</author>
     ///<date>2018-1-24</date>
     /// </summary>
-    public class PalletFormCtrls {
-        public PalletFormCtrls(string machineCode, string rfid, int axisNum) {
+    public class PalletConfirmForm {
+        public PalletConfirmForm(string machineCode, string rfid, int axisNum) {
             MachineCode = machineCode;
             Rfid = rfid;
             AxisNum = axisNum;

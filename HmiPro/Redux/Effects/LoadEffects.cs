@@ -106,9 +106,7 @@ namespace HmiPro.Redux.Effects {
             if (processIsStarted()) {
                 var message = "系统重复启动异常";
                 App.Store.Dispatch(new SysActions.SetLoadingMessage(message, 0.18));
-                Thread.Sleep(1000);
-                MessageBox.Show(message, "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
-                App.Store.Dispatch(new SysActions.ShutdownApp());
+                shutdownAppAfterSec(10, 0.18, "重复启动系统异常");
                 return;
             }
 
@@ -225,7 +223,7 @@ namespace HmiPro.Redux.Effects {
             isMqEffectsStarted = Task.WaitAll(new[] { task }, 10000);
             if (!isMqEffectsStarted) {
                 updateLoadingMessage("连接服务器超时...", 0.6);
-                closeAppAfterSec(10, 0.6, "连接服务器超时");
+                shutdownAppAfterSec(10, 0.6, "连接服务器超时");
                 return;
             }
 
@@ -280,7 +278,7 @@ namespace HmiPro.Redux.Effects {
                 if (!isStartedOk) {
                     var message = "系统核心启动超时，请检查网络连接";
                     updateLoadingMessage(message, 0.95);
-                    closeAppAfterSec(10, 0.95, "系统核心启动超时");
+                    shutdownAppAfterSec(10, 0.95, "系统核心启动超时");
                     return;
                 }
                 //是否启动完成Cpm服务
@@ -367,7 +365,7 @@ namespace HmiPro.Redux.Effects {
         /// <summary>
         /// 程序将在 totalSec 秒后自动关闭
         /// </summary>
-        void closeAppAfterSec(int totalSec, double percent, string message = "程序启动超时") {
+        void shutdownAppAfterSec(int totalSec, double percent, string message = "程序启动超时") {
             YUtil.SetInterval(1000, t => {
                 var wait = totalSec - t;
                 var waitMessage = $"{message}，将在 {wait} 秒后关闭";

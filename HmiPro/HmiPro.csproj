@@ -258,7 +258,7 @@
     <Compile Include="Redux\Services\MqService.cs" />
     <Compile Include="Redux\Cores\OeeCore.cs" />
     <Compile Include="Redux\Services\SysService.cs" />
-    <Compile Include="ViewModels\DMes\Form\PalletFormCtrls.cs" />
+    <Compile Include="ViewModels\DMes\Form\PalletConfirmForm.cs" />
     <Compile Include="ViewModels\DMes\Tab\AlarmTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\Com485Tab.cs" />
@@ -268,6 +268,7 @@
     <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />
     <Compile Include="ViewModels\Sys\FormViewModel.cs" />
+    <Compile Include="ViewModels\Sys\Form\NavToTestViewForm.cs" />
     <Compile Include="ViewModels\Sys\SelectableViewModel.cs" />
     <Compile Include="Views\DMes\DMesCoreView.xaml.cs">
       <DependentUpon>DMesCoreView.xaml</DependentUpon>
@@ -738,6 +739,11 @@
   <ItemGroup>
     <Resource Include="Resources\completed.png" />
     <Resource Include="Resources\in-progress.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Profiles\Assets\Images\privacy.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

@@ -263,8 +263,9 @@ namespace HmiPro.ViewModels {
             RaisePropertyChanged(nameof(LoadingGridHeight));
             LoadinngGridVisibility = Visibility.Collapsed;
             RaisePropertyChanged(nameof(LoadinngGridVisibility));
-            App.Store.Dispatch(new SysActions.ReturnDesktop());
+            //隐藏任务栏 + 桌面
             if (!HmiConfig.IsDevUserEnv) {
+                App.Store.Dispatch(new SysActions.HideTaskBar());
             }
             //进入主界面
             App.Current.Dispatcher.Invoke(() => {
@@ -352,7 +353,9 @@ namespace HmiPro.ViewModels {
         void doShowFormView(AppState state, IAction action) {
             var sysAction = (SysActions.ShowFormView)action;
             //弹出键盘
-            YUtil.CallOskAsync();
+            if (!HmiConfig.IsDevUserEnv) {
+                YUtil.CallOskAsync();
+            }
             DispatcherService.BeginInvoke(() => {
                 JumFormView(sysAction.Title, sysAction.FormCtrls);
             });
@@ -437,9 +440,9 @@ namespace HmiPro.ViewModels {
                 formViewModel);
             //派发事件，可根据 FormCtrls 的 Type 来确定逻辑
             if (resultCmd == okCmd) {
-                App.Store.Dispatch(new SysActions.FormViewPressedOk(title, formViewModel.FormCtrls));
+                App.Store.Dispatch(new SysActions.FormViewPressedOk(title, formViewModel.Form));
             } else {
-                App.Store.Dispatch(new SysActions.FormViewPressedCancel(title, formViewModel.FormCtrls));
+                App.Store.Dispatch(new SysActions.FormViewPressedCancel(title, formViewModel.Form));
             }
         }
 

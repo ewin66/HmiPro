@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -21,6 +22,9 @@ using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
 using HmiPro.ViewModels.DMes;
 using HmiPro.ViewModels.Sys;
+using HmiPro.ViewModels.Sys.Form;
+using HmiPro.Views.DMes;
+using HmiPro.Views.Sys;
 using Reducto;
 using YCsharp.Service;
 using YCsharp.Util;
@@ -32,7 +36,7 @@ namespace HmiPro.ViewModels {
     /// <date>2017-12-17</date>
     /// </summary>
     [POCOViewModel]
-    public class HomeViewModel {
+    public class HomeViewModel : IDocumentContent {
         /// <summary>
         /// 程序的资源路径，主要使用了里面的图片资源
         /// </summary>
@@ -54,6 +58,9 @@ namespace HmiPro.ViewModels {
         /// </summary>
         public virtual IDispatcherService DispatcherService => null;
 
+        readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
+        Unsubscribe unsubscribe;
+
         /// <summary>
         /// 决定「设置」菜单是否显示
         /// </summary>
@@ -62,6 +69,7 @@ namespace HmiPro.ViewModels {
             if (HmiConfig.IsDevUserEnv) {
                 SettingViewVisibility = Visibility.Visible;
             }
+
         }
 
         [Command(Name = "OnLoadedCommand")]
@@ -69,6 +77,34 @@ namespace HmiPro.ViewModels {
             try {
                 DXSplashScreen.Close();
             } catch { }
+            actionsExecDict[SysActions.FORM_VIEW_PRESSED_OK] = formViewPressedOk;
+            unsubscribe = App.Store.Subscribe(actionsExecDict, false);
+        }
+
+        /// <summary>
+        /// 1. 是否能导航到「测试」界面
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void formViewPressedOk(AppState state, IAction action) {
+            var formAction = (SysActions.FormViewPressedOk)action;
+            if (formAction.Form is NavToTestViewForm toTestView) {
+                if (toTestView.Password == "112211") {
+                    navToTestView();
+                } else {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "警告",
+                        Content = "密码错误"
+                    }));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 导航到测试界面
+        /// </summary>
+        void navToTestView() {
+            NavigationSerivce.Navigate(nameof(TestView), null, this, true);
         }
 
         /// <summary>
@@ -77,9 +113,11 @@ namespace HmiPro.ViewModels {
         /// <param name="viewName">页面名称，比如页面为HomeView.xaml，则名称为HomeView</param>
         [Command(Name = "NavigateCommand")]
         public void Navigate(string viewName) {
-            if (viewName == "DMesCoreView") {
+            if (viewName == nameof(DMesCoreView)) {
                 var vm = DMesCoreViewModel.Create(App.Store.GetState().ViewStoreState.NavView.DMesSelectedMachineCode);
-                NavigationSerivce.Navigate("DMesCoreView", vm, null, this, true);
+                NavigationSerivce.Navigate(nameof(DMesCoreView), vm, null, this, true);
+            } else if (viewName == nameof(TestView)) {
+                App.Store.Dispatch(new SysActions.ShowFormView("请输入密码", new NavToTestViewForm()));
             } else {
                 NavigationSerivce.Navigate(viewName, null, this, true);
             }
@@ -92,5 +130,15 @@ namespace HmiPro.ViewModels {
         public void JumpAppSetting() {
             App.Store.Dispatch(new SysActions.ShowSettingView());
         }
+
+        public void OnClose(CancelEventArgs e) {
+            unsubscribe?.Invoke();
+        }
+
+        public void OnDestroy() {
+        }
+
+        public IDocumentOwner DocumentOwner { get; set; }
+        public object Title { get; }
     }
 }

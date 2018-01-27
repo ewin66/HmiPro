@@ -174,7 +174,7 @@ namespace HmiPro.ViewModels.DMes.Tab {
                     Content = "未扫描栈板的Rfid"
                 }));
             }
-            var formCtrls = new PalletFormCtrls(MachineCode, pallet.Rfid,pallet.AxisNum);
+            var formCtrls = new PalletConfirmForm(MachineCode, pallet.Rfid,pallet.AxisNum);
             App.Store.Dispatch(new SysActions.ShowFormView("确认栈板轴数量", formCtrls));
         }
 

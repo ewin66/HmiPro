@@ -161,13 +161,13 @@ namespace HmiPro.Redux.Actions {
 
         public struct FormViewPressedOk : IAction {
             public string Type() => FORM_VIEW_PRESSED_OK;
-            public object FormCtrls;
+            public object Form;
             public string Title;
 
 
-            public FormViewPressedOk(string title, object formCtrls) {
+            public FormViewPressedOk(string title, object form) {
                 Title = title;
-                FormCtrls = formCtrls;
+                Form = form;
             }
         }
 

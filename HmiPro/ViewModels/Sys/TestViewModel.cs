@@ -95,5 +95,24 @@ namespace HmiPro.ViewModels.Sys {
             App.Store.Dispatch(new SysActions.ShutdownApp());
         }
 
+        /// <summary>
+        /// 显示桌面
+        /// </summary>
+        [Command(Name = "ReturnDesktopCommand")]
+        public void ReturnDesktop() {
+            //返回桌面之前应显示任务栏，不然没办法找到软件
+            App.Store.Dispatch(new SysActions.ShowTaskBar());
+            App.Store.Dispatch(new SysActions.ReturnDesktop());
+        }
+
+        [Command(Name = "HideTaskBarCommand")]
+        public void HideTaskBar() {
+            App.Store.Dispatch(new SysActions.HideTaskBar());
+        }
+
+        [Command(Name = "ShowTaskBarCommand")]
+        public void ShowTaskBar() {
+            App.Store.Dispatch(new SysActions.ShowTaskBar());
+        }
     }
 }

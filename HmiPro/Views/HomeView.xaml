@@ -56,8 +56,8 @@
                 <dxlc:Tile Header="实时曲线"  Style="{StaticResource HorizontalTile}" Background="#509688"  Command="{Binding NavigateCommand}" CommandParameter="GrafanaView">
                     <BitmapImage UriSource="{Binding Assets.IconStatsLines}" />
                 </dxlc:Tile>
-                <dxlc:Tile Header="功能页面"  Style="{StaticResource HorizontalTile}"  Background="#087688"  Command="{Binding NavigateCommand}" CommandParameter="TestView">
-                    <BitmapImage UriSource="{Binding Assets.IconTest}" />
+                <dxlc:Tile Header="系统管理"  Style="{StaticResource HorizontalTile}"  Background="#087688"  Command="{Binding NavigateCommand}" CommandParameter="TestView">
+                    <BitmapImage UriSource="{Binding Assets.IconPrivacy}" />
                 </dxlc:Tile>
             </dxlc:TileLayoutControl>
         </Grid>
