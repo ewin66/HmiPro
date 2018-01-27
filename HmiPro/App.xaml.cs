@@ -175,8 +175,16 @@ namespace HmiPro {
                 //将错误日志写入mongoDb
                 Logger.ErrorWithDb(message, MachineConfig.HmiName);
                 if (!HmiConfig.IsDevUserEnv) {
-                    //直接重启电脑
-                    //YUtil.RestartPC();
+                    //重启软件
+                    ActiveMqHelper.GetActiveMqService().Close();
+                    Application.Current.Dispatcher.Invoke(() => {
+                        var param = " ";
+                        if (HmiConfig.IsDevUserEnv) {
+                            param += " --config office";
+                        }
+                        YUtil.Exec(Application.ResourceAssembly.Location, param);
+                        Application.Current.Shutdown();
+                    });
                 }
             };
         }

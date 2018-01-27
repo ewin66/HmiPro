@@ -67,10 +67,9 @@ namespace HmiPro.Redux.Effects {
             LoadGlobalConfig = App.Store.asyncAction<LoadActions.LoadGlobalConfig, bool>(
                 async (dispatch, getState, instance) => {
                     dispatch(instance);
-                    return await Task.Run(() => {
-                        globalConfigLoad();
-                        return true;
-                    });
+                    return await Task.Run(() =>
+                        globalConfigLoad()
+                    );
                 });
         }
 
@@ -92,7 +91,7 @@ namespace HmiPro.Redux.Effects {
         /// <summary>
         /// LoggerHelper 和 Assets Helper 已经在 App.xaml.cs 中初始化了，所以这里不必要初始化了
         /// </summary>
-        void globalConfigLoad() {
+        bool globalConfigLoad() {
             updateLoadingMessage("正在准备系统资源文件", 0.15);
             Thread.Sleep(CmdOptions.GlobalOptions.WaitSec * 1000);
 
@@ -101,7 +100,7 @@ namespace HmiPro.Redux.Effects {
                 var message = "系统重复启动异常";
                 App.Store.Dispatch(new SysActions.SetLoadingMessage(message, 0.18));
                 shutdownAppAfterSec(10, 0.18, "重复启动系统异常");
-                return;
+                return false;
             }
 
             updateLoadingMessage("正在初始化异常配置...", 0.20);
@@ -126,6 +125,8 @@ namespace HmiPro.Redux.Effects {
             Logger.Debug("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
             Logger.Debug("是否为开发环境：" + HmiConfig.IsDevUserEnv);
             Logger.Debug("浮点精度：" + HmiConfig.MathRound);
+
+            return true;
         }
 
         /// <summary>
@@ -143,14 +144,9 @@ namespace HmiPro.Redux.Effects {
                 afterConfigLoaded();
             } catch (Exception e) {
                 Logger.Error("程序配置出错", e);
-                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                    Title = "配置出错",
-                    Content = e.Message
-                }));
                 var message = "机台配置文件出错，请检查网络连接";
                 updateLoadingMessage(message, 0.5, 0);
-                MessageBox.Show(message, "网络异常", MessageBoxButton.OK, MessageBoxImage.None);
-                App.Store.Dispatch(new SysActions.ShutdownApp());
+                shutdownAppAfterSec(10, 0.1, "配置文件出错");
             }
         }
 
@@ -172,9 +168,6 @@ namespace HmiPro.Redux.Effects {
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
 
-            //<fixme>触发条件执行 SysActions.Restart()，这里会卡死</fixme>
-            //fix: 2018-1-26
-            //用超时来提醒用户，该重启程序为关闭程序
             updateLoadingMessage("正在连接服务器...", 0.55);
             var task = Task.Run(() => {
                 mqEffects.Start();
@@ -342,7 +335,7 @@ namespace HmiPro.Redux.Effects {
                 var waitMessage = $"{message}，将在 {wait} 秒后关闭";
                 updateLoadingMessage(waitMessage, percent, 0);
                 if (wait <= 0) {
-                    App.Store.Dispatch(new SysActions.ShutdownApp());
+                    Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
                 }
             }, totalSec);
         }

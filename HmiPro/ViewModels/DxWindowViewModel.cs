@@ -191,8 +191,10 @@ namespace HmiPro.ViewModels {
             }
             //加载MachineConfig
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
-            await App.Store.Dispatch(loadEffects.LoadGlobalConfig(new LoadActions.LoadGlobalConfig()));
-            await App.Store.Dispatch(loadEffects.LoadMachineConfig(new LoadActions.LoadMachieConfig()));
+            var globalLoaded = await App.Store.Dispatch(loadEffects.LoadGlobalConfig(new LoadActions.LoadGlobalConfig()));
+            if (globalLoaded) {
+                await App.Store.Dispatch(loadEffects.LoadMachineConfig(new LoadActions.LoadMachieConfig()));
+            }
         }
 
         /// <summary>
