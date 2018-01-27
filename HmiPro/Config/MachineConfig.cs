@@ -56,13 +56,17 @@ namespace HmiPro.Config {
 
         /// <summary>
         /// 根据ip来寻找其配置文件的路径
+        /// 如果指定了 hmiXlsPath，则直接使用
         /// </summary>
-        public static void LoadFromGlobal() {
+        public static void LoadFromGlobal(string hmiXlsPath) {
+            if (!string.IsNullOrEmpty(hmiXlsPath)) {
+                Load(hmiXlsPath);
+                return;
+            }
+
             string configPath = null;
-            //命令行参数指定Hmi配置
             if (!string.IsNullOrEmpty(CmdOptions.GlobalOptions.HmiName)) {
-                configPath = YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" +
-                                                   CmdOptions.GlobalOptions.HmiName + ".xls");
+             
                 Console.WriteLine("指定配置Hmi：" + CmdOptions.GlobalOptions.HmiName);
                 //Global.xls中根据ip来指定Hmi配置
             } else {

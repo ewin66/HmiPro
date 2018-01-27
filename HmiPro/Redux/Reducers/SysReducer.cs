@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsInput;
+using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
@@ -89,7 +90,11 @@ namespace HmiPro.Redux.Reducers {
              }).When<SysActions.RestartApp>((state, action) => {
                  ActiveMqHelper.GetActiveMqService().Close();
                  Application.Current.Dispatcher.Invoke(() => {
-                     YUtil.Exec(Application.ResourceAssembly.Location, " --wait " + action.WaitSec);
+                     var param = " --wait " + action.WaitSec;
+                     if (HmiConfig.IsDevUserEnv) {
+                         param += " --config office";
+                     }
+                     YUtil.Exec(Application.ResourceAssembly.Location, param);
                      Application.Current.Shutdown();
                  });
                  return state;

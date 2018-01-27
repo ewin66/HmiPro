@@ -83,13 +83,7 @@ namespace HmiPro.Redux.Effects {
                     dispatch(instance);
                     updateLoadingMessage("正在加载机台配置...", 0.4);
                     return await Task.Run(() => {
-                        //为了调试方便机台配置文件在开发环境可以更改
-                        if (HmiConfig.IsDevUserEnv) {
-                            loadConfigBySetting();
-                            //在生产环境机台配置文件地址和机台Ip是绑定在一起的
-                        } else {
-                            loadConfigByGlobal();
-                        }
+                        loadConfigByGlobal();
                         return true;
                     });
                 });
@@ -116,10 +110,7 @@ namespace HmiPro.Redux.Effects {
             updateLoadingMessage("正在加载系统配置...", 0.23);
             GlobalConfig.Load(YUtil.GetAbsolutePath(".\\Profiles\\Global.xls"));
 
-            updateLoadingMessage("正在初始化 Sqlite...", 0.25);
-            SqliteHelper.Init(HmiConfig.SqlitePath);
-
-            updateLoadingMessage("正在初始化 ActiveMq...", 0.28);
+            updateLoadingMessage("正在初始化 ActiveMq...", 0.27);
             ActiveMqHelper.Init(HmiConfig.MqConn, HmiConfig.MqUserName, HmiConfig.MqUserPwd);
 
             updateLoadingMessage("正在初始化 MongoDb...", 0.30);
@@ -138,36 +129,16 @@ namespace HmiPro.Redux.Effects {
         }
 
         /// <summary>
-        /// 通过 Sqlite 中的设置数据来加载配置
-        /// </summary>
-        private void loadConfigBySetting() {
-            using (var ctx = SqliteHelper.CreateSqliteService()) {
-                var setting = ctx.Settings.ToList().LastOrDefault();
-                if (setting == null) {
-                    App.Store.Dispatch(new SysActions.ShowSettingView());
-                } else {
-                    try {
-                        MachineConfig.Load(setting.MachineXlsPath);
-                        checkConfig();
-                        afterConfigLoaded();
-                    } catch (Exception e) {
-                        App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                            Title = "配置出错",
-                            Content = e.Message
-                        }));
-                        Logger.Error($"程序配置有误", e);
-                        App.Store.Dispatch(new SysActions.ShowSettingView());
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// 通过 Global.xls中预定义的数据来加载配置
         /// </summary>
         void loadConfigByGlobal() {
             try {
-                MachineConfig.LoadFromGlobal();
+                string hmiPath = "";
+                if (!string.IsNullOrEmpty(CmdOptions.GlobalOptions.HmiName)) {
+                    hmiPath = YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" +
+                                                        CmdOptions.GlobalOptions.HmiName + ".xls");
+                }
+                MachineConfig.LoadFromGlobal(hmiPath);
                 checkConfig();
                 afterConfigLoaded();
             } catch (Exception e) {

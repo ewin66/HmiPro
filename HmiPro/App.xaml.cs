@@ -31,7 +31,7 @@ using YCsharp.Util;
 namespace HmiPro {
     /// <summary>
     /// App.xaml 的交互逻辑
-    /// 解析命令、初始化 HmiConfig、初始化 Redux、打印所有的 Action、LoggerHelper、AssetsHelper 这两个依赖较少的 Helper
+    /// 解析命令、初始化 HmiConfig、初始化 Redux、打印所有的 Action、初始化 LoggerHelper、AssetsHelper、SqliteHelper 
     /// <date>2017-12-17</date>
     /// <author>ychost</author>
     /// </summary>
@@ -136,6 +136,7 @@ namespace HmiPro {
         /// <param name="e"></param>
         void hmiConfigInit(StartupEventArgs e) {
             Parser.Default.ParseArguments<CmdOptions>(e.Args).WithParsed(opt => {
+                opt.HmiName = opt.HmiName.ToUpper();
                 opt.ProfilesFolder = YUtil.GetAbsolutePath(opt.ProfilesFolder);
                 var configFolder = opt.ProfilesFolder + "\\" + opt.Mode;
                 opt.ConfigFolder = configFolder;
@@ -161,6 +162,7 @@ namespace HmiPro {
                 Console.WriteLine("当前运行模式：-" + opt.Mode);
                 AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
                 LoggerHelper.Init(YUtil.GetAbsolutePath(HmiConfig.LogFolder));
+                SqliteHelper.Init(YUtil.GetAbsolutePath(HmiConfig.SqlitePath));
                 //保留启动参数
                 CmdOptions.GlobalOptions = opt;
             }).WithNotParsed(err =>
@@ -174,7 +176,7 @@ namespace HmiPro {
                 Logger.ErrorWithDb(message, MachineConfig.HmiName);
                 if (!HmiConfig.IsDevUserEnv) {
                     //直接重启电脑
-                    YUtil.RestartPC();
+                    //YUtil.RestartPC();
                 }
             };
         }
