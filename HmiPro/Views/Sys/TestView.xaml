@@ -15,7 +15,7 @@
              x:Name="Self"
              d:DesignHeight="600" d:DesignWidth="800">
 
-    <dxwui:PageAdornerControl  Header="测试页面" ShowBackButton="True">
+    <dxwui:PageAdornerControl  Header="系统管理" ShowBackButton="True">
         <Grid>
             <dxlc:FlowLayoutControl BreakFlowToFit="True" HorizontalAlignment="Center" >
                 <Button Height="50" Width="200" Content="打开报警灯 2s" Command="{Binding Path=OpenAlarmCommand}" CommandParameter="2000"></Button>
