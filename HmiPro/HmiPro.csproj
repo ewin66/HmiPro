@@ -223,6 +223,7 @@
     <Compile Include="Redux\Models\Cpm.cs" />
     <Compile Include="Redux\Models\Dpm.cs" />
     <Compile Include="Redux\Models\MqCall.cs" />
+    <Compile Include="Redux\Models\MqCmd.cs" />
     <Compile Include="Redux\Models\MqUploadRest.cs" />
     <Compile Include="Redux\Models\MqUploadDpm.cs" />
     <Compile Include="Redux\Models\PipeRest.cs" />
@@ -747,6 +748,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Profiles\Assets\Images\monitor2.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Profiles\Assets\Images\background.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

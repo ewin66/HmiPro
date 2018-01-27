@@ -65,7 +65,7 @@ namespace HmiPro.ViewModels {
         public HomeViewModel() {
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             if (HmiConfig.IsDevUserEnv) {
-                SettingViewVisibility = Visibility.Visible;
+                //SettingViewVisibility = Visibility.Visible;
             }
 
         }

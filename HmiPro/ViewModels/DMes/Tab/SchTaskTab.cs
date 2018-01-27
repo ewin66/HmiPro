@@ -10,6 +10,7 @@ using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm.POCO;
 using DevExpress.Mvvm.UI;
 using HmiPro.Config;
+using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
@@ -21,6 +22,7 @@ namespace HmiPro.ViewModels.DMes.Tab {
         public ObservableCollection<MqSchTask> MqSchTasks { get; set; }
         public ObservableCollection<BaseTab> MqSchTaskDetails { get; set; } = new ObservableCollection<BaseTab>();
         private MqSchTask _selectedTask;
+        public string BackgroundImage { get; set; }
         private Visibility palletVisibility = Visibility.Collapsed;
         /// <summary>
         /// 是否含有栈板
@@ -38,10 +40,10 @@ namespace HmiPro.ViewModels.DMes.Tab {
         public Pallet Pallet { get; set; }
 
         public SchTaskTab() {
-
+            BackgroundImage = AssetsHelper.GetAssets().ImageBackground;
         }
 
-        public SchTaskTab(string header) {
+        public SchTaskTab(string header) : this() {
             Header = header;
         }
 

@@ -122,7 +122,7 @@
                                     <Button Visibility="{Binding Path=PalletVisibility}" Content="叉走栈板" Command="{Binding ShowPalletViewCommand}"></Button>
                                 </StackPanel>
 
-                                <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" SelectedIndex="{Binding Path=ViewStore.TaskTabSelectedIndex}" ItemHeaderTemplate="{StaticResource TabHeader}" >
+                                <dx:DXTabControl Background="Transparent" Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" SelectedIndex="{Binding Path=ViewStore.TaskTabSelectedIndex}" ItemHeaderTemplate="{StaticResource TabHeader}" >
                                     <dx:DXTabControl.Resources>
                                         <DataTemplate DataType="{x:Type dMes1:SchTaskAxisViewModel}">
                                             <dMes:SchTaskAxisView DataContext="{Binding Path=.}"/>
@@ -201,7 +201,7 @@
                                     <Setter Property="FontSize" Value="13"></Setter>
                                 </Style>
                             </Grid.Resources>
-                            <dxg:GridControl ItemsSource="{Binding Path=Alarms}" x:Name="AlarmGridControl" SelectedItem="{Binding Path=ViewStore.AlarmSelectedRow}">
+                            <dxg:GridControl Background="Transparent" ItemsSource="{Binding Path=Alarms}" x:Name="AlarmGridControl" SelectedItem="{Binding Path=ViewStore.AlarmSelectedRow}">
                                 <dxg:GridControl.View>
                                     <dxg:TableView  AllowResizing="False"  ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
                                 </dxg:GridControl.View>
@@ -228,7 +228,7 @@
                             </Grid.Resources>
                             <dxg:GridControl ItemsSource="{Binding Path=Com485Status}" x:Name="AlarmGridControl" SelectedItem="{Binding Path=ViewStore.Com485SelectedRow}">
                                 <dxg:GridControl.View>
-                                    <dxg:TableView  AllowResizing="False"  ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
+                                    <dxg:TableView  Background="Transparent" AllowResizing="False"  ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
                                 </dxg:GridControl.View>
                                 <dxg:GridControl.Columns>
                                     <dxg:GridColumn Width="2*"  Header="Ip" FieldName="Ip"/>

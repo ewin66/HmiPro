@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Media;
 using System.Net.NetworkInformation;
@@ -28,6 +29,7 @@ using YCsharp.Service;
 using FluentScheduler;
 using HmiPro.Mocks;
 using HmiPro.Redux.Services;
+using HmiPro.Views.Dx;
 using YCsharp.Util;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
@@ -39,6 +41,19 @@ namespace HmiPro.ViewModels {
     /// <author>ychost</author>
     /// </summary>
     public class DxWindowViewModel : ViewModelBase {
+        private string backgroundImage;
+        /// <summary>
+        ///背景图片
+        /// </summary>
+        public string BackgroundImage {
+            get => backgroundImage;
+            set {
+                if (backgroundImage != value) {
+                    backgroundImage = value;
+                    RaisePropertyChanged(nameof(BackgroundImage));
+                }
+            }
+        }
         /// <summary>
         /// 日志
         /// </summary>
@@ -170,6 +185,10 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         async void whenAppXamlInited(AppState state, IAction action) {
+            BackgroundImage = AssetsHelper.GetAssets().ImageBackground;
+            if (!File.Exists(backgroundImage)) {
+                throw new Exception("背景图不存在");
+            }
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             var loadEffects = UnityIocService.ResolveDepend<LoadEffects>();
             //启动完毕则检查更新
@@ -270,9 +289,7 @@ namespace HmiPro.ViewModels {
                 App.Store.Dispatch(new SysActions.HideTaskBar());
             }
             //进入主界面
-            App.Current.Dispatcher.Invoke(() => {
-                Navigate("HomeView");
-            });
+            Navigate(nameof(HomeView));
 
         }
 

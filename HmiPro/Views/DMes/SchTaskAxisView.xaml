@@ -17,7 +17,7 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <dxg:GridControl ItemsSource="{Binding Path=TaskAxisList}" SelectedItem="{Binding Path=ViewStore.AxisSelectedRow}">
+    <dxg:GridControl Background="Transparent"  ItemsSource="{Binding Path=TaskAxisList}" SelectedItem="{Binding Path=ViewStore.AxisSelectedRow}">
         <dxg:GridControl.View>
             <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False"
                              AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False"  
