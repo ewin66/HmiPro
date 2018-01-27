@@ -17,6 +17,7 @@ using HmiPro.Redux.Reducers;
 using HmiPro.ViewModels.DMes.Form;
 using HmiPro.ViewModels.DMes.Tab;
 using HmiPro.ViewModels.Sys;
+using HmiPro.Views.DMes;
 using Reducto;
 using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Util;
@@ -194,7 +195,7 @@ namespace HmiPro.ViewModels.DMes {
             if (nav.MachineCode != navViewStore.DMesSelectedMachineCode) {
                 App.Store.Dispatch(new ViewStoreActions.ChangeDMesSelectedMachineCode(nav.MachineCode));
                 var vm = DMesCoreViewModel.Create(nav.MachineCode);
-                NavigationSerivce.Navigate("DMesCoreView", vm, null, this, false);
+                NavigationSerivce.Navigate(nameof(DMesCoreView), vm, null, this, false);
             }
 
         }

@@ -174,8 +174,9 @@ namespace HmiPro.ViewModels.DMes.Tab {
                     Content = "未扫描栈板的Rfid"
                 }));
             }
-            var formCtrls = new PalletConfirmForm(MachineCode, pallet.Rfid,pallet.AxisNum);
-            App.Store.Dispatch(new SysActions.ShowFormView("确认栈板轴数量", formCtrls));
+            var workcode = App.Store.GetState().DMesState.SchTaskDoingDict[MachineCode].MqSchTask?.workcode;
+            var form = new PalletConfirmForm(MachineCode, pallet.Rfid, pallet.AxisNum, workcode);
+            App.Store.Dispatch(new SysActions.ShowFormView("确认栈板轴数量", form));
         }
 
         public static SchTaskTab Create(string header) {

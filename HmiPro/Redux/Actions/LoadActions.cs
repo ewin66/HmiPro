@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace HmiPro.Redux.Actions {
     /// <summary>
@@ -14,7 +15,6 @@ namespace HmiPro.Redux.Actions {
         public static readonly string LOAD_GLOBAL_CONFIG = "[Load] Load Global Config";
 
         public static readonly string LOAD_MACHINE_CONFIG = "[Load] Machine Config";
-
 
         public struct LoadGlobalConfig : IAction {
             public string Type() => LOAD_GLOBAL_CONFIG;

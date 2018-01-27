@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using CommandLine;
 using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
@@ -28,21 +29,26 @@ namespace HmiPro.Redux.Effects {
     /// <date>2018-1-26</date>
     /// </summary>
     public class LoadEffects {
-        /// <summary>
-        /// 加载机台配置
-        /// </summary>
-        public StorePro<AppState>.AsyncActionNeedsParam<LoadActions.LoadMachieConfig, bool> LoadMachineConfig;
+
+
+
         /// <summary>
         /// 加载全局配置，GlobalConfig、各种Helper 等等
         /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<LoadActions.LoadGlobalConfig, bool> LoadGlobalConfig;
+        /// <summary>
+        /// 加载机台配置
+        /// </summary>
+        public StorePro<AppState>.AsyncActionNeedsParam<LoadActions.LoadMachieConfig, bool> LoadMachineConfig;
+
+
         /// <summary>
         /// 日志
         /// </summary>
         public LoggerService Logger;
 
         public LoadEffects() {
-            Logger = LoggerHelper.CreateLogger(GetType().ToString());
+            Logger = new LoggerService(HmiConfig.LogFolder){DefaultLocation = GetType().ToString()};
             initLoadGlobalConfig();
             initLoadMachineConfig();
         }
@@ -59,6 +65,8 @@ namespace HmiPro.Redux.Effects {
                 Thread.Sleep(sleepms);
             }
         }
+
+
 
         /// <summary>
         /// 加载 GlobalConfig 和 初始化 xxHelper
@@ -149,6 +157,8 @@ namespace HmiPro.Redux.Effects {
                 shutdownAppAfterSec(10, 0.1, "配置文件出错");
             }
         }
+
+
 
 
         /// <summary>

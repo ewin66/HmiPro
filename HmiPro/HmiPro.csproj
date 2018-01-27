@@ -268,7 +268,7 @@
     <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />
     <Compile Include="ViewModels\Sys\FormViewModel.cs" />
-    <Compile Include="ViewModels\Sys\Form\NavToTestViewForm.cs" />
+    <Compile Include="ViewModels\Sys\Form\JumpToTestViewForm.cs" />
     <Compile Include="ViewModels\Sys\SelectableViewModel.cs" />
     <Compile Include="Views\DMes\DMesCoreView.xaml.cs">
       <DependentUpon>DMesCoreView.xaml</DependentUpon>

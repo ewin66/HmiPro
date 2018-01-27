@@ -58,8 +58,6 @@ namespace HmiPro.ViewModels {
         /// </summary>
         public virtual IDispatcherService DispatcherService => null;
 
-        readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
-        Unsubscribe unsubscribe;
 
         /// <summary>
         /// 决定「设置」菜单是否显示
@@ -77,34 +75,21 @@ namespace HmiPro.ViewModels {
             try {
                 DXSplashScreen.Close();
             } catch { }
-            actionsExecDict[SysActions.FORM_VIEW_PRESSED_OK] = formViewPressedOk;
-            unsubscribe = App.Store.Subscribe(actionsExecDict, false);
-        }
-
-        /// <summary>
-        /// 1. 是否能导航到「测试」界面
-        /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
-        void formViewPressedOk(AppState state, IAction action) {
-            var formAction = (SysActions.FormViewPressedOk)action;
-            if (formAction.Form is NavToTestViewForm toTestView) {
-                if (toTestView.Password == "112211") {
-                    navToTestView();
-                } else {
-                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                        Title = "警告",
-                        Content = "密码错误"
-                    }));
-                }
-            }
         }
 
         /// <summary>
         /// 导航到测试界面
         /// </summary>
-        void navToTestView() {
-            NavigationSerivce.Navigate(nameof(TestView), null, this, true);
+        void tryJumpToTestView(BaseForm form) {
+            var testForm = (JumpToTestViewForm)form;
+            if (testForm.Password == "112211") {
+                NavigationSerivce.Navigate(nameof(TestView), null, this, true);
+            } else {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "警告",
+                    Content = "密码错误"
+                }));
+            }
         }
 
         /// <summary>
@@ -117,7 +102,7 @@ namespace HmiPro.ViewModels {
                 var vm = DMesCoreViewModel.Create(App.Store.GetState().ViewStoreState.NavView.DMesSelectedMachineCode);
                 NavigationSerivce.Navigate(nameof(DMesCoreView), vm, null, this, true);
             } else if (viewName == nameof(TestView)) {
-                App.Store.Dispatch(new SysActions.ShowFormView("请输入密码", new NavToTestViewForm()));
+                App.Store.Dispatch(new SysActions.ShowFormView("请输入密码", new JumpToTestViewForm() { OnOkPressed = tryJumpToTestView }));
             } else {
                 NavigationSerivce.Navigate(viewName, null, this, true);
             }
@@ -132,7 +117,7 @@ namespace HmiPro.ViewModels {
         }
 
         public void OnClose(CancelEventArgs e) {
-            unsubscribe?.Invoke();
+
         }
 
         public void OnDestroy() {

@@ -84,6 +84,8 @@ namespace HmiPro.Redux.Reducers {
         /// </summary>
         public string Rfid { get; set; }
 
+        public string WorkCode { get; set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]

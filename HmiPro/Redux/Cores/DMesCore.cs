@@ -123,8 +123,8 @@ namespace HmiPro.Redux.Cores {
         /// <param name="action"></param>
         void doFormViewPressedOk(AppState state, IAction action) {
             var sysAction = (SysActions.FormViewPressedOk)action;
-            if (sysAction.Form != null && sysAction.Form is PalletConfirmForm ctrls) {
-                confirmPalletAxisNum(ctrls);
+            if (sysAction.Form != null && sysAction.Form is PalletConfirmForm form) {
+                confirmPalletAxisNum(form);
             }
         }
 
@@ -132,15 +132,16 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 确认栈板Rfid与轴数目的关系
         /// </summary>
-        /// <param name="ctrls"></param>
-        async void confirmPalletAxisNum(PalletConfirmForm ctrls) {
-            var machinieCode = ctrls.MachineCode;
+        /// <param name="form"></param>
+        async void confirmPalletAxisNum(PalletConfirmForm form) {
+            var machinieCode = form.MachineCode;
             if (!PalletDict.ContainsKey(machinieCode)) {
                 return;
             }
             var pallet = new Pallet();
-            pallet.AxisNum = ctrls.AxisNum;
-            pallet.Rfid = ctrls.Rfid;
+            pallet.AxisNum = form.AxisNum;
+            pallet.Rfid = form.Rfid;
+            pallet.WorkCode = form.WorkCode;
             //清空栈板轴数量
             PalletDict[machinieCode].AxisNum = 0;
 
@@ -155,7 +156,7 @@ namespace HmiPro.Redux.Cores {
                 callType = MqCallType.Forklift,
                 callAction = MqCallAction.MovePallet,
                 CallId = Guid.NewGuid().GetHashCode(),
-                callArgs = pallet.Rfid
+                callArgs = pallet
             };
             var callSuccess = await App.Store.Dispatch(mqEffects.CallSystem(new MqActions.CallSystem(machinieCode, mqCall)));
             if (callSuccess) {

@@ -11,7 +11,7 @@ namespace HmiPro.ViewModels.Sys.Form {
     /// <author>ychost</author>
     /// <date>2018-1-27</date>
     /// </summary>
-    public class NavToTestViewForm {
+    public class JumpToTestViewForm : BaseForm {
         [Display(Name = "密码"), DataType(DataType.Password)]
         public string Password { get; set; }
     }

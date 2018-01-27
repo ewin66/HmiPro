@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using DevExpress.Mvvm;
 using DevExpress.Xpf.WindowsUI;
 using HmiPro.Redux.Models;
+using HmiPro.ViewModels.Sys;
 using HmiPro.Views.Sys;
 
 namespace HmiPro.Redux.Actions {
@@ -124,7 +125,12 @@ namespace HmiPro.Redux.Actions {
         }
 
         public struct AppXamlInited : IAction {
+            public StartupEventArgs StartArgs;
             public string Type() => APP_XAML_INITED;
+
+            public AppXamlInited(StartupEventArgs args) {
+                StartArgs = args;
+            }
         }
 
         public struct AddMarqueeMessage : IAction {
@@ -173,12 +179,12 @@ namespace HmiPro.Redux.Actions {
 
         public struct ShowFormView : IAction {
             public string Type() => SHOW_FORM_VIEW;
-            public object FormCtrls;
+            public BaseForm Form;
             public string Title;
 
-            public ShowFormView(string title, object formCtrls) {
+            public ShowFormView(string title, BaseForm form) {
                 Title = title;
-                FormCtrls = formCtrls;
+                Form = form;
             }
         }
 

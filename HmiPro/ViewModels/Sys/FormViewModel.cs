@@ -19,22 +19,34 @@ namespace HmiPro.ViewModels.Sys {
     /// </summary>
     [POCOViewModel(ImplementIDataErrorInfo = true)]
     public class FormViewModel {
-        public virtual object Form { get; set; }
+        public virtual BaseForm Form { get; set; }
         public virtual string Title { get; set; }
 
         public FormViewModel() {
 
         }
 
-        public FormViewModel(string title, object form) {
+        public FormViewModel(string title, BaseForm form) {
             Title = title;
             Form = form;
         }
 
-        public static FormViewModel Create(string title,object formCtrls) {
-            return ViewModelSource.Create(() => new FormViewModel(title,formCtrls));
+        public static FormViewModel Create(string title, BaseForm form) {
+            return ViewModelSource.Create(() => new FormViewModel(title, form));
         }
 
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class BaseForm {
+        public Action<BaseForm> OnOkPressed;
+        public Action<BaseForm> OnCancelPressed;
+
+        public BaseForm() {
+
+        }
     }
 
 

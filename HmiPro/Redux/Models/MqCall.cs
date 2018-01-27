@@ -47,4 +47,5 @@ namespace HmiPro.Redux.Models {
         public static readonly string Forklift = "叉车";
         public static readonly string Repair = "维修";
     }
+
 }

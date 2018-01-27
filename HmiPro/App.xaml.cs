@@ -75,7 +75,7 @@ namespace HmiPro {
                 hmiConfigInit(e);
                 initSubscribe();
                 //通知 DxWindow 初始化完毕
-                Store.Dispatch(new SysActions.AppXamlInited());
+                Store.Dispatch(new SysActions.AppXamlInited(e));
             });
         }
 
@@ -135,6 +135,7 @@ namespace HmiPro {
         /// </summary>
         /// <param name="e"></param>
         void hmiConfigInit(StartupEventArgs e) {
+            updateLoadingMessage("正在解析命令...", 0.01);
             Parser.Default.ParseArguments<CmdOptions>(e.Args).WithParsed(opt => {
                 opt.HmiName = opt.HmiName.ToUpper();
                 opt.ProfilesFolder = YUtil.GetAbsolutePath(opt.ProfilesFolder);
@@ -142,26 +143,34 @@ namespace HmiPro {
                 opt.ConfigFolder = configFolder;
                 var assetsFolder = opt.ProfilesFolder + @"\Assets";
 
-                Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
-                Console.WriteLine("配置文件夹：-" + opt.ProfilesFolder);
-                Console.WriteLine("显示 Splash -" + opt.ShowSplash);
-                //开机自启
-                YUtil.SetAppAutoStart(GetType().ToString(), bool.Parse(opt.AutoSatrt));
-                //显示Console框
                 if (bool.Parse(opt.ShowConsole)) {
                     ConsoleHelper.Show();
                 }
-                //全局配置文件
+                Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
+                Console.WriteLine("配置文件夹：-" + opt.ProfilesFolder);
+                Console.WriteLine("显示 Splash -" + opt.ShowSplash);
+                Console.WriteLine("当前运行模式：-" + opt.Mode);
+
+                updateLoadingMessage("配置开机自启...", 0.02);
+                YUtil.SetAppAutoStart(GetType().ToString(), bool.Parse(opt.AutoSatrt));
+
+                updateLoadingMessage("初始化Hmi配置...", 0.03);
                 var configFile = configFolder + $@"\Hmi.Config.{opt.Config}.json";
                 HmiConfig.Load(configFile);
                 Console.WriteLine($"初始化配置文件: -{configFile}");
                 Console.WriteLine("是否启用Mock数据：-" + bool.Parse(opt.Mock));
-                //配置静态资源文件
-                HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);
+
+                updateLoadingMessage("初始化工艺字典...", 0.04);
                 HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
-                Console.WriteLine("当前运行模式：-" + opt.Mode);
+
+                updateLoadingMessage("初始化资源文件...", 0.05);
                 AssetsHelper.Init(YUtil.GetAbsolutePath(assetsFolder));
+
+                updateLoadingMessage("初始化日志服务...", 0.06);
                 LoggerHelper.Init(YUtil.GetAbsolutePath(HmiConfig.LogFolder));
+
+                updateLoadingMessage("初始化 Sqlite...", 0.08);
+                HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);
                 SqliteHelper.Init(YUtil.GetAbsolutePath(HmiConfig.SqlitePath));
                 //保留启动参数
                 CmdOptions.GlobalOptions = opt;
@@ -178,16 +187,26 @@ namespace HmiPro {
                     //重启软件
                     ActiveMqHelper.GetActiveMqService().Close();
                     Application.Current.Dispatcher.Invoke(() => {
-                        var param = " ";
-                        if (HmiConfig.IsDevUserEnv) {
-                            param += " --config office";
-                        }
-                        YUtil.Exec(Application.ResourceAssembly.Location, param);
+                        YUtil.Exec(Application.ResourceAssembly.Location, "");
                         Application.Current.Shutdown();
                     });
                 }
             };
         }
+        /// <summary>
+        /// 更新系统启动进度内容
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="percent"></param>
+        /// <param name="sleepms"></param>
+        void updateLoadingMessage(string message, double percent, int sleepms = 400) {
+            App.Store.Dispatch(new SysActions.SetLoadingMessage(message, percent));
+            if (!HmiConfig.IsDevUserEnv) {
+                Thread.Sleep(sleepms);
+            }
+        }
+
+
     }
     /// <summary>
     /// 对频率较高的日志的打印频率进行抑制

@@ -170,6 +170,7 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         async void whenAppXamlInited(AppState state, IAction action) {
+            Logger = LoggerHelper.CreateLogger(GetType().ToString());
             var loadEffects = UnityIocService.ResolveDepend<LoadEffects>();
             //启动完毕则检查更新
             bool isFoundUpdate = false;
@@ -190,7 +191,6 @@ namespace HmiPro.ViewModels {
                 return;
             }
             //加载MachineConfig
-            Logger = LoggerHelper.CreateLogger(GetType().ToString());
             var globalLoaded = await App.Store.Dispatch(loadEffects.LoadGlobalConfig(new LoadActions.LoadGlobalConfig()));
             if (globalLoaded) {
                 await App.Store.Dispatch(loadEffects.LoadMachineConfig(new LoadActions.LoadMachieConfig()));
@@ -359,7 +359,7 @@ namespace HmiPro.ViewModels {
                 YUtil.CallOskAsync();
             }
             DispatcherService.BeginInvoke(() => {
-                JumFormView(sysAction.Title, sysAction.FormCtrls);
+                JumFormView(sysAction.Title, sysAction.Form);
             });
         }
 
@@ -425,8 +425,8 @@ namespace HmiPro.ViewModels {
         /// 派发了用户点击「确定」或者「取消」的事件
         /// </summary>
         /// <param name="title"></param>
-        /// <param name="formCtrls"></param>
-        public void JumFormView(string title, object formCtrls) {
+        /// <param name="form"></param>
+        public void JumFormView(string title, BaseForm form) {
             UICommand okCmd = new UICommand() {
                 Caption = "确定",
                 IsCancel = false,
@@ -437,14 +437,16 @@ namespace HmiPro.ViewModels {
                 IsCancel = true,
                 IsDefault = true
             };
-            var formViewModel = FormViewModel.Create(title, formCtrls);
+            var formViewModel = FormViewModel.Create(title, form);
             var resultCmd = DialogService.ShowDialog(new List<UICommand>() { okCmd, cancelCmd }, title, nameof(FormView),
                 formViewModel);
             //派发事件，可根据 FormCtrls 的 Type 来确定逻辑
             if (resultCmd == okCmd) {
                 App.Store.Dispatch(new SysActions.FormViewPressedOk(title, formViewModel.Form));
+                formViewModel.Form.OnOkPressed?.Invoke(formViewModel.Form);
             } else {
                 App.Store.Dispatch(new SysActions.FormViewPressedCancel(title, formViewModel.Form));
+                formViewModel.Form.OnCancelPressed?.Invoke(formViewModel.Form);
             }
         }
 
