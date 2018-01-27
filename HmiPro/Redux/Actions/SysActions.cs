@@ -17,29 +17,37 @@ namespace HmiPro.Redux.Actions {
     /// <author>ychost</author>
     /// </summary>
     public static class SysActions {
+        //设置界面，目前在 Prod 中已经不用了
         public static readonly string SHOW_SETTING_VIEW = "[Sys] Show Setting View";
         public static readonly string SHUTDOWN_APP = "[Sys] Shutdown App";
 
+        //Http 系统相关指令
         public static readonly string START_HTTP_SYSTEM = "[Sys] Start Http System";
         public static readonly string START_HTTP_SYSTEM_SUCCESS = "[Sys] Start Http System Success";
         public static readonly string START_HTTP_SYSTEM_FAILED = "[Sys] Start Http System Failed";
         public static readonly string HTTP_SYSTEM_INVOKE = "[Sys] Http System Invoke";
 
+        //程序更新状态
         public static readonly string FIND_UPDATED_VERSION = "[Sys] Find Updated Version";
         public static readonly string NOT_FIND_UPDATED_VERSION = "[Sys] Not Find Updated Version";
 
+        //整个程序初始化完成，包括配置文件、Helper、定时器等等都初始化完成
         public static readonly string APP_INIT_COMPLETED = "[Sys] App Init Completed";
 
+        //对显示器的操作
         public static readonly string CLOSE_SCREEN = "[Sys] Close Screen";
         public static readonly string OPEN_SCREEN = "[Sys] Open Screen";
         public static readonly string START_CLOSE_SCREEN_TIMER = "[Sys] Start Turn Off Screen Timer";
         public static readonly string STOP_CLOSE_SCREEN_TIMER = "[Sys] Stop Turn Off Screen Timer";
 
+        //右上角提示
         public static readonly string SHOW_NOTIFICATION = "[Sys] Show Notification";
 
+        //添加和删除跑马灯文字内容，注意：添加是 AddOrUpdate 操作
         public static readonly string ADD_MARQUEE_MESSAGE = "[Sys] Add Marquee Message";
         public static readonly string DEL_MARQUEE_MESSAGE = "[Sys] Delete Marquee Message";
 
+        //弹出的Modal框（DataLayout布局）
         public static readonly string SHOW_FORM_VIEW = "[Sys] Show Form View";
         public static readonly string FORM_VIEW_PRESSED_OK = "[Sys] Form View Pressed Ok";
         public static readonly string FORM_VIEW_PRESSED_CANCEL = "[Sys] Form View Pressed Cancel";
@@ -52,11 +60,43 @@ namespace HmiPro.Redux.Actions {
         public static readonly string MARQUEE_APP_START_TIMEOUT = "[Marquee Id] App Start Timeout";
         public static readonly string MARQUEE_LOG_FOLDER_TOO_LARGE = "[Marquee Id] Log Folder Too Large";
 
+        //Loading 界面
         public static readonly string SET_LOADING_MESSAGE = "[Sys] Set Loading Message";
 
+        //app.xaml.cs初始化完毕
         public static readonly string APP_XAML_INITED = "[Sys] App Xaml Inited";
 
+        //重启软件
         public static readonly string RESTART_APP = "[Sys] Restart App";
+
+        //桌面操作
+        public static readonly string HIDE_DESKTOP = "[Sys] Hide Desktop";
+        public static readonly string SHOW_DESKTOP = "[Sys] Show Desktop";
+        public static readonly string RETURN_DESKTOP = "[Sys] Return Desktop";
+
+        //任务栏操作
+        public static readonly string HIDE_TASK_BAR = "[Sys] Hide Task Bar";
+        public static readonly string SHOW_TASK_BAR = "[Sys] Show Task Bar";
+
+        public struct HideDesktop : IAction {
+            public string Type() => HIDE_DESKTOP;
+        }
+
+        public struct ShowDesktop : IAction {
+            public string Type() => SHOW_DESKTOP;
+        }
+
+        public struct ReturnDesktop : IAction {
+            public string Type() => RETURN_DESKTOP;
+        }
+
+        public struct HideTaskBar : IAction {
+            public string Type() => HIDE_TASK_BAR;
+        }
+
+        public struct ShowTaskBar : IAction {
+            public string Type() => SHOW_TASK_BAR;
+        }
 
 
         public struct RestartApp : IAction {

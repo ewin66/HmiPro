@@ -6,12 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Forms;
+using WindowsInput;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using Reducto;
 using YCsharp.Util;
+using Application = System.Windows.Application;
 
 namespace HmiPro.Redux.Reducers {
     /// <summary>
@@ -86,10 +88,23 @@ namespace HmiPro.Redux.Reducers {
              }).When<SysActions.RestartApp>((state, action) => {
                  ActiveMqHelper.GetActiveMqService().Close();
                  Application.Current.Dispatcher.Invoke(() => {
-                     //System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
                      YUtil.Exec(Application.ResourceAssembly.Location, " --wait " + action.WaitSec);
                      Application.Current.Shutdown();
                  });
+                 return state;
+             }).When<SysActions.HideDesktop>((state, action) => {
+                 YUtil.Exec(AssetsHelper.GetAssets().ExeNirCmd, "win hide class progman ");
+                 return state;
+             }).When<SysActions.ShowDesktop>((state, action) => {
+                 YUtil.Exec(AssetsHelper.GetAssets().ExeNirCmd, "win show class progman ");
+                 return state;
+             }).When<SysActions.ReturnDesktop>((state, action) => {
+                 //通过快捷键的方式来显示桌面
+                 InputSimulator.SimulateModifiedKeyStroke(VirtualKeyCode.LWIN, VirtualKeyCode.VK_D);
+                 return state;
+             }).When<SysActions.HideTaskBar>((state, action) => {
+                 return state;
+             }).When<SysActions.ShowTaskBar>((state, action) => {
                  return state;
              });
         }

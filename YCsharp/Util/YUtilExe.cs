@@ -90,6 +90,8 @@ namespace YCsharp.Util {
             });
         }
 
+
+
         /// <summary>
         /// 通过 NirCmd调用的方式关闭显示器
         /// </summary>

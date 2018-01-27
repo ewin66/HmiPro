@@ -33,7 +33,6 @@ namespace YCsharp.Util {
         public static void SetEnvVal(string name, string val) {
             Environment.SetEnvironmentVariable(name, val, EnvironmentVariableTarget.Machine);
         }
-
         /// <summary>
         /// 获取目前windows登录用户名字
         /// </summary>

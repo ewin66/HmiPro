@@ -139,9 +139,13 @@ namespace HmiPro.Redux.Services {
         /// <param name="response"></param>
         /// <param name="rest"></param>
         private void outResponse(HttpListenerResponse response, HttpSystemRest rest) {
-            using (var stream = response.OutputStream) {
-                var result = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(rest));
-                stream.Write(result, 0, result.Length);
+            try {
+                using (var stream = response.OutputStream) {
+                    var result = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(rest));
+                    stream.Write(result, 0, result.Length);
+                }
+            } catch (Exception e) {
+                Logger.Error("Http 系统回复异常", e);
             }
         }
         /// <summary>
@@ -159,10 +163,6 @@ namespace HmiPro.Redux.Services {
         /// 执行更新
         /// </summary>
         public void StartUpdate() {
-            //先停止守护进程
-            YUtil.StopWinService(HmiConfig.DaemonName);
-            //睡一秒保证服务被停止了
-            //Thread.Sleep(1000);
             AppUpdater.StartExternalUpdater();
         }
     }

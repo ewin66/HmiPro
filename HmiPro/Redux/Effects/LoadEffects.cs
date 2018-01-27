@@ -304,13 +304,13 @@ namespace HmiPro.Redux.Effects {
                     if (!isStartListenMq) {
                         string failedMessage = string.Empty;
                         if (mqKey.Contains("QUEUE")) {
-                            failedMessage = $"监听Mq 排产队列 {pair.Key} 失败，请检查";
+                            failedMessage = $"监听Mq 排产队列 {pair.Key} 失败";
                         } else if (mqKey.Contains("JUDGE_MATER")) {
-                            failedMessage = $"监听Mq 扫描来料队列 {pair.Key} 失败，请检查";
+                            failedMessage = $"监听Mq 扫描来料队列 {pair.Key} 失败";
                         } else if (mqKey.Contains("RFIDEMP")) {
-                            failedMessage = $"监听mq 人员打卡 数据失败，请检查";
+                            failedMessage = $"监听mq 人员打卡 数据失败";
                         } else if (mqKey.Contains("RFIDAXIS")) {
-                            failedMessage = $"监听Mq 线盘卡失败，请检查";
+                            failedMessage = $"监听Mq 线盘卡失败";
                         }
                         if (!string.IsNullOrEmpty(failedMessage)) {
                             updateLoadingMessage(failedMessage, 0.95, 0);
@@ -368,7 +368,6 @@ namespace HmiPro.Redux.Effects {
         /// 程序将在 totalSec 秒后自动关闭
         /// </summary>
         void closeAppAfterSec(int totalSec, double percent, string message = "程序启动超时") {
-            var ms = totalSec * 1000;
             YUtil.SetInterval(1000, t => {
                 var wait = totalSec - t;
                 var waitMessage = $"{message}，将在 {wait} 秒后关闭";
