@@ -60,4 +60,5 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="VerticalHeaderAlignment" Value="Stretch" />
     </Style>
+    <SolidColorBrush x:Key="Button.DefaultState.Border2" Color="#FF0000" />
 </ResourceDictionary>

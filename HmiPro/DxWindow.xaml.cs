@@ -21,6 +21,10 @@ namespace HmiPro {
     /// </summary>
     public partial class DxWindow : DXWindow {
         public DxWindow() {
+            Theme theme = new Theme("HmiPro", "DevExpress.Xpf.Themes.HmiPro.v17.1");
+            theme.AssemblyName = "DevExpress.Xpf.Themes.HmiPro.v17.1";
+            Theme.RegisterTheme(theme);
+            ThemeManager.SetTheme(this, theme);
             InitializeComponent();
             //开发电脑
             if (HmiConfig.IsDevUserEnv) {

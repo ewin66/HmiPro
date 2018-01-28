@@ -22,6 +22,11 @@ namespace HmiPro.ViewModels.Sys {
 
         private Func<int> rand = YUtil.GetRandomIntGen(0, 10);
 
+        [Command(Name = "OnLoadedCommand")]
+        public void Onloaded() {
+            App.Store.Dispatch(new SysActions.CloseLoadingSplash());
+        }
+
         [Command(Name = "OpenAlarmCommand")]
         public void OpenAlarm(int ms) {
             var machineCode = MachineConfig.MachineDict.FirstOrDefault().Key;

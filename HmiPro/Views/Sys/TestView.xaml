@@ -14,7 +14,10 @@
              DataContext="{dxmvvm:ViewModelSource Type={x:Type sys:TestViewModel}}"
              x:Name="Self"
              d:DesignHeight="600" d:DesignWidth="800">
-
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:DispatcherService />
+        <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
+    </dxmvvm:Interaction.Behaviors>
     <dxwui:PageAdornerControl  Header="系统管理" ShowBackButton="True">
         <Grid>
             <dxlc:FlowLayoutControl BreakFlowToFit="True" HorizontalAlignment="Center" >

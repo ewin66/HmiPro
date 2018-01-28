@@ -52,6 +52,8 @@ namespace HmiPro.ViewModels.Func {
                 MqCallDict[machineCode].Add(callRepair);
                 MqCallDict[machineCode].Add(callForklift);
             }
+
+            App.Store.Dispatch(new SysActions.CloseLoadingSplash());
         }
 
         [Command(Name = "CallCommand")]

@@ -64,7 +64,7 @@
                                     <ColumnDefinition/>
                                     <ColumnDefinition/>
                                 </Grid.ColumnDefinitions>
-                                <Button Grid.Column="0" Content="显示键盘" Width="200" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl},Path=DataContext.CallOskCommand}"></Button>
+                                <Button Grid.Column="0" Background="Transparent"  Content="显示键盘" Width="200" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl},Path=DataContext.CallOskCommand}"></Button>
                                 <Button Grid.Column="1" Content="提交" Width="200" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl},Path=DataContext.SubmitDpmsCommand}"></Button>
                             </Grid>
                             <dxlc:FlowLayoutControl ItemsSource="{Binding Path=Dpms}" Orientation="Vertical" BreakFlowToFit="True">
@@ -122,7 +122,7 @@
                                     <Button Visibility="{Binding Path=PalletVisibility}" Content="叉走栈板" Command="{Binding ShowPalletViewCommand}"></Button>
                                 </StackPanel>
 
-                                <dx:DXTabControl Background="Transparent" Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" SelectedIndex="{Binding Path=ViewStore.TaskTabSelectedIndex}" ItemHeaderTemplate="{StaticResource TabHeader}" >
+                                <dx:DXTabControl  Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" SelectedIndex="{Binding Path=ViewStore.TaskTabSelectedIndex}" ItemHeaderTemplate="{StaticResource TabHeader}" >
                                     <dx:DXTabControl.Resources>
                                         <DataTemplate DataType="{x:Type dMes1:SchTaskAxisViewModel}">
                                             <dMes:SchTaskAxisView DataContext="{Binding Path=.}"/>
@@ -203,7 +203,7 @@
                             </Grid.Resources>
                             <dxg:GridControl Background="Transparent" ItemsSource="{Binding Path=Alarms}" x:Name="AlarmGridControl" SelectedItem="{Binding Path=ViewStore.AlarmSelectedRow}">
                                 <dxg:GridControl.View>
-                                    <dxg:TableView  AllowResizing="False"  ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" />
+                                    <dxg:TableView Background="Transparent"  AllowResizing="False" ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False" ShowDataNavigator="False" />
                                 </dxg:GridControl.View>
                                 <dxg:GridControl.Columns>
                                     <dxg:GridColumn Width="2*"  Header="参数" FieldName="CpmName"/>

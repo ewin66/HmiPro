@@ -10,13 +10,14 @@
              xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
              xmlns:models="clr-namespace:HmiPro.Redux.Models"
              mc:Ignorable="d" 
+             Background="Transparent"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <Style x:Key="LeftPanelTileItemStyle" TargetType="{x:Type dxnav:TileBarItem}">
             <Setter Property="Foreground" Value="#FF787878"/>
             <Setter Property="BorderBrush" Value="#FFD6D6D6"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Stretch"/>
             <Setter Property="Height" Value="75"/>
@@ -58,6 +59,7 @@
                            ItemsSource="{Binding Path=MqSchTasks}"
                            ItemContainerStyle="{StaticResource LeftPanelTileItemStyle}"
                            SelectedItem="{Binding Path=SelectedTask,Mode=TwoWay}"
+                           Background="Transparent"
                            Padding="0">
             </dxnav:TileBar>
         </panels:DpiResizingPanel>

@@ -5,9 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:dx="clr-namespace:HmiPro.Views.Dx"
         mc:Ignorable="d"
-        
         WindowStyle="None" ResizeMode="NoResize" SizeToContent="WidthAndHeight"
-        AllowsTransparency="True" Background="Transparent" ShowInTaskbar="False" Topmost="True"
+        AllowsTransparency="True"  Background="Transparent"  ShowInTaskbar="False" Topmost="True"
     >
-    <dx:LoadingView Background="Black"/>
+    <dx:LoadingView Background="Transparent"/>
 </Window>

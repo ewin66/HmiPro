@@ -30,10 +30,10 @@
             <dxg:GridColumn Width="*" Header="颜色" FieldName="color" />
             <dxg:GridColumn Width="*" Header="完成率" FieldName="CompletedRate"  >
                 <dxg:GridColumn.EditSettings>
-                    <dxe:ProgressBarEditSettings ContentDisplayMode="Value" DisplayFormat="{}{0:P}"  Orientation="Horizontal" Maximum="1" SmallStep="0.01" LargeStep="0.05" >
-                        <dxe:ProgressBarEditSettings.StyleSettings>
+                    <dxe:ProgressBarEditSettings  ContentDisplayMode="Value" DisplayFormat="{}{0:P}"  Orientation="Horizontal" Maximum="1" SmallStep="0.01" LargeStep="0.05" >
+                        <!--<dxe:ProgressBarEditSettings.StyleSettings>
                             <dxe:ProgressBarStyleSettings/>
-                        </dxe:ProgressBarEditSettings.StyleSettings>
+                        </dxe:ProgressBarEditSettings.StyleSettings>-->
                     </dxe:ProgressBarEditSettings>
                 </dxg:GridColumn.EditSettings>
             </dxg:GridColumn>

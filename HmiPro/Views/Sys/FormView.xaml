@@ -10,7 +10,7 @@
              xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
              mc:Ignorable="d" 
              DataContext="{dxmvvm:ViewModelSource Type=sys:FormViewModel}"
-
+              Background="Transparent"
              d:DesignHeight="600" d:DesignWidth="800">
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:ApplicationJumpListService />

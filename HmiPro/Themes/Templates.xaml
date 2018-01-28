@@ -10,7 +10,9 @@
                     xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
                     xmlns:themeKeys="http://schemas.devexpress.com/winfx/2008/xaml/windowsui/themekeys"
                     xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
-                    xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys">
+                    xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
+                    xmlns:themes="http://schemas.devexpress.com/winfx/2008/xaml/editors/themekeys"
+                    xmlns:themes1="http://schemas.devexpress.com/winfx/2008/xaml/core/themekeys">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Converts.xaml" />
@@ -122,23 +124,12 @@
             </Grid>
         </Border>
     </ControlTemplate>
-    <ControlTemplate xmlns:dxgt="http://schemas.devexpress.com/winfx/2008/xaml/grid/themekeys"
-                     xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
-                     x:Key="{dxgt:GridControlThemeKey ResourceKey=BorderTemplate, IsThemeIndependent=True}"
-                     TargetType="{x:Type ContentControl}">
+
+
+    <ControlTemplate x:Key="{themes:ProgressBarEditThemeKey ResourceKey=PanelBackgroundHorizontalTemplate, IsThemeIndependent=true}"  TargetType="{x:Type ContentControl}">
         <Border Background="Transparent">
-            <Border.Padding>
-                <Binding Path="(dxg:GridBorderHelper.ShowBorder)" RelativeSource="{RelativeSource TemplatedParent}">
-                    <Binding.Converter>
-                        <dx:BoolToObjectConverter FalseValue="0" TrueValue="1" />
-                    </Binding.Converter>
-                </Binding>
-            </Border.Padding>
-            <!--<Border Background="Transparent">
-                <ContentPresenter />
-            </Border>-->
-                <ContentPresenter />
+            <ContentPresenter/>
         </Border>
     </ControlTemplate>
- 
+
 </ResourceDictionary>

@@ -74,15 +74,19 @@ namespace HmiPro.ViewModels.DMes {
             //绑定实时参数
             var onlineCpmsDict = App.Store.GetState().CpmState.OnlineCpmsDict;
             CpmsTab.BindSource(MachineCode, onlineCpmsDict[MachineCode]);
+
             //绑定报警
             var alarmsDict = App.Store.GetState().AlarmState.AlarmsDict;
             AlarmTab.BindSource(MachineCode, alarmsDict[MachineCode]);
+
             //绑定任务
             var mqTaskDict = App.Store.GetState().DMesState.MqSchTasksDict;
             SchTaskTab.BindSource(MachineCode, mqTaskDict[MachineCode]);
+
             //初始化人员卡
             var mqEmpRfids = App.Store.GetState().DMesState.MqEmpRfidDict;
             SchTaskTab.InitEmployees(mqEmpRfids[MachineCode]);
+
             //初始化来料
             var scanMaterialDict = App.Store.GetState().DMesState.MqScanMaterialDict;
             if (scanMaterialDict.TryGetValue(MachineCode, out var material)) {
@@ -93,6 +97,7 @@ namespace HmiPro.ViewModels.DMes {
             var status = com485Dict.Where(c => MachineConfig.MachineCodeToIpsDict[MachineCode].Contains(c.Key))
                 .Select(c => c.Value).ToList();
             Com485Tab.BindSource(MachineCode, status);
+
             //回填参数
             var dpms = App.Store.GetState().DpmStore.DpmsDict;
             DpmsTab.BindSource(dpms[MachineCode]);
@@ -100,7 +105,8 @@ namespace HmiPro.ViewModels.DMes {
             //绑定选中的tab
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[MachineCode];
 
-            unsubscribe = App.Store.Subscribe(actionExecDict);
+            unsubscribe = App.Store.Subscribe(actionExecDict,false);
+            App.Store.Dispatch(new SysActions.CloseLoadingSplash());
         }
 
 

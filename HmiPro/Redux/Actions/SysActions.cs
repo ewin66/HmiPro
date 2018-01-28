@@ -79,6 +79,27 @@ namespace HmiPro.Redux.Actions {
         public static readonly string HIDE_TASK_BAR = "[Sys] Hide Task Bar";
         public static readonly string SHOW_TASK_BAR = "[Sys] Show Task Bar";
 
+        //关闭 「正在加载中..」的 Loading 框框
+        //某些 Hmi 无法自动关闭，所以在 OnLoad 里面手动关闭
+        public static readonly string CLOSE_LOADING_SPLASH = "[Sys] Close Loading Splash";
+
+        //更换壁纸
+        public static readonly string CHANGE_WINDOW_BACKGROUND_IMAGE = "[Sys] Change Window Background Image";
+
+        public struct ChangeWindowBackgroundImage : IAction {
+            public string Type() => CHANGE_WINDOW_BACKGROUND_IMAGE;
+            public string ImagePath;
+
+            public ChangeWindowBackgroundImage(string imagePath) {
+                ImagePath = imagePath;
+            }
+        }
+
+        public struct CloseLoadingSplash : IAction {
+            public string Type() => CLOSE_LOADING_SPLASH;
+        }
+
+
         public struct HideDesktop : IAction {
             public string Type() => HIDE_DESKTOP;
         }

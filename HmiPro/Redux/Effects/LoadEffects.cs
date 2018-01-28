@@ -48,7 +48,7 @@ namespace HmiPro.Redux.Effects {
         public LoggerService Logger;
 
         public LoadEffects() {
-            Logger = new LoggerService(HmiConfig.LogFolder){DefaultLocation = GetType().ToString()};
+            Logger = new LoggerService(HmiConfig.LogFolder) { DefaultLocation = GetType().ToString() };
             initLoadGlobalConfig();
             initLoadMachineConfig();
         }
@@ -289,6 +289,11 @@ namespace HmiPro.Redux.Effects {
                             return;
                         }
                     }
+                }
+                if (HmiConfig.IsDevUserEnv) {
+                    updateLoadingMessage("系统核心启动完毕，正在渲染界面...", 1, 0);
+                    App.Store.Dispatch(new SysActions.AppInitCompleted());
+                    return;
                 }
                 var percent = 0.95;
                 YUtil.SetInterval(300, t => {

@@ -12,7 +12,7 @@
     xmlns:controls="clr-namespace:HmiPro.Controls"
     ShowIcon="False"
     ShowTitle="False"
-    dx:ThemeManager.ThemeName="TouchlineDark"
+
     Title="Hmi Pro Dev By Ychost"
     Topmost="True"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

@@ -164,10 +164,22 @@ namespace HmiPro.ViewModels {
             actionsExecDict[SysActions.DEL_MARQUEE_MESSAGE] = doDelMarqueeMessage;
             actionsExecDict[SysActions.APP_XAML_INITED] = whenAppXamlInited;
             actionsExecDict[SysActions.SET_LOADING_MESSAGE] = doSetLoadingMessage;
+            actionsExecDict[SysActions.CHANGE_WINDOW_BACKGROUND_IMAGE] = doChangeBackground;
             Store.Subscribe(actionsExecDict);
         }
 
-
+        /// <summary>
+        /// 更改背景图片
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doChangeBackground(AppState state, IAction action) {
+            var changeBg = (SysActions.ChangeWindowBackgroundImage)action;
+            if (!File.Exists(changeBg.ImagePath)) {
+                throw new Exception("背景图不存在");
+            }
+            BackgroundImage = changeBg.ImagePath;
+        }
         /// <summary>
         /// 设置加载内容信息，比如 正在加载配置文件... 30%
         /// </summary>
@@ -185,10 +197,7 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         async void whenAppXamlInited(AppState state, IAction action) {
-            BackgroundImage = AssetsHelper.GetAssets().ImageBackground;
-            if (!File.Exists(backgroundImage)) {
-                throw new Exception("背景图不存在");
-            }
+            BackgroundImage = AssetsHelper.GetAssets().ImageIronMan;
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             var loadEffects = UnityIocService.ResolveDepend<LoadEffects>();
             //启动完毕则检查更新
@@ -315,11 +324,11 @@ namespace HmiPro.ViewModels {
                 //    });
                 //});
 
-                //YUtil.SetTimeout(3000, () => {
-                //    for (int i = 0; i < 1; i++) {
-                //        MockDispatchers.DispatchMockSchTask(machineCode, i);
-                //    }
-                //});
+                YUtil.SetTimeout(3000, () => {
+                    for (int i = 0; i < 2; i++) {
+                        MockDispatchers.DispatchMockSchTask(machineCode, i);
+                    }
+                });
             }
         }
 

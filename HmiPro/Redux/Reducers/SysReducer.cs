@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsInput;
+using DevExpress.Xpf.Core;
 using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
@@ -114,6 +115,15 @@ namespace HmiPro.Redux.Reducers {
                  return state;
              }).When<SysActions.ShowTaskBar>((state, action) => {
                  YUtil.ShowTaskBar();
+                 return state;
+             }).When<SysActions.CloseLoadingSplash>((state, action) => {
+                 Application.Current.Dispatcher.Invoke(() => {
+                     try {
+                         DXSplashScreen.Close();
+                     } catch {
+
+                     }
+                 });
                  return state;
              });
         }

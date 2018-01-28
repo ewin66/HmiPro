@@ -57,6 +57,7 @@ namespace HmiPro.Config {
         public string IconPrivacy => ImagesFolder + "\\privacy.ico";
         public string IconMonitor2 => ImagesFolder + "\\monitor2.ico";
         public string ImageBackground => ImagesFolder + "\\background.jpg";
+        public string ImageIronMan => ImagesFolder + "\\iron-man.jpg";
 
         public string CraftsBomXls => DictsFoler + "\\工艺Bom.xls";
         public string MockMqSchTaskJson => MocksFolder + "\\MqSchTask.json";

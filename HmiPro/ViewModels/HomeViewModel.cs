@@ -72,9 +72,8 @@ namespace HmiPro.ViewModels {
 
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
-            try {
-                DXSplashScreen.Close();
-            } catch { }
+            App.Store.Dispatch(new SysActions.CloseLoadingSplash());
+            App.Store.Dispatch(new SysActions.ChangeWindowBackgroundImage(AssetsHelper.GetAssets().ImageBackground));
         }
 
         /// <summary>
