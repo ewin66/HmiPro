@@ -473,13 +473,17 @@ namespace HmiPro.Redux.Cores {
                 foreach (var task in allTasks) {
                     if (task.taskId == taskAccept.taskId) {
                         //任务已经开始了不能冲掉
-                        if (SchTaskDoingDict[machineCode]?.MqSchTask?.taskId == taskAccept.taskId) {
-                            Logger.Error($"任务已经开始，无法替换,{task.taskId}");
+                        if (SchTaskDoingDict[machineCode]?.MqSchTask?.taskId == taskAccept.taskId && SchTaskDoingDict[machineCode].IsStarted) {
+                            Logger.Warn($"任务已经开始，无法替换 {task.taskId}", true);
+                            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                                Title = "通知",
+                                Content = $"任务已经开始，无法更换 {taskAccept.taskId}"
+                            }));
                             return;
                         }
                         App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                             Title = "通知",
-                            Content = $"已更新任务, {taskAccept.taskId}"
+                            Content = $"已更新任务 {taskAccept.taskId}"
                         }));
                         //要被冲掉的任务
                         taskRemove = task;
@@ -1028,7 +1032,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="taskId"></param>
         void completeOneSchTask(string machineCode, string taskId) {
             var mqTasks = MqSchTasksDict[machineCode];
-            var removeTask = mqTasks.FirstOrDefault(t => t.taskId== taskId);
+            var removeTask = mqTasks.FirstOrDefault(t => t.taskId == taskId);
             //移除已经完成的某个工单任务
             //fixed: 2018-01-14
             // mqTasks 是界面数据，所以要用 Dispatcher

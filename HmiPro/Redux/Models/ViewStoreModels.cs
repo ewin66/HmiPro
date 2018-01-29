@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using DevExpress.XtraExport.Xls;
 using HmiPro.Annotations;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Reducers;
@@ -176,14 +177,38 @@ namespace HmiPro.Redux.Models {
                     RaisePropertyChanged(nameof(SelectedCpm));
                     lock (opLock) {
                         SelectedCpmChartSource = ChartCpmSourceDict[selectedCpm.Code];
+                        SelectedMaxThreshold = MaxThresholdDict[selectedCpm.Code];
+                        SelectedMinThreshold = MinThresholdDict[SelectedCpm.Code];
                     }
                     RaisePropertyChanged(nameof(SelectedCpmChartSource));
+                    RaisePropertyChanged(nameof(SelectedMaxThreshold));
+                    RaisePropertyChanged(nameof(SelectedMinThreshold));
                 }
             }
         }
 
+        public ObservableCollection<CpmChartThreshold> SelectedMaxThreshold { get; set; }
+
+        public ObservableCollection<CpmChartThreshold> SelectedMinThreshold { get; set; }
+
+        /// <summary>
+        /// 每个参数的最大值，同参数一起更新
+        /// </summary>
+        public IDictionary<int, ObservableCollection<CpmChartThreshold>> MaxThresholdDict { get; set; }
+
+        /// <summary>
+        /// 每个参数的最小值，同参数一起更新
+        /// </summary>
+        public IDictionary<int, ObservableCollection<CpmChartThreshold>> MinThresholdDict { get; set; }
+
+        /// <summary>
+        /// 每个参数的历史数据
+        /// </summary>
         public IDictionary<int, ObservableCollection<Models.Cpm>> ChartCpmSourceDict { get; set; }
 
+        /// <summary>
+        /// 选择参数的历史数据
+        /// </summary>
         public ObservableCollection<Cpm> SelectedCpmChartSource { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -195,23 +220,17 @@ namespace HmiPro.Redux.Models {
     }
 
     /// <summary>
-    /// chart 适用的数据模型
-    /// <author>DevExpress</author>
+    /// 参数曲线的最值
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class ChartDataCollection<T> : ObservableCollection<T> {
-        public void AddRange(IList<T> items) {
-            foreach (T item in items)
-                Items.Add(item);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (IList)items, Items.Count - items.Count));
-        }
-        public void RemoveFromBegin(int count) {
-            IList<T> removedItems = new List<T>(count);
-            for (int i = 0; i < count; i++) {
-                removedItems.Add(Items[0]);
-                Items.RemoveAt(0);
-            }
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, (IList)removedItems, 0));
-        }
+    public class CpmChartThreshold {
+        /// <summary>
+        /// 
+        /// </summary>
+        public float Value { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public DateTime UpdateTime { get; set; }
+
     }
 }

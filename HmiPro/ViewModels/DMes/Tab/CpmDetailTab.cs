@@ -27,7 +27,7 @@ namespace HmiPro.ViewModels.DMes.Tab {
 
         public void BindSource(string machineCode, IDictionary<int, Cpm> sourceDict) {
             OnlineCpms = new ObservableCollection<Cpm>();
-            ViewStore = App.Store.GetState().ViewStoreState.CpmDetailsiewDict[machineCode];
+            ViewStore = App.Store.GetState().ViewStoreState.CpmDetailViewDict[machineCode];
             //保证显示顺序和配置顺序一致
             foreach (var pair in MachineConfig.MachineDict[machineCode].CodeToAllCpmDict) {
                 OnlineCpms.Add(sourceDict[pair.Key]);

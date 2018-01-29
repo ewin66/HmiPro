@@ -24,7 +24,7 @@
     <dxdo:DockLayoutManager >
         <dxdo:LayoutGroup Background="Transparent" Caption="LayoutRoot">
             <dxdo:LayoutPanel Caption="参数" Background="Transparent" ItemWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}},Path=ActualWidth,
-                Converter={StaticResource ConverterCoef},ConverterParameter=0.4 
+                Converter={StaticResource ConverterCoef},ConverterParameter=0.3 
             }" >
                 <dxg:GridControl SelectedItem="{Binding Path=ViewStore.SelectedCpm}" ItemsSource="{Binding Path=OnlineCpms}">
                     <dxg:GridControl.View>
@@ -34,17 +34,17 @@
                     </dxg:GridControl.View>
                     <dxg:GridControl.Columns>
                         <dxg:GridColumn FieldName="Name" Width="2*"   Header="参数" />
-                        <dxg:GridColumn FieldName="Value" Width="2*" Header="值"/>
-                        <dxg:GridColumn FieldName="PickTime"  Width="1*" Header="时间"  >
+                        <dxg:GridColumn FieldName="Value" Width="*" Header="值"/>
+                        <!--<dxg:GridColumn FieldName="PickTime"  Width="1*" Header="时间"  >
                             <dxg:GridColumn.EditSettings>
                                 <dxe:DateEditSettings Mask="T" MaskUseAsDisplayFormat="True"/>
                             </dxg:GridColumn.EditSettings>
-                        </dxg:GridColumn>
+                        </dxg:GridColumn>-->
                     </dxg:GridControl.Columns>
                 </dxg:GridControl>
             </dxdo:LayoutPanel>
-            <dxdo:LayoutPanel Caption="曲线" ItemWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}},Path=ActualWidth,
-                Converter={StaticResource ConverterCoef},ConverterParameter=0.6 
+            <dxdo:LayoutPanel Background="Transparent" Caption="曲线" ItemWidth="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}},Path=ActualWidth,
+                Converter={StaticResource ConverterCoef},ConverterParameter=0.7 
             }">
                 <dxc:ChartControl
                 Background="Transparent"
@@ -59,8 +59,8 @@
                         Orientation="Horizontal" />
                     </dxc:ChartControl.Legend>
                     <dxc:XYDiagram2D Background="Transparent">
-                        <dxc:XYDiagram2D.AxisX>
-                            <dxc:AxisX2D  Brush="Green">
+                        <dxc:XYDiagram2D.AxisX >
+                            <dxc:AxisX2D  Brush="LightGreen">
                                 <dxc:AxisX2D.DateTimeScaleOptions>
                                     <dxc:ContinuousDateTimeScaleOptions />
                                 </dxc:AxisX2D.DateTimeScaleOptions>
@@ -79,7 +79,7 @@
                         </dxc:XYDiagram2D.AxisX>
                         <dxc:XYDiagram2D.AxisY>
                             <dxc:AxisY2D
-                                Brush="Green"
+                                Brush="LightGreen"
                             Interlaced="True">
                                 <dxc:AxisY2D.Title>
                                     <dxc:AxisTitle
@@ -91,19 +91,46 @@
                                 </dxc:AxisY2D.WholeRange>
                             </dxc:AxisY2D>
                         </dxc:XYDiagram2D.AxisY>
-                        <dxc:LineSeries2D
-                           Brush="Green"
+                        <dxc:SplineSeries2D
+                           Brush="LightGreen"
                         DataSource="{Binding ViewStore.SelectedCpmChartSource}"
                         ArgumentDataMember="PickTime"
                         ValueDataMember="FloatValue"
                         ArgumentScaleType="DateTime"
                         DisplayName="{Binding ViewStore.SelectedCpm.Name}">
-                            <dxc:LineSeries2D.LineStyle>
+                            <dxc:SplineSeries2D.LineStyle>
                                 <dxc:LineStyle
                                 Thickness="1" />
-                            </dxc:LineSeries2D.LineStyle>
-                        </dxc:LineSeries2D>
+                            </dxc:SplineSeries2D.LineStyle>
+                        </dxc:SplineSeries2D>
+
+                        <dxc:SplineSeries2D
+                           Brush="Red"
+                        DataSource="{Binding ViewStore.SelectedMaxThreshold}"
+                        ArgumentDataMember="UpdateTime"
+                        ValueDataMember="Value"
+                        ArgumentScaleType="DateTime"
+                        DisplayName="最大值">
+                            <dxc:SplineSeries2D.LineStyle>
+                                <dxc:LineStyle
+                                Thickness="1" />
+                            </dxc:SplineSeries2D.LineStyle>
+                        </dxc:SplineSeries2D>
+                        
+                        <dxc:SplineSeries2D
+                           Brush="yellow"
+                        DataSource="{Binding ViewStore.SelectedMinThreshold}"
+                        ArgumentDataMember="UpdateTime"
+                        ValueDataMember="Value"
+                        ArgumentScaleType="DateTime"
+                        DisplayName="最小值">
+                            <dxc:SplineSeries2D.LineStyle>
+                                <dxc:LineStyle
+                                Thickness="1" />
+                            </dxc:SplineSeries2D.LineStyle>
+                        </dxc:SplineSeries2D>
                     </dxc:XYDiagram2D>
+
                 </dxc:ChartControl>
             </dxdo:LayoutPanel>
         </dxdo:LayoutGroup>

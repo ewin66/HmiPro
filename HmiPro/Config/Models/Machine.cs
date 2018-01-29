@@ -32,6 +32,7 @@ namespace HmiPro.Config.Models {
         //mq检验报警
         public IDictionary<int, CpmInfo> CodeToMqBomAlarmCpmDict = new Dictionary<int, CpmInfo>();
 
+        //plc检验报警
         public IDictionary<int, PlcAlarmCpm> CodeToPlcAlarmDict = new Dictionary<int, PlcAlarmCpm>();
         /// <summary>
         /// 参数名称：编码
