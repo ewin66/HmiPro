@@ -471,15 +471,15 @@ namespace HmiPro.Redux.Cores {
             MqSchTask taskRemove = null;
             lock (SchTaskDoingLocks[machineCode]) {
                 foreach (var task in allTasks) {
-                    if (task.workcode == taskAccept.workcode) {
-                        //工单已经开始了不能冲掉
-                        if (SchTaskDoingDict[machineCode].WorkCode == taskAccept.workcode) {
-                            Logger.Error($"工单已经开始，无法替换,{task.workcode}");
+                    if (task.taskId == taskAccept.taskId) {
+                        //任务已经开始了不能冲掉
+                        if (SchTaskDoingDict[machineCode]?.MqSchTask?.taskId == taskAccept.taskId) {
+                            Logger.Error($"任务已经开始，无法替换,{task.taskId}");
                             return;
                         }
                         App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                             Title = "通知",
-                            Content = $"即将更新工单任务,工单 {taskAccept.workcode}"
+                            Content = $"已更新任务, {taskAccept.taskId}"
                         }));
                         //要被冲掉的任务
                         taskRemove = task;
@@ -514,11 +514,11 @@ namespace HmiPro.Redux.Cores {
                     var tasks = ctx.Restore<ObservableCollection<MqSchTask>>(key);
                     if (tasks != null) {
                         //过滤掉重复、已完成、过期工单等等
-                        HashSet<string> allCodes = new HashSet<string>();
+                        HashSet<string> allTaskIds = new HashSet<string>();
                         HashSet<MqSchTask> delTasks = new HashSet<MqSchTask>();
                         foreach (var task in tasks) {
                             //重复工单
-                            if (!allCodes.Add(task.workcode)) {
+                            if (!allTaskIds.Add(task.taskId)) {
                                 delTasks.Add(task);
                             }
                             //过期工单
@@ -599,7 +599,7 @@ namespace HmiPro.Redux.Cores {
                     machineCode = machineCode,
                     meter = meter,
                     time = time,
-                    workCode = taskDoing?.MqSchTask?.workcode,
+                    workCode = taskDoing?.WorkCode
                 };
                 return mqAlarm;
             }
@@ -890,10 +890,11 @@ namespace HmiPro.Redux.Cores {
             taskDoing.MqSchAxis = axis;
             taskDoing.IsStarted = true;
             taskDoing.Step = st.step;
-            taskDoing.WorkCode = st.workcode;
+            taskDoing.WorkCode = axis.workcode;
             taskDoing.MeterPlan = axis.length;
             taskDoing.StartTime = DateTime.Now;
             taskDoing.CalcAvgSpeed = YUtil.CreateExecAvgFunc();
+            taskDoing.TaskId = axis.taskId;
             axis.IsStarted = true;
             axis.State = MqSchTaskAxisState.Doing;
             axis.StartTime = DateTime.Now;
@@ -959,7 +960,7 @@ namespace HmiPro.Redux.Cores {
                 taskDoing.MqSchTask.CompletedRate = (float)completedAxis / taskDoing.MqSchTask.axisParam.Count;
                 //一个工单任务完成
                 if (taskDoing.MqSchTask.CompletedRate >= 1) {
-                    completeOneSchTask(machineCode, taskDoing.WorkCode);
+                    completeOneSchTask(machineCode, taskDoing.TaskId);
                 }
                 uManu = new MqUploadManu() {
                     actualBeginTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
@@ -1024,10 +1025,10 @@ namespace HmiPro.Redux.Cores {
         /// 完成某个工单
         /// </summary>
         /// <param name="machineCode"></param>
-        /// <param name="workCode"></param>
-        void completeOneSchTask(string machineCode, string workCode) {
+        /// <param name="taskId"></param>
+        void completeOneSchTask(string machineCode, string taskId) {
             var mqTasks = MqSchTasksDict[machineCode];
-            var removeTask = mqTasks.FirstOrDefault(t => t.workcode == workCode);
+            var removeTask = mqTasks.FirstOrDefault(t => t.taskId== taskId);
             //移除已经完成的某个工单任务
             //fixed: 2018-01-14
             // mqTasks 是界面数据，所以要用 Dispatcher

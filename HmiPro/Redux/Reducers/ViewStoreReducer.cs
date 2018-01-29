@@ -79,7 +79,7 @@ namespace HmiPro.Redux.Reducers {
         /// <param name="cpmDetail"></param>
         /// <param name="cpm"></param>
         private static void updateChartView(CpmDetailViewStore cpmDetail, Cpm cpm) {
-            if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > 1000) {
+            if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > 200) {
                 cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, 100);
             }
             if (cpm.ValueType == SmParamType.Signal) {

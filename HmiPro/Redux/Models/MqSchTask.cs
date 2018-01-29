@@ -328,6 +328,10 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public string axiscode { get; set; }
         /// <summary>
+        /// 任务 Id
+        /// </summary>
+        public string taskId { get; set; }
+        /// <summary>
         /// 
         /// </summary>
         public int step { get; set; }

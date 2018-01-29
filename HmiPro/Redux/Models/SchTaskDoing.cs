@@ -97,6 +97,10 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public int Step;
         /// <summary>
+        /// 任务 Id，确定任务的唯一性
+        /// </summary>
+        public string TaskId { get; set; }
+        /// <summary>
         /// 计算平均速度
         /// </summary>
         public Func<double, double> CalcAvgSpeed;

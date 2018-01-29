@@ -17,6 +17,8 @@
         <Style TargetType="dxdo:LayoutPanel">
             <Setter Property="ShowCloseButton" Value="False"></Setter>
             <Setter Property="ShowPinButton" Value="True"></Setter>
+            <Setter Property="AllowClose" Value="False"></Setter>
+            <Setter Property="AllowFloat" Value="False"></Setter>
         </Style>
     </UserControl.Resources>
     <dxdo:DockLayoutManager >
@@ -58,7 +60,7 @@
                     </dxc:ChartControl.Legend>
                     <dxc:XYDiagram2D Background="Transparent">
                         <dxc:XYDiagram2D.AxisX>
-                            <dxc:AxisX2D  Brush="Red">
+                            <dxc:AxisX2D  Brush="Green">
                                 <dxc:AxisX2D.DateTimeScaleOptions>
                                     <dxc:ContinuousDateTimeScaleOptions />
                                 </dxc:AxisX2D.DateTimeScaleOptions>
@@ -77,7 +79,7 @@
                         </dxc:XYDiagram2D.AxisX>
                         <dxc:XYDiagram2D.AxisY>
                             <dxc:AxisY2D
-                                Brush="Red"
+                                Brush="Green"
                             Interlaced="True">
                                 <dxc:AxisY2D.Title>
                                     <dxc:AxisTitle
@@ -90,7 +92,7 @@
                             </dxc:AxisY2D>
                         </dxc:XYDiagram2D.AxisY>
                         <dxc:LineSeries2D
-                           Brush="Red"
+                           Brush="Green"
                         DataSource="{Binding ViewStore.SelectedCpmChartSource}"
                         ArgumentDataMember="PickTime"
                         ValueDataMember="FloatValue"
