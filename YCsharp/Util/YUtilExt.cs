@@ -18,5 +18,6 @@ namespace YCsharp.Util {
         public static string Truncate(this string value, int maxChars, string restStr = "...") {
             return value.Length <= maxChars ? value : value.Substring(0, maxChars) + restStr;
         }
+
     }
 }

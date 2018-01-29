@@ -24,6 +24,8 @@ namespace HmiPro.Config.Models {
         /// </summary>
         public string PlcAlarmKey;
 
+        public string[] ExpAlarms;
+
 
         private CpmInfoMethodName? methodName;
         public CpmInfoMethodName? MethodName {
@@ -383,6 +385,9 @@ namespace HmiPro.Config.Models {
                     if (!string.IsNullOrEmpty(cpmStr.MqAlarm)) {
                         cpmInfo.MqAlarmBomKeys = cpmStr.MqAlarm.Trim().Split('|');
                     }
+                    if (!string.IsNullOrEmpty(cpmStr.ExpAlarm)) {
+                        cpmInfo.ExpAlarms = cpmStr.ExpAlarm?.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+                    }
                     cpmInfo.PlcAlarmKey = cpmStr.PlcAlarm;
                     //算法参数（计算型）
                     if (IsRelateMethod(cpmInfo.MethodName)) {
@@ -412,12 +417,15 @@ namespace HmiPro.Config.Models {
                 MethodName = row["算法"].ToString(),
                 MethodParams = row["算法参数"].ToString(),
             };
+
             cpmStr.PlcAlarm = row.GetValue("Plc报警配置");
             //兼容老版本配置
             cpmStr.MqAlarm = row.GetValue("报警配置");
             if (string.IsNullOrEmpty(cpmStr.MqAlarm)) {
                 cpmStr.MqAlarm = row.GetValue("Mq报警配置");
             }
+            cpmStr.ExpAlarm = row.GetValue("Exp报警配置");
+
             return cpmStr;
         }
 
@@ -447,6 +455,7 @@ namespace HmiPro.Config.Models {
         public string MethodParams;
         public string MqAlarm;
         public string PlcAlarm;
+        public string ExpAlarm;
     }
 
     /// <summary>
@@ -472,5 +481,15 @@ namespace HmiPro.Config.Models {
         /// 报警关键字
         /// </summary>
         public string AlarmKey;
+    }
+
+    /// <summary>
+    /// 经验报警，固定的最大值和最小值
+    /// <author>ychost</author>
+    /// <date>2018-1-29</date>
+    /// </summary>
+    public class ExpAlarm {
+        public float? Max;
+        public float? Min;
     }
 }

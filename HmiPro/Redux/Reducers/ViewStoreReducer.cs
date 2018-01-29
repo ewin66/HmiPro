@@ -55,22 +55,23 @@ namespace HmiPro.Redux.Reducers {
                     //这个 6 表示为曲线界面 PageView 的 Index 为 6
                     var isInChartView = state.DMewCoreViewDict[action.MachineCode].TabSelectedIndex == 6;
                     var machineCode = action.MachineCode;
-                    lock (cpmDetail.opLock) {
-                        foreach (var cpm in action.Cpms) {
-                            var (maxThreshold, minThreshold) = getMaxAndMinCpmThreshold(state, machineCode, cpm);
-                            //减少主线程调用次数
-                            //只有更新的参数Id为选中的 && 当前处于曲线界面才唤起主线程 && 当前导航机台位参数机台
-                            if (state.NavView.DMesSelectedMachineCode == action.MachineCode && cpm.Code == cpmDetail.SelectedCpm?.Code && isInChartView) {
-                                Application.Current.Dispatcher.Invoke(() => {
-                                    updateChartView(cpmDetail, cpm, maxThreshold, minThreshold);
-                                });
-                            } else {
-                                //防止多线程错误
-                                try {
-                                    updateChartView(cpmDetail, cpm, maxThreshold, minThreshold);
-                                } catch {
+                    foreach (var cpm in action.Cpms) {
+                        if (cpm.ValueType != SmParamType.Signal) {
+                            continue;
+                        }
+                        var (maxThreshold, minThreshold) = getMaxMinThreshold(state, machineCode, cpm);
+                        //减少主线程调用次数
+                        //只有更新的参数Id为选中的 && 当前处于曲线界面才唤起主线程 && 当前导航机台位参数机台
+                        if (state.NavView.DMesSelectedMachineCode == action.MachineCode && cpm.Code == cpmDetail.SelectedCpm?.Code && isInChartView) {
+                            Application.Current.Dispatcher.Invoke(() => {
+                                updateChartView(cpmDetail, cpm, maxThreshold, minThreshold);
+                            });
+                        } else {
+                            //防止多线程错误
+                            try {
+                                updateChartView(cpmDetail, cpm, maxThreshold, minThreshold);
+                            } catch {
 
-                                }
                             }
                         }
                     }
@@ -80,18 +81,30 @@ namespace HmiPro.Redux.Reducers {
         }
 
 
+        private static (CpmChartThreshold, CpmChartThreshold) getMaxMinThreshold(Store state, string machineCode, Cpm cpm) {
+            CpmChartThreshold maxThreshold = null;
+            CpmChartThreshold minThreshold = null;
+
+            var (plcMax, plcMin) = getThresholdFromExp(state, machineCode, cpm);
+            var (expMax, expMin) = getThresholdFromExp(state, machineCode, cpm);
+
+            //首先考虑Plc的最值，再考虑经验最值，最后考虑历史保存最值
+            maxThreshold = plcMax ?? expMax ?? state.CpmDetailViewDict[machineCode].MaxThresholdDict[cpm.Code].LastOrDefault()?.Clone();
+            minThreshold = plcMin ?? expMin ?? state.CpmDetailViewDict[machineCode].MinThresholdDict[cpm.Code].LastOrDefault()?.Clone(); ;
+
+            return (maxThreshold, minThreshold);
+        }
+
         /// <summary>
-        /// 获取参数的最大最小值
+        /// 从 Plc 中读取参数的最值
         /// </summary>
         /// <param name="state"></param>
         /// <param name="machineCode"></param>
         /// <param name="cpm"></param>
         /// <returns></returns>
-        private static (CpmChartThreshold, CpmChartThreshold) getMaxAndMinCpmThreshold(Store state, string machineCode, Cpm cpm) {
-            //从 Plc 中获取
-            //最大值和最小值，默认为上一次的值
-            CpmChartThreshold maxThreshold = state.CpmDetailViewDict[machineCode].MaxThresholdDict[cpm.Code].LastOrDefault();
-            CpmChartThreshold minThreshold = state.CpmDetailViewDict[machineCode].MinThresholdDict[cpm.Code].LastOrDefault();
+        private static (CpmChartThreshold, CpmChartThreshold) getThresholdFromPlc(Store state, string machineCode, Cpm cpm) {
+            CpmChartThreshold maxThreshold = null;
+            CpmChartThreshold minThreshold = null;
             if (MachineConfig.MachineDict[machineCode].CodeToPlcAlarmDict.TryGetValue(cpm.Code, out var plc)) {
                 if (plc.MaxCode.HasValue) {
                     var maxCpm = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode][plc.MaxCode.Value];
@@ -106,6 +119,29 @@ namespace HmiPro.Redux.Reducers {
                     }
                 }
             }
+            return (maxThreshold, minThreshold);
+        }
+
+        /// <summary>
+        /// 读取参数的经验最值
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="machineCode"></param>
+        /// <param name="cpm"></param>
+        /// <returns></returns>
+        private static (CpmChartThreshold, CpmChartThreshold) getThresholdFromExp(Store state, string machineCode, Cpm cpm) {
+            CpmChartThreshold maxThreshold = null;
+            CpmChartThreshold minThreshold = null;
+
+            if (MachineConfig.MachineDict[machineCode].CodeToExpAlarmDict.TryGetValue(cpm.Code, out var expAlarm)) {
+                if (expAlarm.Max.HasValue) {
+                    maxThreshold = new CpmChartThreshold() { Value = expAlarm.Max.Value };
+                }
+                if (expAlarm.Min.HasValue) {
+                    minThreshold = new CpmChartThreshold() { Value = expAlarm.Min.Value };
+                }
+            }
+
             return (maxThreshold, minThreshold);
         }
 
@@ -126,10 +162,13 @@ namespace HmiPro.Redux.Reducers {
 
             if (cpm.ValueType == SmParamType.Signal) {
                 cpmDetail.ChartCpmSourceDict[cpm.Code].Add(cpm);
+                //同步最值和实时曲线的时间
                 if (maxThreshold != null) {
+                    maxThreshold.UpdateTime = cpm.PickTime;
                     cpmDetail.MaxThresholdDict[cpm.Code].Add(maxThreshold);
                 }
                 if (minThreshold != null) {
+                    minThreshold.UpdateTime = cpm.PickTime;
                     cpmDetail.MinThresholdDict[cpm.Code].Add(minThreshold);
                 }
             }

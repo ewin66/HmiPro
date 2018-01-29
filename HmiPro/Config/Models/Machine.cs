@@ -31,9 +31,11 @@ namespace HmiPro.Config.Models {
 
         //mq检验报警
         public IDictionary<int, CpmInfo> CodeToMqBomAlarmCpmDict = new Dictionary<int, CpmInfo>();
-
         //plc检验报警
         public IDictionary<int, PlcAlarmCpm> CodeToPlcAlarmDict = new Dictionary<int, PlcAlarmCpm>();
+        //经验报警配置
+        public IDictionary<int, ExpAlarm> CodeToExpAlarmDict = new Dictionary<int, ExpAlarm>();
+
         /// <summary>
         /// 参数名称：编码
         /// </summary>
@@ -88,7 +90,23 @@ namespace HmiPro.Config.Models {
                     if (!cpm.PlcAlarmKey.ToLower().Contains("_max") && !cpm.PlcAlarmKey.ToLower().Contains("_min")) {
                         CodeToPlcAlarmDict[cpm.Code] = new PlcAlarmCpm() { Code = cpm.Code, AlarmKey = cpm.PlcAlarmKey };
                     }
-
+                }
+                //经验报警配置
+                //max_150|min_130   ||    max_150   || min_130 || min_130|max_150
+                if (cpm.ExpAlarms != null) {
+                    float? max = null, min = null;
+                    var maxStr = cpm.ExpAlarms.FirstOrDefault(c => c.ToLower().Contains("max"));
+                    var minStr = cpm.ExpAlarms.FirstOrDefault(c => c.ToLower().Contains("min"));
+                    if (!string.IsNullOrEmpty(maxStr)) {
+                        max = float.Parse(maxStr.Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries)[1]);
+                    }
+                    if (!string.IsNullOrEmpty(minStr)) {
+                        min = float.Parse(minStr.Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries)[1]);
+                    }
+                    CodeToExpAlarmDict[cpm.Code] = new ExpAlarm() {
+                        Max = max,
+                        Min = min
+                    };
                 }
             });
             //更新Plc报警参数

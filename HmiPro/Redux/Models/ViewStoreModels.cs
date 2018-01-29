@@ -165,7 +165,6 @@ namespace HmiPro.Redux.Models {
         }
 
         private Cpm selectedCpm;
-        public object opLock = new object();
         /// <summary>
         /// 用户选择的参数
         /// </summary>
@@ -175,11 +174,9 @@ namespace HmiPro.Redux.Models {
                 if (selectedCpm != value && value != null) {
                     selectedCpm = value;
                     RaisePropertyChanged(nameof(SelectedCpm));
-                    lock (opLock) {
-                        SelectedCpmChartSource = ChartCpmSourceDict[selectedCpm.Code];
-                        SelectedMaxThreshold = MaxThresholdDict[selectedCpm.Code];
-                        SelectedMinThreshold = MinThresholdDict[SelectedCpm.Code];
-                    }
+                    SelectedCpmChartSource = ChartCpmSourceDict[selectedCpm.Code];
+                    SelectedMaxThreshold = MaxThresholdDict[selectedCpm.Code];
+                    SelectedMinThreshold = MinThresholdDict[SelectedCpm.Code];
                     RaisePropertyChanged(nameof(SelectedCpmChartSource));
                     RaisePropertyChanged(nameof(SelectedMaxThreshold));
                     RaisePropertyChanged(nameof(SelectedMinThreshold));
@@ -232,5 +229,8 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public DateTime UpdateTime { get; set; }
 
+        public CpmChartThreshold Clone() {
+            return new CpmChartThreshold() { Value = this.Value, UpdateTime = this.UpdateTime };
+        }
     }
 }
