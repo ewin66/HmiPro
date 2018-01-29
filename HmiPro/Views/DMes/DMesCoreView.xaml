@@ -34,7 +34,7 @@
                 </DataTemplate>
             </Grid.Resources>
             <sys:NavigatorView Grid.Row="0"/>
-            <dxwui:PageView Grid.Row="1" ShowBackButton="False"  Padding="0,0,0,0"  ItemTemplate="{StaticResource TabHeader}" ItemsSource="{Binding Path=ViewSource}" SelectedIndex="{Binding Path=ViewStore.TabSelectedIndex}">
+            <dxwui:PageView Grid.Row="1" AnimationType="SlideHorizontal"  ShowBackButton="False"  Padding="0,0,0,0"  ItemTemplate="{StaticResource TabHeader}" ItemsSource="{Binding Path=ViewSource}" SelectedIndex="{Binding Path=ViewStore.TabSelectedIndex}">
                 <dxwui:PageView.Resources>
                     <!--</dxwui:PageView>
             <dx:DXTabControl Grid.Row="1" ItemsSource="{Binding Path=ViewSource}" ItemHeaderTemplate="{StaticResource TabHeader}" SelectedIndex="{Binding Path=ViewStore.TabSelectedIndex}" >

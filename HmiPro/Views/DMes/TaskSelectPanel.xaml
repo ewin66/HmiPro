@@ -63,7 +63,7 @@
                            Padding="0">
             </dxnav:TileBar>
         </panels:DpiResizingPanel>
-        <ToggleButton x:Name="expandButton" DockPanel.Dock="Left" Style="{StaticResource HideButtonStyle}"   IsChecked="True" VerticalAlignment="Center"/>
+        <ToggleButton x:Name="expandButton" DockPanel.Dock="Left" Style="{StaticResource HideButtonStyle}"   IsChecked="{Binding Path=ViewStore.TaskPanelIsSelected}" VerticalAlignment="Center"/>
     </DockPanel>
 </UserControl>
 

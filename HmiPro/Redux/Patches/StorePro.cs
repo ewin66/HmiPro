@@ -110,7 +110,7 @@ namespace HmiPro.Redux.Patches {
         /// <param name="subscription"></param>
         /// <param name="useLatest">是否订阅的时候就派遣最近的 Action</param>
         /// <returns></returns>
-        public new Unsubscribe Subscribe(StateChangedSubscriber<T> subscription, bool useLatest = true) {
+        public Unsubscribe Subscribe(StateChangedSubscriber<T> subscription, bool useLatest = true) {
             lock (storeLock) {
                 subscriptions += subscription;
                 //立即返回存储的状态

@@ -86,6 +86,14 @@ namespace HmiPro.Redux.Actions {
         //更换壁纸
         public static readonly string CHANGE_WINDOW_BACKGROUND_IMAGE = "[Sys] Change Window Background Image";
 
+        //使背景模糊
+        public static readonly string MAKE_WINDOW_BACKGROUND_BLUR = "[Sys] Make Window Background Blur";
+
+        public struct MakeWindowBackgroundBlur : IAction {
+            public string Type() => MAKE_WINDOW_BACKGROUND_BLUR;
+
+        }
+
         public struct ChangeWindowBackgroundImage : IAction {
             public string Type() => CHANGE_WINDOW_BACKGROUND_IMAGE;
             public string ImagePath;

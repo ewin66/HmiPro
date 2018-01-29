@@ -24,6 +24,12 @@ namespace HmiPro.ViewModels.DMes.Tab {
         private MqSchTask _selectedTask;
         public string BackgroundImage { get; set; }
         private Visibility palletVisibility = Visibility.Collapsed;
+        public SchTaskAxisViewModel SchTaskAxisViewModel { get; set; }
+        public CraftBomViewModel CraftBomViewModel { get; set; }
+        public string MachineCode { get; set; }
+        public DMesCoreViewStore ViewStore { get; set; }
+
+
         /// <summary>
         /// 是否含有栈板
         /// </summary>
@@ -93,11 +99,6 @@ namespace HmiPro.ViewModels.DMes.Tab {
                 MqSchTaskDetails.Clear();
             });
         }
-        public SchTaskAxisViewModel SchTaskAxisViewModel { get; set; }
-        public CraftBomViewModel CraftBomViewModel { get; set; }
-        public string MachineCode { get; set; }
-        public DMesCoreViewStore ViewStore { get; set; }
-
         /// <summary>
         /// 初始化任务数据
         /// </summary>

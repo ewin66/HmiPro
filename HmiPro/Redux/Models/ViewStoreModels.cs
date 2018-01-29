@@ -115,6 +115,22 @@ namespace HmiPro.Redux.Models {
             }
         }
 
+        private bool taskPanelIsSelected;
+
+        /// <summary>
+        /// 控制工单列表的显示/隐藏
+        /// </summary>
+        public bool TaskPanelIsSelected {
+            get { return taskPanelIsSelected; }
+            set {
+                if (taskPanelIsSelected != value) {
+                    taskPanelIsSelected = value;
+                    OnPropertyChanged(nameof(TaskPanelIsSelected));
+                }
+            }
+        }
+
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]

@@ -198,6 +198,7 @@ namespace HmiPro.ViewModels {
         /// <param name="action"></param>
         async void whenAppXamlInited(AppState state, IAction action) {
             BackgroundImage = AssetsHelper.GetAssets().ImageIronMan;
+            App.Store.Dispatch(new SysActions.MakeWindowBackgroundBlur());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
             var loadEffects = UnityIocService.ResolveDepend<LoadEffects>();
             //启动完毕则检查更新
