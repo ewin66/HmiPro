@@ -16,6 +16,10 @@ namespace HmiPro.Redux.Models {
     /// <date>2017-12-19</date>
     /// </summary>
     public class MqSchTask : INotifyPropertyChanged {
+        /// <summary>
+        /// 任务 Id 
+        /// </summary>
+        public string taskId { get; set; }
         public static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
         /// <summary>
@@ -139,7 +143,6 @@ namespace HmiPro.Redux.Models {
             }
         }
 
-
         public string PdTimeStr { get; set; }
 
         /// <summary>
@@ -178,15 +181,12 @@ namespace HmiPro.Redux.Models {
             }
         }
 
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-
     }
     public class PmtmsItem {
 

@@ -42,14 +42,9 @@ namespace HmiPro.Redux.Cores {
             var taskDoing = state.DMesState.SchTaskDoingDict[dpmAction.MachineCode];
             mqUploadDpm.proGgxh = taskDoing?.MqSchAxis?.product;
             mqUploadDpm.macCode = dpmAction.MachineCode;
-            mqUploadDpm.paramJson = new List<DpmUpload>();
+            mqUploadDpm.paramJson = new Dictionary<string,string>();
             foreach (var dpm in dpmAction.Dpms) {
-                mqUploadDpm.paramJson.Add(new DpmUpload() {
-                    macCode = dpmAction.MachineCode,
-                    paramName = dpm.Name,
-                    paramValue = dpm.Value,
-                    proGgxh = mqUploadDpm.proGgxh
-                });
+                mqUploadDpm.paramJson[dpm.Name] = dpm.Value;
             }
             //提交给Mq
             App.Store.Dispatch(mqEffects.UploadDpms(new MqActions.UploadDpms(dpmAction.MachineCode, mqUploadDpm)));

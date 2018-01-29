@@ -74,6 +74,7 @@ namespace HmiPro.ViewModels {
         public void OnLoaded() {
             App.Store.Dispatch(new SysActions.CloseLoadingSplash());
             App.Store.Dispatch(new SysActions.ChangeWindowBackgroundImage(AssetsHelper.GetAssets().ImageBackground));
+            AppState.IsCompleteInited = true;
         }
 
         /// <summary>

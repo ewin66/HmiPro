@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using HmiPro.Annotations;
+using HmiPro.Redux.Actions;
 using HmiPro.Redux.Reducers;
 
 namespace HmiPro.Redux.Models {
@@ -115,13 +119,13 @@ namespace HmiPro.Redux.Models {
             }
         }
 
-        private bool taskPanelIsSelected;
+        private bool taskPanelIsSelected = true;
 
         /// <summary>
         /// 控制工单列表的显示/隐藏
         /// </summary>
         public bool TaskPanelIsSelected {
-            get { return taskPanelIsSelected; }
+            get { return taskPanelIsSelected = true; }
             set {
                 if (taskPanelIsSelected != value) {
                     taskPanelIsSelected = value;
@@ -147,5 +151,67 @@ namespace HmiPro.Redux.Models {
         /// DMes界面中选定的某个机台
         /// </summary>
         public string DMesSelectedMachineCode;
+    }
+
+    /// <summary>
+    /// 参数详细数据
+    /// </summary>
+    public class CpmDetailViewStore : INotifyPropertyChanged {
+        public readonly string MachineCode;
+
+        public CpmDetailViewStore(string machineCode) {
+            MachineCode = machineCode;
+        }
+
+        private Cpm selectedCpm;
+        public object opLock = new object();
+        /// <summary>
+        /// 用户选择的参数
+        /// </summary>
+        public Cpm SelectedCpm {
+            get { return selectedCpm; }
+            set {
+                if (selectedCpm != value && value != null) {
+                    selectedCpm = value;
+                    RaisePropertyChanged(nameof(SelectedCpm));
+                    lock (opLock) {
+                        SelectedCpmChartSource = ChartCpmSourceDict[selectedCpm.Code];
+                    }
+                    RaisePropertyChanged(nameof(SelectedCpmChartSource));
+                }
+            }
+        }
+
+        public IDictionary<int, ObservableCollection<Models.Cpm>> ChartCpmSourceDict { get; set; }
+
+        public ObservableCollection<Cpm> SelectedCpmChartSource { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    /// <summary>
+    /// chart 适用的数据模型
+    /// <author>DevExpress</author>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class ChartDataCollection<T> : ObservableCollection<T> {
+        public void AddRange(IList<T> items) {
+            foreach (T item in items)
+                Items.Add(item);
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, (IList)items, Items.Count - items.Count));
+        }
+        public void RemoveFromBegin(int count) {
+            IList<T> removedItems = new List<T>(count);
+            for (int i = 0; i < count; i++) {
+                removedItems.Add(Items[0]);
+                Items.RemoveAt(0);
+            }
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, (IList)removedItems, 0));
+        }
     }
 }

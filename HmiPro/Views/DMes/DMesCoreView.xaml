@@ -82,7 +82,7 @@
                                                                         Converter={StaticResource ConverterCoef},
                                                                         ConverterParameter=0.20 }"
                                                         Grid.Column="0"></TextBlock>
-                                            <dxe:TextEdit Grid.Column="1" Text="{Binding Path=Value}"
+                                            <dxe:TextEdit Background="Transparent" Grid.Column="1" Text="{Binding Path=Value}"
                                                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, 
                                                                         AncestorType={x:Type dxlc:FlowLayoutControl}},
                                                                         Path=ActualWidth,
@@ -237,6 +237,9 @@
                                 </dxg:GridControl.Columns>
                             </dxg:GridControl>
                         </Grid>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type Model:CpmDetailTab}">
+                        <dMes:CpmDetailView DataContext="{Binding Path=.}" />
                     </DataTemplate>
                     <!--</dx:DXTabControl.Resources>
             </dx:DXTabControl>-->

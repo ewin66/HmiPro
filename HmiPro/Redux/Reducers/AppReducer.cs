@@ -22,5 +22,7 @@ namespace HmiPro.Redux.Reducers {
         /// Actions:ExectedTime
         /// </summary>
         public static IDictionary<string, DateTime> ExectedActions = new ConcurrentDictionary<string, DateTime>();
+
+        public static bool IsCompleteInited = false;
     }
 }

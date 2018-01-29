@@ -298,7 +298,7 @@ namespace HmiPro.ViewModels {
             if (!HmiConfig.IsDevUserEnv) {
                 App.Store.Dispatch(new SysActions.HideTaskBar());
             }
-            //进入主界面
+        
             Navigate(nameof(HomeView));
 
         }

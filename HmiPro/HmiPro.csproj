@@ -52,16 +52,21 @@
     <Reference Include="Common.Logging.Core, Version=3.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
       <HintPath>..\packages\Common.Logging.Core.3.3.1\lib\net40\Common.Logging.Core.dll</HintPath>
     </Reference>
+    <Reference Include="DevExpress.Charts.v17.1.Core, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Data.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Mvvm.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
       <Private>True</Private>
     </Reference>
     <Reference Include="DevExpress.Printing.v17.1.Core, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Charts.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Xpf.Controls.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Xpf.Core.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Docking.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Xpf.Grid.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Xpf.Grid.v17.1.Core, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Layout.v17.1.Core, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Xpf.LayoutControl.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpf.Printing.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Xpf.Themes.HmiPro.v17.1">
       <HintPath>..\..\HmiTheme\DevExpress.Xpf.Themes.HmiPro\Bin\DevExpress.Xpf.Themes.HmiPro.v17.1.dll</HintPath>
     </Reference>
@@ -128,6 +133,7 @@
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Printing" />
     <Reference Include="System.Reflection.TypeExtensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Reflection.TypeExtensions.4.1.0-rc2-24027\lib\net46\System.Reflection.TypeExtensions.dll</HintPath>
     </Reference>
@@ -266,6 +272,7 @@
     <Compile Include="ViewModels\DMes\Tab\AlarmTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\Com485Tab.cs" />
+    <Compile Include="ViewModels\DMes\Tab\CpmDetailTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\CpmsTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\DpmsTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\ScanMaterialTab.cs" />
@@ -274,6 +281,10 @@
     <Compile Include="ViewModels\Sys\FormViewModel.cs" />
     <Compile Include="ViewModels\Sys\Form\JumpToTestViewForm.cs" />
     <Compile Include="ViewModels\Sys\SelectableViewModel.cs" />
+    <Compile Include="Views\DMes\CpmDetailView.xaml.cs">
+      <DependentUpon>CpmDetailView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\DMes\CpmDetailViewModel.cs" />
     <Compile Include="Views\DMes\DMesCoreView.xaml.cs">
       <DependentUpon>DMesCoreView.xaml</DependentUpon>
     </Compile>
@@ -355,6 +366,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Themes\Templates.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DMes\CpmDetailView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

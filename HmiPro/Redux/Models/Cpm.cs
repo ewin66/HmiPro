@@ -56,6 +56,12 @@ namespace HmiPro.Redux.Models {
             }
         }
 
+        public float FloatValue => GetFloatVal();
+        /// <summary>
+        /// 只保留指定字符个数的值
+        /// </summary>
+        public object NameRest => Name.Truncate(5);
+
         /// <summary>
         /// 获取浮点值，直接强转 (float)value会出问题
         /// </summary>
@@ -68,8 +74,18 @@ namespace HmiPro.Redux.Models {
             return float.Parse(value.ToString());
         }
 
+        private DateTime pickTime = DateTime.Now;
         //采集时间
-        public DateTime PickTime { get; set; } = DateTime.Now;
+        public DateTime PickTime {
+            get => pickTime;
+            set {
+                if (pickTime != value) {
+                    pickTime = value;
+                    OnPropertyChanged(nameof(PickTime));
+                }
+            }
+        }
+
         //采集时间戳，毫秒级别
         public Int64 PickTimeStampMs => YUtil.GetUtcTimestampMs(PickTime);
         //参数名字

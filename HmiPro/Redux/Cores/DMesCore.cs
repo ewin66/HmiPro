@@ -95,7 +95,7 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
             actionExecDict[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
             actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompleteSchAxis;
-            actionExecDict[DMesActions.CLEAR_SCH_TASKS] = clearSchTasks;
+            actionExecDict[DMesActions.CLEAR_SCH_TASKS] = doClearSchTasks;
             actionExecDict[SysActions.FORM_VIEW_PRESSED_OK] = doFormViewPressedOk;
 
             App.Store.Subscribe(actionExecDict);
@@ -177,7 +177,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        void clearSchTasks(AppState state, IAction action) {
+        void doClearSchTasks(AppState state, IAction action) {
             var dmesAction = (DMesActions.ClearSchTasks)action;
             Application.Current.Dispatcher.Invoke(() => {
                 foreach (var machineCode in dmesAction.Machines) {

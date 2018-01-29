@@ -41,7 +41,6 @@ namespace HmiPro.Redux.Effects {
         /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<LoadActions.LoadMachieConfig, bool> LoadMachineConfig;
 
-
         /// <summary>
         /// 日志
         /// </summary>

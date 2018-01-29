@@ -69,8 +69,11 @@ namespace HmiPro.Redux.Models {
             OeeVal = TimeEff * SpeedEff * QualityEff;
         }
 
-        private float oeeVal;
 
+        private float oeeVal;
+        /// <summary>
+        /// 
+        /// </summary>
         public float OeeVal {
             get { return oeeVal; }
             set {

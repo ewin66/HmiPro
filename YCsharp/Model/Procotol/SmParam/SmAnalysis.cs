@@ -36,8 +36,13 @@ namespace YCsharp.Model.Procotol.SmParam {
             List<byte[]> replayCmdPackages = packageDictionary[SmPackageType.ClientReplyCmd];
             //采集参数包解码
             paramPackages.ForEach(p => {
-                SmModel data = processParamPackage(p, 0);
-                dataList.Add(data);
+                try {
+                    SmModel data = processParamPackage(p, 0);
+                    dataList.Add(data);
+                } catch (Exception e) {
+                    var gap = 3600 * 24;
+                    Logger.Error("参数解码错误 ", e, gap);
+                }
             });
             //心跳包解码
             heartbeatPackages.ForEach(p => {

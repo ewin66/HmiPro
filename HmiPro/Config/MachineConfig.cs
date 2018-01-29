@@ -36,7 +36,7 @@ namespace HmiPro.Config {
             IpToMachineCodeDict = new Dictionary<string, string>();
             AlarmIpDict = new Dictionary<string, string>();
             MachineCodeToIpsDict = new Dictionary<string, List<string>>();
-            var codes = Path.GetFileNameWithoutExtension(path).Split('_');
+            var codes = Path.GetFileNameWithoutExtension(path).Split(new string[]{"_"},StringSplitOptions.RemoveEmptyEntries);
             HmiName = Path.GetFileNameWithoutExtension(path);
             foreach (var code in codes) {
                 var machine = new Machine();

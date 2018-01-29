@@ -44,6 +44,7 @@ namespace HmiPro.ViewModels.DMes {
         public virtual ScanMaterialTab ScanMaterialTab { get; set; } = new ScanMaterialTab() { Header = "来料" };
         public virtual Com485Tab Com485Tab { get; set; } = new Com485Tab() { Header = "通讯" };
         public virtual DpmsTab DpmsTab { get; set; } = new DpmsTab() { Header = "设置" };
+        public virtual CpmDetailTab CpmDetailTab { get; set; } = new CpmDetailTab() { Header = "曲线" };
         private Unsubscribe unsubscribe;
         readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
         public virtual string Header { get; set; }
@@ -60,6 +61,7 @@ namespace HmiPro.ViewModels.DMes {
             ViewSource.Add(ScanMaterialTab);
             ViewSource.Add(Com485Tab);
             ViewSource.Add(DpmsTab);
+            ViewSource.Add(CpmDetailTab);
 
             actionExecDict[DMesActions.RFID_ACCPET] = whenRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccpet;
@@ -102,10 +104,13 @@ namespace HmiPro.ViewModels.DMes {
             var dpms = App.Store.GetState().DpmStore.DpmsDict;
             DpmsTab.BindSource(dpms[MachineCode]);
 
+            //绑定曲线参数界面
+            CpmDetailTab.BindSource(MachineCode,onlineCpmsDict[MachineCode]);
+
             //绑定选中的tab
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[MachineCode];
 
-            unsubscribe = App.Store.Subscribe(actionExecDict,false);
+            unsubscribe = App.Store.Subscribe(actionExecDict, false);
             App.Store.Dispatch(new SysActions.CloseLoadingSplash());
         }
 
