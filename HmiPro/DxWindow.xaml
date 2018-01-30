@@ -19,7 +19,6 @@
     mc:Ignorable="d"
     Padding="0"
     Margin="0"
-    AllowsTransparency="True"
     d:DesignHeight="600" d:DesignWidth="800"
     >
     <Window.Background>

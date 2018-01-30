@@ -81,11 +81,18 @@ namespace HmiPro.Redux.Reducers {
         }
 
 
+        /// <summary>
+        /// 获取参数的最值
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="machineCode"></param>
+        /// <param name="cpm"></param>
+        /// <returns></returns>
         private static (CpmChartThreshold, CpmChartThreshold) getMaxMinThreshold(Store state, string machineCode, Cpm cpm) {
             CpmChartThreshold maxThreshold = null;
             CpmChartThreshold minThreshold = null;
 
-            var (plcMax, plcMin) = getThresholdFromExp(state, machineCode, cpm);
+            var (plcMax, plcMin) = getThresholdFromPlc(state, machineCode, cpm);
             var (expMax, expMin) = getThresholdFromExp(state, machineCode, cpm);
 
             //首先考虑Plc的最值，再考虑经验最值，最后考虑历史保存最值
@@ -171,6 +178,9 @@ namespace HmiPro.Redux.Reducers {
                     minThreshold.UpdateTime = cpm.PickTime;
                     cpmDetail.MinThresholdDict[cpm.Code].Add(minThreshold);
                 }
+            }
+            if (cpm.Code == cpmDetail.SelectedCpm.Code) {
+                cpmDetail.SelectedPointNums = "点数：" + cpmDetail.SelectedCpmChartSource.Count;
             }
         }
     }

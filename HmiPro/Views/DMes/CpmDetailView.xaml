@@ -51,7 +51,13 @@
                 BorderThickness="0"
                 AutoLayout="False"
                 CrosshairEnabled="False"
+                Padding="0"
                 IsHitTestVisible="False">
+                    <dxc:ChartControl.Titles>
+                        <dxc:Title HorizontalAlignment="Center" Margin="200,-25,0,0" Content="{Binding Path=ViewStore.SelectedPointNums}" FontSize="16" VerticalAlignment="Top" Dock="Bottom">
+
+                        </dxc:Title>
+                    </dxc:ChartControl.Titles>
                     <dxc:ChartControl.Legend>
                         <dxc:Legend
                         HorizontalPosition="Left"
@@ -116,7 +122,7 @@
                                 Thickness="1" />
                             </dxc:SplineSeries2D.LineStyle>
                         </dxc:SplineSeries2D>
-                        
+
                         <dxc:SplineSeries2D
                            Brush="yellow"
                         DataSource="{Binding ViewStore.SelectedMinThreshold}"

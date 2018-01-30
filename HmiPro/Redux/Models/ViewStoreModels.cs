@@ -158,8 +158,15 @@ namespace HmiPro.Redux.Models {
     /// 参数详细数据
     /// </summary>
     public class CpmDetailViewStore : INotifyPropertyChanged {
+        /// <summary>
+        /// 唯一标识
+        /// </summary>
         public readonly string MachineCode;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="machineCode"></param>
         public CpmDetailViewStore(string machineCode) {
             MachineCode = machineCode;
         }
@@ -173,20 +180,42 @@ namespace HmiPro.Redux.Models {
             set {
                 if (selectedCpm != value && value != null) {
                     selectedCpm = value;
-                    RaisePropertyChanged(nameof(SelectedCpm));
                     SelectedCpmChartSource = ChartCpmSourceDict[selectedCpm.Code];
                     SelectedMaxThreshold = MaxThresholdDict[selectedCpm.Code];
                     SelectedMinThreshold = MinThresholdDict[SelectedCpm.Code];
+
+                    RaisePropertyChanged(nameof(SelectedCpm));
                     RaisePropertyChanged(nameof(SelectedCpmChartSource));
                     RaisePropertyChanged(nameof(SelectedMaxThreshold));
                     RaisePropertyChanged(nameof(SelectedMinThreshold));
+                    SelectedPointNums = "点数：" + SelectedCpmChartSource.Count;
+                }
+            }
+        }
+        /// <summary>
+        /// 选中曲线的最大值
+        /// </summary>
+        public ObservableCollection<CpmChartThreshold> SelectedMaxThreshold { get; set; }
+
+        /// <summary>
+        /// 选中曲线的最小值
+        /// </summary>
+        public ObservableCollection<CpmChartThreshold> SelectedMinThreshold { get; set; }
+
+        /// <summary>
+        /// 选中的曲线的点数
+        /// </summary>
+        private string selectedPointNums;
+        public string SelectedPointNums {
+            get { return selectedPointNums; }
+            set {
+                if (selectedPointNums != value) {
+                    selectedPointNums = value;
+                    RaisePropertyChanged(nameof(SelectedPointNums));
                 }
             }
         }
 
-        public ObservableCollection<CpmChartThreshold> SelectedMaxThreshold { get; set; }
-
-        public ObservableCollection<CpmChartThreshold> SelectedMinThreshold { get; set; }
 
         /// <summary>
         /// 每个参数的最大值，同参数一起更新
@@ -218,14 +247,15 @@ namespace HmiPro.Redux.Models {
 
     /// <summary>
     /// 参数曲线的最值
+    /// 最值可动态变更，并非一条常量曲线，它和正常曲线一起绘制的
     /// </summary>
     public class CpmChartThreshold {
         /// <summary>
-        /// 
+        /// 最值
         /// </summary>
         public float Value { get; set; }
         /// <summary>
-        /// 
+        /// 最值更新时间
         /// </summary>
         public DateTime UpdateTime { get; set; }
 
