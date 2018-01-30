@@ -20,6 +20,7 @@ namespace HmiPro.Redux.Actions {
         public static readonly string START_LISTEN_SCH_TASK_FAILED = "[Mq] Start Listen Schedule Task Failed";
         public static readonly string SCH_TASK_ACCEPT = "[Mq] Schedule Task Accept";
         public static readonly string SCH_TASK_REPLACED = "[Mq] Schedule Task Replaced";
+        public static readonly string CMD_ACCEPT = "[Mq] Command Accpet";
 
         //监听来料信息
         public static readonly string SCAN_MATERIAL_ACCEPT = "[Mq] Scan Material Accept";
@@ -51,6 +52,12 @@ namespace HmiPro.Redux.Actions {
         public static readonly string START_LISTEN_AXIS_RFID_SUCCESS = "[Mq] Start Listen Axis Rfid Success";
         public static readonly string START_LISTEN_AXIS_RFID_FAILED = "[Mq] Start Listen Axis Rfid Failed";
 
+        //监听命令
+        public static readonly string START_LISTEN_CMD = "[Mq] Start Listen Command";
+        public static readonly string START_LISTEN_CMD_SUCCESS = "[Mq] Start Listen Command Success";
+        public static readonly string START_LISTEN_CMD_FAILED = "[Mq] Start Listen Command Failed";
+
+
         //上传回填参数
         public static readonly string UPLOAD_DPMS = "[Mq] Upload Dpms";
         public static readonly string UPLOAD_DPMS_SUCCESS = "[Mq] Upload Dpms Success";
@@ -62,6 +69,27 @@ namespace HmiPro.Redux.Actions {
         public static readonly string CALL_SYSTEM = "[Call] Call System";
         public static readonly string CALL_SYSTEM_SUCCESS = "[Call] Call System Success";
         public static readonly string CALL_SYSTEM_FAILED = "[Call] Call System Failed";
+
+
+        public struct CmdAccept : IAction {
+            public string Type() => CMD_ACCEPT;
+            public string MachineCode;
+            public MqCmd MqCmd;
+
+            public CmdAccept(string machineCode, MqCmd mqCmd) {
+                MachineCode = machineCode;
+                MqCmd = mqCmd;
+            }
+        }
+
+        public struct StartListenCmd : IAction {
+            public string Type() => START_LISTEN_CMD;
+            public string TopicName;
+
+            public StartListenCmd(string topicName) {
+                TopicName = topicName;
+            }
+        }
 
         public struct CallSystem : IAction {
             public string Type() => CALL_SYSTEM;

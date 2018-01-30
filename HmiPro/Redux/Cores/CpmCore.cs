@@ -132,7 +132,8 @@ namespace HmiPro.Redux.Cores {
                 SmParamTcp?.OpenAlarm(ip);
                 //一定时间后关闭报警灯
                 YUtil.SetTimeout(alarmAction.LightMs, () => {
-                    App.Store.Dispatch(new AlarmActions.CloseAlarmLights(alarmAction.MachineCode));
+                    //App.Store.Dispatch(new AlarmActions.CloseAlarmLights(alarmAction.MachineCode));
+                    doCloseAlarmLights(state,new AlarmActions.CloseAlarmLights(alarmAction.MachineCode));
                 });
             } else {
                 Logger.Error($"机台 {alarmAction.MachineCode} 没有报警 ip");

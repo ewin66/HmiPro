@@ -24,7 +24,7 @@
   //用于接受命令的http端口
   "CmdHttpPort": 8899,
   //息屏间隔
-  "CloseScreenInterval": 900000,
+  "CloseScreenInterval": 600000,
 
   //---------ActiveMq队列和主题---------
   //队列，上传生产属性

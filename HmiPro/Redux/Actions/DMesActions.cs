@@ -25,6 +25,19 @@ namespace HmiPro.Redux.Actions {
         public static readonly string COMPLETED_SCH_AXIS_SUCESS = "[DMes] Completed Schedule Axis Success";
         public static readonly string COMPLETED_SCH_AXIS_FAILED = "[DMes] Completed Schedule Axis Failed";
         public static readonly string CLEAR_SCH_TASKS = "[DMes] Clear Sch Tasks";
+        public static readonly string DEL_TASK = "[DMes] Del Task";
+
+
+        public struct DelTask : IAction {
+            public string Type() => DEL_TASK;
+            public string MachineCode;
+            public string TaskId;
+
+            public DelTask(string machineCode, string taskId) {
+                MachineCode = machineCode;
+                TaskId = taskId;
+            }
+        }
 
         //接受到Rfid可能来自Mq，可能来自底层参数
         public static readonly string RFID_ACCPET = "[Cpm] Rfid Accept";
@@ -97,10 +110,12 @@ namespace HmiPro.Redux.Actions {
             public string Type() => START_SCH_TASK_AXIS;
             public string AxisCode;
             public string MachineCode;
+            public string TaskId;
 
-            public StartSchTaskAxis(string machineCode, string axisCode) {
+            public StartSchTaskAxis(string machineCode, string axisCode,string taskId) {
                 MachineCode = machineCode;
                 AxisCode = axisCode;
+                TaskId = taskId;
             }
         }
 

@@ -73,10 +73,12 @@ namespace HmiPro.Mocks {
             var task = YUtil.GetJsonObjectFromFile<MqSchTask>(AssetsHelper.GetAssets().MockMqSchTaskJson);
             task.workcode = YUtil.GetRandomString(8);
             task.id = id;
+            task.taskId = id.ToString();
             task.maccode = machineCode;
             foreach (var axis in task.axisParam) {
                 axis.maccode = task.maccode;
                 axis.axiscode = YUtil.GetRandomString(10);
+                axis.taskId = task.taskId;
             }
             JavaTime startTime = new JavaTime() {
                 time = YUtil.GetUtcTimestampMs(YUtil.GetRandomTime(DateTime.Now.AddDays(-1), DateTime.Now))

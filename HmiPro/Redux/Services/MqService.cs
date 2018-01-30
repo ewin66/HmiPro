@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentScheduler;
 using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using Newtonsoft.Json;
 using YCsharp.Service;
+using YCsharp.Util;
 
 namespace HmiPro.Redux.Services {
     /// <summary>
@@ -21,6 +23,34 @@ namespace HmiPro.Redux.Services {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
         }
+
+
+        /// <summary>
+        /// 机台命令处理
+        /// </summary>
+        /// <param name="json"></param>
+        public void CmdAccept(string json) {
+            try {
+                var mqCmd = JsonConvert.DeserializeObject<MqCmd>(json);
+
+                //机台过滤
+                if (MachineConfig.MachineDict.Keys.Contains(mqCmd.machineCode.ToUpper())) {
+                    mqCmd.machineCode = mqCmd.machineCode.ToUpper();
+                    //指定执行时间
+                    if (mqCmd.execTime.HasValue) {
+                        var execTime = YUtil.UtcTimestampToLocalTime(mqCmd.execTime.Value);
+                        Console.WriteLine($"任务将在 {execTime.ToString("G")} 执行");
+                        JobManager.AddJob(() => { App.Store.Dispatch(new MqActions.CmdAccept(mqCmd.machineCode, mqCmd));
+                        }, (s) => s.ToRunOnceAt(execTime));
+                    } else {
+                        App.Store.Dispatch(new MqActions.CmdAccept(mqCmd.machineCode, mqCmd));
+                    }
+                }
+            } catch (Exception e) {
+                Logger.Error("处理机台命令异常，命令为：" + json, e);
+            }
+        }
+
         /// <summary>
         /// 处理排产任务
         /// </summary>

@@ -20,7 +20,6 @@ namespace HmiPro.ViewModels.DMes.Tab {
                 if (value != header) {
                     header = value;
                     RaisePropertyChanged(nameof(Header));
-
                 }
             }
         }

@@ -35,7 +35,7 @@ namespace HmiPro.ViewModels.DMes {
         [Command(Name = "StartTaskAxisDoingCommand")]
         public void StartTaskAxisDoing(object row) {
             var axis = (MqTaskAxis)row;
-            App.Store.Dispatch(new DMesActions.StartSchTaskAxis(axis.maccode, axis.axiscode));
+            App.Store.Dispatch(new DMesActions.StartSchTaskAxis(axis.maccode, axis.axiscode,axis.taskId));
         }
 
         [Command(Name = "CompletedTaskAxisDoingCommand")]

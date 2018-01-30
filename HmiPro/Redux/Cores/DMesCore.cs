@@ -35,7 +35,13 @@ namespace HmiPro.Redux.Cores {
     /// <author>ychost</author>
     /// </summary>
     public class DMesCore {
+        /// <summary>
+        /// 异步操作数据库（MongoDb,InfluxDb)
+        /// </summary>
         private readonly DbEffects dbEffects;
+        /// <summary>
+        /// 异步操作 Mq
+        /// </summary>
         private readonly MqEffects mqEffects;
         /// <summary>
         /// 每个机台接受到的所有任务
@@ -53,7 +59,6 @@ namespace HmiPro.Redux.Cores {
         /// 人员卡信息
         /// </summary>
         public IDictionary<string, List<MqEmpRfid>> MqEmpRfidDict;
-
         /// <summary>
         /// 日志辅助
         /// </summary>
@@ -62,15 +67,20 @@ namespace HmiPro.Redux.Cores {
         /// 命令派发执行的动作
         /// </summary>
         readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
-
         /// <summary>
         /// 任务锁
         /// </summary>
         public static readonly IDictionary<string, object> SchTaskDoingLocks = new Dictionary<string, object>();
-
+        /// <summary>
+        /// 栈板数据保存
+        /// </summary>
         public IDictionary<string, Pallet> PalletDict;
 
-
+        /// <summary>
+        /// 注入必需的服务
+        /// </summary>
+        /// <param name="dbEffects"></param>
+        /// <param name="mqEffects"></param>
         public DMesCore(DbEffects dbEffects, MqEffects mqEffects) {
             UnityIocService.AssertIsFirstInject(GetType());
             this.dbEffects = dbEffects;
@@ -97,6 +107,8 @@ namespace HmiPro.Redux.Cores {
             actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompleteSchAxis;
             actionExecDict[DMesActions.CLEAR_SCH_TASKS] = doClearSchTasks;
             actionExecDict[SysActions.FORM_VIEW_PRESSED_OK] = doFormViewPressedOk;
+            actionExecDict[MqActions.CMD_ACCEPT] = whenCmdAccept;
+            actionExecDict[DMesActions.DEL_TASK] = doDelTask;
 
             App.Store.Subscribe(actionExecDict);
 
@@ -117,6 +129,55 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
+        /// 删除某个任务
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void doDelTask(AppState state, IAction action) {
+            var delTaskAction = (DMesActions.DelTask)action;
+            var tasks = MqSchTasksDict[delTaskAction.MachineCode];
+            MqSchTask delTask = null;
+            lock (SchTaskDoingLocks[delTaskAction.MachineCode]) {
+                //任务已经开始了，不能被删除
+                if (SchTaskDoingDict[delTaskAction.MachineCode].IsStarted && SchTaskDoingDict[delTaskAction.MachineCode].TaskId == delTaskAction.TaskId) {
+                    Logger.Warn($"任务 {delTaskAction.TaskId} 已经开始了，不能被删除");
+                    return;
+                }
+                delTask = tasks.FirstOrDefault(t => t.taskId == delTaskAction.TaskId);
+            }
+
+            Application.Current.Dispatcher.Invoke(() => {
+                if (tasks.Remove(delTask)) {
+                    //这里不用异步会死锁  2018-1-30
+                    Task.Run(() => {
+                        Logger.Info($"任务 {delTaskAction.TaskId} 被指令删除");
+                        App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                            Title = "通知",
+                            Content = $"任务 {delTaskAction.TaskId} 已经被服务器删除"
+                        }));
+                        //更新数据库
+                        SqliteHelper.DoAsync(ctx => {
+                            ctx.SavePersist(new Persist("task_" + delTaskAction.MachineCode, JsonConvert.SerializeObject(tasks)));
+                        });
+                    });
+
+                }
+            });
+        }
+
+        /// <summary>
+        /// 接受到命令
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenCmdAccept(AppState state, IAction action) {
+            var cmdAction = (MqActions.CmdAccept)action;
+            if (cmdAction.MqCmd.action == MqCmdActions.DEL_WORK_TASK) {
+                App.Store.Dispatch(new DMesActions.DelTask(cmdAction.MachineCode, cmdAction.MqCmd.args?.ToString()));
+            }
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="state"></param>
@@ -127,7 +188,6 @@ namespace HmiPro.Redux.Cores {
                 confirmPalletAxisNum(form);
             }
         }
-
 
         /// <summary>
         /// 确认栈板Rfid与轴数目的关系
@@ -209,11 +269,11 @@ namespace HmiPro.Redux.Cores {
             completeOneAxis(dmesAction.MachineCode, dmesAction.AxisCode);
             //自动开始下一轴任务
             lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
-                var nextAxisCode = SchTaskDoingDict[dmesAction.MachineCode]?.MqSchTask?.axisParam
-                                  ?.FirstOrDefault(s => s.IsCompleted == false)?.axiscode;
-                Logger.Info("自动开始下一轴号：" + nextAxisCode);
-                if (!string.IsNullOrEmpty(nextAxisCode)) {
-                    DMesActions.StartSchTaskAxis startAxis = new DMesActions.StartSchTaskAxis(dmesAction.MachineCode, nextAxisCode);
+                var nextAxis = SchTaskDoingDict[dmesAction.MachineCode]?.MqSchTask?.axisParam
+                    ?.FirstOrDefault(s => s.IsCompleted == false);
+                Logger.Info("自动开始下一轴号：" + nextAxis);
+                if (nextAxis != null) {
+                    DMesActions.StartSchTaskAxis startAxis = new DMesActions.StartSchTaskAxis(dmesAction.MachineCode, nextAxis.axiscode, nextAxis.taskId);
                     doStartSchTaskAxis(state, startAxis, true);
                 }
             }

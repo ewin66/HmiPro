@@ -40,12 +40,11 @@ namespace HmiPro.Redux.Cores {
         /// 3. 定时上传Cpm到Mq
         /// </summary>
         public async Task Init() {
-            await App.Store.Dispatch(
-                sysEffects.StartCloseScreenTimer(new SysActions.StartCloseScreenTimer(HmiConfig.CloseScreenInterval)));
+            JobManager.JobException += info => Logger.Error("An error just happened with a scheduled job: " + info.Exception);
+            //自动关闭显示器
+            await App.Store.Dispatch( sysEffects.StartCloseScreenTimer(new SysActions.StartCloseScreenTimer(HmiConfig.CloseScreenInterval)));
             //启动定时上传Cpms到Mq定时器
-            await App.Store.Dispatch(mqEffects.StartUploadCpmsInterval(
-                new MqActions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
-
+            await App.Store.Dispatch(mqEffects.StartUploadCpmsInterval(new MqActions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
             //每天8点打开显示器
             Schedule(() => {
                 App.Store.Dispatch(new SysActions.OpenScreen());

@@ -210,15 +210,15 @@ namespace HmiPro.Redux.Effects {
             await UnityIocService.ResolveDepend<SchCore>().Init();
 
             //Http 命令解析
-            updateLoadingMessage("正在启动系统核心...", 0.7);
+            updateLoadingMessage("正在启动Http服务...", 0.7);
             var starHttpSystem = App.Store.Dispatch(sysEffects.StartHttpSystem(new SysActions.StartHttpSystem($"http://+:{HmiConfig.CmdHttpPort}/")));
 
             //参数采集服务
-            updateLoadingMessage("正在启动系统核心...", 0.75);
+            updateLoadingMessage("正在启动参数采集服务...", 0.75);
             var startCpmServer = App.Store.Dispatch(cpmEffects.StartServer(new CpmActions.StartServer(HmiConfig.CpmTcpIp, HmiConfig.CpmTcpPort)));
 
-            //监听 Mq
-            updateLoadingMessage("正在启动系统核心...", 0.8);
+            //监听排产和来料 
+            updateLoadingMessage("正在启动监听排产服务...", 0.8);
             Dictionary<string, Task<bool>> startListenMqDict = new Dictionary<string, Task<bool>>();
             foreach (var pair in MachineConfig.MachineDict) {
                 //监听排产任务
@@ -232,16 +232,21 @@ namespace HmiPro.Redux.Effects {
             }
 
             //监听人员打卡
-            updateLoadingMessage("正在启动系统核心...", 0.85);
+            updateLoadingMessage("正在启动监听人员打卡...", 0.85);
             var empRfidTask = App.Store.Dispatch(mqEffects.StartListenEmpRfid(new MqActions.StartListenEmpRfid(HmiConfig.TopicEmpRfid)));
             startListenMqDict["rfidEmpTask"] = empRfidTask;
 
             //监听轴号卡
-            updateLoadingMessage("正在启动系统核心...", 0.9);
+            updateLoadingMessage("正在启动监听盘卡扫描...", 0.90);
             var axisRfidTask = App.Store.Dispatch(mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(HmiConfig.TopicListenHandSet)));
             startListenMqDict["rfidAxisTask"] = axisRfidTask;
 
-            updateLoadingMessage("正在启动系统核心...", 0.95);
+            //监听机台命令
+            updateLoadingMessage("正在启动监听机台命令...", 0.92);
+            var cmdTask = App.Store.Dispatch(mqEffects.StartListenCmd(new MqActions.StartListenCmd(HmiConfig.TopicCmdReceived)));
+            startListenMqDict["cmdTask"] = cmdTask;
+
+            updateLoadingMessage("正在启动系统核心服务...", 0.95);
             var tasks = new List<Task<bool>>() { starHttpSystem, startCpmServer };
             tasks.AddRange(startListenMqDict.Values);
             //检查各项任务启动情况
@@ -259,6 +264,7 @@ namespace HmiPro.Redux.Effects {
                 if (!isCpmServer) {
                     var message = "参数采集核心启动失败";
                     updateLoadingMessage(message, 0.95, 0);
+                    shutdownAppAfterSec(10, 0.95, message);
                     return;
                 }
                 //是否启动完成Http解析系统
@@ -266,6 +272,7 @@ namespace HmiPro.Redux.Effects {
                 if (!isHttpSystem) {
                     var message = "Http 核心启动失败";
                     updateLoadingMessage(message, 0.95, 0);
+                    shutdownAppAfterSec(10, 0.95, message);
                     return;
                 }
                 //是否完成监听Mq
@@ -282,9 +289,12 @@ namespace HmiPro.Redux.Effects {
                             failedMessage = $"监听mq 人员打卡 数据失败";
                         } else if (mqKey.Contains("RFIDAXIS")) {
                             failedMessage = $"监听Mq 线盘卡失败";
+                        } else if (mqKey.Contains("CMD")) {
+                            failedMessage = $"监听Mq 机台命令失败";
                         }
                         if (!string.IsNullOrEmpty(failedMessage)) {
                             updateLoadingMessage(failedMessage, 0.95, 0);
+                            shutdownAppAfterSec(10, 0.95, failedMessage);
                             return;
                         }
                     }
@@ -302,7 +312,6 @@ namespace HmiPro.Redux.Effects {
                         App.Store.Dispatch(new SysActions.AppInitCompleted());
                     }
                 }, 5);
-
             });
         }
         /// <summary>

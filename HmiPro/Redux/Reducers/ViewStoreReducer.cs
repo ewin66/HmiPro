@@ -20,9 +20,21 @@ namespace HmiPro.Redux.Reducers {
     /// <author>ychost</author>
     /// </summary>
     public static class ViewStoreReducer {
+        /// <summary>
+        /// 保存视图的一些临时数据，比如导航数据，列表选择数据等等，让用户下一次进入到此路由的时候恢复上次离开的时候的状态
+        /// </summary>
         public struct Store {
+            /// <summary>
+            /// DMesCoreView 视图模型数据
+            /// </summary>
             public IDictionary<string, DMesCoreViewStore> DMewCoreViewDict;
+            /// <summary>
+            /// 导航视图M模型数据（目前只在 DMesCoreView 中使用到，顶部的那个机台导航）
+            /// </summary>
             public NavViewStore NavView;
+            /// <summary>
+            /// DMesCoreView -> CpmDetailView 视图模型数据
+            /// </summary>
             public IDictionary<string, CpmDetailViewStore> CpmDetailViewDict;
         }
 
@@ -75,7 +87,6 @@ namespace HmiPro.Redux.Reducers {
                             }
                         }
                     }
-
                     return state;
                 });
         }
@@ -153,18 +164,25 @@ namespace HmiPro.Redux.Reducers {
         }
 
         /// <summary>
+        /// 一个曲线图最多绘制的点数
+        /// </summary>
+        private static int maxChartPointNums = 10000; 
+        /// <summary>
+        /// 当点数超过 maxChartPointNums 之后移除的点数
+        /// </summary>
+        private static int removePointNums = 1000;
+        /// <summary>
         /// 更新曲线数据
         /// </summary>
         private static void updateChartView(CpmDetailViewStore cpmDetail, Cpm cpm, CpmChartThreshold maxThreshold, CpmChartThreshold minThreshold) {
-            //最多保留 1000 个点
-            if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > 1000) {
-                cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, 100);
+            if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > maxChartPointNums) {
+                cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, removePointNums);
             }
-            if (cpmDetail.MaxThresholdDict[cpm.Code].Count > 1000) {
-                cpmDetail.MaxThresholdDict[cpm.Code].RemoveRange(0, 100);
+            if (cpmDetail.MaxThresholdDict[cpm.Code].Count > maxChartPointNums) {
+                cpmDetail.MaxThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
             }
-            if (cpmDetail.MinThresholdDict[cpm.Code].Count > 1000) {
-                cpmDetail.MinThresholdDict[cpm.Code].RemoveRange(0, 100);
+            if (cpmDetail.MinThresholdDict[cpm.Code].Count > maxChartPointNums) {
+                cpmDetail.MinThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
             }
 
             if (cpm.ValueType == SmParamType.Signal) {

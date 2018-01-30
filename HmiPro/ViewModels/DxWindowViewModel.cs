@@ -298,9 +298,7 @@ namespace HmiPro.ViewModels {
             if (!HmiConfig.IsDevUserEnv) {
                 App.Store.Dispatch(new SysActions.HideTaskBar());
             }
-        
             Navigate(nameof(HomeView));
-
         }
 
         /// <summary>
@@ -326,8 +324,14 @@ namespace HmiPro.ViewModels {
                 //});
 
                 YUtil.SetTimeout(3000, () => {
-                    for (int i = 0; i < 2; i++) {
+                    for (int i = 0; i < 1; i++) {
                         MockDispatchers.DispatchMockSchTask(machineCode, i);
+                        var delCmd = new MqCmd() {
+                            action = MqCmdActions.DEL_WORK_TASK,
+                            args = i.ToString(),
+                            machineCode = machineCode
+                        };
+                        Logger.Info("测试删除指令生成："+JsonConvert.SerializeObject(delCmd));
                     }
                 });
             }

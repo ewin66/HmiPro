@@ -65,6 +65,10 @@ namespace HmiPro.Redux.Effects {
         /// 呼叫叉车、维修等等
         /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.CallSystem, bool> CallSystem;
+        /// <summary>
+        /// 监听命令
+        /// </summary>
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenCmd, bool> StartListenCmd;
 
         /// <summary>
         /// 
@@ -86,8 +90,25 @@ namespace HmiPro.Redux.Effects {
             initStartListenAxisRfid();
             initUploadDpms();
             initCallSystem();
+            initStartListenCmd();
         }
 
+
+        void initStartListenCmd() {
+            StartListenCmd = App.Store.asyncAction<MqActions.StartListenCmd, bool>(
+                        async (dispatch, getState, instance) => {
+                            dispatch(instance);
+                            return await Task.Run(() => {
+                                try {
+                                    activeMq.ListenTopic(instance.TopicName, null, mqService.CmdAccept);
+                                    return true;
+                                } catch (Exception e) {
+                                    dispatch(new SimpleAction(MqActions.START_LISTEN_CMD_FAILED, e));
+                                }
+                                return false;
+                            });
+                        });
+        }
         /// <summary>
         /// 连接服务器
         /// </summary>

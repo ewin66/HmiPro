@@ -168,6 +168,10 @@ namespace HmiPro.Config {
         /// 呼叫系统
         /// </summary>
         public static string QueueCallSystem = "call";
+        /// <summary>
+        /// 机台接受的命令
+        /// </summary>
+        public static string TopicCmdReceived = "Machine_Command";
     }
 
 }

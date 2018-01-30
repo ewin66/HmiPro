@@ -36,21 +36,22 @@ namespace HmiPro.Config {
             IpToMachineCodeDict = new Dictionary<string, string>();
             AlarmIpDict = new Dictionary<string, string>();
             MachineCodeToIpsDict = new Dictionary<string, List<string>>();
-            var codes = Path.GetFileNameWithoutExtension(path).Split(new string[]{"_"},StringSplitOptions.RemoveEmptyEntries);
+            var codes = Path.GetFileNameWithoutExtension(path).Split(new string[] { "_" }, StringSplitOptions.RemoveEmptyEntries);
             HmiName = Path.GetFileNameWithoutExtension(path);
             foreach (var code in codes) {
+                var upperCode = code.ToUpper();
                 var machine = new Machine();
-                machine.Code = code;
-                machine.InitCpmDict(path, $"{code}_采集参数");
-                machine.CpmIps = GlobalConfig.MachineSettingDict[code].CpmModuleIps;
-                MachineDict[code] = machine;
+                machine.Code = upperCode;
+                machine.InitCpmDict(path, $"{upperCode}_采集参数");
+                machine.CpmIps = GlobalConfig.MachineSettingDict[upperCode].CpmModuleIps;
+                MachineDict[upperCode] = machine;
                 foreach (var ip in machine.CpmIps) {
-                    IpToMachineCodeDict[ip] = code;
+                    IpToMachineCodeDict[ip] = upperCode;
                     if (ip.EndsWith("100")) {
-                        AlarmIpDict[code] = ip;
+                        AlarmIpDict[upperCode] = ip;
                     }
                 }
-                MachineCodeToIpsDict[code] = machine.CpmIps.ToList();
+                MachineCodeToIpsDict[upperCode] = machine.CpmIps.ToList();
             }
         }
 
@@ -66,7 +67,7 @@ namespace HmiPro.Config {
 
             string configPath = null;
             if (!string.IsNullOrEmpty(CmdOptions.GlobalOptions.HmiName)) {
-             
+
                 Console.WriteLine("指定配置Hmi：" + CmdOptions.GlobalOptions.HmiName);
                 //Global.xls中根据ip来指定Hmi配置
             } else {
