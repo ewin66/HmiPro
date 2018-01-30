@@ -31,6 +31,8 @@
                 <Button Content="显示桌面" Height="50" Width="200" Command="{Binding Path=ReturnDesktopCommand}"  ></Button>
                 <Button Content="隐藏任务栏" Height="50" Width="200" Command="{Binding Path=HideTaskBarCommand}"  ></Button>
                 <Button Content="显示任务栏" Height="50" Width="200" Command="{Binding Path=ShowTaskBarCommand}"  ></Button>
+                <Button Content="弹出任务管理器" Height="50" Width="200" Command="{Binding Path=ShowTaskMgmrCommand}"  ></Button>
+                <Button Content="弹出日志文件夹" Height="50" Width="200" Command="{Binding Path=ShowLogFolerCommand}"  ></Button>
                 <Button Content="关闭软件" Height="50" Width="200" Command="{Binding Path=CloseAppCommand}"  ></Button>
                 <Button Content="检查更新" Height="50" Width="200" Command="{Binding Path=CheckUpdateCommand}"  ></Button>
             </dxlc:FlowLayoutControl>

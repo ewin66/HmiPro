@@ -119,5 +119,17 @@ namespace HmiPro.ViewModels.Sys {
         public void ShowTaskBar() {
             App.Store.Dispatch(new SysActions.ShowTaskBar());
         }
+
+        [Command(Name = "ShowTaskMgmrCommand")]
+        public void ShowTaskMgmr() {
+            YUtil.CallTaskMgrAsync();
+        }
+
+        [Command(Name = "ShowLogFolerCommand")]
+        public void ShowLogFoler() {
+            Task.Run(() => {
+                YUtil.Exec(HmiConfig.LogFolder, "");
+            });
+        }
     }
 }

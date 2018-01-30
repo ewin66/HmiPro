@@ -192,7 +192,6 @@ namespace HmiPro.Redux.Models {
                     RaisePropertyChanged(nameof(SelectedMinThreshold));
                     SelectedPointNums = "点数：" + SelectedCpmChartSource.Count;
                     SelectedVisualMax = DateTime.Now;
-                    SelectedVisualMin = SelectedVisualMax.AddSeconds(-10);
                 }
             }
         }

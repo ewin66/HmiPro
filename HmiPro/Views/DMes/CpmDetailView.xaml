@@ -79,7 +79,7 @@
                                     <dxc:Range  AutoSideMargins="True" />
                                 </dxc:AxisX2D.WholeRange>
                                 <dxc:AxisX2D.VisualRange>
-                                    <dxc:Range AutoSideMargins="True"  MaxValue="{Binding ViewStore.SelectedVisualMax}" />
+                                    <dxc:Range AutoSideMargins="True"   MaxValue="{Binding ViewStore.SelectedVisualMax}" />
                                 </dxc:AxisX2D.VisualRange>
                             </dxc:AxisX2D>
                         </dxc:XYDiagram2D.AxisX>

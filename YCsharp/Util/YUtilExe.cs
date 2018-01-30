@@ -199,7 +199,7 @@ namespace YCsharp.Util {
         /// </summary>
         /// <param name="serviceName"></param>
         public static void UninstallWinService(string serviceName) {
-            var installUtil = @"C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe";
+            var installUtil = $@"{GetDotNetFolder()}\InstallUtil.exe";
             if (!CheckServiceIsExist(serviceName)) {
                 return;
             }
@@ -220,6 +220,15 @@ namespace YCsharp.Util {
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// 弹出任务管理器
+        /// </summary>
+        public static void CallTaskMgrAsync() {
+            Task.Run(() => {
+                Exec("TaskMgr.exe", "");
+            });
         }
     }
 }

@@ -38,14 +38,14 @@ namespace HmiPro {
                 Topmost = false;
                 //生产电脑
             } else {
-                Topmost = true;
+                Topmost =false;
                 WindowStyle = WindowStyle.None;
                 WindowState = WindowState.Maximized;
             }
             //每一秒回收一次垃圾
-            DispatcherTimer timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            timer.Tick += (d, e) => { GC.Collect(); };
-            timer.Start();
+            //DispatcherTimer timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            //timer.Tick += (d, e) => { GC.Collect(); };
+            //timer.Start();
         }
 
         #region  模糊背景
