@@ -710,8 +710,7 @@ namespace HmiPro.Redux.Cores {
                         min = minObj != null ? (float?)minObj : null;
                         std = stdObj != null ? (float?)stdObj : null;
                     } catch (Exception e) {
-                        var logDetail = $"任务 id={taskDoing.MqSchTaskId} 的Bom表上下限有误" +
-                                        $"{checkAlarm.MaxBomKey}: {maxObj},{checkAlarm.MinBomKey}:{minObj},{checkAlarm.StdBomKey}: {stdObj}";
+                        var logDetail = $"任务 id={taskDoing.MqSchTaskId} 的Bom表上下限有误  {checkAlarm.MaxBomKey}: {maxObj},{checkAlarm.MinBomKey}:{minObj},{checkAlarm.StdBomKey}: {stdObj}";
                         //10分钟通知一次
                         App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                             Title = $"机台 {machineCode} 报警失败",
@@ -728,14 +727,18 @@ namespace HmiPro.Redux.Cores {
                 }
                 //报警
                 if (max.HasValue && min.HasValue) {
+                    //上下限有误
+                    if (max.Value <= min.Value) {
+                        return;
+                    }
                     var cpmVal = (float)checkAlarm.Cpm.Value;
-                    if (cpmVal > max || cpmVal < min) {
+                    if ((cpmVal > max && max > 0) || (cpmVal < min && min > 0)) {
                         MqAlarm mqAlarm = createMqAlarmMustInTask(machineCode, checkAlarm.Cpm.PickTimeStampMs,
                             checkAlarm.Cpm.Name, AlarmType.CpmErr);
                         dispatchAlarmAction(machineCode, mqAlarm);
                     }
                 } else {
-                    Logger.Error($"未能从任务 Id={taskDoing.MqSchTaskId}的Bom表中求出上下限，Max: {max},Min {min},Std: {std}");
+                    Logger.Error($"未能从任务 Id={taskDoing.MqSchTaskId}的Bom表中求出上下限，Max: {max},Min {min},Std: {std}", 3600);
                 }
             }
         }

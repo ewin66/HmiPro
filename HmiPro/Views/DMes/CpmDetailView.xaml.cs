@@ -20,5 +20,6 @@ namespace HmiPro.Views.DMes {
         public CpmDetailView() {
             InitializeComponent();
         }
+  
     }
 }

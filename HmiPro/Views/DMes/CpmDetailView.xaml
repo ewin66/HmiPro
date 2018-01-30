@@ -49,13 +49,10 @@
                 <dxc:ChartControl
                 Background="Transparent"
                 BorderThickness="0"
-                AutoLayout="False"
-                CrosshairEnabled="False"
                 Padding="0"
-                IsHitTestVisible="False">
+                >
                     <dxc:ChartControl.Titles>
                         <dxc:Title HorizontalAlignment="Center" Margin="300,-25,0,0" Content="{Binding Path=ViewStore.SelectedPointNums}" FontSize="16" VerticalAlignment="Top" Dock="Bottom">
-
                         </dxc:Title>
                     </dxc:ChartControl.Titles>
                     <dxc:ChartControl.Legend>
@@ -79,24 +76,15 @@
                                     TextPattern="{}{A:HH:mm:ss}" />
                                 </dxc:AxisX2D.Label>
                                 <dxc:AxisX2D.WholeRange>
-                                    <dxc:Range AutoSideMargins="True" />
+                                    <dxc:Range  AutoSideMargins="True" />
                                 </dxc:AxisX2D.WholeRange>
                                 <dxc:AxisX2D.VisualRange>
-                                    <dxc:Range />
+                                    <dxc:Range AutoSideMargins="True"  MaxValue="{Binding ViewStore.SelectedVisualMax}" />
                                 </dxc:AxisX2D.VisualRange>
-                                <dxc:AxisX2D.NumericScaleOptions>
-                                    <dxc:ContinuousNumericScaleOptions />
-                                </dxc:AxisX2D.NumericScaleOptions>
                             </dxc:AxisX2D>
                         </dxc:XYDiagram2D.AxisX>
                         <dxc:XYDiagram2D.AxisY>
-                            <dxc:AxisY2D
-                                Brush="LightGreen"
-                            Interlaced="True">
-                                <dxc:AxisY2D.Title>
-                                    <dxc:AxisTitle
-                                    Content="值" />
-                                </dxc:AxisY2D.Title>
+                            <dxc:AxisY2D   Brush="LightGreen"  Interlaced="False">
                                 <dxc:AxisY2D.WholeRange>
                                     <dxc:Range
                                     dxc:AxisY2D.AlwaysShowZeroLevel="False" />
@@ -104,11 +92,12 @@
                             </dxc:AxisY2D>
                         </dxc:XYDiagram2D.AxisY>
                         <dxc:SplineSeries2D
-                           Brush="LightGreen"
+                        Brush="LightGreen"
                         DataSource="{Binding ViewStore.SelectedCpmChartSource}"
                         ArgumentDataMember="PickTime"
                         ValueDataMember="FloatValue"
                         ArgumentScaleType="DateTime"
+                            CrosshairLabelPattern="{}{S}：{V:F3}"  
                         DisplayName="{Binding ViewStore.SelectedCpm.Name}">
                             <dxc:SplineSeries2D.LineStyle>
                                 <dxc:LineStyle
@@ -122,7 +111,9 @@
                         ArgumentDataMember="UpdateTime"
                         ValueDataMember="Value"
                         ArgumentScaleType="DateTime"
+                            CrosshairLabelPattern="{}{S}：{V:F3}"  
                         DisplayName="最大值">
+
                             <dxc:SplineSeries2D.LineStyle>
                                 <dxc:LineStyle
                                 Thickness="1" />
@@ -135,6 +126,7 @@
                         ArgumentDataMember="UpdateTime"
                         ValueDataMember="Value"
                         ArgumentScaleType="DateTime"
+                            CrosshairLabelPattern="{}{S}：{V:F3}"  
                         DisplayName="最小值">
                             <dxc:SplineSeries2D.LineStyle>
                                 <dxc:LineStyle

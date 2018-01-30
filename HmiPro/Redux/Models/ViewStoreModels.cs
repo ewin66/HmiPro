@@ -169,6 +169,8 @@ namespace HmiPro.Redux.Models {
         /// <param name="machineCode"></param>
         public CpmDetailViewStore(string machineCode) {
             MachineCode = machineCode;
+            SelectedVisualMax = DateTime.Now;
+            SelectedVisualMin = SelectedVisualMax.AddMinutes(-10);
         }
 
         private Cpm selectedCpm;
@@ -189,6 +191,8 @@ namespace HmiPro.Redux.Models {
                     RaisePropertyChanged(nameof(SelectedMaxThreshold));
                     RaisePropertyChanged(nameof(SelectedMinThreshold));
                     SelectedPointNums = "点数：" + SelectedCpmChartSource.Count;
+                    SelectedVisualMax = DateTime.Now;
+                    SelectedVisualMin = SelectedVisualMax.AddSeconds(-10);
                 }
             }
         }
@@ -215,6 +219,36 @@ namespace HmiPro.Redux.Models {
                 }
             }
         }
+
+        private DateTime selectedVisualMax;
+        /// <summary>
+        /// 下面滚动条的最大时间点
+        /// </summary>
+        public DateTime SelectedVisualMax {
+            get { return selectedVisualMax; }
+            set {
+                if (selectedVisualMax != value) {
+                    selectedVisualMax = value;
+                    RaisePropertyChanged(nameof(SelectedVisualMax));
+                }
+            }
+        }
+
+
+        private DateTime selectedVisualMin;
+        /// <summary>
+        /// 下面滚动条的最小值
+        /// </summary>
+        public DateTime SelectedVisualMin {
+            get { return selectedVisualMin; }
+            set {
+                if (selectedVisualMin != value) {
+                    selectedVisualMin = value;
+                    RaisePropertyChanged(nameof(SelectedVisualMin));
+                }
+            }
+        }
+
 
 
         /// <summary>

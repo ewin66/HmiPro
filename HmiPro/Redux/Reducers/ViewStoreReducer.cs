@@ -166,7 +166,7 @@ namespace HmiPro.Redux.Reducers {
         /// <summary>
         /// 一个曲线图最多绘制的点数
         /// </summary>
-        private static int maxChartPointNums = 10000; 
+        private static int maxChartPointNums = 10000;
         /// <summary>
         /// 当点数超过 maxChartPointNums 之后移除的点数
         /// </summary>
@@ -199,6 +199,14 @@ namespace HmiPro.Redux.Reducers {
             }
             if (cpm.Code == cpmDetail.SelectedCpm.Code) {
                 cpmDetail.SelectedPointNums = "点数：" + cpmDetail.SelectedCpmChartSource.Count;
+                //保证实时曲线的动态绘制
+                cpmDetail.SelectedVisualMax = DateTime.Now;
+                //控制曲线可视范围
+                //十分钟更新一次
+                //if ((DateTime.Now - cpmDetail.SelectedVisualMax).TotalMinutes > 10) {
+                //    cpmDetail.SelectedVisualMax = DateTime.Now;
+                //    //cpmDetail.SelectedVisualMin = DateTime.Now.AddMinutes(-10);
+                //}
             }
         }
     }
