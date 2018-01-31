@@ -24,7 +24,7 @@ namespace YCsharp.Util {
         /// <summary>
         /// 关机
         /// </summary>
-        public static void ShutDown() {
+        public static void ShutDownPc() {
             try {
                 System.Diagnostics.ProcessStartInfo startinfo =
                     new System.Diagnostics.ProcessStartInfo("shutdown.exe", "-s -t 00");

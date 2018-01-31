@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
+using DevExpress.Xpf.Core;
 using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Mocks;
@@ -130,6 +131,36 @@ namespace HmiPro.ViewModels.Sys {
             Task.Run(() => {
                 YUtil.Exec(HmiConfig.LogFolder, "");
             });
+        }
+
+        [Command(Name = "CloseLoadingSplashCommand1")]
+        public void CloseLoadingSplash1() {
+            App.Store.Dispatch(new SysActions.CloseLoadingSplash());
+            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                Title = "通知",
+                Content = "完成 Splash 关闭 动作"
+            }));
+        }
+
+        [Command(Name = "CloseLoadingSplashCommand2")]
+        public void CloseLoadingSplash2() {
+            try {
+                DXSplashScreen.Close();
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "通知",
+                    Content = "关闭 Splash 成功"
+                }));
+            } catch {
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = "警告",
+                    Content = "关闭 Splash 失败"
+                }));
+            }
+        }
+
+        [Command(Name = "ClosePcCommand")]
+        public void ClosePc() {
+            YUtil.ShutDownPc();
         }
     }
 }

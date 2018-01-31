@@ -107,6 +107,11 @@ namespace HmiPro.Redux.Cores {
                     OnlineCpmDict = App.Store.GetState().CpmState.OnlineCpmsDict;
                 }
                 SmParamTcp.Start();
+
+                //检查超时
+                YUtil.SetInterval(HmiConfig.CpmTimeout, () => {
+                    checkCpmTimeout(HmiConfig.CpmTimeout);
+                });
             });
         }
 
@@ -133,7 +138,7 @@ namespace HmiPro.Redux.Cores {
                 //一定时间后关闭报警灯
                 YUtil.SetTimeout(alarmAction.LightMs, () => {
                     //App.Store.Dispatch(new AlarmActions.CloseAlarmLights(alarmAction.MachineCode));
-                    doCloseAlarmLights(state,new AlarmActions.CloseAlarmLights(alarmAction.MachineCode));
+                    doCloseAlarmLights(state, new AlarmActions.CloseAlarmLights(alarmAction.MachineCode));
                 });
             } else {
                 Logger.Error($"机台 {alarmAction.MachineCode} 没有报警 ip");
@@ -259,8 +264,7 @@ namespace HmiPro.Redux.Cores {
             dispatchCheckBomAlarm(machineCode, cpms);
             //检查Plc上下限报警
             dispatchCheckPlcAlarm(machineCode, cpms);
-            //检查超时
-            checkCpmTimeout(HmiConfig.CpmTimeout);
+            ;
         }
 
         /// <summary>
@@ -291,7 +295,6 @@ namespace HmiPro.Redux.Cores {
             } else if (DefinedParamCode.EmpRfid == cpm.Code) {
             }
             return rfidAccept;
-
         }
 
 
@@ -303,7 +306,7 @@ namespace HmiPro.Redux.Cores {
         private void checkCpmTimeout(int timeoutMs) {
             foreach (var cpmsDict in OnlineCpmDict) {
                 foreach (var pair in cpmsDict.Value) {
-                    if (pair.Value.ValueType != SmParamType.Signal || pair.Value.ValueType != SmParamType.String) {
+                    if ((pair.Value.ValueType != SmParamType.Signal && pair.Value.ValueType != SmParamType.String)) {
                         continue;
                     }
                     var msDiff = Math.Abs((DateTime.Now - pair.Value.PickTime).TotalMilliseconds);
