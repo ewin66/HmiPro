@@ -171,41 +171,46 @@ namespace HmiPro.Redux.Reducers {
         /// <summary>
         /// 一个曲线图最多绘制的点数
         /// </summary>
-        private static int maxChartPointNums =200;
+        private static int maxChartPointNums = 200;
         /// <summary>
         /// 当点数超过 maxChartPointNums 之后移除的点数
         /// </summary>
-        private static int removePointNums =50;
+        private static int removePointNums = 50;
+
         /// <summary>
         /// 更新曲线数据
+        /// 该函数被多线程调用，所以给每个 Code 对应的 Chart 都上了一把锁
         /// </summary>
         private static void updateChartView(CpmDetailViewStore cpmDetail, Cpm cpm, CpmChartThreshold maxThreshold, CpmChartThreshold minThreshold) {
-            if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > maxChartPointNums) {
-                cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, removePointNums);
-            }
-            if (cpmDetail.MaxThresholdDict[cpm.Code].Count > maxChartPointNums) {
-                cpmDetail.MaxThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
-            }
-            if (cpmDetail.MinThresholdDict[cpm.Code].Count > maxChartPointNums) {
-                cpmDetail.MinThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
-            }
 
-            if (cpm.ValueType == SmParamType.Signal) {
-                cpmDetail.ChartCpmSourceDict[cpm.Code].Add(cpm);
-                //同步最值和实时曲线的时间
-                if (maxThreshold != null) {
-                    maxThreshold.UpdateTime = cpm.PickTime;
-                    cpmDetail.MaxThresholdDict[cpm.Code].Add(maxThreshold);
+            lock (cpmDetail.ChartCpmSourceDict[cpm.Code]) {
+                if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > maxChartPointNums) {
+                    cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, removePointNums);
                 }
-                if (minThreshold != null) {
-                    minThreshold.UpdateTime = cpm.PickTime;
-                    cpmDetail.MinThresholdDict[cpm.Code].Add(minThreshold);
+                if (cpmDetail.MaxThresholdDict[cpm.Code].Count > maxChartPointNums) {
+                    cpmDetail.MaxThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
                 }
-            }
-            if (cpm.Code == cpmDetail.SelectedCpm.Code) {
-                cpmDetail.SelectedPointNums = "点数：" + cpmDetail.SelectedCpmChartSource.Count;
-                //保证实时曲线的动态绘制
-                cpmDetail.SelectedVisualMax = DateTime.Now;
+                if (cpmDetail.MinThresholdDict[cpm.Code].Count > maxChartPointNums) {
+                    cpmDetail.MinThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
+                }
+
+                if (cpm.ValueType == SmParamType.Signal) {
+                    cpmDetail.ChartCpmSourceDict[cpm.Code].Add(cpm);
+                    //同步最值和实时曲线的时间
+                    if (maxThreshold != null) {
+                        maxThreshold.UpdateTime = cpm.PickTime;
+                        cpmDetail.MaxThresholdDict[cpm.Code].Add(maxThreshold);
+                    }
+                    if (minThreshold != null) {
+                        minThreshold.UpdateTime = cpm.PickTime;
+                        cpmDetail.MinThresholdDict[cpm.Code].Add(minThreshold);
+                    }
+                }
+                if (cpm.Code == cpmDetail.SelectedCpm.Code) {
+                    cpmDetail.SelectedPointNums = "点数：" + cpmDetail.SelectedCpmChartSource.Count;
+                    //保证实时曲线的动态绘制
+                    cpmDetail.SelectedVisualMax = DateTime.Now;
+                }
             }
         }
     }

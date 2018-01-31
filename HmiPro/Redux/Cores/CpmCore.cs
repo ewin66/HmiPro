@@ -105,13 +105,13 @@ namespace HmiPro.Redux.Cores {
                     SmParamTcp = new YSmParamTcp(ip, port, LoggerHelper.CreateLogger("YSmParamTcp"));
                     SmParamTcp.OnDataReceivedAction += smModelsHandler;
                     OnlineCpmDict = App.Store.GetState().CpmState.OnlineCpmsDict;
+                    //检查超时
+                    YUtil.SetInterval(HmiConfig.CpmTimeout, () => {
+                        checkCpmTimeout(HmiConfig.CpmTimeout);
+                    }) ;
                 }
                 SmParamTcp.Start();
 
-                //检查超时
-                YUtil.SetInterval(HmiConfig.CpmTimeout, () => {
-                    checkCpmTimeout(HmiConfig.CpmTimeout);
-                });
             });
         }
 
