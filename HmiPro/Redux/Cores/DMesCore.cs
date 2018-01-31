@@ -864,7 +864,6 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 通知服务器任务开始了
         /// </summary>
-        /// <param name="machineCode"></param>
         void notifyServerAxisStarted(string machineCode, string axisCode) {
             MqUploadManu uManu = null;
             lock (SchTaskDoingLocks[machineCode]) {
@@ -889,7 +888,8 @@ namespace HmiPro.Redux.Cores {
                     status = "开始生产",
                 };
             }
-            mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu));
+            Logger.Info("通知服务器开始任务：" + JsonConvert.SerializeObject(uManu));
+            App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
         }
 
 

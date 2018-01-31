@@ -46,7 +46,7 @@
         <dxmvvm:NotificationService x:Name="AppNotificationService" UseWin8NotificationsIfAvailable="False" PredefinedNotificationDuration="Long" PredefinedNotificationTemplate="ShortHeaderAndTwoTextFields"   />
         <dxmvvm:DispatcherService />
         <navigation:FrameNavigationService Frame="{Binding ElementName=frame}" ShowSplashScreen="False"  />
-        <dx:DXSplashScreenService SplashScreenType="{x:Type View:LoadingWindow}" SplashScreenStartupLocation="CenterOwner"/>
+        <dx:DXSplashScreenService SplashScreenType="{x:Type View:LoadingWindow}" SplashScreenStartupLocation="CenterOwner" FadeOutDuration="0:0:1"/>
     </dxmvvm:Interaction.Behaviors>
     <Grid Margin="0" Background="Transparent">
         <Grid.RowDefinitions>
