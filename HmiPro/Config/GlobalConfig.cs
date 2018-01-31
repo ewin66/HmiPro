@@ -75,7 +75,7 @@ namespace HmiPro.Config {
                     setting.Od = row["Od"].ToString();
                     setting.CpmModuleIps = row["CpmModuleIps"].ToString().Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
                     setting.DPms = row["Dpms"].ToString().Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
-                    setting.StartTrayNum = int.Parse(row["StartTrayNum"].ToString());
+                    //setting.StartTrayNum = int.Parse(row["StartTrayNum"].ToString());
                     MachineSettingDict[setting.Code] = setting;
                 }
 
@@ -104,6 +104,5 @@ namespace HmiPro.Config {
                 }
             }
         }
-
     }
 }

@@ -105,7 +105,7 @@ namespace HmiPro.ViewModels.DMes {
             DpmsTab.BindSource(dpms[MachineCode]);
 
             //绑定曲线参数界面
-            CpmDetailTab.BindSource(MachineCode,onlineCpmsDict[MachineCode]);
+            CpmDetailTab.BindSource(MachineCode, onlineCpmsDict[MachineCode]);
 
             //绑定选中的tab
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[MachineCode];
@@ -202,6 +202,7 @@ namespace HmiPro.ViewModels.DMes {
 
         [Command(Name = "NavigateCommand")]
         public void Navigate(Navigator nav) {
+            App.Store.Dispatch(new SysActions.ShowLoadingSplash());
             var navViewStore = App.Store.GetState().ViewStoreState.NavView;
             if (nav.MachineCode != navViewStore.DMesSelectedMachineCode) {
                 App.Store.Dispatch(new ViewStoreActions.ChangeDMesSelectedMachineCode(nav.MachineCode));

@@ -20,9 +20,8 @@
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
-        <dxmvvm:VisualStateService/>
     </dxmvvm:Interaction.Behaviors>
-    <dxwui:PageAdornerControl  Header="{Binding Header}" ShowBackButton="True">
+    <dxwui:PageAdornerControl  Header="{Binding Header}" ShowBackButton="True" >
         <Grid Height="Auto" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>

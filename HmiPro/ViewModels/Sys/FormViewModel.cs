@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm.POCO;
 using HmiPro.Annotations;
+using HmiPro.Redux.Actions;
 
 namespace HmiPro.ViewModels.Sys {
     /// <summary>
@@ -33,6 +34,11 @@ namespace HmiPro.ViewModels.Sys {
 
         public static FormViewModel Create(string title, BaseForm form) {
             return ViewModelSource.Create(() => new FormViewModel(title, form));
+        }
+
+        [Command(Name = "OnLoadedCommand")]
+        public void OnLoaded() {
+            App.Store.Dispatch(new SysActions.CloseLoadingSplash());
         }
 
     }

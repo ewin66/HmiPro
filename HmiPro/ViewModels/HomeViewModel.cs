@@ -86,6 +86,7 @@ namespace HmiPro.ViewModels {
         void tryJumpToTestView(BaseForm form) {
             var testForm = (JumpToTestViewForm)form;
             if (testForm.Password == "112211") {
+                App.Store.Dispatch(new SysActions.ShowLoadingSplash());
                 NavigationSerivce.Navigate(nameof(TestView), null, this, true);
             } else {
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
@@ -101,6 +102,7 @@ namespace HmiPro.ViewModels {
         /// <param name="viewName">页面名称，比如页面为HomeView.xaml，则名称为HomeView</param>
         [Command(Name = "NavigateCommand")]
         public void Navigate(string viewName) {
+            App.Store.Dispatch(new SysActions.ShowLoadingSplash());
             if (viewName == nameof(DMesCoreView)) {
                 var vm = DMesCoreViewModel.Create(App.Store.GetState().ViewStoreState.NavView.DMesSelectedMachineCode);
                 NavigationSerivce.Navigate(nameof(DMesCoreView), vm, null, this, true);

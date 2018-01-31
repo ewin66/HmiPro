@@ -14,6 +14,7 @@ using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Services;
+using HmiPro.Views.Dx;
 using Reducto;
 using YCsharp.Util;
 using Application = System.Windows.Application;
@@ -123,6 +124,13 @@ namespace HmiPro.Redux.Reducers {
                      } catch {
 
                      }
+                 });
+                 return state;
+             }).When<SysActions.ShowLoadingSplash>((state, action) => {
+                 Application.Current.Dispatcher.Invoke(() => {
+                     try {
+                         DXSplashScreen.Show<LoadingWindow>();
+                     } catch { }
                  });
                  return state;
              });

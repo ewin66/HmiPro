@@ -64,6 +64,7 @@ namespace HmiPro.Redux.Actions {
         //Loading 界面
         public static readonly string SET_LOADING_MESSAGE = "[Sys] Set Loading Message";
 
+
         //app.xaml.cs初始化完毕
         public static readonly string APP_XAML_INITED = "[Sys] App Xaml Inited";
 
@@ -79,15 +80,20 @@ namespace HmiPro.Redux.Actions {
         public static readonly string HIDE_TASK_BAR = "[Sys] Hide Task Bar";
         public static readonly string SHOW_TASK_BAR = "[Sys] Show Task Bar";
 
-        //关闭 「正在加载中..」的 Loading 框框
-        //某些 Hmi 无法自动关闭，所以在 OnLoad 里面手动关闭
+        //关闭 Loading Splash 窗体
         public static readonly string CLOSE_LOADING_SPLASH = "[Sys] Close Loading Splash";
+        //打开 Loading Splash 窗体
+        public static readonly string SHOW_LOADING_SPLASH = "[Sys] Show Loading Splash";
 
         //更换壁纸
         public static readonly string CHANGE_WINDOW_BACKGROUND_IMAGE = "[Sys] Change Window Background Image";
 
         //使背景模糊
         public static readonly string MAKE_WINDOW_BACKGROUND_BLUR = "[Sys] Make Window Background Blur";
+
+        public struct ShowLoadingSplash : IAction {
+            public string Type() => SHOW_LOADING_SPLASH;
+        }
 
         public struct MakeWindowBackgroundBlur : IAction {
             public string Type() => MAKE_WINDOW_BACKGROUND_BLUR;
