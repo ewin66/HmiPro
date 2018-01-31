@@ -104,16 +104,16 @@
   <ItemGroup>
     <Compile Include="Extension\ListExt.cs" />
     <Compile Include="Model\Buffers\YDynamicBuffer.cs" />
-    <Compile Include="Model\Procotol\SmParam\SmAnalysis.cs" />
-    <Compile Include="Model\Procotol\SmParam\SmCrc16.cs" />
-    <Compile Include="Model\Procotol\SmParam\SmEncrypt.cs" />
-    <Compile Include="Model\Procotol\SmParam\SmEnum.cs" />
-    <Compile Include="Model\Procotol\SmParam\SmModel.cs" />
-    <Compile Include="Model\Procotol\SmParam\SmPackage.cs" />
-    <Compile Include="Model\Procotol\SmParam\SmClientManager.cs" />
-    <Compile Include="Model\Procotol\SmParam\SmParamApi.cs" />
-    <Compile Include="Model\Procotol\YHdlcTcp.cs" />
-    <Compile Include="Model\Procotol\YSmParamTcp.cs" />
+    <Compile Include="Model\Protocol\SmParam\SmAnalysis.cs" />
+    <Compile Include="Model\Protocol\SmParam\SmCrc16.cs" />
+    <Compile Include="Model\Protocol\SmParam\SmEncrypt.cs" />
+    <Compile Include="Model\Protocol\SmParam\SmEnum.cs" />
+    <Compile Include="Model\Protocol\SmParam\SmModel.cs" />
+    <Compile Include="Model\Protocol\SmParam\SmPackage.cs" />
+    <Compile Include="Model\Protocol\SmParam\SmClientManager.cs" />
+    <Compile Include="Model\Protocol\SmParam\SmParamApi.cs" />
+    <Compile Include="Model\Protocol\YHdlcTcp.cs" />
+    <Compile Include="Model\Protocol\YSmParamTcp.cs" />
     <Compile Include="Model\Tcp\YTcpClient.cs" />
     <Compile Include="Model\Tcp\YTcpServer.cs" />
     <Compile Include="Program.cs" />
@@ -140,12 +140,12 @@
   <ItemGroup>
     <Folder Include="Model\Attrs\" />
     <Folder Include="Model\Dynamic\" />
-    <Folder Include="Model\Procotol\Hdlc\" />
+    <Folder Include="Model\Protocol\Hdlc\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

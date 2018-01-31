@@ -326,7 +326,7 @@ namespace UnitTestPro.FuncTest {
 
         [TestMethod]
         public void SmtcProtocolTest() {
-            var data = 0xff & 0x03;
+            float data = 0xff & 0x03;
             Assert.AreEqual(data, 3);
             data = (0xff & 0x0c) >> 2;
             Assert.AreEqual(data, 3);
