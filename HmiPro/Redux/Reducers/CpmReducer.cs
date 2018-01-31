@@ -234,14 +234,14 @@ namespace HmiPro.Redux.Reducers {
             MachineState newMachineState = null;
             var machineCode = action.MachineCode;
             state.StateSpeedDict[machineCode] = currentSpeed;
-            if (currentSpeed > 0 && state.PreStateSpeedDict[machineCode] == 0) {
+            if (currentSpeed > 0.1 && state.PreStateSpeedDict[machineCode] <= 0.1) {
                 newMachineState = new MachineState() {
                     StatePoint = MachineState.State.Start,
                     Time = DateTime.Now
                 };
             }
             //关机阶段，上一个速度大于0，此时速度等于0
-            else if (currentSpeed == 0 && state.PreStateSpeedDict[machineCode] > 0) {
+            else if (currentSpeed <= 0.1 && state.PreStateSpeedDict[machineCode] > 0.1) {
                 newMachineState = new MachineState() {
                     StatePoint = MachineState.State.Stop,
                     Time = DateTime.Now

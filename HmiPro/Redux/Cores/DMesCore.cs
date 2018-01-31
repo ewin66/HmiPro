@@ -529,42 +529,47 @@ namespace HmiPro.Redux.Cores {
             var allTasks = MqSchTasksDict[machineCode];
             var taskAccept = mqAction.MqSchTask;
             MqSchTask taskRemove = null;
-            lock (SchTaskDoingLocks[machineCode]) {
-                foreach (var task in allTasks) {
-                    if (task.taskId == taskAccept.taskId) {
-                        //任务已经开始了不能冲掉
-                        if (SchTaskDoingDict[machineCode]?.MqSchTask?.taskId == taskAccept.taskId && SchTaskDoingDict[machineCode].IsStarted) {
-                            Logger.Warn($"任务已经开始，无法替换 {task.taskId}", true);
+            //容易卡死 UI ，这里让它运行在异步里面
+            Task.Run(() => {
+                lock (SchTaskDoingLocks[machineCode]) {
+                    foreach (var task in allTasks) {
+                        if (task.taskId == taskAccept.taskId) {
+                            //任务已经开始了不能冲掉
+                            if (SchTaskDoingDict[machineCode]?.MqSchTask?.taskId == taskAccept.taskId &&
+                                SchTaskDoingDict[machineCode].IsStarted) {
+                                Logger.Warn($"任务已经开始，无法替换 {task.taskId}", true);
+                                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                                    Title = "通知",
+                                    Content = $"任务已经开始，无法更换 {taskAccept.taskId}"
+                                }));
+                                return;
+                            }
                             App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                                 Title = "通知",
-                                Content = $"任务已经开始，无法更换 {taskAccept.taskId}"
+                                Content = $"已更新任务 {taskAccept.taskId}"
                             }));
-                            return;
+                            //要被冲掉的任务
+                            taskRemove = task;
+                            break;
                         }
-                        App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                            Title = "通知",
-                            Content = $"已更新任务 {taskAccept.taskId}"
-                        }));
-                        //要被冲掉的任务
-                        taskRemove = task;
-                        break;
+                    }
+                    //将任务添加到任务队列里面
+                    //fix: 2018-01-04
+                    // mqTasks被view引用了，所以用Ui线程来更新
+                    Application.Current.Dispatcher.Invoke(() => {
+                        allTasks.Remove(taskRemove);
+                        allTasks.Add(taskAccept);
+                    });
+                    //有任务被顶掉了
+                    if (taskRemove != null) {
+                        App.Store.Dispatch(new MqActions.SchTaskReplaced(machineCode));
                     }
                 }
-                //将任务添加到任务队列里面
-                //fix: 2018-01-04
-                // mqTasks被view引用了，所以用Ui线程来更新
-                Application.Current.Dispatcher.Invoke(() => {
-                    allTasks.Remove(taskRemove);
-                    allTasks.Add(taskAccept);
+                //更新任务缓存
+                SqliteHelper.DoAsync(ctx => {
+                    ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(allTasks)));
                 });
-                //有任务被顶掉了
-                if (taskRemove != null) {
-                    App.Store.Dispatch(new MqActions.SchTaskReplaced(machineCode));
-                }
-            }
-            //更新任务缓存
-            SqliteHelper.DoAsync(ctx => {
-                ctx.SavePersist(new Persist(@"task_" + machineCode, JsonConvert.SerializeObject(allTasks)));
+
             });
         }
 
