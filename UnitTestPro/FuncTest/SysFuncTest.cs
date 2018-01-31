@@ -296,8 +296,7 @@ namespace UnitTestPro.FuncTest {
             async Task<Boolean> timeConsume() {
                 Console.WriteLine("time consume in");
                 return await Task.Run(() => {
-                    lock (locker)
-                    {
+                    lock (locker) {
                         Thread.Sleep(1000);
                         Console.WriteLine("time consume execing");
                         Thread.Sleep(1000);
@@ -316,13 +315,25 @@ namespace UnitTestPro.FuncTest {
             for (int i = 0; i < 3; i++) {
                 await Task.Run(() => {
                     lock (locker) {
-                      dispatch();
+                        dispatch();
                     }
                 });
             }
 
             Thread.Sleep(9000);
 
+        }
+
+        [TestMethod]
+        public void SmtcProtocolTest() {
+            var data = 0xff & 0x03;
+            Assert.AreEqual(data, 3);
+            data = (0xff & 0x0c) >> 2;
+            Assert.AreEqual(data, 3);
+            data = (0xff & 0x30) >> 4;
+            Assert.AreEqual(data, 3);
+            data = (0xff >> 4) & 0x03;
+            Assert.AreEqual(data, 3);
         }
 
     }

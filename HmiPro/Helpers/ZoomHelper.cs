@@ -7,6 +7,10 @@ using System.Windows;
 using System.Windows.Controls;
 
 namespace HmiPro.Helpers {
+    /// <summary>
+    ///缩放助手
+    ///<author>DevExpress</author>
+    /// </summary>
     public static class ZoomHelper {
         #region Dependency Properties
         public static readonly DependencyProperty SupressZoomFactorProperty;

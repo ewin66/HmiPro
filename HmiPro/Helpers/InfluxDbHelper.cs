@@ -18,6 +18,11 @@ namespace HmiPro.Helpers {
         private static string addr;
         private static string dbName;
 
+        /// <summary>
+        /// 初始化 InfluxDb 
+        /// </summary>
+        /// <param name="addr"></param>
+        /// <param name="dbName"></param>
         public static void Init(string addr, string dbName) {
             InfluxDbHelper.addr = addr;
             InfluxDbHelper.dbName = dbName;

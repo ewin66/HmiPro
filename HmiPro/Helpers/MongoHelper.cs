@@ -13,15 +13,23 @@ namespace HmiPro.Helpers {
     /// <author>ychost</author>
     /// </summary>
     public static class MongoHelper {
-        private static string connection;
+        /// <summary>
+        /// 全局的 Mongo 服务对象
+        /// </summary>
+        private static MongoClient mongoClient;
 
+        /// <summary>
+        /// 初始化全局的 Mongo 服务对象
+        /// </summary>
+        /// <param name="connection"></param>
         public static void Init(string connection) {
-            MongoHelper.connection = connection;
             mongoClient = new MongoClient(connection);
         }
 
-        private static MongoClient mongoClient;
-
+        /// <summary>
+        /// Mongo 的库会自动管理连接池，所以这里返回一个全局的对象即可，不用自己手动 Dispose()
+        /// </summary>
+        /// <returns></returns>
         public static MongoClient GetMongoService() {
             if (mongoClient == null) {
                 throw new Exception("请先初始化 MongoHelper.Init(connection)");

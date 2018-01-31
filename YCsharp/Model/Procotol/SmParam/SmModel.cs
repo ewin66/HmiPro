@@ -102,12 +102,19 @@ namespace YCsharp.Model.Procotol.SmParam {
         /// </summary>
         /// <returns></returns>
         public bool IsSignalData() {
-            return DataType == (byte)EmsocketDataType.Float1234 ||
-                   DataType == (byte)EmsocketDataType.Int4321 ||
+            return DataType == (byte)EmsocketDataType.Int4321 ||
+                   DataType == (byte)EmsocketDataType.Int3412 ||
+                   DataType == (byte)EmsocketDataType.Int1234 ||
+
+                   DataType == (byte)EmsocketDataType.Float1234 ||
                    DataType == (byte)EmsocketDataType.Float4321 ||
                    DataType == (byte)EmsocketDataType.Float3412 ||
-                   DataType == (byte)EmsocketDataType.Int3412 ||
-                   DataType == (byte)EmsocketDataType.Float2143;
+                   DataType == (byte)EmsocketDataType.Float2143 ||
+
+                   DataType == (byte)EmsocketDataType.Bit12 ||
+                   DataType == (byte)EmsocketDataType.Bit34 ||
+                   DataType == (byte)EmsocketDataType.Bit56 ||
+                   DataType == (byte)EmsocketDataType.Bit78;
         }
 
         /// <summary>
@@ -258,7 +265,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                 if (DataType == (byte)EmsocketDataType.Float1234) {
                     var data = this.Data.Reverse().ToArray();
                     val = BitConverter.ToSingle(data, 0);
-                    //整形计算
+                    //普通整形
                 } else if (DataType == (byte)EmsocketDataType.Int4321) {
                     //转成"12d54f"
                     var str = BitConverter.ToString(Data, 0).Replace("-", "");
@@ -268,8 +275,8 @@ namespace YCsharp.Model.Procotol.SmParam {
                     if (FloatPlace > 0) {
                         val = (val / (Math.Pow(10, FloatPlace)));
                     }
+                    //整形 1234 ==> 4321
                 } else if (DataType == (byte)EmsocketDataType.Int1234) {
-                    //1234 ==> 4321
                     var tmp = Data[0];
                     Data[0] = Data[3];
                     Data[3] = tmp;
@@ -280,8 +287,8 @@ namespace YCsharp.Model.Procotol.SmParam {
                     if (FloatPlace > 0) {
                         val = (val / (Math.Pow(10, FloatPlace)));
                     }
+                    //整形 3412 ==> 4321
                 } else if (DataType == (byte)EmsocketDataType.Int3412) {
-                    //3412 ==> 4321
                     var tmp = Data[0];
                     Data[0] = Data[1];
                     Data[1] = tmp;
@@ -292,8 +299,8 @@ namespace YCsharp.Model.Procotol.SmParam {
                     if (FloatPlace > 0) {
                         val = (val / (Math.Pow(10, FloatPlace)));
                     }
+                    //浮点 2143 ==> 4321
                 } else if (DataType == (byte)EmsocketDataType.Float2143) {
-                    //2143 ==> 4321
                     var tmp = Data[0];
                     Data[0] = Data[2];
                     Data[2] = tmp;
@@ -301,10 +308,10 @@ namespace YCsharp.Model.Procotol.SmParam {
                     Data[1] = Data[3];
                     Data[3] = tmp;
                     val = BitConverter.ToSingle(Data, 0);
-                    //普通顺序 4321
+                    //普通浮点 4321
                 } else if (DataType == (byte)EmsocketDataType.Float4321) {
                     val = BitConverter.ToSingle(Data, 0);
-                    //乱序1 3412 ==> 4321
+                    //浮点 3412 ==> 4321
                 } else if (DataType == (byte)EmsocketDataType.Float3412) {
                     var tmp = Data[0];
                     Data[0] = Data[1];
@@ -313,12 +320,23 @@ namespace YCsharp.Model.Procotol.SmParam {
                     Data[2] = Data[3];
                     Data[3] = tmp;
                     val = BitConverter.ToSingle(this.Data, 0);
+                    //取1-2位
+                } else if (DataType == (byte)EmsocketDataType.Bit12) {
+                    val = Data[0] & 0x03;
+                    //取3-4位
+                } else if (DataType == (byte)EmsocketDataType.Bit34) {
+                    val = (Data[0] >> 2) & 0x03;
+                    //取5-6位
+                } else if (DataType == (byte)EmsocketDataType.Bit56) {
+                    val = (Data[0] >> 4) & 0x03;
+                    //取7-8位
+                } else if (DataType == (byte)EmsocketDataType.Bit78) {
+                    val = (Data[0] >> 6) & 0x03;
                 }
                 singleData = (Single)val;
-
                 //复位Data
                 Data = dataCopy;
-                return (float)Math.Round(val, mathRound);
+                return (float)val;
             }
         }
     }
