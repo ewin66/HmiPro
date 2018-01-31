@@ -34,7 +34,11 @@
                     </dxg:GridControl.View>
                     <dxg:GridControl.Columns>
                         <dxg:GridColumn FieldName="Name" Width="1.5*"   Header="参数" />
-                        <dxg:GridColumn FieldName="Value" Width="*" Header="值"/>
+                        <dxg:GridColumn FieldName="Value" Width="*" Header="值">
+                        <dxg:GridColumn.EditSettings>
+                        <dxe:TextEditSettings DisplayFormat="F2"></dxe:TextEditSettings>
+                        </dxg:GridColumn.EditSettings>
+                        </dxg:GridColumn>
                         <!--<dxg:GridColumn FieldName="PickTime"  Width="1*" Header="时间"  >
                             <dxg:GridColumn.EditSettings>
                                 <dxe:DateEditSettings Mask="T" MaskUseAsDisplayFormat="True"/>
@@ -51,10 +55,6 @@
                 BorderThickness="0"
                 Padding="0"
                 >
-                    <dxc:ChartControl.Titles>
-                        <dxc:Title HorizontalAlignment="Center" Margin="300,-25,0,0" Content="{Binding Path=ViewStore.SelectedPointNums}" FontSize="16" VerticalAlignment="Top" Dock="Bottom">
-                        </dxc:Title>
-                    </dxc:ChartControl.Titles>
                     <dxc:ChartControl.Legend>
                         <dxc:Legend
                         HorizontalPosition="Left"
@@ -67,10 +67,6 @@
                                 <dxc:AxisX2D.DateTimeScaleOptions>
                                     <dxc:ContinuousDateTimeScaleOptions />
                                 </dxc:AxisX2D.DateTimeScaleOptions>
-                                <dxc:AxisX2D.Title>
-                                    <dxc:AxisTitle
-                                    Content="时间" />
-                                </dxc:AxisX2D.Title>
                                 <dxc:AxisX2D.Label>
                                     <dxc:AxisLabel
                                     TextPattern="{}{A:HH:mm:ss}" />
@@ -97,11 +93,11 @@
                         ArgumentDataMember="PickTime"
                         ValueDataMember="FloatValue"
                         ArgumentScaleType="DateTime"
-                            CrosshairLabelPattern="{}{S}：{V:F3}"  
+                            CrosshairLabelPattern="{}{S}：{V:F2}"  
                         DisplayName="{Binding ViewStore.SelectedCpm.Name}">
                             <dxc:SplineSeries2D.LineStyle>
                                 <dxc:LineStyle
-                                Thickness="1" />
+                                Thickness="2" />
                             </dxc:SplineSeries2D.LineStyle>
                         </dxc:SplineSeries2D>
 
@@ -111,12 +107,11 @@
                         ArgumentDataMember="UpdateTime"
                         ValueDataMember="Value"
                         ArgumentScaleType="DateTime"
-                            CrosshairLabelPattern="{}{S}：{V:F3}"  
+                            CrosshairLabelPattern="{}{S}：{V:F2}"  
                         DisplayName="最大值">
-
                             <dxc:SplineSeries2D.LineStyle>
                                 <dxc:LineStyle
-                                Thickness="1" />
+                                Thickness="2" />
                             </dxc:SplineSeries2D.LineStyle>
                         </dxc:SplineSeries2D>
 
@@ -126,14 +121,27 @@
                         ArgumentDataMember="UpdateTime"
                         ValueDataMember="Value"
                         ArgumentScaleType="DateTime"
-                            CrosshairLabelPattern="{}{S}：{V:F3}"  
+                            CrosshairLabelPattern="{}{S}：{V:F2}"  
                         DisplayName="最小值">
                             <dxc:SplineSeries2D.LineStyle>
                                 <dxc:LineStyle
-                                Thickness="1" />
+                                Thickness="2" />
+                            </dxc:SplineSeries2D.LineStyle>
+                        </dxc:SplineSeries2D>
+                        <dxc:SplineSeries2D
+                           Brush="Gray"
+                        ArgumentDataMember="UpdateTime"
+                        ValueDataMember="Value"
+                        ArgumentScaleType="DateTime"
+                            CrosshairLabelPattern="{}{S}：{V:F2}"  
+                        DisplayName="{Binding Path=ViewStore.SelectedPointNums}">
+                            <dxc:SplineSeries2D.LineStyle>
+                                <dxc:LineStyle
+                                Thickness="2" />
                             </dxc:SplineSeries2D.LineStyle>
                         </dxc:SplineSeries2D>
                     </dxc:XYDiagram2D>
+
 
                 </dxc:ChartControl>
             </dxdo:LayoutPanel>
