@@ -71,6 +71,11 @@ namespace HmiPro.Redux.Reducers {
                         if (cpm.ValueType != SmParamType.Signal) {
                             continue;
                         }
+                        //过滤掉时间有问题的点
+                        var lastTime = cpmDetail.ChartCpmSourceDict[cpm.Code].LastOrDefault()?.PickTime;
+                        if (lastTime.HasValue && lastTime.Value >= cpm.PickTime) {
+                            continue;
+                        }
                         var (maxThreshold, minThreshold) = getMaxMinThreshold(state, machineCode, cpm);
                         //减少主线程调用次数
                         //只有更新的参数Id为选中的 && 当前处于曲线界面才唤起主线程 && 当前导航机台位参数机台
@@ -166,11 +171,11 @@ namespace HmiPro.Redux.Reducers {
         /// <summary>
         /// 一个曲线图最多绘制的点数
         /// </summary>
-        private static int maxChartPointNums = 10000;
+        private static int maxChartPointNums =200;
         /// <summary>
         /// 当点数超过 maxChartPointNums 之后移除的点数
         /// </summary>
-        private static int removePointNums = 1000;
+        private static int removePointNums =50;
         /// <summary>
         /// 更新曲线数据
         /// </summary>
@@ -201,12 +206,6 @@ namespace HmiPro.Redux.Reducers {
                 cpmDetail.SelectedPointNums = "点数：" + cpmDetail.SelectedCpmChartSource.Count;
                 //保证实时曲线的动态绘制
                 cpmDetail.SelectedVisualMax = DateTime.Now;
-                //控制曲线可视范围
-                //十分钟更新一次
-                //if ((DateTime.Now - cpmDetail.SelectedVisualMax).TotalMinutes > 10) {
-                //    cpmDetail.SelectedVisualMax = DateTime.Now;
-                //    //cpmDetail.SelectedVisualMin = DateTime.Now.AddMinutes(-10);
-                //}
             }
         }
     }
