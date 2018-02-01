@@ -22,8 +22,6 @@ namespace HmiPro.ViewModels.Sys {
         public TestViewModel() {
         }
 
-        private Func<int> rand = YUtil.GetRandomIntGen(0, 10);
-
         /// <summary>
         /// 惯例，关闭 Loading 
         /// </summary>

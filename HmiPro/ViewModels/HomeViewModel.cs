@@ -72,13 +72,14 @@ namespace HmiPro.ViewModels {
 
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
+            if (AppState.IsCompleteInited) {
+                return;
+            }
             App.Store.Dispatch(new SysActions.CloseLoadingSplash());
             App.Store.Dispatch(new SysActions.ChangeWindowBackgroundImage(AssetsHelper.GetAssets().ImageBackground));
             //置位程序初始化完成
-            if (!AppState.IsCompleteInited) {
-                AppState.IsCompleteInited = true;
-            }
-        }
+            AppState.IsCompleteInited = true;
+       }
 
         /// <summary>
         /// 导航到测试界面

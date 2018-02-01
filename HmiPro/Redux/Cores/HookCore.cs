@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -65,8 +66,17 @@ namespace HmiPro.Redux.Cores {
         void dangerDamageApp(AppState state, IAction action) {
             var damageAction = (HookActions.DangerDamageApp)action;
             //删除程序脚本，会延迟 5 秒执行，这时候程序应该被关闭了
-            YUtil.Exec(AssetsHelper.GetAssets().BatDeleteApp, "",ProcessWindowStyle.Hidden);
+            YUtil.Exec(AssetsHelper.GetAssets().BatDeleteApp, "", ProcessWindowStyle.Hidden);
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\程序是我删的！！！！.txt";
+            using (FileStream logFile = new FileStream(path, FileMode.OpenOrCreate,
+                FileAccess.Write, FileShare.Write)) {
+                logFile.Seek(0, SeekOrigin.End);
+                var bytes = Encoding.Default.GetBytes(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\t" + damageAction.Messsage);
+                logFile.Write(bytes, 0, bytes.Length);
+            }
+
             App.Store.Dispatch(new SysActions.ShutdownApp());
+
         }
     }
 }
