@@ -27,7 +27,7 @@ namespace YCsharp.Util {
     /// <version>1.0</version>
     /// <copyright>Copyright (c) 2008, TopCoder, Inc. All rights reserved.</copyright>
     public static partial class YUtil {
-
+        #region Windows 版本预定义
         /// <summary>
         /// <para>
         /// Represents Windows 95.
@@ -244,7 +244,9 @@ namespace YCsharp.Util {
         /// </para>
         /// </summary>
         private const short VER_SUITE_COMPUTE_SERVER = 0x4000;
+        #endregion
 
+        #region 获取 版本 Api
         /// <summary>
         /// <para>
         /// Contains operating system version information. The information includes major and minor version
@@ -586,7 +588,7 @@ namespace YCsharp.Util {
                     "An error occurred while getting the version of the service pack.", ex);
             }
         }
+        #endregion
     }
-
 
 }

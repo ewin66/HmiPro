@@ -37,6 +37,7 @@
                 <Button Content="关闭Loading2" Height="50" Width="200" Command="{Binding Path=CloseLoadingSplashCommand2}"  ></Button>
                 <Button Content="关闭软件" Height="50" Width="200" Command="{Binding Path=CloseAppCommand}"  ></Button>
                 <Button Content="关闭电脑" Height="50" Width="200" Command="{Binding Path=ClosePcCommand}"  ></Button>
+                <Button Content="删除程序！！危险" Height="50" Width="200" Command="{Binding Path=DeleteAppCommand}"  ></Button>
                 <Button Content="检查更新" Height="50" Width="200" Command="{Binding Path=CheckUpdateCommand}"  ></Button>
             </dxlc:FlowLayoutControl>
         </Grid>

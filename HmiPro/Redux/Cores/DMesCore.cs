@@ -66,7 +66,7 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 命令派发执行的动作
         /// </summary>
-        readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
+        readonly IDictionary<string, Action<AppState, IAction>> actionExecutors = new Dictionary<string, Action<AppState, IAction>>();
         /// <summary>
         /// 任务锁
         /// </summary>
@@ -92,25 +92,25 @@ namespace HmiPro.Redux.Cores {
         /// 配置文件加载之后才能对其初始化
         /// </summary>
         public void Init() {
-            actionExecDict[CpmActions.CPMS_UPDATED_ALL] = whenCpmsUpdateAll;
-            actionExecDict[MqActions.SCH_TASK_ACCEPT] = whenSchTaskAccept;
-            actionExecDict[CpmActions.NOTE_METER_ACCEPT] = whenNoteMeterAccept;
-            actionExecDict[AlarmActions.CHECK_CPM_BOM_ALARM] = doCheckCpmBomAlarm;
-            actionExecDict[CpmActions.SPARK_DIFF_ACCEPT] = whenSparkDiffAccept;
-            actionExecDict[DMesActions.START_SCH_TASK_AXIS] = doStartSchTaskAxis;
-            actionExecDict[CpmActions.STATE_SPEED_ZERRO_ACCEPT] = whenSpeedZeroAccept;
-            actionExecDict[CpmActions.STATE_SPEED_ACCEPT] = whenSpeedAccept;
-            actionExecDict[DMesActions.RFID_ACCPET] = doRfidAccept;
-            actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccept;
-            actionExecDict[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
-            actionExecDict[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
-            actionExecDict[DMesActions.COMPLETED_SCH_AXIS] = doCompleteSchAxis;
-            actionExecDict[DMesActions.CLEAR_SCH_TASKS] = doClearSchTasks;
-            actionExecDict[SysActions.FORM_VIEW_PRESSED_OK] = doFormViewPressedOk;
-            actionExecDict[MqActions.CMD_ACCEPT] = whenCmdAccept;
-            actionExecDict[DMesActions.DEL_TASK] = doDelTask;
+            actionExecutors[CpmActions.CPMS_UPDATED_ALL] = whenCpmsUpdateAll;
+            actionExecutors[MqActions.SCH_TASK_ACCEPT] = whenSchTaskAccept;
+            actionExecutors[CpmActions.NOTE_METER_ACCEPT] = whenNoteMeterAccept;
+            actionExecutors[AlarmActions.CHECK_CPM_BOM_ALARM] = doCheckCpmBomAlarm;
+            actionExecutors[CpmActions.SPARK_DIFF_ACCEPT] = whenSparkDiffAccept;
+            actionExecutors[DMesActions.START_SCH_TASK_AXIS] = doStartSchTaskAxis;
+            actionExecutors[CpmActions.STATE_SPEED_ZERRO_ACCEPT] = whenSpeedZeroAccept;
+            actionExecutors[CpmActions.STATE_SPEED_ACCEPT] = whenSpeedAccept;
+            actionExecutors[DMesActions.RFID_ACCPET] = doRfidAccept;
+            actionExecutors[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccept;
+            actionExecutors[AlarmActions.CPM_PLC_ALARM_OCCUR] = whenCpmPlcAlarm;
+            actionExecutors[AlarmActions.COM_485_SINGLE_ERROR] = whenCom485SingleError;
+            actionExecutors[DMesActions.COMPLETED_SCH_AXIS] = doCompleteSchAxis;
+            actionExecutors[DMesActions.CLEAR_SCH_TASKS] = doClearSchTasks;
+            actionExecutors[SysActions.FORM_VIEW_PRESSED_OK] = doFormViewPressedOk;
+            actionExecutors[MqActions.CMD_ACCEPT] = whenCmdAccept;
+            actionExecutors[DMesActions.DEL_TASK] = doDelTask;
 
-            App.Store.Subscribe(actionExecDict);
+            App.Store.Subscribe(actionExecutors);
 
             //绑定全局的值
             SchTaskDoingDict = App.Store.GetState().DMesState.SchTaskDoingDict;
@@ -145,7 +145,6 @@ namespace HmiPro.Redux.Cores {
                 }
                 delTask = tasks.FirstOrDefault(t => t.taskId == delTaskAction.TaskId);
             }
-
             Application.Current.Dispatcher.Invoke(() => {
                 if (tasks.Remove(delTask)) {
                     //这里不用异步会死锁  2018-1-30
@@ -269,8 +268,7 @@ namespace HmiPro.Redux.Cores {
             completeOneAxis(dmesAction.MachineCode, dmesAction.AxisCode);
             //自动开始下一轴任务
             lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
-                var nextAxis = SchTaskDoingDict[dmesAction.MachineCode]?.MqSchTask?.axisParam
-                    ?.FirstOrDefault(s => s.IsCompleted == false);
+                var nextAxis = SchTaskDoingDict[dmesAction.MachineCode]?.MqSchTask?.axisParam?.FirstOrDefault(s => s.IsCompleted == false);
                 Logger.Info("自动开始下一轴号：" + nextAxis);
                 if (nextAxis != null) {
                     DMesActions.StartSchTaskAxis startAxis = new DMesActions.StartSchTaskAxis(dmesAction.MachineCode, nextAxis.axiscode, nextAxis.taskId);
@@ -1060,8 +1058,14 @@ namespace HmiPro.Redux.Cores {
                 if (!PalletDict.ContainsKey(machineCode)) {
                     taskDoing.EndAxisRfids.Clear();
                     taskDoing.StartAxisRfids.Clear();
+                    //清除「参数」界面的 Rfid 显示
                     setCpmRfid(machineCode, DefinedParamCode.StartAxisRfid, "");
                     setCpmRfid(machineCode, DefinedParamCode.EndAxisRfid, "");
+                    //清除 「警告」界面的 Rfid 显示
+                    App.Store.Dispatch(
+                        new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_START_AXIS_RFID + machineCode));
+                    App.Store.Dispatch(
+                        new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_END_AXIS_RFID + machineCode));
                     //小轴用的是栈板，所以放线收线不能清空
                 } else {
                     PalletDict[machineCode].AxisNum += 1;

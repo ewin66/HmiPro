@@ -163,6 +163,7 @@ namespace HmiPro.Redux.Services {
         /// 执行更新
         /// </summary>
         public void StartUpdate() {
+            YUtil.StopWinService(HmiConfig.DaemonServiceName);
             AppUpdater.StartExternalUpdater();
         }
     }

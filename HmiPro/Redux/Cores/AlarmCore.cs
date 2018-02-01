@@ -19,7 +19,7 @@ namespace HmiPro.Redux.Cores {
     /// <date>2017-12-22</date>
     /// </summary>
     public class AlarmCore {
-        private readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
+        private readonly IDictionary<string, Action<AppState, IAction>> actionExecutors = new Dictionary<string, Action<AppState, IAction>>();
         private IDictionary<string, ObservableCollection<MqAlarm>> historyAlarmsDict;
         private readonly MqEffects mqEffects;
         private readonly DbEffects dbEffects;
@@ -28,7 +28,7 @@ namespace HmiPro.Redux.Cores {
             UnityIocService.AssertIsFirstInject(GetType());
             this.mqEffects = mqEffects;
             this.dbEffects = dbEffects;
-            actionsExecDict[AlarmActions.GENERATE_ONE_ALARM] = doGenerateOneAlarm;
+            actionExecutors[AlarmActions.GENERATE_ONE_ALARM] = doGenerateOneAlarm;
         }
 
         private void doGenerateOneAlarm(AppState state, IAction action) {
@@ -78,8 +78,7 @@ namespace HmiPro.Redux.Cores {
             //绑定
             historyAlarmsDict = App.Store.GetState().AlarmState.AlarmsDict;
             //订阅
-            App.Store.Subscribe(actionsExecDict);
-            ;
+            App.Store.Subscribe(actionExecutors);
         }
     }
 }

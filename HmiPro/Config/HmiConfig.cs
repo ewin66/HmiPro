@@ -159,7 +159,7 @@ namespace HmiPro.Config {
         //== 来自外部命令行和约定配置
         public static string LogFolder = @"C:\HmiPro\Log\";
         public static string QueueDpms = "QUE_WEB_Command_Receive_p2p";
-        public static string DaemonName = "HmiDaemon";
+        public static string DaemonServiceName = "HmiDaemon";
         /// <summary>
         /// 往Pipe里面发送心跳时间间隔
         /// </summary>

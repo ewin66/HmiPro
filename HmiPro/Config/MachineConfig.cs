@@ -36,8 +36,24 @@ namespace HmiPro.Config {
             IpToMachineCodeDict = new Dictionary<string, string>();
             AlarmIpDict = new Dictionary<string, string>();
             MachineCodeToIpsDict = new Dictionary<string, List<string>>();
-            var codes = Path.GetFileNameWithoutExtension(path).Split(new string[] { "_" }, StringSplitOptions.RemoveEmptyEntries);
             HmiName = Path.GetFileNameWithoutExtension(path);
+
+            //存在 DE_DF.xls 这样的文件
+            if (File.Exists(path)) {
+                initMachine(path);
+                //不存在则分别加载 DF.xls与DE.xls
+            } else {
+                var codes = Path.GetFileNameWithoutExtension(path).Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var code in codes) {
+                    var mPath = Path.GetDirectoryName(path) + code + ".xls";
+                    initMachine(mPath);
+                }
+            }
+        }
+
+
+        static void initMachine(string path) {
+            var codes = Path.GetFileNameWithoutExtension(path).Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var code in codes) {
                 var upperCode = code.ToUpper();
                 var machine = new Machine();
@@ -64,20 +80,11 @@ namespace HmiPro.Config {
                 Load(hmiXlsPath);
                 return;
             }
-
             string configPath = null;
-            if (!string.IsNullOrEmpty(CmdOptions.GlobalOptions.HmiName)) {
-
-                Console.WriteLine("指定配置Hmi：" + CmdOptions.GlobalOptions.HmiName);
-                //Global.xls中根据ip来指定Hmi配置
-            } else {
-                var ips = YUtil.GetAllIps();
-                foreach (var ip in ips) {
-                    if (GlobalConfig.IpToHmiDict.TryGetValue(ip, out var hmi)) {
-                        configPath =
-                            YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" + hmi +
-                                                  ".xls");
-                    }
+            var ips = YUtil.GetAllIps();
+            foreach (var ip in ips) {
+                if (GlobalConfig.IpToHmiDict.TryGetValue(ip, out var hmi)) {
+                    configPath = YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" + hmi + ".xls");
                 }
             }
             if (string.IsNullOrEmpty(configPath)) {
@@ -89,3 +96,4 @@ namespace HmiPro.Config {
 
     }
 }
+

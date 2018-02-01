@@ -64,7 +64,6 @@ namespace HmiPro.Redux.Actions {
         //Loading 界面
         public static readonly string SET_LOADING_MESSAGE = "[Sys] Set Loading Message";
 
-
         //app.xaml.cs初始化完毕
         public static readonly string APP_XAML_INITED = "[Sys] App Xaml Inited";
 
@@ -90,6 +89,22 @@ namespace HmiPro.Redux.Actions {
 
         //使背景模糊
         public static readonly string MAKE_WINDOW_BACKGROUND_BLUR = "[Sys] Make Window Background Blur";
+
+        //设置程序启动的时候的加载界面的状态 显示/隐藏
+        public static readonly string SET_LOADING_VIEW_STATE = "[Sys] Set Loading View State";
+
+        public struct SetLoadingViewState : IAction {
+            public Visibility Visibility;
+            public string Type() => SET_LOADING_VIEW_STATE;
+            public double Height;
+            public string LoadingTxt;
+
+            public SetLoadingViewState(Visibility visibility, double height, string loadingTxt) {
+                Visibility = visibility;
+                Height = height;
+                LoadingTxt = loadingTxt;
+            }
+        }
 
         public struct ShowLoadingSplash : IAction {
             public string Type() => SHOW_LOADING_SPLASH;

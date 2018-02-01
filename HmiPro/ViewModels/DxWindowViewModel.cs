@@ -41,18 +41,12 @@ namespace HmiPro.ViewModels {
     /// <author>ychost</author>
     /// </summary>
     public class DxWindowViewModel : ViewModelBase {
-        private string backgroundImage;
         /// <summary>
         ///背景图片
         /// </summary>
         public string BackgroundImage {
-            get => backgroundImage;
-            set {
-                if (backgroundImage != value) {
-                    backgroundImage = value;
-                    RaisePropertyChanged(nameof(BackgroundImage));
-                }
-            }
+            get => GetProperty(() => BackgroundImage);
+            set => SetProperty(() => BackgroundImage, value);
         }
         /// <summary>
         /// 日志
@@ -65,9 +59,15 @@ namespace HmiPro.ViewModels {
         /// <summary>
         /// 事件派发器
         /// </summary>
-        public readonly IDictionary<string, Action<AppState, IAction>> actionsExecDict = new Dictionary<string, Action<AppState, IAction>>();
+        public readonly IDictionary<string, Action<AppState, IAction>> actionExecutors = new Dictionary<string, Action<AppState, IAction>>();
 
         private string marqueeText;
+
+        /// <summary>
+        /// 设置跑马灯高度，这里用高度而不用 Visibility 是因为 Visibility 设置成 Collpased 会导致 跑马灯效果失效
+        /// </summary>
+        public double MarqueeHiehgit { get; set; }
+
         /// <summary>
         /// 跑马灯文字内容信息，如果文字内容为空，则隐藏显示
         /// </summary>
@@ -123,22 +123,29 @@ namespace HmiPro.ViewModels {
         /// 跑马灯用的是 SortedDictionary 不支持并发，所以要手工对 Add，Remove 上锁
         /// </summary>
         public object MarqueeLock = new object();
-        /// <summary>
-        /// 设置跑马灯高度，这里用高度而不用 Visibility 是因为 Visibility 设置成 Collpased 会导致 跑马灯效果失效
-        /// </summary>
-        public double MarqueeHiehgit { get; set; }
+
         /// <summary>
         /// LoadingControl 所在外围 Grid 的高度
         /// </summary>
-        public double LoadingGridHeight { get; set; }
+        public double LoadingGridHeight {
+            get => GetProperty(() => LoadingGridHeight);
+            set { SetProperty(() => LoadingGridHeight, value); }
+        }
         /// <summary>
         /// 加载文字内容
         /// </summary>
-        public string LoadingText { get; set; } = "检查更新... 5%";
+        public string LoadingText {
+            get => GetProperty(() => LoadingText);
+            set { SetProperty(() => LoadingText, value); }
+        }
+
         /// <summary>
         /// 加载界面是否显示
         /// </summary>
-        public Visibility LoadinngGridVisibility { get; set; } = Visibility.Visible;
+        public Visibility LoadinngGridVisibility {
+            get => GetProperty(() => LoadinngGridVisibility);
+            set { SetProperty(() => LoadinngGridVisibility, value); }
+        }
         /// <summary>
         /// 初始化日志、Store、定时器等等
         /// </summary>
@@ -155,18 +162,52 @@ namespace HmiPro.ViewModels {
                 MarqueeMessagesDict = Store.GetState().SysState.MarqueeMessagesDict;
             }
             //初始化事件派发
-            actionsExecDict[SysActions.SHOW_NOTIFICATION] = doShowNotification;
-            actionsExecDict[SysActions.SHOW_SETTING_VIEW] = doShowSettingView;
-            actionsExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
-            actionsExecDict[SysActions.APP_INIT_COMPLETED] = whenAppInitCompleted;
-            actionsExecDict[SysActions.SHOW_FORM_VIEW] = doShowFormView;
-            actionsExecDict[SysActions.ADD_MARQUEE_MESSAGE] = doAddMarqueeMessage;
-            actionsExecDict[SysActions.DEL_MARQUEE_MESSAGE] = doDelMarqueeMessage;
-            actionsExecDict[SysActions.APP_XAML_INITED] = whenAppXamlInited;
-            actionsExecDict[SysActions.SET_LOADING_MESSAGE] = doSetLoadingMessage;
-            actionsExecDict[SysActions.CHANGE_WINDOW_BACKGROUND_IMAGE] = doChangeBackground;
-            Store.Subscribe(actionsExecDict);
+            actionExecutors[SysActions.SHOW_NOTIFICATION] = doShowNotification;
+            actionExecutors[SysActions.SHOW_SETTING_VIEW] = doShowSettingView;
+            actionExecutors[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
+            actionExecutors[SysActions.APP_INIT_COMPLETED] = whenAppInitCompleted;
+            actionExecutors[SysActions.SHOW_FORM_VIEW] = doShowFormView;
+            actionExecutors[SysActions.ADD_MARQUEE_MESSAGE] = doAddMarqueeMessage;
+            actionExecutors[SysActions.DEL_MARQUEE_MESSAGE] = doDelMarqueeMessage;
+            actionExecutors[SysActions.APP_XAML_INITED] = whenAppXamlInited;
+            actionExecutors[SysActions.SET_LOADING_MESSAGE] = doSetLoadingMessage;
+            actionExecutors[SysActions.CHANGE_WINDOW_BACKGROUND_IMAGE] = doChangeBackground;
+            actionExecutors[SysActions.SET_LOADING_VIEW_STATE] = doSetLoadingViewState;
+            Store.Subscribe(actionExecutors);
         }
+
+        /// <summary>
+        /// App.xaml.cs加载完成
+        ///然后加载程序的配置文件，Global.xls,Hmi.xls,一些 Helper等等
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenAppInitCompleted(AppState state, IAction action) {
+            //模拟动作
+            if (CmdOptions.GlobalOptions.MockVal) {
+                dispatchMockActions();
+            }
+            //每一分钟检查一次与服务器的连接
+            YUtil.SetInterval(60000, () => {
+                checkNetwork(HmiConfig.InfluxDbIp);
+            });
+            //软件启动的时候检查一次
+            checkLogFolderSize(HmiConfig.LogFolder);
+            //每个小时检查一下日志文件夹大小
+            YUtil.SetInterval(3600000, () => {
+                checkLogFolderSize(HmiConfig.LogFolder);
+            });
+            //隐藏加载界面
+            App.Store.Dispatch(new SysActions.SetLoadingViewState(Visibility.Collapsed, 0, ""));
+         
+            //隐藏任务栏 + 桌面
+            if (!HmiConfig.IsDevUserEnv) {
+                App.Store.Dispatch(new SysActions.HideTaskBar());
+            }
+            Navigate(nameof(HomeView));
+        }
+
+
 
         /// <summary>
         /// 更改背景图片
@@ -188,7 +229,6 @@ namespace HmiPro.ViewModels {
         void doSetLoadingMessage(AppState state, IAction action) {
             var loadMessage = (SysActions.SetLoadingMessage)action;
             LoadingText = loadMessage.Message + "  " + loadMessage.Percent.ToString("p1");
-            RaisePropertyChanged(nameof(LoadingText));
         }
 
         /// <summary>
@@ -265,40 +305,17 @@ namespace HmiPro.ViewModels {
             MarqueeText = stringBuilder.ToString();
         }
 
+
         /// <summary>
-        /// 程序初始化完成
-        /// 包括配置文件初始化成功
-        /// Mq消息监听成功
-        /// Cpm服务启动成功
-        /// Http服务启动成功
+        /// 设置 Loading 界面的状态，可见性，高度等等
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        void whenAppInitCompleted(AppState state, IAction action) {
-            //模拟动作
-            if (CmdOptions.GlobalOptions.MockVal) {
-                dispatchMockActions();
-            }
-            //每一分钟检查一次与服务器的连接
-            YUtil.SetInterval(60000, () => {
-                checkNetwork(HmiConfig.InfluxDbIp);
-            });
-            //软件启动的时候检查一次
-            checkLogFolderSize(HmiConfig.LogFolder);
-            //每个小时检查一下日志文件夹大小
-            YUtil.SetInterval(3600000, () => {
-                checkLogFolderSize(HmiConfig.LogFolder);
-            });
-            //隐藏加载界面
-            LoadingGridHeight = 0;
-            RaisePropertyChanged(nameof(LoadingGridHeight));
-            LoadinngGridVisibility = Visibility.Collapsed;
-            RaisePropertyChanged(nameof(LoadinngGridVisibility));
-            //隐藏任务栏 + 桌面
-            if (!HmiConfig.IsDevUserEnv) {
-                App.Store.Dispatch(new SysActions.HideTaskBar());
-            }
-            Navigate(nameof(HomeView));
+        void doSetLoadingViewState(AppState state, IAction action) {
+            var loadingAction = (SysActions.SetLoadingViewState)action;
+            LoadingText = loadingAction.LoadingTxt;
+            LoadinngGridVisibility = loadingAction.Visibility;
+            LoadingGridHeight = loadingAction.Height;
         }
 
         /// <summary>
@@ -331,7 +348,7 @@ namespace HmiPro.ViewModels {
                             args = i.ToString(),
                             machineCode = machineCode
                         };
-                        Logger.Info("测试删除指令生成："+JsonConvert.SerializeObject(delCmd));
+                        Logger.Info("测试删除指令生成：" + JsonConvert.SerializeObject(delCmd));
                     }
                 });
             }

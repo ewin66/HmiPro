@@ -22,12 +22,9 @@ namespace Daemon {
         private static readonly string logPath = "C:\\HmiPro\\Log\\Daemon\\";
         private static readonly string pipeName = "HmiDaemon";
         public readonly LoggerService Logger;
-        private readonly Encoding encoding = Encoding.UTF8;
-        private DateTime hmiLastRunTime = DateTime.MinValue;
         private Timer keepHmiRunningTimer;
         private NamedPipeServerStream pipeServer;
         private readonly string hmiProcessName = "HmiPro";
-        private readonly string hmiExePath;
 
 
         /// <summary>
@@ -38,7 +35,6 @@ namespace Daemon {
         public HmiDaemon() {
             InitializeComponent();
             Logger = new LoggerService(logPath) { DefaultLocation = "HmiDaemon" };
-            hmiExePath = YUtil.GetAbsolutePath(@"..\..\HmiPro.exe");
         }
 
         /// <summary>
@@ -47,7 +43,6 @@ namespace Daemon {
         /// <param name="args"></param>
         protected override void OnStart(string[] args) {
             StartPipeServer();
-            keepHmiRunningTimer = YUtil.SetInterval(hmiWriteIntervalMs * 4, keepHmiRunning);
             Logger.Info("--Hmi Daemon 启动完毕--");
         }
 
@@ -75,11 +70,8 @@ namespace Daemon {
                 server.Read(buffer, 0, 65535);
                 string json = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
                 var rest = JsonConvert.DeserializeObject<PipeRest>(json);
-                hmiLastRunTime = rest.WriteTime;
-                Logger.Info("Hmi 程序最后运行时间：" + rest.WriteTime, true, ConsoleColor.Black, 36000);
-                if (rest.DataType == PipeDataType.Event) {
 
-                }
+
                 //一定要先端口连接
                 server.Disconnect();
                 //再连接
@@ -98,16 +90,5 @@ namespace Daemon {
             keepHmiRunningTimer = null;
         }
 
-        /// <summary>
-        /// 保证Hmi程序正常运行
-        /// 如果检查到Hmi挂了，则重新启动其程序
-        /// </summary>
-        private void keepHmiRunning() {
-            //超过4次待在没收到消息
-            //则认为程序已死
-            if ((DateTime.Now - hmiLastRunTime).TotalMilliseconds > hmiWriteIntervalMs * 4) {
-                Logger.Error("Hmi 程序已经挂掉");
-            }
-        }
     }
 }

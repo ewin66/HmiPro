@@ -56,6 +56,7 @@ namespace HmiPro.Redux {
             UnityIocService.RegisterGlobalDepend<DpmCore>();
             UnityIocService.RegisterGlobalDepend<PipeEffects>();
             UnityIocService.RegisterGlobalDepend<LoadEffects>();
+            UnityIocService.RegisterGlobalDepend<HookCore>();
         }
 
     }

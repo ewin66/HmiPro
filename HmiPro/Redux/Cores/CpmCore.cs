@@ -39,7 +39,7 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 订阅指令：执行逻辑
         /// </summary>
-        readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new ConcurrentDictionary<string, Action<AppState, IAction>>();
+        readonly IDictionary<string, Action<AppState, IAction>> actionExecutors = new ConcurrentDictionary<string, Action<AppState, IAction>>();
         /// <summary>
         /// 最后打开报警灯时间
         /// </summary>
@@ -61,10 +61,10 @@ namespace HmiPro.Redux.Cores {
                 onlineFloatDict[pair.Key] = new ConcurrentDictionary<int, float>();
             }
             AlarmLightsStateDict = App.Store.GetState().CpmState.AlarmLightsStateDict;
-            actionExecDict[AlarmActions.OPEN_ALARM_LIGHTS] = doOpenAlarmLights;
-            actionExecDict[AlarmActions.CLOSE_ALARM_LIGHTS] = doCloseAlarmLights;
-            actionExecDict[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
-            App.Store.Subscribe(actionExecDict);
+            actionExecutors[AlarmActions.OPEN_ALARM_LIGHTS] = doOpenAlarmLights;
+            actionExecutors[AlarmActions.CLOSE_ALARM_LIGHTS] = doCloseAlarmLights;
+            actionExecutors[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
+            App.Store.Subscribe(actionExecutors);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace HmiPro.Redux.Cores {
                     //检查超时
                     YUtil.SetInterval(HmiConfig.CpmTimeout, () => {
                         checkCpmTimeout(HmiConfig.CpmTimeout);
-                    }) ;
+                    });
                 }
                 SmParamTcp.Start();
 
@@ -264,7 +264,6 @@ namespace HmiPro.Redux.Cores {
             dispatchCheckBomAlarm(machineCode, cpms);
             //检查Plc上下限报警
             dispatchCheckPlcAlarm(machineCode, cpms);
-            ;
         }
 
         /// <summary>
@@ -306,13 +305,13 @@ namespace HmiPro.Redux.Cores {
         private void checkCpmTimeout(int timeoutMs) {
             foreach (var cpmsDict in OnlineCpmDict) {
                 foreach (var pair in cpmsDict.Value) {
-                    if ((pair.Value.ValueType != SmParamType.Signal && pair.Value.ValueType != SmParamType.String)) {
+                    if (pair.Value.ValueType != SmParamType.Signal && pair.Value.ValueType != SmParamType.String) {
                         continue;
                     }
-                    var msDiff = Math.Abs((DateTime.Now - pair.Value.PickTime).TotalMilliseconds);
+                    //时间差 
+                    var msDiff = (DateTime.Now - pair.Value.PickTime).TotalMilliseconds;
                     if (msDiff > timeoutMs) {
-                        pair.Value.Value = "暂无";
-                        pair.Value.ValueType = SmParamType.Timeout;
+                        pair.Value.Update("暂无", SmParamType.Timeout, DateTime.Now);
                     }
                 }
             }

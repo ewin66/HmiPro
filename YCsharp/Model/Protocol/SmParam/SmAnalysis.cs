@@ -39,9 +39,14 @@ namespace YCsharp.Model.Procotol.SmParam {
                 try {
                     SmModel data = processParamPackage(p, 0);
                     dataList.Add(data);
+                    //打印错误包数据
                 } catch (Exception e) {
                     var gap = 3600 * 24;
-                    Logger.Error("参数解码错误 ", e, gap);
+                    StringBuilder strB = new StringBuilder();
+                    for (int i = 0; i < buffer.Length; i++) {
+                        strB.Append("" + buffer[i].ToString("X2"));
+                    }
+                    Logger.Error("参数解码错误: bffer \r\n " + strB.ToString(), e, gap);
                 }
             });
             //心跳包解码

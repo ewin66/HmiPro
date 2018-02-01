@@ -23,15 +23,15 @@ namespace HmiPro.Redux.Cores {
     /// </summary>
     public class OeeCore {
         public readonly LoggerService Logger;
-        private readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
+        private readonly IDictionary<string, Action<AppState, IAction>> actionExecutors = new Dictionary<string, Action<AppState, IAction>>();
         public OeeCore() {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());
-            actionExecDict[CpmActions.OEE_SPEED_ACCEPT] = whenOeeSpeedAccept;
+            actionExecutors[CpmActions.OEE_SPEED_ACCEPT] = whenOeeSpeedAccept;
         }
 
         public void Init() {
-            App.Store.Subscribe(actionExecDict);
+            App.Store.Subscribe(actionExecutors);
         }
         /// <summary>
         /// 计算Oee

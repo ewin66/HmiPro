@@ -7,17 +7,24 @@ using YCsharp.Util;
 
 namespace HmiPro.Config {
     /// <summary>
-    /// 
+    /// 程序使用到的图片、字典、配置Json静态文件路径
+    /// <author>ychost</author>
+    /// <date>2017-10-18</date>
     /// </summary>
     public class Assets {
         public Assets(string folder) {
             AssetsFolder = folder;
         }
         public readonly string AssetsFolder;
+
+        //约定的文件夹
         public string ImagesFolder => AssetsFolder + @"\Images";
         public string DictsFoler => AssetsFolder + @"\Dicts";
         public string MocksFolder => AssetsFolder + @"\Mocks";
+        public string BatsFoler => AssetsFolder + @"\Bats";
 
+
+        //一些图标
         public string IconConfigAdmin => ImagesFolder + "\\config-admin.ico";
         public string IconJson => ImagesFolder + "\\json.ico";
         public string IconCsv => ImagesFolder + "\\csv.ico";
@@ -56,9 +63,13 @@ namespace HmiPro.Config {
         public string IconTest => ImagesFolder + "\\test.ico";
         public string IconPrivacy => ImagesFolder + "\\privacy.ico";
         public string IconMonitor2 => ImagesFolder + "\\monitor2.ico";
+
+        //一些图片
         public string ImageBackground => ImagesFolder + "\\background.jpg";
         public string ImageIronMan => ImagesFolder + "\\iron-man.jpg";
+        public string ImageSkull => ImagesFolder + "\\skull.jpg";
 
+        //一些资源文件
         public string CraftsBomXls => DictsFoler + "\\工艺Bom.xls";
         public string MockMqSchTaskJson => MocksFolder + "\\MqSchTask.json";
         public string MockMqScanMaterial => MocksFolder + "\\MqScanMaterial.json";
@@ -67,5 +78,8 @@ namespace HmiPro.Config {
         public string ExeType => Environment.Is64BitOperatingSystem ? "x64" : "x86";
         public string ExePath => AssetsFolder + "\\Exe\\";
         public string ExeNirCmd => ExePath + ExeType + "\\nircmd.exe";
+
+        //一些脚本文件
+        public string BatDeleteApp => BatsFoler + "\\delete-app.bat";
     }
 }

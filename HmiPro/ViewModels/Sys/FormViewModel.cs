@@ -51,7 +51,6 @@ namespace HmiPro.ViewModels.Sys {
         public Action<BaseForm> OnCancelPressed;
 
         public BaseForm() {
-
         }
     }
 

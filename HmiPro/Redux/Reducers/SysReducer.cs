@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
 using WindowsInput;
 using DevExpress.Xpf.Core;
@@ -52,10 +53,13 @@ namespace HmiPro.Redux.Reducers {
             /// </summary>
             public IDictionary<string, string> MarqueeMessagesDict { get; set; }
 
+            public LoadingWindow LoadingWindow;
         }
 
+
+
         public static SimpleReducer<State> Create() {
-            return new SimpleReducer<State>(() => new State() { IsScreenLight = true, MarqueeMessagesDict = new SortedDictionary<string, string>() })
+            return new SimpleReducer<State>(() => new State() { IsScreenLight = true, MarqueeMessagesDict = new SortedDictionary<string, string>(), LoadingWindow = new LoadingWindow() { Topmost = true, WindowStartupLocation = WindowStartupLocation.CenterOwner } })
              .When<SysActions.StartHttpSystemSuccess>((state, action) => {
                  state.HttpSystemIsStarted = true;
                  return state;
@@ -66,11 +70,11 @@ namespace HmiPro.Redux.Reducers {
                  state.HttpSystemIsStarted = false;
                  return state;
              }).When<SysActions.OpenScreen>((state, action) => {
-                 YUtil.OpenScreenByNirCmmd(AssetsHelper.GetAssets().ExeNirCmd);
+                 YUtil.OpenScreen(AssetsHelper.GetAssets().ExeNirCmd);
                  state.IsScreenLight = true;
                  return state;
              }).When<SysActions.CloseScreen>((state, action) => {
-                 YUtil.CloseScreenByNirCmd(AssetsHelper.GetAssets().ExeNirCmd);
+                 YUtil.CloseScreen(AssetsHelper.GetAssets().ExeNirCmd);
                  state.IsScreenLight = false;
                  return state;
              }).When<SysActions.StartCloseScreenTimer>((state, action) => {
@@ -120,17 +124,21 @@ namespace HmiPro.Redux.Reducers {
              }).When<SysActions.CloseLoadingSplash>((state, action) => {
                  Application.Current.Dispatcher.Invoke(() => {
                      try {
-                         DXSplashScreen.Close();
+                         //DXSplashScreen.Close();
+                         state.LoadingWindow.Hide();
                      } catch {
-
+                         Console.WriteLine("隐藏加载框失败");
                      }
                  });
                  return state;
              }).When<SysActions.ShowLoadingSplash>((state, action) => {
                  Application.Current.Dispatcher.Invoke(() => {
                      try {
-                         DXSplashScreen.Show<LoadingWindow>();
-                     } catch { }
+                         //DXSplashScreen.Show<LoadingWindow>();
+                         state.LoadingWindow.Show();
+                     } catch {
+                         Console.WriteLine("显示加载框失败");
+                     }
                  });
                  return state;
              });

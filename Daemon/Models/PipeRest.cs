@@ -37,7 +37,7 @@ namespace Daemon.Models {
     /// <summary>
     /// 当 DataType == PipeDataType.Event 的时候 Data 的取值类型
     /// </summary>
-    public class PipeEventData {
+    public class PipeEvent {
         /// <summary>
         /// 执行 Daemon 的事件
         /// </summary>
@@ -45,7 +45,20 @@ namespace Daemon.Models {
         /// <summary>
         /// 执行 Daemon 的事件参数
         /// </summary>
-        public string EventArgs { get; set; }
+        public object EventArgs { get; set; }
     }
+
+    public static class PipeActions {
+        /// <summary>
+        /// 删除掉 Hmi Pro 程序
+        /// </summary>
+        public static readonly string DANGER_DELETE_HMI_PRO_APP = "[Danger] Delete Hmi Pro App";
+
+        public class DangerDeleteHmiProApp {
+            public string AppPath { get; set; }
+        }
+
+    }
+
 }
 

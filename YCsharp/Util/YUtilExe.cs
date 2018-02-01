@@ -14,6 +14,9 @@ namespace YCsharp.Util {
     /// 都是调用其它exe文件
     /// </summary>
     public static partial class YUtil {
+
+        #region 关机、重启、注销、锁屏
+
         [DllImport("user32")]
         public static extern bool ExitWindowsEx(uint uFlags, uint dwReason);
 
@@ -26,9 +29,8 @@ namespace YCsharp.Util {
         /// </summary>
         public static void ShutDownPc() {
             try {
-                System.Diagnostics.ProcessStartInfo startinfo =
-                    new System.Diagnostics.ProcessStartInfo("shutdown.exe", "-s -t 00");
-                System.Diagnostics.Process.Start(startinfo);
+                ProcessStartInfo startinfo = new ProcessStartInfo("shutdown.exe", "-s -t 00");
+                Process.Start(startinfo);
             } catch {
             }
         }
@@ -38,9 +40,8 @@ namespace YCsharp.Util {
         /// </summary>
         public static void RestartPC() {
             try {
-                System.Diagnostics.ProcessStartInfo startinfo =
-                    new System.Diagnostics.ProcessStartInfo("shutdown.exe", "-r -t 00");
-                System.Diagnostics.Process.Start(startinfo);
+                ProcessStartInfo startinfo = new ProcessStartInfo("shutdown.exe", "-r -t 00");
+                Process.Start(startinfo);
             } catch {
             }
         }
@@ -64,8 +65,7 @@ namespace YCsharp.Util {
             } catch {
             }
         }
-
-
+        #endregion
 
         /// <summary>
         /// 执行命令
@@ -74,13 +74,15 @@ namespace YCsharp.Util {
         /// <param name="cmd">命令</param>
         public static void Exec(string exePath, string cmd) {
             try {
-                System.Diagnostics.ProcessStartInfo startinfo = new System.Diagnostics.ProcessStartInfo(exePath, cmd);
-                System.Diagnostics.Process.Start(startinfo);
+                ProcessStartInfo startinfo = new ProcessStartInfo(exePath, cmd);
+                //startinfo.WindowStyle = ProcessWindowStyle.Hidden;
+                Process.Start(startinfo);
             } catch {
                 Console.WriteLine("执行命令 " + exePath + " " + cmd + " 异常");
             }
         }
 
+        #region 弹出 windows 自带的软件
         /// <summary>
         /// 显示虚拟键盘
         /// </summary>
@@ -90,13 +92,23 @@ namespace YCsharp.Util {
             });
         }
 
+        /// <summary>
+        /// 弹出任务管理器
+        /// </summary>
+        public static void CallTaskMgrAsync() {
+            Task.Run(() => {
+                Exec("TaskMgr.exe", "");
+            });
+        }
+        #endregion
 
-
+        #region 显示器开启/熄灭
         /// <summary>
         /// 通过 NirCmd调用的方式关闭显示器
+        /// 暂时不支持 Win10
         /// </summary>
         /// <param name="nirCmdPath"></param>
-        public static void CloseScreenByNirCmd(string nirCmdPath) {
+        public static void CloseScreen(string nirCmdPath) {
             if (YUtil.GetOsVersion().Contains(Windows10)) {
                 Console.WriteLine("暂不支持win10的关闭屏幕操作");
                 return;
@@ -110,9 +122,10 @@ namespace YCsharp.Util {
 
         /// <summary>
         /// 通过NirCmd调用的方式打开显示器
+        /// 暂时不支持 Win10
         /// </summary>
         /// <param name="nirCmdPath"></param>
-        public static void OpenScreenByNirCmmd(string nirCmdPath) {
+        public static void OpenScreen(string nirCmdPath) {
             if (YUtil.GetOsVersion().Contains(Windows10)) {
                 Console.WriteLine("暂不支持win10的开启屏幕操作");
                 return;
@@ -124,6 +137,9 @@ namespace YCsharp.Util {
             task.Wait(1000);
         }
 
+        #endregion
+
+        #region Windows Service 辅助
         /// <summary>
         /// 获取 Windows 服务状态
         /// </summary>
@@ -221,14 +237,8 @@ namespace YCsharp.Util {
             }
             return false;
         }
+        #endregion
 
-        /// <summary>
-        /// 弹出任务管理器
-        /// </summary>
-        public static void CallTaskMgrAsync() {
-            Task.Run(() => {
-                Exec("TaskMgr.exe", "");
-            });
-        }
+
     }
 }

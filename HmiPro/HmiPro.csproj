@@ -70,6 +70,7 @@
     <Reference Include="DevExpress.Xpf.Themes.HmiPro.v17.1">
       <HintPath>..\..\HmiTheme\DevExpress.Xpf.Themes.HmiPro\Bin\DevExpress.Xpf.Themes.HmiPro.v17.1.dll</HintPath>
     </Reference>
+    <Reference Include="DevExpress.Xpo.v17.1, Version=17.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DnsClient, Version=1.0.7.0, Culture=neutral, PublicKeyToken=4574bb5573c51424, processorArchitecture=MSIL">
       <HintPath>..\packages\DnsClient.1.0.7\lib\net45\DnsClient.dll</HintPath>
     </Reference>
@@ -213,6 +214,7 @@
     <Compile Include="Redux\Actions\DbActions.cs" />
     <Compile Include="Redux\Actions\DMesActions.cs" />
     <Compile Include="Redux\Actions\DpmActions.cs" />
+    <Compile Include="Redux\Actions\HookActions.cs" />
     <Compile Include="Redux\Actions\LoadActions.cs" />
     <Compile Include="Redux\Actions\MockActions.cs" />
     <Compile Include="Redux\Actions\MqActions.cs" />
@@ -222,6 +224,7 @@
     <Compile Include="Redux\Actions\ViewStoreActions.cs" />
     <Compile Include="Redux\Cores\AlarmCore.cs" />
     <Compile Include="Redux\Cores\DpmCore.cs" />
+    <Compile Include="Redux\Cores\HookCore.cs" />
     <Compile Include="Redux\Cores\SchCore.cs" />
     <Compile Include="Redux\Cores\ViewStoreCore.cs" />
     <Compile Include="Redux\Effects\CpmEffects.cs" />
@@ -234,6 +237,7 @@
     <Compile Include="Redux\Models\AlarmBomCheck.cs" />
     <Compile Include="Redux\Models\Cpm.cs" />
     <Compile Include="Redux\Models\Dpm.cs" />
+    <Compile Include="Redux\Models\ManuInfo.cs" />
     <Compile Include="Redux\Models\MqCall.cs" />
     <Compile Include="Redux\Models\MqCmd.cs" />
     <Compile Include="Redux\Models\MqUploadRest.cs" />
@@ -447,6 +451,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Profiles\Assets\Bats\delete-app.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Profiles\Prod\Machines\EK.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -751,10 +758,15 @@
   <ItemGroup>
     <Folder Include="Profiles\Dev\Machines\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Profiles\Assets\Images\skull.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

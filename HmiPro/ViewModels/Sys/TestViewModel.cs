@@ -44,14 +44,14 @@ namespace HmiPro.ViewModels.Sys {
         [Command(Name = "CloseScreenCommand")]
         public void CloseScreen(object secObj) {
             if (secObj == null) {
-                YUtil.CloseScreenByNirCmd(AssetsHelper.GetAssets().ExeNirCmd);
+                YUtil.CloseScreen(AssetsHelper.GetAssets().ExeNirCmd);
             } else {
                 int sec = int.Parse(secObj.ToString());
                 var ms = sec * 1000;
                 Task.Run(() => {
-                    YUtil.CloseScreenByNirCmd(AssetsHelper.GetAssets().ExeNirCmd);
+                    YUtil.CloseScreen(AssetsHelper.GetAssets().ExeNirCmd);
                     YUtil.SetTimeout(ms, () => {
-                        YUtil.OpenScreenByNirCmmd(AssetsHelper.GetAssets().ExeNirCmd);
+                        YUtil.OpenScreen(AssetsHelper.GetAssets().ExeNirCmd);
                     });
                 });
             }
@@ -76,7 +76,7 @@ namespace HmiPro.ViewModels.Sys {
 
         [Command(Name = "OpenScreenCommand")]
         public void OpenScreen() {
-            YUtil.OpenScreenByNirCmmd(AssetsHelper.GetAssets().ExeNirCmd);
+            YUtil.OpenScreen(AssetsHelper.GetAssets().ExeNirCmd);
         }
 
         [Command(Name = "StandbyScreenCommand")]
@@ -161,6 +161,11 @@ namespace HmiPro.ViewModels.Sys {
         [Command(Name = "ClosePcCommand")]
         public void ClosePc() {
             YUtil.ShutDownPc();
+        }
+
+        [Command(Name = "DeleteAppCommand")]
+        public void DeleteApp() {
+            App.Store.Dispatch(new HookActions.DangerDamageApp("莫生气"));
         }
     }
 }

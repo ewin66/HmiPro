@@ -81,14 +81,17 @@ namespace HmiPro.Redux.Reducers {
                         //只有更新的参数Id为选中的 && 当前处于曲线界面才唤起主线程 && 当前导航机台位参数机台
                         if (state.NavView.DMesSelectedMachineCode == action.MachineCode && cpm.Code == cpmDetail.SelectedCpm?.Code && isInChartView) {
                             Application.Current.Dispatcher.Invoke(() => {
-                                updateChartView(cpmDetail, cpm, maxThreshold, minThreshold);
+                                //有的机台会抛错，别问我为什么
+                                try {
+                                    updateChartView(cpmDetail, cpm, maxThreshold, minThreshold);
+                                } catch {
+                                }
                             });
                         } else {
                             //防止多线程错误
                             try {
                                 updateChartView(cpmDetail, cpm, maxThreshold, minThreshold);
                             } catch {
-
                             }
                         }
                     }
@@ -182,7 +185,6 @@ namespace HmiPro.Redux.Reducers {
         /// 该函数被多线程调用，所以给每个 Code 对应的 Chart 都上了一把锁
         /// </summary>
         private static void updateChartView(CpmDetailViewStore cpmDetail, Cpm cpm, CpmChartThreshold maxThreshold, CpmChartThreshold minThreshold) {
-
             lock (cpmDetail.ChartCpmSourceDict[cpm.Code]) {
                 if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > maxChartPointNums) {
                     cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, removePointNums);

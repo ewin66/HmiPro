@@ -151,9 +151,9 @@ namespace HmiPro.Redux.Effects {
                 afterConfigLoaded();
             } catch (Exception e) {
                 Logger.Error("程序配置出错", e);
-                var message = "机台配置文件出错，请检查网络连接";
+                var message = "程序出错，请检查网络连接";
                 updateLoadingMessage(message, 0.5, 0);
-                shutdownAppAfterSec(10, 0.1, "配置文件出错");
+                shutdownAppAfterSec(10, 0.1, message);
             }
         }
 
@@ -205,6 +205,7 @@ namespace HmiPro.Redux.Effects {
             UnityIocService.ResolveDepend<CpmCore>().Init();
             UnityIocService.ResolveDepend<OeeCore>().Init();
             UnityIocService.ResolveDepend<DpmCore>().Init();
+            UnityIocService.ResolveDepend<HookCore>().Init();
 
             updateLoadingMessage("正在启动调度器...", 0.65);
             await UnityIocService.ResolveDepend<SchCore>().Init();
