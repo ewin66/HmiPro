@@ -346,7 +346,7 @@ namespace HmiPro.Redux.Effects {
                     //在时间之内完成了task
                 } else {
                     //超时
-                    Console.WriteLine($"上传Mq超时{awaitTime / 1000}s");
+                    Logger.Error("上传实时参数到 Mq 超时", 36000);
                     App.Store.Dispatch(new MqActions.UploadCpmsFailed() { Exp = new Exception($"上传超时 {awaitTime / 1000}s ") });
                 }
                 task.Dispose();

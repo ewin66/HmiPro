@@ -199,7 +199,6 @@ namespace HmiPro.ViewModels {
             });
             //隐藏加载界面
             App.Store.Dispatch(new SysActions.SetLoadingViewState(Visibility.Collapsed, 0, ""));
-
             //隐藏任务栏 + 桌面
             if (!HmiConfig.IsDevUserEnv) {
                 App.Store.Dispatch(new SysActions.HideTaskBar());
@@ -366,8 +365,8 @@ namespace HmiPro.ViewModels {
             logFolder = YUtil.GetAbsolutePath(logFolder);
             var bytes = YUtil.GetDirectorySizeByte(logFolder);
             var mBytes = bytes / (1024 * 1024);
-            //日志文件超过了 1 G
-            if (mBytes > 1024) {
+            //日志文件超过了 500M 
+            if (mBytes > 500) {
                 Logger.ErrorWithDb($"日志文件夹大小：{mBytes} M", MachineConfig.HmiName);
                 App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_LOG_FOLDER_TOO_LARGE,
                     $"日志文件过大 {mBytes} M，请及时清理"));
@@ -468,7 +467,9 @@ namespace HmiPro.ViewModels {
         /// </summary>
         /// <param name="target"></param>
         public void Navigate(string target) {
-            NavigationService.Navigate(target, null, this, true);
+            Application.Current.Dispatcher.Invoke(() => {
+                NavigationService.Navigate(target, null, this, true);
+            });
         }
 
 
