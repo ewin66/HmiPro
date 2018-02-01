@@ -226,13 +226,9 @@ namespace HmiPro.Redux.Cores {
                 cpms.AddRange(cpmsDirect);
                 cpms.AddRange(cpmsRelate);
             }
-            //更新参数字典
-            //fixed:2017-10-20
-            //      一包参数的时间应该一致
+
             var pickTime = DateTime.Now;
-            void updateDiff(Cpm cpm) {
-                cpm.PickTime = pickTime;
-                //直接更新，会更新界面的数据
+            foreach (var cpm in cpms) {
                 if (OnlineCpmDict[machineCode].TryGetValue(cpm.Code, out var storeCpm)) {
                     //Rfid 数据是在 DMesCore 更新
                     if (!DefinedParamCode.IsRfidParam(cpm.Code)) {
@@ -241,7 +237,6 @@ namespace HmiPro.Redux.Cores {
                 } else {
                     Logger.Error($"参数 {cpm.Code} 未注册", 3600);
                 }
-                updatedCpmsDiffDict[cpm.Code] = cpm;
             }
 
             //差异更新，使用linq 2017-11-13
@@ -252,7 +247,10 @@ namespace HmiPro.Redux.Cores {
                      || OnlineCpmDict[machineCode][c.Code].Value.ToString() != c.Value.ToString())
              )
              select c
-            ).ForEach(updateDiff);
+            ).ForEach(cpm => {
+                cpm.PickTime = pickTime;
+                updatedCpmsDiffDict[cpm.Code] = cpm;
+            });
             //一定要先派遣所有更新，再派遣部分更新
             //这样就保证了reducer里面数据的唯一性
             if (cpms.Count > 0) {
