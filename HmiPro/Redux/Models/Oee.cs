@@ -12,8 +12,8 @@ namespace HmiPro.Redux.Models {
     /// <summary>
     /// Oee的值，Oee由时间、速度、质量效率三部分组成
     /// 更新其中的一项都会自动更新Oee的值
-    /// <date>2017-12-20</date>
     /// <author>ychost</author>
+    /// <date>2017-12-20</date>
     /// </summary>
     public class Oee : INotifyPropertyChanged {
 

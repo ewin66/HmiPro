@@ -16,7 +16,9 @@ using Reducto;
 
 namespace HmiPro.Redux.Reducers {
     /// <summary>
-    /// 
+    /// DMes系统的数据核心
+    /// <author>ychost</author>
+    /// <date>2017-12-19</date>
     /// </summary>
     public static class DMesReducer {
         public struct State {

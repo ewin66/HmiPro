@@ -17,6 +17,8 @@ namespace HmiPro.Redux.Effects {
     public class PipeEffects {
         /// <summary>
         /// 往命名管道里面异步写入数据
+        /// <author>ychost</author>
+        /// <date>2018-1-22</date>
         /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<PipeActions.WriteRest, bool> WriteString;
 

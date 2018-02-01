@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace HmiPro.Redux.Models {
     /// <summary>
-    /// <date>2017-12-20</date>
     /// <author>ychost</author>
+    /// <date>2017-12-20</date>
     /// </summary>
     public struct SysNotificationMsg {
         /// <summary>

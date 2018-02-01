@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 
 namespace HmiPro.Redux.Reducers {
 
+    /// <summary>
+    /// 整个程序的所有数据源
+    /// <authro>ychost</authro>
+    /// <date>2017-12-18</date>
+    /// </summary>
     public struct AppState {
         public string Type;
         public CpmReducer.State CpmState;

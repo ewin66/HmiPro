@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 using HmiPro.Redux.Models;
 
 namespace HmiPro.Redux.Actions {
+    /// <summary>
+    /// 模拟动作
+    /// <author>ychost</author>
+    /// <date>2018-01-11</date>
+    /// </summary>
     public static class MockActions {
         public static readonly string MOCK_SCH_TASK_ACCEPT = "[Mock] Schedule Task Accept";
         public struct MockSchTaskAccpet : IAction {

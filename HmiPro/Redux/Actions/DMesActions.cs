@@ -8,6 +8,8 @@ using HmiPro.Redux.Models;
 namespace HmiPro.Redux.Actions {
     /// <summary>
     /// DMes系统相关核心指令
+    /// <author>ychost</author>
+    /// <date>2017-12-20</date>
     /// </summary>
     public static class DMesActions {
         /// <summary>
@@ -16,15 +18,23 @@ namespace HmiPro.Redux.Actions {
         /// </summary>
         public static readonly string DMES_SCH_TASK_ASSIGN = "[DMes] Schedule Task Assign";
 
+        //初始化一些字典等等
         public static readonly string INIT = "[DMes] Init";
 
+        //开始某轴任务
         public static readonly string START_SCH_TASK_AXIS = "[DMes] Start Schedule Task Axis";
         public static readonly string START_SCH_TASK_AXIS_SUCCESS = "[DMes] Start Schedule Task Axis Success";
         public static readonly string START_SCH_TASK_AXIS_FAILED = "[DMes] Start Schedule Task Axis Failed";
+
+        //完成某轴任务
         public static readonly string COMPLETED_SCH_AXIS = "[DMes] Completed Schedule Axis";
         public static readonly string COMPLETED_SCH_AXIS_SUCESS = "[DMes] Completed Schedule Axis Success";
         public static readonly string COMPLETED_SCH_AXIS_FAILED = "[DMes] Completed Schedule Axis Failed";
+
+        //清空任务
         public static readonly string CLEAR_SCH_TASKS = "[DMes] Clear Sch Tasks";
+
+        //删除某个任务集合
         public static readonly string DEL_TASK = "[DMes] Del Task";
 
 

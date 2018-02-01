@@ -10,6 +10,8 @@ using HmiPro.Annotations;
 namespace HmiPro.Redux.Models {
     /// <summary>
     /// 当前任务
+    /// <author>ychost</author>
+    /// <date>2018-1-31</date>
     /// </summary>
     public class SchTaskDoing : INotifyPropertyChanged {
         /// <summary>

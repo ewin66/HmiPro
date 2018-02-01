@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 namespace HmiPro.Redux.Models {
     /// <summary>
     /// 机台开机、停机态点
+    /// <author>ychost</author>
+    /// <date>2018-1-4</date>
     /// </summary>
     public class MachineState {
         public DateTime Time;

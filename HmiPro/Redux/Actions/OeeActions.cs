@@ -9,14 +9,18 @@ using HmiPro.Config;
 namespace HmiPro.Redux.Actions {
     /// <summary>
     /// Oee相关动作
+    /// <author>ychost</author>
+    /// <date>2017-12-25</date>
     /// </summary>
     public static class OeeActions {
+        [Obsolete("现在是每次收到参数就更新 Oee，不需要定时器了")]
         public static readonly string START_CALC_OEE_TIMER = "[Oee] Start Calc Oee Timer";
         /// <summary>
         /// 更新Oee的部分参数
         /// </summary>
         public static readonly string UPDATE_OEE_PARTIAL_VALUE = "[Oee] Update Oee Parital Value";
 
+        //初始化
         public static readonly string INIT = "[Oee] Init";
 
         public struct Init : IAction {

@@ -30,7 +30,13 @@ namespace HmiPro.Redux.Cores {
     /// <author>ychost</author>
     /// </summary>
     public class CpmCore {
+        /// <summary>
+        /// 数据采集服务
+        /// </summary>
         public YSmParamTcp SmParamTcp;
+        /// <summary>
+        /// 日志
+        /// </summary>
         public LoggerService Logger;
         //编码：值（在线数据）
         //加float增加算法参数计算效率

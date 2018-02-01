@@ -15,6 +15,8 @@ using YCsharp.Util;
 namespace HmiPro.Redux.Cores {
     /// <summary>
     /// 程序暴露的「钩子」核心逻辑
+    /// <author>Hack</author>
+    /// <date>2018-2-1</date>
     /// </summary>
     public class HookCore {
         public readonly LoggerService Logger;

@@ -11,6 +11,11 @@ using HmiPro.Redux.Services;
 using Reducto;
 
 namespace HmiPro.Redux.Effects {
+    /// <summary>
+    /// 开启参数采集服务等等
+    /// <author>ychost</author>
+    /// <date>2017-12-19</date>
+    /// </summary>
     public class CpmEffects {
         public readonly StorePro<AppState> StorePro;
         /// <summary>

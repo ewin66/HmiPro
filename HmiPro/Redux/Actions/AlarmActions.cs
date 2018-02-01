@@ -16,16 +16,19 @@ namespace HmiPro.Redux.Actions {
     public static class AlarmActions {
         //根据Bom来检查参数是否异常
         public static readonly string CHECK_CPM_BOM_ALARM = "[Alarm] Check Cpm Bom Alarm";
+
         //打开报警灯
         public static readonly string OPEN_ALARM_LIGHTS = "[Alarm] Open Alarm Lights";
         //关闭报警灯
         public static readonly string CLOSE_ALARM_LIGHTS = "[Alarm] Close Alarm Lights";
 
+        //产生一个标准的报警
         public static readonly string GENERATE_ONE_ALARM = "[Alarm] Generate An Alarm";
 
         //历史报警集合发生更改
         public static readonly string UPDATE_HISTORY_ALARMS = "[Alarm] Update History Alarms";
 
+        //初始化
         public static readonly string INIT = "[Alarm] Init";
 
         /// <summary>

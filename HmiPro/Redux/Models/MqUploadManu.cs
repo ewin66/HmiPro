@@ -9,8 +9,8 @@ using Newtonsoft.Json;
 namespace HmiPro.Redux.Models {
     /// <summary>
     /// 每一轴洛轴后回传给服务器的数据
-    /// <date>2017-12-21</date>
     /// <author>ychost</author>
+    /// <date>2017-12-21</date>
     /// </summary>
     public class MqUploadManu {
         [Key]

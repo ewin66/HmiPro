@@ -6,7 +6,13 @@ using System.Threading.Tasks;
 using HmiPro.Redux.Models;
 
 namespace HmiPro.Redux.Actions {
+    /// <summary>
+    /// 管道操作
+    /// <author>ychost</author>
+    /// <date>2018-1-22</date>
+    /// </summary>
     public static class PipeActions {
+        //往管道里面写入字符串
         public static readonly string WRITE_STRING = "[Pipe] Write String";
         public static readonly string WRITE_STRING_SUCCESS = "[Pipe] Write String Success";
         public static readonly string WRITE_STRING_FAILED = "[Pipe] Write String Failed";

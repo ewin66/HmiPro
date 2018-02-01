@@ -18,6 +18,7 @@ using YCsharp.Util;
 
 namespace HmiPro.Redux.Effects {
     /// <summary>
+    /// 监听排产任务、机台指令、上传采集参数等等
     /// <date>2017-12-19</date>
     /// <author>ychost</author>
     /// </summary>

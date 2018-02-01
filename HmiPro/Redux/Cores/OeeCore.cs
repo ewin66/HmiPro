@@ -22,7 +22,13 @@ namespace HmiPro.Redux.Cores {
     /// <author>ychost</author>
     /// </summary>
     public class OeeCore {
+        /// <summary>
+        /// 日志
+        /// </summary>
         public readonly LoggerService Logger;
+        /// <summary>
+        /// 事件处理器
+        /// </summary>
         private readonly IDictionary<string, Action<AppState, IAction>> actionExecutors = new Dictionary<string, Action<AppState, IAction>>();
         public OeeCore() {
             UnityIocService.AssertIsFirstInject(GetType());
@@ -30,6 +36,9 @@ namespace HmiPro.Redux.Cores {
             actionExecutors[CpmActions.OEE_SPEED_ACCEPT] = whenOeeSpeedAccept;
         }
 
+        /// <summary>
+        /// 初始化订阅
+        /// </summary>
         public void Init() {
             App.Store.Subscribe(actionExecutors);
         }

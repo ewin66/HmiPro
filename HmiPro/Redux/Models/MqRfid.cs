@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 namespace HmiPro.Redux.Models {
     /// <summary>
     /// Mq传过来的人员卡
+    /// <author>ychost</author>
+    /// <date>201-1-20</date>
     /// </summary>
     public class MqEmpRfid {
         public string employeeCode { get; set; } // 生产部人员CODE ,用rfid代替

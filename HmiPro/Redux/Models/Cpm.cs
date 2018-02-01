@@ -36,6 +36,11 @@ namespace HmiPro.Redux.Models {
         }
     }
 
+    /// <summary>
+    /// 采集的参数模型
+    /// <author>ychost</author>
+    /// <date>2017-12-19</date>
+    /// </summary>
     public class Cpm : INotifyPropertyChanged {
         //数据要保存在mongo中，所以必须有id才可以
         [JsonIgnore]

@@ -16,8 +16,8 @@ using YCsharp.Model.Procotol.SmParam;
 namespace HmiPro.Redux.Reducers {
     /// <summary>
     /// 保存所有视图状态
-    /// <date>2018-01-15</date>
     /// <author>ychost</author>
+    /// <date>2018-01-15</date>
     /// </summary>
     public static class ViewStoreReducer {
         /// <summary>

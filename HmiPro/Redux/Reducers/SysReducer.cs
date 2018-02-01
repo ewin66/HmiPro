@@ -23,8 +23,8 @@ using Application = System.Windows.Application;
 namespace HmiPro.Redux.Reducers {
     /// <summary>
     /// 系统功能状态维护
-    /// <date>2017-12-19</date>
     /// <author>ychost</author>
+    /// <date>2017-12-19</date>
     /// </summary>
     public static class SysReducer {
         /// <summary>

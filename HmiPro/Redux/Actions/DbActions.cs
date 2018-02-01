@@ -6,23 +6,32 @@ using HmiPro.Redux.Models;
 
 namespace HmiPro.Redux.Actions {
     /// <summary>
-    /// 相聚看的相关操作
+    /// MongoDb、InfluxDb 等操作
     /// <date>2017-12-20</date>
     /// <autthor>ychost</autthor>
     /// </summary>
     public static class DbActions {
+        //上传采集参数到 InfluxDB
         public static readonly string UPLOAD_CPMS_INFLUXDB = "[Db] Upload Cpms To InfluxDb";
         public static readonly string UPLOAD_CPMS_INFLUXDB_SUCCESS = "[Db] Upload Cpms To InfluxDb Success";
         public static readonly string UPLOAD_CPMS_INFLUXDB_FAILED = "[Db] Upload Cpms To InfluxDb Failed";
+
+        //上传采集参数到 Mongo
         public static readonly string UPLOAD_CPMS_MONGO = "[Db] Upload Cpms To Mongo";
         public static readonly string UPLOAD_CPMS_MONGO_SUCCESS = "[Db] Upload Cpms To Mongo Sucess";
         public static readonly string UPLOAD_CPMS_MONGO_FALIED = "[Db] Upload Cpms To Mongo Failed";
+
+        //上传报警到 Mongo
         public static readonly string UPLOAD_ALARMS_MONGO = "[Db] Upload Alarms To Mongo";
         public static readonly string UPLOAD_ALARMS_MONGO_SUCCESS = "[Db] Upload Alarms To Mongo Success";
         public static readonly string UPLOAD_ALARMS_MONGO_FAILED = "[Db] Upload Alarms To Mongo Failed";
+
+        //上传普通对象到 Mongo
         public static readonly string UPLOAD_DOC_TO_MONGO = "[Db] Upload Document To Mongo";
         public static readonly string UPLOAD_DOC_TO_MONGO_SUCCESS = "[Db] Upload Document To Mongo Success";
         public static readonly string UPLOAD_DOC_TO_MONGO_FAILED = "[Db] Upload Document To Mongo Failed";
+
+        //上传普通集合到 Mongo
         public static readonly string UPLOAD_DOC_MANY_TO_MONGO = "[Db] Upload Document Many To Mongo";
         public static readonly string UPLOAD_DOC_MANY_TO_MONGO_SUCCESS = "[Db] Upload Document Many To Mongo Success";
         public static readonly string UPLOAD_DOC_MANY_TO_MONGO_FAILED = "[Db] Upload Document Many To Mongo Failed";

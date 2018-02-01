@@ -19,6 +19,7 @@ namespace HmiPro.Redux.Actions {
     /// </summary>
     public static class SysActions {
         //设置界面，目前在 Prod 中已经不用了
+        [Obsolete("目前在 Prod 中已经不用了")]
         public static readonly string SHOW_SETTING_VIEW = "[Sys] Show Setting View";
         public static readonly string SHUTDOWN_APP = "[Sys] Shutdown App";
 

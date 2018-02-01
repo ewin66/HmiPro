@@ -22,6 +22,7 @@ using YCsharp.Util;
 
 namespace HmiPro.Redux.Effects {
     /// <summary>
+    /// 开启 Http 服务，打开/关闭 显示器（定时操作）
     /// <date>2017-12-19</date>
     /// <author>ychost</author>
     /// </summary>

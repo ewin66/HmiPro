@@ -10,6 +10,11 @@ using Reducto;
 
 namespace HmiPro.Redux.Reducers {
 
+    /// <summary>
+    /// Mq 数据核心，排产任务数据、启动监听状态等等
+    /// <author>ychost</author>
+    /// <date>2017-12-1</date>
+    /// </summary>
     public static class MqReducer {
         public struct State {
             /// <summary>

@@ -11,6 +11,7 @@ using Reducto;
 
 namespace HmiPro.Redux.Reducers {
     /// <summary>
+    /// 根据配置计算 Oee 的值
     /// <date>2017-12-20</date>
     /// <author>ychost</author>
     /// </summary>

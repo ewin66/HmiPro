@@ -12,6 +12,7 @@ using Reducto;
 
 namespace HmiPro.Redux.Reducers {
     /// <summary>
+    /// 报警字典
     /// <date>2017-12-19</date>
     /// <author>ychost</author>
     /// </summary>

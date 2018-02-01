@@ -8,6 +8,8 @@ using YCsharp.Service;
 namespace HmiPro.Redux.Cores {
     /// <summary>
     /// 保存视图状态
+    /// <author>ychost</author>
+    /// <date>2018-1-15</date>
     /// </summary>
     public class ViewStoreCore {
         public ViewStoreCore() {

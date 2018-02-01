@@ -12,7 +12,10 @@ namespace HmiPro.Redux.Actions {
     /// <date>2018-1-17</date>
     /// </summary>
     public static class DpmActions {
+        //初始化
         public static readonly string INIT = "[Dpm] Init";
+
+        //提交到服务器
         public static readonly string SUBMIT = "[Dpm] Submit ";
         public static readonly string SUBMIT_SUCCESS = "[Dpm] Submit Success ";
         public static readonly string SUBMIT_FAILED = "[Dpm] Submit Failed";

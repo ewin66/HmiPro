@@ -31,6 +31,11 @@ namespace HmiPro.Redux.Cores {
             actionExecutors[AlarmActions.GENERATE_ONE_ALARM] = doGenerateOneAlarm;
         }
 
+        /// <summary>
+        /// 处理一个标准的报警流程
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
         private void doGenerateOneAlarm(AppState state, IAction action) {
             var alarmAction = (AlarmActions.GenerateOneAlarm)action;
             var machineCode = alarmAction.MachineCode;

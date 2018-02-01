@@ -10,32 +10,53 @@ namespace HmiPro.Redux.Actions {
     /// <summary>
     /// 采集参数相关动作指令
     /// <author>ychost</author>
+    /// <date>2017-12-19</date>
     /// </summary>
     public static class CpmActions {
 
+        //初始化一些字典之类的
         public static readonly string INIT = "[Cpm] Init";
+
+        //启动参数解析服务
         public static readonly string START_SERVER = "[Cpm] Start Server";
         public static readonly string START_SERVER_SUCCESS = "[Cpm] Start Server Success";
         public static readonly string START_SERVER_FAILED = "[Cpm] Start Server  Failed";
+
+        //接受到的所有更新参数
         public static readonly string CPMS_UPDATED_ALL = "[Cpm] Updated All";
+        //接受到的较上一次发生变化的参数
         public static readonly string CPMS_UPDATED_DIFF = "[Cpm] Updated Difference";
+
+        //某个模块 Ip 活动
         public static readonly string CPMS_IP_ACTIVED = "[Cpm] Ip Actived";
+        //未注册的 Ip 在活动
+        public static readonly string UNREGISTERED_IP_ACTIVE = "[Cpm] Unregistered Ip Active";
+
+        //关闭参数解析服务
         public static readonly string STOP_SERVER = "[Cpm] Stop Server";
         public static readonly string STOP_SERVER_SUCCESS = "[Cpm] Stop Server Success";
         public static readonly string STOP_SERVER_FAILED = "[Cpm] Stop Server Failed";
+
+        //记米发生变化才触发
         public static readonly string NOTE_METER_DIFF_ACCEPT = "[Cpm] Note Meter Diff Accept";
         public static readonly string NOTE_METER_ACCEPT = "[Cpm] Note Meter Accpet";
+
+        //状态速度（可判断开机、停机）
         public static readonly string STATE_SPEED_ACCEPT = "[Cpm] State Speed Accept";
         public static readonly string STATE_SPEED_DIFF_ACCEPT = "[Cpm] State Speed Diff Accept";
+        public static readonly string STATE_SPEED_ZERRO_ACCEPT = "[Cpm] State Speed Zero Accept";
+        public static readonly string STATE_SPEED_DIFF_ZERO_ACCEPT = "[Cpm] State Speed Diff Zero Accept";
+
+        //Oee速度
         public static readonly string OEE_SPEED_ACCEPT = "[Cpm] Oee Speed Accept";
         public static readonly string SPARK_DIFF_ACCEPT = "[Cpm] Spark Diff Accept";
-        public static readonly string STATE_SPEED_DIFF_ZERO_ACCEPT = "[Cpm] State Speed Diff Zero Accept";
-        public static readonly string STATE_SPEED_ZERRO_ACCEPT = "[Cpm] State Speed Zero Accept";
+
+        //外径
         public static readonly string OD_ACCPET = "[Cpm] Od Accept";
-        public static readonly string UNREGISTERED_IP_ACTIVE = "[Cpm] Unregistered Ip Active";
+
         //485串口状态更新
-        //单节点状态
         public static readonly string COM_485_SINGLE_STATUS_ACCEPT = "[Cpm] Communication 485 Single  Status Accept";
+
 
         public struct Com485SingleStatusAccept : IAction {
             public string Type() => COM_485_SINGLE_STATUS_ACCEPT;
