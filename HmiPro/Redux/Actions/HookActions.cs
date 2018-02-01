@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 namespace HmiPro.Redux.Actions {
     /// <summary>
     ///  「后门」 动作，开放出一些有意思的「钩子」
-    /// 
-    /// <author>ychost</author>
+    /// <author>Hacker</author>
     /// <date>2018-2-1</date>
     /// </summary>
     public static class HookActions {

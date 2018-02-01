@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace HmiPro.ViewModels.Sys.Form {
     /// <summary>
-    /// 去往测试界面需要密码
+    /// 需要输入密码的Form
     /// <author>ychost</author>
     /// <date>2018-1-27</date>
     /// </summary>
-    public class JumpToTestViewForm : BaseForm {
+    public class PasswordForm : BaseForm {
         [Display(Name = "密码"), DataType(DataType.Password)]
         public string Password { get; set; }
     }

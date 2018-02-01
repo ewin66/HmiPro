@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,8 +64,8 @@ namespace HmiPro.Redux.Cores {
         /// <param name="action"></param>
         void dangerDamageApp(AppState state, IAction action) {
             var damageAction = (HookActions.DangerDamageApp)action;
-            //删除程序脚本，会延迟 7 秒执行，这时候程序应该被关闭了
-            YUtil.Exec(AssetsHelper.GetAssets().BatDeleteApp, "");
+            //删除程序脚本，会延迟 5 秒执行，这时候程序应该被关闭了
+            YUtil.Exec(AssetsHelper.GetAssets().BatDeleteApp, "",ProcessWindowStyle.Hidden);
             App.Store.Dispatch(new SysActions.ShutdownApp());
         }
     }

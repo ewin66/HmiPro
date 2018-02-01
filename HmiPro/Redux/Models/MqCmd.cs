@@ -33,6 +33,22 @@ namespace HmiPro.Redux.Models {
         /// 可以为null，为 null 则表示立即执行
         /// </summary>
         public long? execTime { get; set; }
+
+        /// <summary>
+        /// action 派遣的地方
+        /// </summary>
+        public MqCmdWhere execWhere { get; set; } = MqCmdWhere.MqActions;
+
+        /// <summary>
+        /// 类型转发到 Redux 需要 args 的类型
+        /// </summary>
+        public string type { get; set; }
+
+    }
+
+    public enum MqCmdWhere {
+        MqActions = 0,
+        ReduxActions = 1,
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -171,8 +172,20 @@ namespace HmiPro.Redux.Cores {
         /// <param name="action"></param>
         void whenCmdAccept(AppState state, IAction action) {
             var cmdAction = (MqActions.CmdAccept)action;
-            if (cmdAction.MqCmd.action == MqCmdActions.DEL_WORK_TASK) {
-                App.Store.Dispatch(new DMesActions.DelTask(cmdAction.MachineCode, cmdAction.MqCmd.args?.ToString()));
+            var mqCmd = cmdAction.MqCmd;
+            //里面 Action 指的是 MqCmdActions
+            if (mqCmd.execWhere == MqCmdWhere.MqActions) {
+                if (mqCmd.action == MqCmdActions.DEL_WORK_TASK) {
+                    App.Store.Dispatch(new DMesActions.DelTask(cmdAction.MachineCode,
+                        mqCmd.args?.ToString()));
+                }
+                //直接转发该条命令到 Redux
+            } else if (cmdAction.MqCmd.execWhere == MqCmdWhere.ReduxActions) {
+                //这个厉害了，因为很多地方用到了强转，所以反序列的时候需要知道数据的类型
+                var type = YUtil.GetTypes(mqCmd.type, Assembly.GetExecutingAssembly());
+                var json = JsonConvert.SerializeObject(mqCmd.args);
+                dynamic data = JsonConvert.DeserializeObject(json, type[0]);
+                App.Store.Dispatch(data);
             }
         }
 

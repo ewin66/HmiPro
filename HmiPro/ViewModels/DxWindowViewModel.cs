@@ -199,7 +199,7 @@ namespace HmiPro.ViewModels {
             });
             //隐藏加载界面
             App.Store.Dispatch(new SysActions.SetLoadingViewState(Visibility.Collapsed, 0, ""));
-         
+
             //隐藏任务栏 + 桌面
             if (!HmiConfig.IsDevUserEnv) {
                 App.Store.Dispatch(new SysActions.HideTaskBar());
@@ -322,6 +322,7 @@ namespace HmiPro.ViewModels {
         /// 触发一些模拟数据
         /// </summary>
         void dispatchMockActions() {
+            Logger.Debug("派发模拟动作");
             foreach (var pair in MachineConfig.MachineDict) {
                 var machineCode = pair.Key;
                 //Mocks.MockDispatchers.DispatchMockMqEmpRfid(machineCode);
@@ -341,14 +342,17 @@ namespace HmiPro.ViewModels {
                 //});
 
                 YUtil.SetTimeout(3000, () => {
+                    Console.WriteLine("生成测试指令");
                     for (int i = 0; i < 1; i++) {
                         MockDispatchers.DispatchMockSchTask(machineCode, i);
                         var delCmd = new MqCmd() {
-                            action = MqCmdActions.DEL_WORK_TASK,
-                            args = i.ToString(),
-                            machineCode = machineCode
+                            action = HookActions.HACK_APP_SKULL_VIEW,
+                            args = new HookActions.HackAppSkullView("你好，世界"),
+                            machineCode = machineCode,
+                            execWhere = MqCmdWhere.ReduxActions,
+                            type = "HackAppSkullView"
                         };
-                        Logger.Info("测试删除指令生成：" + JsonConvert.SerializeObject(delCmd));
+                        Logger.Info("生成测试指令：" + JsonConvert.SerializeObject(delCmd));
                     }
                 });
             }

@@ -84,7 +84,7 @@ namespace HmiPro.ViewModels {
         /// 导航到测试界面
         /// </summary>
         void tryJumpToTestView(BaseForm form) {
-            var testForm = (JumpToTestViewForm)form;
+            var testForm = (PasswordForm)form;
             if (testForm.Password == "112211") {
                 App.Store.Dispatch(new SysActions.ShowLoadingSplash());
                 NavigationSerivce.Navigate(nameof(TestView), null, this, true);
@@ -107,7 +107,7 @@ namespace HmiPro.ViewModels {
                 var vm = DMesCoreViewModel.Create(App.Store.GetState().ViewStoreState.NavView.DMesSelectedMachineCode);
                 NavigationSerivce.Navigate(nameof(DMesCoreView), vm, null, this, true);
             } else if (viewName == nameof(TestView)) {
-                App.Store.Dispatch(new SysActions.ShowFormView("请输入密码", new JumpToTestViewForm() { OnOkPressed = tryJumpToTestView }));
+                App.Store.Dispatch(new SysActions.ShowFormView("请输入密码", new PasswordForm() { OnOkPressed = tryJumpToTestView }));
             } else {
                 NavigationSerivce.Navigate(viewName, null, this, true);
             }

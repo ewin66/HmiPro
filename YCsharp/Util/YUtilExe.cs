@@ -27,7 +27,7 @@ namespace YCsharp.Util {
         /// <summary>
         /// 关机
         /// </summary>
-        public static void ShutDownPc() {
+        public static void ShutdownPc() {
             try {
                 ProcessStartInfo startinfo = new ProcessStartInfo("shutdown.exe", "-s -t 00");
                 Process.Start(startinfo);
@@ -72,10 +72,10 @@ namespace YCsharp.Util {
         /// </summary>
         /// <param name="exePath">接受命令的可执行文件</param>
         /// <param name="cmd">命令</param>
-        public static void Exec(string exePath, string cmd) {
+        public static void Exec(string exePath, string cmd, ProcessWindowStyle winStyle = ProcessWindowStyle.Normal) {
             try {
                 ProcessStartInfo startinfo = new ProcessStartInfo(exePath, cmd);
-                //startinfo.WindowStyle = ProcessWindowStyle.Hidden;
+                startinfo.WindowStyle = winStyle;
                 Process.Start(startinfo);
             } catch {
                 Console.WriteLine("执行命令 " + exePath + " " + cmd + " 异常");

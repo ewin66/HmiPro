@@ -183,24 +183,6 @@ namespace YCsharp.Util {
             return (T)obj;//类型转换并返回
         }
 
-        /// <summary>
-        /// 获取命名空间下的所有类型
-        /// </summary>
-        /// <param name="am"></param>
-        /// <param name="namespace"></param>
-        /// <param name="containChildSpace"></param>
-        /// <returns></returns>
-        public static List<Type> GetTypesOfNamespace(Assembly am, string @namespace, bool containChildSpace) {
-            List<Type> types = new List<Type>();
-            foreach (var type in am.GetTypes()) {
-                if (containChildSpace) {
-                    if (type.Namespace.StartsWith(@namespace)) {
-                        types.Add(type);
-                    }
-                }
-            }
-            return types;
-        }
 
         /// <summary>
         /// 获取命名空间下的所有类名,仅仅含有类名，不含有空间名字
@@ -245,6 +227,23 @@ namespace YCsharp.Util {
         /// <returns></returns>
         public static string GetValue(this DataRow row, string column) {
             return row.Table.Columns.Contains(column) ? row[column].ToString() : null;
+        }
+
+        /// <summary>
+        /// 获取某个集合下面的类型
+        /// 如果未指明命名空间，则返回所有与之同名的类型
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
+        public static List<Type> GetTypes(string name, Assembly assembly) {
+            var types = new List<Type>();
+            foreach (var type in assembly.GetTypes()) {
+                if (type.Name == name) {
+                    types.Add(type);
+                }
+            }
+            return types;
         }
     }
 }

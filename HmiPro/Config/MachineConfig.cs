@@ -45,7 +45,7 @@ namespace HmiPro.Config {
             } else {
                 var codes = Path.GetFileNameWithoutExtension(path).Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var code in codes) {
-                    var mPath = Path.GetDirectoryName(path) + code + ".xls";
+                    var mPath = Path.GetDirectoryName(path) +"\\"+ code + ".xls";
                     initMachine(mPath);
                 }
             }

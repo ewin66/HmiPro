@@ -286,7 +286,7 @@
     <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DxWindowViewModel.cs" />
     <Compile Include="ViewModels\Sys\FormViewModel.cs" />
-    <Compile Include="ViewModels\Sys\Form\JumpToTestViewForm.cs" />
+    <Compile Include="ViewModels\Sys\Form\PasswordForm.cs" />
     <Compile Include="ViewModels\Sys\SelectableViewModel.cs" />
     <Compile Include="Views\DMes\CpmDetailView.xaml.cs">
       <DependentUpon>CpmDetailView.xaml</DependentUpon>
@@ -766,7 +766,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
+      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

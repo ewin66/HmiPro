@@ -275,7 +275,7 @@ namespace YCsharp.Service {
         /// <param name="mark"></param>
         /// <returns></returns>
         string createLogContent(string location, string message, string mark) {
-            return $"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [{mark}]: 线程：[{Thread.CurrentThread.ManagedThreadId.ToString("00")}]  位置：{location}  信息：{message}\r\n";
+            return $"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")} [{mark}]: 线程：[{Thread.CurrentThread.ManagedThreadId.ToString("00")}]  位置：{location} \r\n 信息：{message}\r\n\r\n";
         }
 
     }

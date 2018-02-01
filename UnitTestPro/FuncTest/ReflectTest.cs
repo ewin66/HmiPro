@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using YCsharp.Util;
 
 namespace UnitTestPro.FuncTest {
@@ -38,6 +40,20 @@ namespace UnitTestPro.FuncTest {
         public void GetBaseClassPrivateTest() {
             var der = new DerivedClass();
 
+        }
+
+        [TestMethod]
+        public void JsonTest() {
+            string json = "{test:\"hello\"}";
+            var type = typeof(Test);
+             Type t = new;
+            dynamic obj = JsonConvert.DeserializeObject(json,type);
+            Test test = (Test)obj;
+            Console.WriteLine(test.test);
+        }
+
+        public class Test {
+            public string test { get; set; }
         }
 
     }
