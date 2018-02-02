@@ -33,8 +33,6 @@ namespace HmiPro.Redux {
                 .Part(s => s.DMesState, DMesReducer.Create())
                 .Part(s => s.ViewStoreState, ViewStoreReducer.Create())
                 .Part(s => s.DpmStore, DpmReducer.Create());
-            ;
-
 
             var storePro = new StorePro<AppState>(reducer);
 

@@ -63,7 +63,7 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 日志辅助
         /// </summary>
-        public readonly LoggerService Logger;
+        public LoggerService Logger;
         /// <summary>
         /// 命令派发执行的动作
         /// </summary>
@@ -86,13 +86,13 @@ namespace HmiPro.Redux.Cores {
             UnityIocService.AssertIsFirstInject(GetType());
             this.dbEffects = dbEffects;
             this.mqEffects = mqEffects;
-            Logger = LoggerHelper.CreateLogger(GetType().ToString());
         }
 
         /// <summary>
         /// 配置文件加载之后才能对其初始化
         /// </summary>
         public void Init() {
+            Logger = LoggerHelper.CreateLogger(GetType().ToString());
             actionExecutors[CpmActions.CPMS_UPDATED_ALL] = whenCpmsUpdateAll;
             actionExecutors[MqActions.SCH_TASK_ACCEPT] = whenSchTaskAccept;
             actionExecutors[CpmActions.NOTE_METER_ACCEPT] = whenNoteMeterAccept;

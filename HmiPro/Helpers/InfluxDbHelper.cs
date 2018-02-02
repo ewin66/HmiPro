@@ -15,22 +15,24 @@ namespace HmiPro.Helpers {
     /// <author>ychost</author>
     /// </summary>
     public static class InfluxDbHelper {
-        private static string addr;
-        private static string dbName;
-
+        /// <summary>
+        /// 全局唯一的 InfluxDbService
+        /// </summary>
+        private static InfluxDbService influxDbService;
         /// <summary>
         /// 初始化 InfluxDb 
         /// </summary>
-        /// <param name="addr"></param>
-        /// <param name="dbName"></param>
+        /// <param name="addr">InfluxDb 地址</param>
+        /// <param name="dbName">InfluxDb 数据库</param>
         public static void Init(string addr, string dbName) {
-            InfluxDbHelper.addr = addr;
-            InfluxDbHelper.dbName = dbName;
             influxDbService = new InfluxDbService(addr, dbName);
         }
 
-        private static InfluxDbService influxDbService;
-
+        /// <summary>
+        /// 获取全局的InfluxService
+        /// 因为使用的是 Http 协议所以不用管理连接池
+        /// </summary>
+        /// <returns></returns>
         public static InfluxDbService GetInfluxDbService() {
             if (influxDbService == null) {
                 throw new Exception("请先初始化 InfluxDbHelper.Init(addr,dbName)");

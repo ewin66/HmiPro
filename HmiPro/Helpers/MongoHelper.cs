@@ -21,7 +21,7 @@ namespace HmiPro.Helpers {
         /// <summary>
         /// 初始化全局的 Mongo 服务对象
         /// </summary>
-        /// <param name="connection"></param>
+        /// <param name="connection">Mongo 连接地址</param>
         public static void Init(string connection) {
             mongoClient = new MongoClient(connection);
         }
@@ -29,7 +29,7 @@ namespace HmiPro.Helpers {
         /// <summary>
         /// Mongo 的库会自动管理连接池，所以这里返回一个全局的对象即可，不用自己手动 Dispose()
         /// </summary>
-        /// <returns></returns>
+        /// <returns>全局的 MongoClient</returns>
         public static MongoClient GetMongoService() {
             if (mongoClient == null) {
                 throw new Exception("请先初始化 MongoHelper.Init(connection)");

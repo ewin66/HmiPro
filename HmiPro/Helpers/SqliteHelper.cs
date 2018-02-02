@@ -70,6 +70,7 @@ namespace HmiPro.Helpers {
         /// 主要是针对 Persists 这张表
         /// </summary>
         static readonly object persistLock = new object();
+
         /// <inheritdoc />
         /// <summary>
         /// 直接指定连接字符串，便于约定数据库位置
