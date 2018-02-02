@@ -25,7 +25,5 @@ namespace HmiPro.ViewModels.DMes.Form {
         [Display(Name = "机台")] public string MachineCode { get; }
         [Display(Name = "Rfid")] public string Rfid { get; }
         [Display(Name = "工单")] public string WorkCode { get; }
-
-
     }
 }

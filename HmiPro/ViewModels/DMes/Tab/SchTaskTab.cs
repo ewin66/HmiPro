@@ -178,7 +178,8 @@ namespace HmiPro.ViewModels.DMes.Tab {
                 }));
             }
             var workcode = App.Store.GetState().DMesState.SchTaskDoingDict[MachineCode].MqSchTask?.workcode;
-            var form = new PalletConfirmForm(MachineCode, pallet.Rfid, pallet.AxisNum, workcode);
+            var rfid = App.Store.GetState().DMesState.SchTaskDoingDict[MachineCode].EmpRfids;
+            var form = new PalletConfirmForm(MachineCode, string.Join(",", rfid), pallet.AxisNum, workcode);
             App.Store.Dispatch(new SysActions.ShowFormView("确认栈板轴数量", form));
         }
 
