@@ -18,13 +18,23 @@ namespace HmiPro.Redux.Cores {
     /// <date>2017-01-17</date>
     /// </summary>
     public class DpmCore {
+        /// <summary>
+        /// Mq 操作利器
+        /// </summary>
         private readonly MqEffects mqEffects;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mqEffects"></param>
         public DpmCore(MqEffects mqEffects) {
             UnityIocService.AssertIsFirstInject(GetType());
             this.mqEffects = mqEffects;
         }
 
+        /// <summary>
+        /// 初始化事件是力气
+        /// </summary>
         public void Init() {
             App.Store.Subscribe(new Dictionary<string, Action<AppState, IAction>>() {
                 [DpmActions.SUBMIT] = doSubmitDpms,
@@ -34,8 +44,8 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 提交回填参数
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">回填的参数内容</param>
         void doSubmitDpms(AppState state, IAction action) {
             var dpmAction = (DpmActions.Submit)action;
             var mqUploadDpm = new MqUploadDpm();

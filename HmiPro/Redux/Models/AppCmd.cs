@@ -10,7 +10,7 @@ namespace HmiPro.Redux.Models {
     /// <author>ychost</author>
     /// <date>2018-1-27</date>
     /// </summary>
-    public class MqCmd {
+    public class AppCmd {
         /// <summary>
         /// 机台编码
         /// </summary>
@@ -33,20 +33,36 @@ namespace HmiPro.Redux.Models {
         /// 可以为null，为 null 则表示立即执行
         /// </summary>
         public long? execTime { get; set; }
-
         /// <summary>
         /// action 派遣的地方
         /// </summary>
-        public MqCmdWhere execWhere { get; set; } = MqCmdWhere.MqActions;
-
+        public AppActionsWhere execWhere { get; set; } = AppActionsWhere.MqActions;
         /// <summary>
         /// 类型转发到 Redux 需要 args 的类型
         /// </summary>
         public string type { get; set; }
+        /// <summary>
+        /// 命令是从哪里发出来的
+        /// </summary>
+        public AppCmdFrom cmdFrom { get; set; } = AppCmdFrom.FromMq;
 
     }
 
-    public enum MqCmdWhere {
+    /// <summary>
+    /// 命令来源
+    /// </summary>
+    public enum AppCmdFrom {
+        FromMq = 1,
+        FromHttp = 2,
+        FromPipe = 3,
+        FromTcp = 4
+    }
+
+
+    /// <summary>
+    /// action 参数是发送到 Redux 还是使用 MqCmdActions
+    /// </summary>
+    public enum AppActionsWhere {
         MqActions = 0,
         ReduxActions = 1,
     }

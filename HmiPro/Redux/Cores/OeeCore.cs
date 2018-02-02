@@ -18,6 +18,7 @@ using YCsharp.Util;
 
 namespace HmiPro.Redux.Cores {
     /// <summary>
+    /// 计算实时 Oee
     /// <date>2017-12-20</date>
     /// <author>ychost</author>
     /// </summary>
@@ -42,11 +43,12 @@ namespace HmiPro.Redux.Cores {
         public void Init() {
             App.Store.Subscribe(actionExecutors);
         }
+
         /// <summary>
         /// 计算Oee
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">Oee 速度值</param>
         private void whenOeeSpeedAccept(AppState state, IAction action) {
             //每当速度变化则计算一次Oee
             var oeeAction = (CpmActions.OeeSpeedAccept)action;

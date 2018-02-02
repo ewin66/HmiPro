@@ -74,11 +74,11 @@ namespace HmiPro.Redux.Actions {
         public struct CmdAccept : IAction {
             public string Type() => CMD_ACCEPT;
             public string MachineCode;
-            public MqCmd MqCmd;
+            public AppCmd AppCmd;
 
-            public CmdAccept(string machineCode, MqCmd mqCmd) {
+            public CmdAccept(string machineCode, AppCmd appCmd) {
                 MachineCode = machineCode;
-                MqCmd = mqCmd;
+                AppCmd = appCmd;
             }
         }
 

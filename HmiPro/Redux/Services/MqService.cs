@@ -31,7 +31,7 @@ namespace HmiPro.Redux.Services {
         /// <param name="json"></param>
         public void CmdAccept(string json) {
             try {
-                var mqCmd = JsonConvert.DeserializeObject<MqCmd>(json);
+                var mqCmd = JsonConvert.DeserializeObject<AppCmd>(json);
 
                 //机台过滤
                 if (MachineConfig.MachineDict.Keys.Contains(mqCmd.machineCode.ToUpper())) {

@@ -130,10 +130,10 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 删除某个任务
+        /// 删除某个大任务
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">待删除任务的属性，含任务 Id</param>
         void doDelTask(AppState state, IAction action) {
             var delTaskAction = (DMesActions.DelTask)action;
             var tasks = MqSchTasksDict[delTaskAction.MachineCode];
@@ -166,21 +166,21 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 接受到命令
+        /// 处理机台的接受到的指令
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">指令内容，目前指令只从 Mq 发出来</param>
         void whenCmdAccept(AppState state, IAction action) {
             var cmdAction = (MqActions.CmdAccept)action;
-            var mqCmd = cmdAction.MqCmd;
+            var mqCmd = cmdAction.AppCmd;
             //里面 Action 指的是 MqCmdActions
-            if (mqCmd.execWhere == MqCmdWhere.MqActions) {
+            if (mqCmd.execWhere == AppActionsWhere.MqActions) {
                 if (mqCmd.action == MqCmdActions.DEL_WORK_TASK) {
                     App.Store.Dispatch(new DMesActions.DelTask(cmdAction.MachineCode,
                         mqCmd.args?.ToString()));
                 }
                 //直接转发该条命令到 Redux
-            } else if (cmdAction.MqCmd.execWhere == MqCmdWhere.ReduxActions) {
+            } else if (cmdAction.AppCmd.execWhere == AppActionsWhere.ReduxActions) {
                 //这个厉害了，因为很多地方用到了强转，所以反序列的时候需要知道数据的类型
                 var type = YUtil.GetTypes(mqCmd.type, Assembly.GetExecutingAssembly());
                 var json = JsonConvert.SerializeObject(mqCmd.args);
@@ -190,10 +190,11 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 
+        /// 栈板相关属性确认（只有 R 系列机台会用到）
+        /// 现在已经不这么使用了，不用全局监听 PressedOk 可以在创建 FormView 的时候直接 Bind PressedOk 逻辑
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">FormView 按下了「确认」，此时 Form 里面的数据</param>
         void doFormViewPressedOk(AppState state, IAction action) {
             var sysAction = (SysActions.FormViewPressedOk)action;
             if (sysAction.Form != null && sysAction.Form is PalletConfirmForm form) {
@@ -204,7 +205,7 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 确认栈板Rfid与轴数目的关系
         /// </summary>
-        /// <param name="form"></param>
+        /// <param name="form">栈板相关数据</param>
         async void confirmPalletAxisNum(PalletConfirmForm form) {
             var machinieCode = form.MachineCode;
             if (!PalletDict.ContainsKey(machinieCode)) {
@@ -245,10 +246,10 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 清空机台任务
+        /// 清空机台所有任务
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">清空任务指令</param>
         void doClearSchTasks(AppState state, IAction action) {
             var dmesAction = (DMesActions.ClearSchTasks)action;
             Application.Current.Dispatcher.Invoke(() => {
@@ -273,8 +274,8 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 完成某个排产轴任务
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">完成轴号</param>
         void doCompleteSchAxis(AppState state, IAction action) {
             var dmesAction = (DMesActions.CompletedSchAxis)action;
             //完成一轴任务
@@ -294,8 +295,8 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 485通讯发生故障
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">485异常数据</param>
         void whenCom485SingleError(AppState state, IAction action) {
             var alarmAction = (AlarmActions.Com485SingleError)action;
             var mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName,
@@ -309,11 +310,11 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 创建报警对象，无论是否有任务进行
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="code"></param>
-        /// <param name="name"></param>
-        /// <param name="message"></param>
-        /// <returns></returns>
+        /// <param name="machineCode">报警机台</param>
+        /// <param name="code">报警编码（一般为参数编码）</param>
+        /// <param name="name">报警名</param>
+        /// <param name="message">报警内容</param>
+        /// <returns>标准的报警对象</returns>
         MqAlarm createMqAlarmAnyway(string machineCode, int code, string name, string message) {
             var meter = App.Store.GetState().CpmState.NoteMeterDict[machineCode];
             lock (SchTaskDoingLocks[machineCode]) {
@@ -337,11 +338,11 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 采集参数超过Plc设定的最值
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">根据读取 Plc 数据直接产生的报警</param>
         void whenCpmPlcAlarm(AppState state, IAction action) {
             var alarmAction = (AlarmActions.CpmPlcAlarmOccur)action;
-            var meter = App.Store.GetState().CpmState.NoteMeterDict[alarmAction.MachineCode];
+            var meter = state.CpmState.NoteMeterDict[alarmAction.MachineCode];
             //记米小于等于0则不产生报警
             if (meter <= 0) {
                 return;
@@ -354,8 +355,8 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 监听到扫描来料信息
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">来料数据</param>
         void whenScanMaterialAccept(AppState state, IAction action) {
             var mqAction = (MqActions.ScanMaterialAccpet)action;
             MqScanMaterialDict[mqAction.MachineCode] = mqAction.ScanMaterial;
@@ -369,8 +370,8 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 计算平均速度
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">接受到的速度值</param>
         void whenSpeedAccept(AppState state, IAction action) {
             var speedAction = (CpmActions.StateSpeedAccept)action;
             var machineCode = speedAction.MachineCode;
@@ -387,8 +388,8 @@ namespace HmiPro.Redux.Cores {
         /// 当速度为0
         /// 任务完成率大于 0.98 的时候则认为一轴的任务完成
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">机台速度为0</param>
         void whenSpeedZeroAccept(AppState state, IAction action) {
             //var speedAction = (CpmActions.StateSpeedZeroAccept)action;
             //var machineCode = speedAction.MachineCode;
@@ -399,7 +400,7 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 检查当前任务可否完成，还是调试完毕
         /// </summary>
-        /// <param name="machineCode"></param>
+        /// <param name="machineCode">机台编码</param>
         private bool isCompleteOrDebugEnd(string machineCode) {
             lock (SchTaskDoingLocks[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
@@ -417,8 +418,8 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 处理接收到的Rfid数据
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">Rfid 数据</param>
         void doRfidAccept(AppState state, IAction action) {
             var dmesAction = (DMesActions.RfidAccpet)action;
             if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine || dmesAction.RfidType == DMesActions.RfidType.EmpEndMachine) {
@@ -432,7 +433,6 @@ namespace HmiPro.Redux.Cores {
                 if (mqEmpRfid.type == MqRfidType.EmpStartMachine) {
                     App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_PUNCH_START_MACHINE + dmesAction.MachineCode));
                 }
-
             } else if (dmesAction.RfidWhere == DMesActions.RfidWhere.FromMq) {
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                     Title = "消息通知",
@@ -506,11 +506,11 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 设置 参数 界面上面的 Rfid 卡显示值
+        /// 参数 界面上面的 Rfid 卡显示值
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="cpmCode"></param>
-        /// <param name="value"></param>
+        /// <param name="machineCode">机台编码</param>
+        /// <param name="cpmCode">Rfid 的参数编码</param>
+        /// <param name="value">Rfid 数据</param>
         void setCpmRfid(string machineCode, int cpmCode, string value) {
             if (string.IsNullOrEmpty(value)) {
                 value = "暂无";
@@ -533,6 +533,8 @@ namespace HmiPro.Redux.Cores {
 
         /// <summary>
         /// 接受到新的任务
+        /// <param name="state">程序状态</param>
+        /// <param name="action">任务数据</param>
         /// </summary>
         void whenSchTaskAccept(AppState state, IAction action) {
             var mqAction = (MqActions.SchTaskAccept)action;
@@ -630,6 +632,8 @@ namespace HmiPro.Redux.Cores {
 
         /// <summary>
         /// 检查火花报警
+        /// <param name="state">程序状态</param>
+        /// <param name="action">火花机报警检查动作</param>
         /// </summary>
         void whenSparkDiffAccept(AppState state, IAction action) {
             var machineCode = state.CpmState.MachineCode;
@@ -689,8 +693,8 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 从Bom表中去出上下限，然后判断参数是否异常
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">待检查的 Bom 关键 Key</param>
         void doCheckCpmBomAlarm(AppState state, IAction action) {
             var checkAlarmAction = (AlarmActions.CheckCpmBomAlarm)action;
             var machineCode = checkAlarmAction.MachineCode;
@@ -760,6 +764,8 @@ namespace HmiPro.Redux.Cores {
         }
         /// <summary>
         /// 记米相关处理
+        /// <param name="state">程序状态</param>
+        /// <param name="action">记米数据</param>
         /// </summary>
         void whenNoteMeterAccept(AppState state, IAction action) {
             var meterAction = (CpmActions.NoteMeterAccept)action;
@@ -786,16 +792,19 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 重载下周
+        /// 手动开始轴任务
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">开始动作</param>
         void doStartSchTaskAxis(AppState state, IAction action) {
             doStartSchTaskAxis(state, action, false);
         }
 
         /// <summary>
         /// 根据轴号设置当前任务开始
+        /// <param name="state">程序状态</param>
+        /// <param name="action">开始轴任务的动作</param>
+        /// <param name="isAutoStart">是否是自动开始任务</param>
         /// </summary>
         void doStartSchTaskAxis(AppState state, IAction action, bool isAutoStart) {
             var dmesAction = (DMesActions.StartSchTaskAxis)action;
@@ -879,6 +888,8 @@ namespace HmiPro.Redux.Cores {
 
         /// <summary>
         /// 通知服务器任务开始了
+        /// <param name="machineCode">机台编码</param>
+        /// <param name="axisCode">开始的轴号</param>
         /// </summary>
         void notifyServerAxisStarted(string machineCode, string axisCode) {
             MqUploadManu uManu = null;
@@ -911,6 +922,7 @@ namespace HmiPro.Redux.Cores {
 
         /// <summary>
         /// 检查任务准备工作是否做好
+        /// <param name="machineCode">机台编码</param>
         /// </summary>
         bool validTaskPrepare(string machineCode) {
             bool isValid = true;
@@ -962,10 +974,10 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 给当前进行的任务赋值，通过排产任务转换成进行任务
         /// </summary>
-        /// <param name="taskDoing"></param>
-        /// <param name="st"></param>
-        /// <param name="axis"></param>
-        /// <param name="axisIndex"></param>
+        /// <param name="taskDoing">运行的任务</param>
+        /// <param name="st">接受到的任务</param>
+        /// <param name="axis">开始的轴号</param>
+        /// <param name="axisIndex">轴任务在任务列表的序号</param>
         void setSchTaskDoing([NotNull]SchTaskDoing taskDoing, [NotNull] MqSchTask st, [NotNull] MqTaskAxis axis, int axisIndex) {
             taskDoing.MqSchTask = st;
             taskDoing.MqSchTaskId = st.id;
@@ -1000,12 +1012,11 @@ namespace HmiPro.Redux.Cores {
             }
         }
 
-
         /// <summary>
         /// 调试一轴结束
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="axisCode"></param>
+        /// <param name="machineCode">机台编码</param>
+        /// <param name="axisCode">调试的轴号</param>
         void debugOneAxisEnd(string machineCode, string axisCode) {
             lock (SchTaskDoingLocks[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
@@ -1018,7 +1029,9 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 完成某轴
+        /// 完成某个 轴 任务
+        /// <param name="machineCode">机台编码</param>
+        /// <param name="axisCode">轴号</param>
         /// </summary>
         async void completeOneAxis(string machineCode, string axisCode) {
             var taskDoing = SchTaskDoingDict[machineCode];
@@ -1113,8 +1126,8 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 完成某个工单
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="taskId"></param>
+        /// <param name="machineCode">机台编码</param>
+        /// <param name="taskId">任务关键字</param>
         void completeOneSchTask(string machineCode, string taskId) {
             var mqTasks = MqSchTasksDict[machineCode];
             var removeTask = mqTasks.FirstOrDefault(t => t.taskId == taskId);

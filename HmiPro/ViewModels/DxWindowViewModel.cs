@@ -344,11 +344,11 @@ namespace HmiPro.ViewModels {
                     Console.WriteLine("生成测试指令");
                     for (int i = 0; i < 1; i++) {
                         MockDispatchers.DispatchMockSchTask(machineCode, i);
-                        var delCmd = new MqCmd() {
+                        var delCmd = new AppCmd() {
                             action = HookActions.HACK_APP_SKULL_VIEW,
                             args = new HookActions.HackAppSkullView("你好，世界"),
                             machineCode = machineCode,
-                            execWhere = MqCmdWhere.ReduxActions,
+                            execWhere = AppActionsWhere.ReduxActions,
                             type = "HackAppSkullView"
                         };
                         Logger.Info("生成测试指令：" + JsonConvert.SerializeObject(delCmd));

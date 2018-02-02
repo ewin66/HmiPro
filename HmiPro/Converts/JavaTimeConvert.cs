@@ -11,6 +11,8 @@ using YCsharp.Util;
 namespace HmiPro.Converts {
     /// <summary>
     /// JavaTime 类转可视化时间
+    /// <author>ychost</author>
+    /// <date>2018-1-22</date>
     /// </summary>
     public class JavaTimeConvert : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {

@@ -25,7 +25,7 @@ using YCsharp.Util;
 
 namespace HmiPro.Redux.Cores {
     /// <summary>
-    /// 数据采集逻辑服务
+    /// 数据采集逻辑服务，将采集的数据按逻辑分发，比如记米、速度、火花值等等
     /// <date>2017-12-17</date>
     /// <author>ychost</author>
     /// </summary>
@@ -38,31 +38,28 @@ namespace HmiPro.Redux.Cores {
         /// 日志
         /// </summary>
         public LoggerService Logger;
-        //编码：值（在线数据）
-        //加float增加算法参数计算效率
-        //计算相关参数的时候需要使用
+        /// <summary>
+        /// 在线的 Float 型数据，主要为了计算出其他参数，比如功率因数等等
+        /// </summary>
         readonly IDictionary<string, IDictionary<int, float>> onlineFloatDict = new ConcurrentDictionary<string, IDictionary<int, float>>();
         /// <summary>
-        /// 订阅指令：执行逻辑
+        /// 事件处理器
         /// </summary>
         readonly IDictionary<string, Action<AppState, IAction>> actionExecutors = new ConcurrentDictionary<string, Action<AppState, IAction>>();
         /// <summary>
-        /// 最后打开报警灯时间
+        /// 每个机台的报警灯目前的状态
         /// </summary>
         public IDictionary<string, AlarmLightsState> AlarmLightsStateDict;
-
-        //编码：采集参数
-        //外部可能会对此进行采样
+        /// <summary>
+        /// 每个机台最新的实时参数
+        /// </summary>
         public IDictionary<string, IDictionary<int, Cpm>> OnlineCpmDict;
-
-        public CpmCore() {
-            Logger = LoggerHelper.CreateLogger(GetType().ToString());
-        }
 
         /// <summary>
         /// 只有配置文件加载完成才能调用此初始化
         /// </summary>
         public void Init() {
+            Logger = LoggerHelper.CreateLogger(GetType().ToString());
             foreach (var pair in MachineConfig.MachineDict) {
                 onlineFloatDict[pair.Key] = new ConcurrentDictionary<int, float>();
             }
@@ -71,6 +68,35 @@ namespace HmiPro.Redux.Cores {
             actionExecutors[AlarmActions.CLOSE_ALARM_LIGHTS] = doCloseAlarmLights;
             actionExecutors[OeeActions.UPDATE_OEE_PARTIAL_VALUE] = whenOeeUpdated;
             App.Store.Subscribe(actionExecutors);
+        }
+
+        /// <summary>
+        /// 异步启动服务，将在线参数字典与AppState全局字典进行绑定
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public Task StartAsync(string ip, int port) {
+            return Task.Run(() => {
+                if (SmParamTcp == null) {
+                    SmParamTcp = new YSmParamTcp(ip, port, LoggerHelper.CreateLogger("YSmParamTcp"));
+                    SmParamTcp.OnDataReceivedAction += whenSmActived;
+                    OnlineCpmDict = App.Store.GetState().CpmState.OnlineCpmsDict;
+                    //检查超时
+                    YUtil.SetInterval(HmiConfig.CpmTimeout, () => {
+                        checkCpmTimeout(HmiConfig.CpmTimeout);
+                    });
+                }
+                SmParamTcp.Start();
+
+            });
+        }
+
+        /// <summary>
+        /// 停止掉Tcp监听服务
+        /// </summary>
+        public void Stop() {
+            SmParamTcp?.StopSoft();
         }
 
         /// <summary>
@@ -100,36 +126,7 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 异步启动服务，将在线参数字典与AppState全局字典进行绑定
-        /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="port"></param>
-        /// <returns></returns>
-        public Task StartAsync(string ip, int port) {
-            return Task.Run(() => {
-                if (SmParamTcp == null) {
-                    SmParamTcp = new YSmParamTcp(ip, port, LoggerHelper.CreateLogger("YSmParamTcp"));
-                    SmParamTcp.OnDataReceivedAction += smModelsHandler;
-                    OnlineCpmDict = App.Store.GetState().CpmState.OnlineCpmsDict;
-                    //检查超时
-                    YUtil.SetInterval(HmiConfig.CpmTimeout, () => {
-                        checkCpmTimeout(HmiConfig.CpmTimeout);
-                    });
-                }
-                SmParamTcp.Start();
-
-            });
-        }
-
-        /// <summary>
-        /// 停止掉Tcp监听服务
-        /// </summary>
-        public void Stop() {
-            SmParamTcp?.StopSoft();
-        }
-
-        /// <summary>
-        /// 打开报警灯，报警Ip必须配置
+        /// 打开报警灯，报警 Ip 必须配置
         /// </summary>
         void doOpenAlarmLights(AppState state, IAction action) {
             var alarmAction = (AlarmActions.OpenAlarmLights)action;
@@ -143,7 +140,6 @@ namespace HmiPro.Redux.Cores {
                 SmParamTcp?.OpenAlarm(ip);
                 //一定时间后关闭报警灯
                 YUtil.SetTimeout(alarmAction.LightMs, () => {
-                    //App.Store.Dispatch(new AlarmActions.CloseAlarmLights(alarmAction.MachineCode));
                     doCloseAlarmLights(state, new AlarmActions.CloseAlarmLights(alarmAction.MachineCode));
                 });
             } else {
@@ -152,7 +148,7 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 关闭报警灯，报警Ip必须配置
+        /// 关闭报警灯，报警 Ip 必须配置
         /// </summary>
         void doCloseAlarmLights(AppState state, IAction action) {
             var alarmAction = (AlarmActions.CloseAlarmLights)action;
@@ -165,63 +161,45 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 来自底层数据处理
+        /// 处理底层发送过来已经解析成 smModels 的数据
         /// </summary>
-        /// <param name="ip"></param>
-        /// <param name="smModels"></param>
-        void smModelsHandler(string ip, List<SmModel> smModels) {
+        /// <param name="ip">数据包的发送者 Ip</param>
+        /// <param name="smModels">可能会粘包，所以有可能一次解析的结果是多个包</param>
+        void whenSmActived(string ip, List<SmModel> smModels) {
             //程序尚未初始化完成
+            //StartAsyc 也是程序初始化的一部分，所以一调用可能底层就发数据上来了，但是程序并没有完全初始化
+            //这些逻辑必须要等到程序完全初始化（进入了 HomeView 才能正常运转）
             if (!AppState.IsCompleteInited) {
                 return;
             }
+            //未注册 Ip 通知
             if (!MachineConfig.IpToMachineCodeDict.TryGetValue(ip, out var code)) {
                 App.Store.Dispatch(new CpmActions.UnregIpActived(ip));
                 Logger.Debug($"ip {ip} 未注册", ConsoleColor.Red);
                 return;
             }
             App.Store.Dispatch(new CpmActions.CpmIpActivted(code, ip, DateTime.Now));
+
+            //处理每个数据包
             smModels?.ForEach(sm => {
-                //处理参数包
                 if (sm.PackageType == SmPackageType.ParamPackage) {
                     updateMachieCpms(code, sm, ip);
                 }
             });
         }
 
-
-
         /// <summary>
         /// 处理参数包，将底层的包转成上层需要的Cpm
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="sm"></param>
+        /// <param name="machineCode">参数所属机台</param>
+        /// <param name="sm">单个参数数据包，一个数据包含多个 Cpm</param>
+        /// <param name="ip"></param>
         void updateMachieCpms(string machineCode, SmModel sm, string ip) {
             var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm);
-            var cpmsRelate = new List<Cpm>();
             var cpms = new List<Cpm>();
             IDictionary<int, Cpm> updatedCpmsDiffDict = new Dictionary<int, Cpm>();
-            //简洁算法计算出来的参数
-            cpmsDirect?.ForEach(cpm => {
-                //普通浮点参数
-                if (cpm.ValueType == SmParamType.Signal) {
-                    var floatVal = cpm.GetFloatVal();
-                    onlineFloatDict[machineCode][cpm.Code] = floatVal;
-                    var relateCpms = calcRelateCpm(machineCode, cpm.Code);
-                    cpmsRelate.AddRange(relateCpms);
-                    //Rfid卡
-                } else if (cpm.ValueType == SmParamType.StrRfid) {
-                    var rfidAccept = createRfid(machineCode, cpm);
-                    if (rfidAccept.RfidType != DMesActions.RfidType.Unknown) {
-                        App.Store.Dispatch(rfidAccept);
-                    }
-                    //485通讯状态
-                } else if (cpm.ValueType == SmParamType.SingleComStatus) {
-                    App.Store.Dispatch(new CpmActions.Com485SingleStatusAccept(machineCode, ip, (SmSingleStatus)cpm.Value, cpm.Code));
-                    if ((SmSingleStatus)cpm.Value == SmSingleStatus.Error) {
-                        App.Store.Dispatch(new AlarmActions.Com485SingleError(machineCode, ip, cpm.Code, cpm.Name));
-                    }
-                }
-            });
+            //计算出功率因数、最大值、最小值，这些参数
+            var cpmsRelate = getRelateCpm(machineCode, ip, cpmsDirect);
             if (cpmsDirect != null) {
                 cpms.AddRange(cpmsDirect);
                 cpms.AddRange(cpmsRelate);
@@ -251,16 +229,17 @@ namespace HmiPro.Redux.Cores {
                 cpm.PickTime = pickTime;
                 updatedCpmsDiffDict[cpm.Code] = cpm;
             });
+
             //一定要先派遣所有更新，再派遣部分更新
             //这样就保证了reducer里面数据的唯一性
             if (cpms.Count > 0) {
-                //派发所有接受到的参数
                 App.Store.Dispatch(new CpmActions.CpmUpdatedAll(machineCode, cpms));
                 dispatchLogicSetting(machineCode, cpms);
             }
+
+            //所有变化的参数
             if (updatedCpmsDiffDict.Count > 0) {
                 var diffCpms = updatedCpmsDiffDict.Values.ToList();
-                //所有变化的参数
                 App.Store.Dispatch(new CpmActions.CpmUpdateDiff(machineCode, updatedCpmsDiffDict));
                 dispatchDiffLogicSetting(machineCode, diffCpms);
             }
@@ -268,6 +247,40 @@ namespace HmiPro.Redux.Cores {
             dispatchCheckBomAlarm(machineCode, cpms);
             //检查Plc上下限报警
             dispatchCheckPlcAlarm(machineCode, cpms);
+        }
+
+        /// <summary>
+        /// 通过参数的参数获取计算的参数，比如功率因数、最大值、最小值、Rfid 等等
+        /// </summary>
+        /// <param name="machineCode">参数所属机台编码</param>
+        /// <param name="ip">参数所属 Ip</param>
+        /// <param name="cpmsDirect">直接采集的参数列表</param>
+        /// <returns>计算出的参数列表</returns>
+        private List<Cpm> getRelateCpm(string machineCode, string ip, List<Cpm> cpmsDirect) {
+            List<Cpm> cpmsRelate = new List<Cpm>();
+            cpmsDirect?.ForEach(cpm => {
+                //普通浮点参数
+                if (cpm.ValueType == SmParamType.Signal) {
+                    var floatVal = cpm.GetFloatVal();
+                    onlineFloatDict[machineCode][cpm.Code] = floatVal;
+                    var relateCpms = calcRelateCpm(machineCode, cpm.Code);
+                    cpmsRelate.AddRange(relateCpms);
+                    //Rfid卡
+                } else if (cpm.ValueType == SmParamType.StrRfid) {
+                    var rfidAccept = createRfid(machineCode, cpm);
+                    if (rfidAccept.RfidType != DMesActions.RfidType.Unknown) {
+                        App.Store.Dispatch(rfidAccept);
+                    }
+                    //485通讯状态
+                } else if (cpm.ValueType == SmParamType.SingleComStatus) {
+                    App.Store.Dispatch(
+                        new CpmActions.Com485SingleStatusAccept(machineCode, ip, (SmSingleStatus)cpm.Value, cpm.Code));
+                    if ((SmSingleStatus)cpm.Value == SmSingleStatus.Error) {
+                        App.Store.Dispatch(new AlarmActions.Com485SingleError(machineCode, ip, cpm.Code, cpm.Name));
+                    }
+                }
+            });
+            return cpmsRelate;
         }
 
         /// <summary>
@@ -284,7 +297,7 @@ namespace HmiPro.Redux.Cores {
                 //收线卡
             } else if (DefinedParamCode.EndAxisRfid == cpm.Code) {
                 rfidAccept.RfidType = DMesActions.RfidType.EndAxis;
-                //人员卡
+                //人员卡，目前所有从底层刷的人员卡，都视为上机卡
             } else if (DefinedParamCode.EmpRfid == cpm.Code) {
                 rfidAccept.RfidType = DMesActions.RfidType.EmpStartMachine;
                 rfidAccept.MqData = new MqEmpRfid() {
@@ -294,25 +307,23 @@ namespace HmiPro.Redux.Cores {
                     PrintTime = DateTime.Now,
                     type = MqRfidType.EmpStartMachine
                 };
-                //物料卡
+                //物料卡，暂时不需要底层传输 物料卡
             } else if (DefinedParamCode.EmpRfid == cpm.Code) {
             }
             return rfidAccept;
         }
 
-
         /// <summary>
         /// 检查参数超时，即参数之前有值，但是后来由于硬件掉线了没有值，这个时候应该更新参数的显示
         /// 如果不更新则会一直显示掉线之前的值
         /// </summary>
-        /// <param name="timeoutMs"></param>
+        /// <param name="timeoutMs">过期时间 毫秒</param>
         private void checkCpmTimeout(int timeoutMs) {
             foreach (var cpmsDict in OnlineCpmDict) {
                 foreach (var pair in cpmsDict.Value) {
                     if (pair.Value.ValueType != SmParamType.Signal && pair.Value.ValueType != SmParamType.String) {
                         continue;
                     }
-                    //时间差 
                     var msDiff = (DateTime.Now - pair.Value.PickTime).TotalMilliseconds;
                     if (msDiff > timeoutMs) {
                         pair.Value.Update("暂无", SmParamType.Timeout, DateTime.Now);
@@ -322,10 +333,10 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 排产逻辑参数差异值
+        /// 派发差异更新的逻辑参数
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="diffCpms"></param>
+        /// <param name="machineCode">参数所属的机台</param>
+        /// <param name="diffCpms">较上次值发生变化的参数列表</param>
         private void dispatchDiffLogicSetting(string machineCode, List<Cpm> diffCpms) {
             var setting = GlobalConfig.MachineSettingDict[machineCode];
             foreach (var cpm in diffCpms) {
@@ -349,10 +360,10 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 派遣设定的逻辑参数值
+        /// 派发接受到的逻辑参数
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="cpms"></param>
+        /// <param name="machineCode">参数所属的机台</param>
+        /// <param name="cpms">参数列表</param>
         private void dispatchLogicSetting(string machineCode, List<Cpm> cpms) {
             var setting = GlobalConfig.MachineSettingDict[machineCode];
             foreach (var cpm in cpms) {
@@ -381,10 +392,10 @@ namespace HmiPro.Redux.Cores {
 
 
         /// <summary>
-        /// 检查Plc报警
+        /// 报警的上下限也是从底层 Plc 传上来的
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="cpms"></param>
+        /// <param name="machineCode">报警的机台</param>
+        /// <param name="cpms">机台的参数</param>
         void dispatchCheckPlcAlarm(string machineCode, List<Cpm> cpms) {
             foreach (var cpm in cpms) {
                 if (cpm.ValueType != SmParamType.Signal) {
@@ -415,20 +426,20 @@ namespace HmiPro.Redux.Cores {
         }
 
         /// <summary>
-        /// 将需要报警检查的Cpm发送出去
+        /// 报警的上下限配置在排产的 Bom 表中，由于 Bom 表的逻辑在 DMesCore 中，所以这里仅仅是将需要检查的参数派发出去
         /// </summary>
-        /// <param name="machineCode"></param>
-        /// <param name="cpms"></param>
+        /// <param name="machineCode">报警机台</param>
+        /// <param name="cpms">机台的参数列表</param>
         void dispatchCheckBomAlarm(string machineCode, List<Cpm> cpms) {
             cpms?.ForEach(cpm => {
                 if (MachineConfig.MachineDict[machineCode].CodeToMqBomAlarmCpmDict.TryGetValue(cpm.Code, out var alarmCpm)) {
                     if (cpm.ValueType != SmParamType.Signal) {
-                        Logger.Error($"机台 {machineCode} 参数 {cpm.Name} 的值不是浮点类型，不能报警");
+                        Logger.Error($"机台 {machineCode} 参数 {cpm.Name} 的值不是浮点类型，不能报警", 36000);
                         return;
                     }
                     var bomKeys = alarmCpm.MqAlarmBomKeys;
                     if (bomKeys?.Length != 2) {
-                        Logger.Error($"机台 {machineCode} 参数 {cpm.Name} 的报警配置有误，长度不为 2 ");
+                        Logger.Error($"机台 {machineCode} 参数 {cpm.Name} 的报警配置有误，长度不为 2 ", 36000);
                         return;
                     }
                     string max = null;
@@ -452,7 +463,9 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 更新需要算法计算的参数，并返回转换后的集合
         /// </summary>
-        /// <returns></returns>
+        /// <param name="code">待计算的参数的编码</param>
+        /// <param name="updatedCode">当前收到来自底层更新的参数的编码</param>
+        /// <returns>根据预定义算法计算出的参数列表</returns>
         List<Cpm> calcRelateCpm(string code, int updatedCode) {
             List<Cpm> cpms = new List<Cpm>();
             foreach (var infoPair in MachineConfig.MachineDict[code].CodeToRelateCpmDict) {

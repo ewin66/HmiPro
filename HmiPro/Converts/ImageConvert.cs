@@ -8,6 +8,10 @@ using System.Windows.Data;
 using DevExpress.Utils;
 
 namespace HmiPro.Converts {
+    /// <summary>
+    /// 将图片的链接转成图片对象
+    /// <author>DevExpress</author>
+    /// </summary>
     public class ImageConvert : IValueConverter {
         object IValueConverter.Convert(object value, Type targetType, object parameter, CultureInfo culture) {
             if (value != null) {

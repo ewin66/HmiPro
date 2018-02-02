@@ -198,7 +198,7 @@
     <Compile Include="Helpers\ActiveMqHelper.cs" />
     <Compile Include="Helpers\AssetsHelper.cs" />
     <Compile Include="Helpers\ConsoleHelper.cs" />
-    <Compile Include="Helpers\ExceptionHelpers.cs" />
+    <Compile Include="Helpers\ExceptionHelper.cs" />
     <Compile Include="Helpers\InfluxDbHelper.cs" />
     <Compile Include="Helpers\LoggerHelper.cs" />
     <Compile Include="Helpers\MongoHelper.cs" />
@@ -239,7 +239,7 @@
     <Compile Include="Redux\Models\Dpm.cs" />
     <Compile Include="Redux\Models\ManuInfo.cs" />
     <Compile Include="Redux\Models\MqCall.cs" />
-    <Compile Include="Redux\Models\MqCmd.cs" />
+    <Compile Include="Redux\Models\AppCmd.cs" />
     <Compile Include="Redux\Models\MqUploadRest.cs" />
     <Compile Include="Redux\Models\MqUploadDpm.cs" />
     <Compile Include="Redux\Models\PipeRest.cs" />
@@ -452,6 +452,15 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="Profiles\Assets\Bats\delete-app.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Profiles\Prod\Machines\E2.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Profiles\Prod\Machines\E3.xls">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Profiles\Prod\Machines\EC.xls">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Profiles\Prod\Machines\EK.xls">
@@ -766,7 +775,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.106.0\build\net46\System.Data.SQLite.Core.targets')" />

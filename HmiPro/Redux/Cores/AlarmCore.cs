@@ -15,15 +15,33 @@ using YCsharp.Util;
 
 namespace HmiPro.Redux.Cores {
     /// <summary>
+    /// 处理产生的报警
     /// <author>ychost</author>
     /// <date>2017-12-22</date>
     /// </summary>
     public class AlarmCore {
+        /// <summary>
+        /// 事件处理器
+        /// </summary>
         private readonly IDictionary<string, Action<AppState, IAction>> actionExecutors = new Dictionary<string, Action<AppState, IAction>>();
+        /// <summary>
+        /// 历史报警字典
+        /// </summary>
         private IDictionary<string, ObservableCollection<MqAlarm>> historyAlarmsDict;
+        /// <summary>
+        /// Mq操作利器
+        /// </summary>
         private readonly MqEffects mqEffects;
+        /// <summary>
+        /// 数据库操作利器
+        /// </summary>
         private readonly DbEffects dbEffects;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mqEffects"></param>
+        /// <param name="dbEffects"></param>
         public AlarmCore(MqEffects mqEffects, DbEffects dbEffects) {
             UnityIocService.AssertIsFirstInject(GetType());
             this.mqEffects = mqEffects;
@@ -34,8 +52,8 @@ namespace HmiPro.Redux.Cores {
         /// <summary>
         /// 处理一个标准的报警流程
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="action"></param>
+        /// <param name="state">程序状态</param>
+        /// <param name="action">参数的报警数据</param>
         private void doGenerateOneAlarm(AppState state, IAction action) {
             var alarmAction = (AlarmActions.GenerateOneAlarm)action;
             var machineCode = alarmAction.MachineCode;
@@ -52,7 +70,7 @@ namespace HmiPro.Redux.Cores {
             AlarmActions.GenerateOneAlarm.LastGenerateTimeDict[key] = DateTime.Now;
             var historyAlarms = historyAlarmsDict[machineCode];
             var alarmRemove = historyAlarms.FirstOrDefault(a => a.code == alarmAdd.code);
-            //fixed: 2018-01-15
+            // fixed: 2018-01-15
             // 直接调用 UI Dispatcher 来更新
             Application.Current.Dispatcher.Invoke(() => {
                 if (alarmRemove != null) {
