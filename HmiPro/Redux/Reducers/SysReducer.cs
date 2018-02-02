@@ -125,7 +125,7 @@ namespace HmiPro.Redux.Reducers {
                  Application.Current.Dispatcher.Invoke(() => {
                      try {
                          //DXSplashScreen.Close();
-                         state.LoadingWindow.Hide();
+                         //state.LoadingWindow.Hide();
                      } catch {
                          Console.WriteLine("隐藏加载框失败");
                      }
@@ -135,7 +135,7 @@ namespace HmiPro.Redux.Reducers {
                  Application.Current.Dispatcher.Invoke(() => {
                      try {
                          //DXSplashScreen.Show<LoadingWindow>();
-                         state.LoadingWindow.Show();
+                         //state.LoadingWindow.Show();
                      } catch {
                          Console.WriteLine("显示加载框失败");
                      }
