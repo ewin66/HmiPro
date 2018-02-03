@@ -15,6 +15,7 @@ using HmiPro.Redux.Cores;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
+using Newtonsoft.Json;
 using Reducto;
 using YCsharp.Service;
 using YCsharp.Util;
@@ -176,6 +177,10 @@ namespace HmiPro.Redux.Effects {
             var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
+            if (HmiConfig.IsDevUserEnv) {
+                restartAppAfterSec(10, 0.6, "连接服务器超时");
+                return;
+            }
 
             updateLoadingMessage("正在连接服务器...", 0.55);
             var task = Task.Run(() => {
@@ -196,7 +201,7 @@ namespace HmiPro.Redux.Effects {
             isMqEffectsStarted = Task.WaitAll(new[] { task }, 10000);
             if (!isMqEffectsStarted) {
                 updateLoadingMessage("连接服务器超时...", 0.6);
-                shutdownAppAfterSec(10, 0.6, "连接服务器超时");
+                restartAppAfterSec(10, 0.6, "连接服务器超时");
                 return;
             }
 
@@ -239,12 +244,12 @@ namespace HmiPro.Redux.Effects {
 
             //监听轴号卡
             updateLoadingMessage("正在启动监听盘卡扫描...", 0.90);
-            var axisRfidTask = App.Store.Dispatch(mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(MachineConfig.HmiName + "axis", HmiConfig.TopicListenHandSet)));
+            var axisRfidTask = App.Store.Dispatch(mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(MachineConfig.HmiName + "_axis", HmiConfig.TopicListenHandSet)));
             startListenMqDict["rfidAxisTask"] = axisRfidTask;
 
             //监听机台命令
             updateLoadingMessage("正在启动监听机台命令...", 0.92);
-            var cmdTask = App.Store.Dispatch(mqEffects.StartListenCmd(new MqActions.StartListenCmd(MachineConfig.HmiName + "cmd", HmiConfig.TopicCmdReceived)));
+            var cmdTask = App.Store.Dispatch(mqEffects.StartListenCmd(new MqActions.StartListenCmd(MachineConfig.HmiName + "_cmd", HmiConfig.TopicCmdReceived)));
             startListenMqDict["cmdTask"] = cmdTask;
 
             updateLoadingMessage("正在启动系统核心服务...", 0.95);
@@ -257,7 +262,7 @@ namespace HmiPro.Redux.Effects {
                 if (!isStartedOk) {
                     var message = "系统核心启动超时，请检查网络连接";
                     updateLoadingMessage(message, 0.95);
-                    shutdownAppAfterSec(10, 0.95, "系统核心启动超时");
+                    restartAppAfterSec(10, 0.95, "系统核心启动超时");
                     return;
                 }
                 //是否启动完成Cpm服务
@@ -265,7 +270,7 @@ namespace HmiPro.Redux.Effects {
                 if (!isCpmServer) {
                     var message = "参数采集核心启动失败";
                     updateLoadingMessage(message, 0.95, 0);
-                    shutdownAppAfterSec(10, 0.95, message);
+                    restartAppAfterSec(10, 0.95, message);
                     return;
                 }
                 //是否启动完成Http解析系统
@@ -273,7 +278,7 @@ namespace HmiPro.Redux.Effects {
                 if (!isHttpSystem) {
                     var message = "Http 核心启动失败";
                     updateLoadingMessage(message, 0.95, 0);
-                    shutdownAppAfterSec(10, 0.95, message);
+                    restartAppAfterSec(10, 0.95, message);
                     return;
                 }
                 //是否完成监听Mq
@@ -295,7 +300,7 @@ namespace HmiPro.Redux.Effects {
                         }
                         if (!string.IsNullOrEmpty(failedMessage)) {
                             updateLoadingMessage(failedMessage, 0.95, 0);
-                            shutdownAppAfterSec(10, 0.95, failedMessage);
+                            restartAppAfterSec(10, 0.95, failedMessage);
                             return;
                         }
                     }
@@ -325,6 +330,7 @@ namespace HmiPro.Redux.Effects {
                     try {
                         //获取服务器时间
                         var ntpTime = YUtil.GetNtpTime(HmiConfig.NtpIp);
+                        App.StartupLog.SyncServerTime = ntpTime;
                         //时间差超过10秒才同步时间
                         if (Math.Abs((DateTime.Now - ntpTime).TotalSeconds) > 10) {
                             YUtil.SetLoadTimeByDateTime(ntpTime);
@@ -354,6 +360,11 @@ namespace HmiPro.Redux.Effects {
         /// 程序将在 totalSec 秒后自动关闭
         /// </summary>
         void shutdownAppAfterSec(int totalSec, double percent, string message = "程序启动超时") {
+            try {
+                updateAppStartupLog(message);
+            } catch {
+            }
+
             YUtil.SetInterval(1000, t => {
                 var wait = totalSec - t;
                 var waitMessage = $"{message}，将在 {wait} 秒后关闭";
@@ -362,6 +373,76 @@ namespace HmiPro.Redux.Effects {
                     Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
                 }
             }, totalSec);
+        }
+
+        /// <summary>
+        /// 程序将在 totalSec 之后重启
+        /// </summary>
+        /// <param name="totalSec"></param>
+        /// <param name="percent"></param>
+        /// <param name="message"></param>
+        void restartAppAfterSec(int totalSec, double percent, string message = "程序启动超时") {
+            try {
+                var latestLog = getAppLatestStartupLog();
+                //连续启动失败次数越多，等待启动时间越长
+                if (latestLog?.ContinueFailedTimes > 0) {
+                    totalSec = latestLog.ContinueFailedTimes * 10;
+                }
+                updateAppStartupLog(message);
+            } catch (Exception e) {
+                Logger.Error("启动日志出问题", e);
+            }
+            //显示重启提示
+            var waitMessage = $"{message}，将在 {totalSec} 秒后尝试重启";
+            updateLoadingMessage(waitMessage, percent, 0);
+            YUtil.SetInterval(1000, t => {
+                var wait = totalSec - t;
+                waitMessage = $"{message}，将在 {wait} 秒后尝试重启";
+                updateLoadingMessage(waitMessage, percent, 0);
+                if (wait <= 0) {
+                    Application.Current.Dispatcher.Invoke(() => {
+                        //利用脚本启动
+                        var startupParam = string.Join(" ", CmdOptions.StartupEventArgs.Args);
+                        startupParam += " --wait 2";
+                        YUtil.Exec(AssetsHelper.GetAssets().BatStartApp, startupParam,ProcessWindowStyle.Hidden);
+                        YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
+                    });
+                }
+            }, totalSec);
+        }
+
+        /// <summary>
+        /// 获取最近一次启动的日志
+        /// </summary>
+        /// <returns></returns>
+        private StartupLog getAppLatestStartupLog() {
+            using (var ctx = SqliteHelper.CreateSqliteService()) {
+                //Sqlite 目前不支持直接 LastOrDefault
+                return ctx.StartupLogs.ToList().LastOrDefault();
+            }
+        }
+
+        /// <summary>
+        /// 更新启动日志
+        /// </summary>
+        /// <param name="startFailedReason">启动失败原因</param>
+        private void updateAppStartupLog(string startFailedReason) {
+            var lastLog = getAppLatestStartupLog();
+            //增加启动失败次数
+            if (lastLog != null) {
+                App.StartupLog.ContinueFailedTimes = ++lastLog.ContinueFailedTimes;
+            }
+            App.StartupLog.StartFailedReason = startFailedReason;
+            Logger.Error(startFailedReason + " -->" + JsonConvert.SerializeObject(App.StartupLog));
+            //保存到 Sqlite
+            using (var ctx = SqliteHelper.CreateSqliteService()) {
+                ctx.StartupLogs.Add(App.StartupLog);
+                ctx.SaveChanges();
+            }
+            //上传到 MongoDB
+            var mongoClient = MongoHelper.GetMongoService();
+            var db = string.IsNullOrEmpty(MachineConfig.HmiName) ? "Unknown" : MachineConfig.HmiName;
+            mongoClient.GetDatabase(db).GetCollection<StartupLog>(nameof(StartupLog) + "s").InsertOneAsync(App.StartupLog);
         }
 
         /// <summary>

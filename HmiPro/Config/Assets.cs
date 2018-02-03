@@ -81,5 +81,6 @@ namespace HmiPro.Config {
 
         //一些脚本文件
         public string BatDeleteApp => BatsFoler + "\\delete-app.bat";
+        public string BatStartApp => BatsFoler + "\\start-app.bat";
     }
 }

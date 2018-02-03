@@ -96,11 +96,8 @@ namespace HmiPro.Redux.Reducers {
              }).When<SysActions.RestartApp>((state, action) => {
                  ActiveMqHelper.GetActiveMqService().Close();
                  Application.Current.Dispatcher.Invoke(() => {
-                     var param = " --wait " + action.WaitSec;
-                     if (HmiConfig.IsDevUserEnv) {
-                         param += " --config office";
-                     }
-                     YUtil.Exec(Application.ResourceAssembly.Location, param);
+                     var startupParam = string.Join(" ", CmdOptions.StartupEventArgs.Args);
+                     YUtil.Exec(Application.ResourceAssembly.Location, startupParam);
                      Application.Current.Shutdown();
                  });
                  return state;

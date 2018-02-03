@@ -294,8 +294,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                     tmp = Data[2];
                     Data[2] = Data[3];
                     Data[3] = tmp;
-                    var str = BitConverter.ToString(Data, 0).Replace("-", "");
-                    val = Convert.ToInt32(str, 16);
+                    val = BitConverter.ToInt32(Data,0);
                     if (FloatPlace > 0) {
                         val = (val / (Math.Pow(10, FloatPlace)));
                     }

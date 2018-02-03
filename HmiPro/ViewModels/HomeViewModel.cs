@@ -75,11 +75,18 @@ namespace HmiPro.ViewModels {
             if (AppState.IsCompleteInited) {
                 return;
             }
+            //更新启动日志
+            App.StartupLog.IsStartSuccess = true;
+            SqliteHelper.DoAsync(ctx => {
+                ctx.StartupLogs.Add(App.StartupLog);
+                ctx.SaveChanges();
+            });
+            App.Store.Dispatch(new DbActions.UploadDocToMongo(MachineConfig.HmiName, nameof(StartupLog)+"s", App.StartupLog));
             App.Store.Dispatch(new SysActions.CloseLoadingSplash());
             App.Store.Dispatch(new SysActions.ChangeWindowBackgroundImage(AssetsHelper.GetAssets().ImageBackground));
             //置位程序初始化完成
             AppState.IsCompleteInited = true;
-       }
+        }
 
         /// <summary>
         /// 导航到测试界面

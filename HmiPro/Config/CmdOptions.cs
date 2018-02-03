@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using CommandLine;
 
 namespace HmiPro.Config {
@@ -40,6 +41,7 @@ namespace HmiPro.Config {
         public string ConfigFolder;
 
         public static CmdOptions GlobalOptions;
+        public static StartupEventArgs StartupEventArgs;
     }
 
 

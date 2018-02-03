@@ -244,6 +244,7 @@
     <Compile Include="Redux\Models\MqUploadRest.cs" />
     <Compile Include="Redux\Models\MqUploadDpm.cs" />
     <Compile Include="Redux\Models\PipeRest.cs" />
+    <Compile Include="Redux\Models\StartupLog.cs" />
     <Compile Include="Redux\Models\ViewStoreModels.cs" />
     <Compile Include="Redux\Models\MachineState.cs" />
     <Compile Include="Redux\Models\MongoDoc.cs" />
@@ -453,6 +454,9 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="Profiles\Assets\Bats\delete-app.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Profiles\Assets\Bats\start-app.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Profiles\Prod\Machines\E2.xls">

@@ -36,14 +36,27 @@ namespace HmiPro {
     /// <author>ychost</author>
     /// </summary>
     public partial class App : Application {
+
         /// <summary>
         /// 设置程序启动时间
         /// </summary>
         public App() {
+            StartupLog = new StartupLog() { StartTime = DateTime.Now, AppVersion = YUtil.GetAppVersion(Assembly.GetExecutingAssembly()) };
             AppState.ExectedActions["[App] Started"] = DateTime.Now;
         }
+        /// <summary>
+        /// 日志操作类，全局可用
+        /// </summary>
         public static LoggerService Logger;
+        /// <summary>
+        /// 核心数据仓库，全局可用
+        /// </summary>
         public static StorePro<AppState> Store;
+        /// <summary>
+        /// 启动日志
+        /// </summary>
+        public static StartupLog StartupLog;
+
         /// <summary>
         /// 减缓这些消除的日志输出频率 
         /// 因为这些消息的原始频率太高了
@@ -135,6 +148,7 @@ namespace HmiPro {
         /// </summary>
         /// <param name="e"></param>
         void hmiConfigInit(StartupEventArgs e) {
+            StartupLog.StartArgs = string.Join(",", e.Args);
             updateLoadingMessage("正在解析命令...", 0.01);
             Parser.Default.ParseArguments<CmdOptions>(e.Args).WithParsed(opt => {
                 opt.HmiName = opt.HmiName.ToUpper();
@@ -174,6 +188,7 @@ namespace HmiPro {
                 SqliteHelper.Init(YUtil.GetAbsolutePath(HmiConfig.SqlitePath));
                 //保留启动参数
                 CmdOptions.GlobalOptions = opt;
+                CmdOptions.StartupEventArgs = e;
             }).WithNotParsed(err =>
                 throw new Exception("启动参数异常" + err)
             );

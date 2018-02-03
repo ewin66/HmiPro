@@ -122,6 +122,10 @@ namespace HmiPro.Helpers {
         /// 上传失败的落轴数据
         /// </summary>
         public DbSet<MqUploadManu> UploadManuFailures { get; set; }
+        /// <summary>
+        /// 程序启动日志
+        /// </summary>
+        public DbSet<StartupLog> StartupLogs { get; set; }
 
         /// <summary>
         /// 保存一个 Json 对象到表中
