@@ -32,15 +32,12 @@ namespace HmiPro.Redux.Effects {
 
         private void asyncSend(IAsyncResult iar) {
             try {
-                // Get the pipe
-                NamedPipeClientStream pipeStream = (NamedPipeClientStream)iar.AsyncState;
-                // End the write
-                pipeStream.EndWrite(iar);
-                pipeStream.Flush();
-                pipeStream.Close();
-                pipeStream.Dispose();
-                App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_SUCCESS));
-                Logger.Info("写入管道成功", true, ConsoleColor.White, 36000);
+                using (var pipeStream = (NamedPipeClientStream)iar.AsyncState) {
+                    pipeStream.EndWrite(iar);
+                    pipeStream.Flush();
+                    App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_SUCCESS));
+                    Logger.Info("写入管道成功", true, ConsoleColor.White, 36000);
+                }
             } catch (Exception e) {
                 Logger.Error("往管道写入数据失败", e);
                 App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_FAILED, e));
