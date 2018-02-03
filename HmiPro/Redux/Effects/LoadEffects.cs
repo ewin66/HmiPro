@@ -177,10 +177,8 @@ namespace HmiPro.Redux.Effects {
             var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
-            if (HmiConfig.IsDevUserEnv) {
-                restartAppAfterSec(10, 0.6, "连接服务器超时");
-                return;
-            }
+            //restartAppAfterSec(10, 0.6, "连接服务器超时");
+            //return;
 
             updateLoadingMessage("正在连接服务器...", 0.55);
             var task = Task.Run(() => {
@@ -370,7 +368,7 @@ namespace HmiPro.Redux.Effects {
                 var waitMessage = $"{message}，将在 {wait} 秒后关闭";
                 updateLoadingMessage(waitMessage, percent, 0);
                 if (wait <= 0) {
-                    Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
+                    App.Shutdown();
                 }
             }, totalSec);
         }
@@ -385,7 +383,7 @@ namespace HmiPro.Redux.Effects {
             try {
                 var latestLog = getAppLatestStartupLog();
                 //连续启动失败次数越多，等待启动时间越长
-                if (latestLog?.ContinueFailedTimes > 0) {
+                if (latestLog?.ContinueFailedTimes > 0 && !HmiConfig.IsDevUserEnv) {
                     totalSec = latestLog.ContinueFailedTimes * 10;
                 }
                 updateAppStartupLog(message);
@@ -400,13 +398,7 @@ namespace HmiPro.Redux.Effects {
                 waitMessage = $"{message}，将在 {wait} 秒后尝试重启";
                 updateLoadingMessage(waitMessage, percent, 0);
                 if (wait <= 0) {
-                    Application.Current.Dispatcher.Invoke(() => {
-                        //利用脚本启动
-                        var startupParam = string.Join(" ", CmdOptions.StartupEventArgs.Args);
-                        startupParam += " --wait 2";
-                        YUtil.Exec(AssetsHelper.GetAssets().BatStartApp, startupParam,ProcessWindowStyle.Hidden);
-                        YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
-                    });
+                    App.Restart();
                 }
             }, totalSec);
         }

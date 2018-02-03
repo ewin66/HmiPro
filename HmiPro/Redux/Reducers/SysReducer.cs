@@ -90,16 +90,11 @@ namespace HmiPro.Redux.Reducers {
                  state.NotificationMsg = action.Message;
                  return state;
              }).When<SysActions.ShutdownApp>((state, action) => {
-                 ActiveMqHelper.GetActiveMqService().Close();
-                 Application.Current.Dispatcher.BeginInvokeShutdown(System.Windows.Threading.DispatcherPriority.Send);
+                 App.Shutdown();
                  return state;
              }).When<SysActions.RestartApp>((state, action) => {
                  ActiveMqHelper.GetActiveMqService().Close();
-                 Application.Current.Dispatcher.Invoke(() => {
-                     var startupParam = string.Join(" ", CmdOptions.StartupEventArgs.Args);
-                     YUtil.Exec(Application.ResourceAssembly.Location, startupParam);
-                     Application.Current.Shutdown();
-                 });
+                 App.Restart();
                  return state;
              }).When<SysActions.HideDesktop>((state, action) => {
                  YUtil.Exec(AssetsHelper.GetAssets().ExeNirCmd, "win hide class progman ");

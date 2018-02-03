@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Effects;
@@ -22,8 +23,8 @@ namespace HmiPro.Redux.Patches {
         /// 将日志内容写入Mongo当中去
         /// </summary>
         public static void WriteToMogo(this LoggerService logger, LogDoc logDoc, string dbName, string collection = "log") {
-            var dbEffects = UnityIocService.ResolveDepend<DbEffects>();
-            App.Store.Dispatch(dbEffects.UploadDocToMongo(new DbActions.UploadDocToMongo(dbName, collection, logDoc)));
+            var mongoClient = MongoHelper.GetMongoService();
+            mongoClient.GetDatabase(MachineConfig.HmiName).GetCollection<MongoDoc>(collection).InsertOneAsync(logDoc);
         }
 
         /// <summary>

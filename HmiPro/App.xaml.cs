@@ -157,6 +157,7 @@ namespace HmiPro {
                 opt.ConfigFolder = configFolder;
                 var assetsFolder = opt.ProfilesFolder + @"\Assets";
 
+                updateLoadingMessage("正在唤醒终端...", 0.01);
                 if (bool.Parse(opt.ShowConsole)) {
                     ConsoleHelper.Show();
                 }
@@ -189,25 +190,30 @@ namespace HmiPro {
                 //保留启动参数
                 CmdOptions.GlobalOptions = opt;
                 CmdOptions.StartupEventArgs = e;
-            }).WithNotParsed(err =>
-                throw new Exception("启动参数异常" + err)
-            );
+            }).WithNotParsed(err => {
+                var logger = new LoggerService(HmiConfig.LogFolder) { DefaultLocation = "StartError" };
+                updateLoadingMessage($"解析命令异常..", 0);
+                string msg = "";
+                err?.ToList()?.ForEach(r => {
+                    msg += r.ToString();
+                });
+                logger.Error("解析命令参数异常:\r\n参数： " + string.Join(",", e.Args) + "\r\n内容：" + msg);
+                throw new Exception("启动参数异常" + err);
+            });
 
             //记录程序崩溃日志
             AppDomain.CurrentDomain.UnhandledException += (s, ue) => {
-                var message = $"程序崩溃：{ue.ExceptionObject}\r\n当前可用内存：{YUtil.GetAvaliableMemoryByte() / 1000000} M\r\nApp.Store: {Newtonsoft.Json.JsonConvert.SerializeObject(App.Store)}";
+                var logger = new LoggerService(HmiConfig.LogFolder) { DefaultLocation = "UnhandleExp" };
+                var message = $"程序崩溃：{ue.ExceptionObject}\r\n当前可用内存：{YUtil.GetAvaliableMemoryByte() / 1000000} M";
                 //将错误日志写入mongoDb
-                Logger.ErrorWithDb(message, MachineConfig.HmiName);
+                logger.ErrorWithDb(message, MachineConfig.HmiName);
+                //1 秒钟后重启程序
                 if (!HmiConfig.IsDevUserEnv) {
-                    //重启软件
-                    ActiveMqHelper.GetActiveMqService().Close();
-                    Application.Current.Dispatcher.Invoke(() => {
-                        YUtil.Exec(Application.ResourceAssembly.Location, "");
-                        Application.Current.Shutdown();
-                    });
+                    YUtil.SetTimeout(1000, Restart);
                 }
             };
         }
+
         /// <summary>
         /// 更新系统启动进度内容
         /// </summary>
@@ -219,6 +225,29 @@ namespace HmiPro {
             if (!HmiConfig.IsDevUserEnv) {
                 Thread.Sleep(sleepms);
             }
+        }
+
+        /// <summary>
+        /// 关闭程序
+        /// </summary>
+        public new static void Shutdown() {
+            Current.Dispatcher.Invoke(() => {
+                ConsoleHelper.Hide();
+                YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
+            });
+        }
+
+        /// <summary>
+        /// 重启软件
+        /// </summary>
+        public static void Restart() {
+            Current.Dispatcher.Invoke(() => {
+                //利用脚本启动
+                var startupParam = string.Join(" ", CmdOptions.StartupEventArgs.Args);
+                ConsoleHelper.Hide();
+                YUtil.Exec(AssetsHelper.GetAssets().BatStartApp, startupParam, ProcessWindowStyle.Hidden);
+                YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
+            });
         }
 
 

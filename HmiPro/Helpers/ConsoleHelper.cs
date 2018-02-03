@@ -42,7 +42,6 @@ namespace HmiPro.Helpers {
             if (!HasConsole) {
                 AllocConsole();
                 InvalidateOutAndError();
-
             }
             //#endif
         }
