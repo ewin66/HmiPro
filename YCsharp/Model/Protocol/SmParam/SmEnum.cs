@@ -95,9 +95,8 @@ namespace YCsharp.Model.Procotol.SmParam {
         Float4321 = 3,
         //整形逆序：3421==>4321
         Int3412 = 4,
-        //乱序浮点1
         //3412 ===>4321
-        Float3412 = 5,
+        Float3412 = 10,
         //2143==>4321
         Float2143 = 6,
         //1234 ==> 4321
@@ -107,9 +106,9 @@ namespace YCsharp.Model.Procotol.SmParam {
         //第 3-4 位有效
         Bit34 = 9,
         //第 5-6 位有效
-        Bit56 = 10,
+        Bit56 = 101,
         //第 7-8 位有效
-        Bit78 = 11,
+        Bit78 = 102,
         //字符串类型，应用Ascii转换
         StrAscii = 2,
         //8位机台号+1状态号+12位卡号

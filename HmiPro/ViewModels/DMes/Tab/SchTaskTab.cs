@@ -171,15 +171,14 @@ namespace HmiPro.ViewModels.DMes.Tab {
                 return;
             }
             var pallet = App.Store.GetState().DMesState.PalletDict[MachineCode];
-            if (string.IsNullOrEmpty(pallet.Rfid)) {
+            if (string.IsNullOrEmpty(pallet.Rfids)) {
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                     Title = "警告",
                     Content = "未扫描栈板的Rfid"
                 }));
             }
             var workcode = App.Store.GetState().DMesState.SchTaskDoingDict[MachineCode].MqSchTask?.workcode;
-            var rfid = App.Store.GetState().DMesState.SchTaskDoingDict[MachineCode].EmpRfids;
-            var form = new PalletConfirmForm(MachineCode, string.Join(",", rfid), pallet.AxisNum, workcode);
+            var form = new PalletConfirmForm(MachineCode, string.Join(",",pallet.Rfids), pallet.AxisNum, workcode);
             App.Store.Dispatch(new SysActions.ShowFormView("确认栈板轴数量", form));
         }
 

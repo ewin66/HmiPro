@@ -234,17 +234,17 @@ namespace HmiPro.Redux.Effects {
 
             //监听人员打卡
             updateLoadingMessage("正在启动监听人员打卡...", 0.85);
-            var empRfidTask = App.Store.Dispatch(mqEffects.StartListenEmpRfid(new MqActions.StartListenEmpRfid(HmiConfig.TopicEmpRfid)));
+            var empRfidTask = App.Store.Dispatch(mqEffects.StartListenEmpRfid(new MqActions.StartListenEmpRfid(MachineConfig.HmiName + "_employee", HmiConfig.TopicEmpRfid)));
             startListenMqDict["rfidEmpTask"] = empRfidTask;
 
             //监听轴号卡
             updateLoadingMessage("正在启动监听盘卡扫描...", 0.90);
-            var axisRfidTask = App.Store.Dispatch(mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(HmiConfig.TopicListenHandSet)));
+            var axisRfidTask = App.Store.Dispatch(mqEffects.StartListenAxisRfid(new MqActions.StartListenAxisRfid(MachineConfig.HmiName + "axis", HmiConfig.TopicListenHandSet)));
             startListenMqDict["rfidAxisTask"] = axisRfidTask;
 
             //监听机台命令
             updateLoadingMessage("正在启动监听机台命令...", 0.92);
-            var cmdTask = App.Store.Dispatch(mqEffects.StartListenCmd(new MqActions.StartListenCmd(HmiConfig.TopicCmdReceived)));
+            var cmdTask = App.Store.Dispatch(mqEffects.StartListenCmd(new MqActions.StartListenCmd(MachineConfig.HmiName + "cmd", HmiConfig.TopicCmdReceived)));
             startListenMqDict["cmdTask"] = cmdTask;
 
             updateLoadingMessage("正在启动系统核心服务...", 0.95);

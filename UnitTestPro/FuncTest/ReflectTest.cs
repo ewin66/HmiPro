@@ -46,7 +46,6 @@ namespace UnitTestPro.FuncTest {
         public void JsonTest() {
             string json = "{test:\"hello\"}";
             var type = typeof(Test);
-             Type t = new;
             dynamic obj = JsonConvert.DeserializeObject(json,type);
             Test test = (Test)obj;
             Console.WriteLine(test.test);

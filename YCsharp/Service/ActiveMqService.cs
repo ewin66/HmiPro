@@ -127,29 +127,23 @@ namespace YCsharp.Service {
             });
         }
 
-        /// <summary>
-        /// 监听主题，异步方法
-        /// </summary>
-        public Task ListenTopicAsync(string topic, string register, Action<string> onMessageReceived) {
-            return Task.Run(() => {
-                this.ListenTopic(topic, register, onMessageReceived);
-            });
-        }
+
 
         /// <summary>
         /// 监听主题，采用的闭包,同步方法
         /// </summary>
         /// <param name="topic">主题</param>
         /// <param name="register">注册Id</param>
+        /// <param name="selector">持久化消息的唯一 Id</param>
         /// <param name="onMessageReceived">接受事件</param>
         /// <returns></returns>
-        public void ListenTopic(string topic, string register, Action<string> onMessageReceived) {
+        public void ListenTopic(string topic, string selector, string register, Action<string> onMessageReceived) {
+            selector = "aphard_" + selector;
             ISession session = poolConnection.CreateSession();
             IMessageConsumer consumer = null;
             if (!string.IsNullOrEmpty(register)) {
-                consumer = session.CreateDurableConsumer(new ActiveMQTopic(topic), register, "receiver='" + register + "'", false);
+                consumer = session.CreateDurableConsumer(new ActiveMQTopic(topic), selector, "receiver='" + register + "'", false);
             } else {
-                var selector = "csharp" + YUtil.RandGenerator();
                 consumer = session.CreateDurableConsumer(new ActiveMQTopic(topic), selector, null, false);
             }
             consumer.Listener += new MessageListener((msg) => {

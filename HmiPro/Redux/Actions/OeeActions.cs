@@ -15,9 +15,7 @@ namespace HmiPro.Redux.Actions {
     public static class OeeActions {
         [Obsolete("现在是每次收到参数就更新 Oee，不需要定时器了")]
         public static readonly string START_CALC_OEE_TIMER = "[Oee] Start Calc Oee Timer";
-        /// <summary>
         /// 更新Oee的部分参数
-        /// </summary>
         public static readonly string UPDATE_OEE_PARTIAL_VALUE = "[Oee] Update Oee Parital Value";
 
         //初始化

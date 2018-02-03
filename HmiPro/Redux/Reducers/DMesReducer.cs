@@ -84,7 +84,7 @@ namespace HmiPro.Redux.Reducers {
         /// <summary>
         /// 栈板的 RFID
         /// </summary>
-        public string Rfid { get; set; }
+        public string Rfids { get; set; }
 
         public string WorkCode { get; set; }
 

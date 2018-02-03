@@ -11,6 +11,11 @@ using HmiPro.ViewModels.DMes.Tab;
 using YCsharp.Util;
 
 namespace HmiPro.ViewModels.DMes {
+    /// <summary>
+    /// Bom 表页面
+    /// <author>ychost</author>
+    /// <date>2017-12-23</date>
+    /// </summary>
     [POCOViewModel]
     public class CraftBomViewModel : BaseTab {
         public virtual string MachineCode { get; set; }

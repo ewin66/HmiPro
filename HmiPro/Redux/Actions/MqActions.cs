@@ -85,8 +85,10 @@ namespace HmiPro.Redux.Actions {
         public struct StartListenCmd : IAction {
             public string Type() => START_LISTEN_CMD;
             public string TopicName;
+            public string Id;
 
-            public StartListenCmd(string topicName) {
+            public StartListenCmd(string id, string topicName) {
+                Id = id;
                 TopicName = topicName;
             }
         }
@@ -128,9 +130,11 @@ namespace HmiPro.Redux.Actions {
         public struct StartListenAxisRfid : IAction {
             public string Type() => START_LISTEN_AXIS_RFID;
             public string TopicName;
+            public string Id;
 
-            public StartListenAxisRfid(string topicName) {
+            public StartListenAxisRfid(string id, string topicName) {
                 TopicName = topicName;
+                Id = id;
             }
         }
 
@@ -138,7 +142,9 @@ namespace HmiPro.Redux.Actions {
         public struct StartListenEmpRfid : IAction {
             public string Type() => START_LISTEN_EMP_RFID;
             public string TopicName;
-            public StartListenEmpRfid(string topicName) {
+            public string Id;
+            public StartListenEmpRfid(string id, string topicName) {
+                Id = id;
                 TopicName = topicName;
             }
         }

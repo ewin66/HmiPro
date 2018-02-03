@@ -213,7 +213,7 @@ namespace HmiPro.Redux.Cores {
                         storeCpm.Update(cpm.Value, cpm.ValueType, pickTime);
                     }
                 } else {
-                    Logger.Error($"参数 {cpm.Code} 未注册", 3600);
+                    Logger.Error($"参数 {cpm.Code} 未注册", 36000);
                 }
             }
 
@@ -301,9 +301,9 @@ namespace HmiPro.Redux.Cores {
             } else if (DefinedParamCode.EmpRfid == cpm.Code) {
                 rfidAccept.RfidType = DMesActions.RfidType.EmpStartMachine;
                 rfidAccept.MqData = new MqEmpRfid() {
-                    employeeCode = rfidAccept.Rfid,
+                    employeeCode = rfidAccept.Rfids,
                     macCode = machineCode,
-                    name = rfidAccept.Rfid,
+                    name = rfidAccept.Rfids,
                     PrintTime = DateTime.Now,
                     type = MqRfidType.EmpStartMachine
                 };

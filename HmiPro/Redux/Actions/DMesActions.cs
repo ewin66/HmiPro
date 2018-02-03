@@ -92,11 +92,16 @@ namespace HmiPro.Redux.Actions {
             public RfidWhere RfidWhere;
             public RfidType RfidType;
             public string MachineCode;
-            public string Rfid;
+            public string Rfids;
             public object MqData;
 
-            public RfidAccpet(string machineCode, string rfid, RfidWhere where, RfidType type, object mqData = null) {
-                Rfid = rfid;
+            public string[] RfidArr {
+                get => Rfids?.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+
+            }
+
+            public RfidAccpet(string machineCode, string rfids, RfidWhere where, RfidType type, object mqData = null) {
+                Rfids = rfids;
                 MachineCode = machineCode;
                 RfidWhere = where;
                 RfidType = type;
@@ -122,7 +127,7 @@ namespace HmiPro.Redux.Actions {
             public string MachineCode;
             public string TaskId;
 
-            public StartSchTaskAxis(string machineCode, string axisCode,string taskId) {
+            public StartSchTaskAxis(string machineCode, string axisCode, string taskId) {
                 MachineCode = machineCode;
                 AxisCode = axisCode;
                 TaskId = taskId;

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using DevExpress.Mvvm.Native;
 using HmiPro.Annotations;
 using HmiPro.Config;
 using HmiPro.Config.Models;
@@ -213,13 +214,13 @@ namespace HmiPro.Redux.Cores {
             }
             var pallet = new Pallet();
             pallet.AxisNum = form.AxisNum;
-            pallet.Rfid = form.Rfid;
+            pallet.Rfids = form.Rfid;
             pallet.WorkCode = form.WorkCode;
             //清空栈板轴数量
             PalletDict[machinieCode].AxisNum = 0;
 
             //保存栈板Rfid 和 轴数量之间的关系
-            var filter = new FilterDefinitionBuilder<Pallet>().Where(s => s.Rfid == pallet.Rfid);
+            var filter = new FilterDefinitionBuilder<Pallet>().Where(s => s.Rfids == pallet.Rfids);
             var options = new UpdateOptions() { IsUpsert = true };
             var updater = Builders<Pallet>.Update.Set(s => s.AxisNum, pallet.AxisNum);
             MongoHelper.GetMongoService().GetDatabase(machinieCode).GetCollection<Pallet>("Pallets").UpdateOneAsync(filter, updater, options);
@@ -231,6 +232,7 @@ namespace HmiPro.Redux.Cores {
                 CallId = Guid.NewGuid().GetHashCode(),
                 callArgs = pallet
             };
+            Logger.Info("栈板绑定数据: " + JsonConvert.SerializeObject(mqCall));
             var callSuccess = await App.Store.Dispatch(mqEffects.CallSystem(new MqActions.CallSystem(machinieCode, mqCall)));
             if (callSuccess) {
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
@@ -421,87 +423,78 @@ namespace HmiPro.Redux.Cores {
         /// <param name="state">程序状态</param>
         /// <param name="action">Rfid 数据</param>
         void doRfidAccept(AppState state, IAction action) {
-            var dmesAction = (DMesActions.RfidAccpet)action;
-            if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine || dmesAction.RfidType == DMesActions.RfidType.EmpEndMachine) {
-                var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
+            var rfidAccpet = (DMesActions.RfidAccpet)action;
+            if (rfidAccpet.RfidType == DMesActions.RfidType.EmpStartMachine || rfidAccpet.RfidType == DMesActions.RfidType.EmpEndMachine) {
+                var mqEmpRfid = (MqEmpRfid)rfidAccpet.MqData;
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                     Title = "消息通知",
-                    Content = $" {mqEmpRfid.name} 打{mqEmpRfid.type}卡成功, {dmesAction.MachineCode} 机台",
+                    Content = $" {mqEmpRfid.name} 打{mqEmpRfid.type}卡成功, {rfidAccpet.MachineCode} 机台",
                     MinGapSec = 10
                 }));
                 //打了上机卡，清除未打上机卡警告
                 if (mqEmpRfid.type == MqRfidType.EmpStartMachine) {
-                    App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_PUNCH_START_MACHINE + dmesAction.MachineCode));
+                    App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_PUNCH_START_MACHINE + rfidAccpet.MachineCode));
                 }
-            } else if (dmesAction.RfidWhere == DMesActions.RfidWhere.FromMq) {
+            } else if (rfidAccpet.RfidWhere == DMesActions.RfidWhere.FromMq) {
                 App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
                     Title = "消息通知",
                     Content = $"手持机扫卡成功",
                     MinGapSec = 10
                 }));
             }
-            lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
-                var doingTask = SchTaskDoingDict[dmesAction.MachineCode];
+            lock (SchTaskDoingLocks[rfidAccpet.MachineCode]) {
+                var doingTask = SchTaskDoingDict[rfidAccpet.MachineCode];
                 //放线卡
-                if (dmesAction.RfidType == DMesActions.RfidType.StartAxis) {
-                    //清除跑马灯警告消息
-                    App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_START_AXIS_RFID + dmesAction.MachineCode));
+                if (rfidAccpet.RfidType == DMesActions.RfidType.StartAxis) {
+                    App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_START_AXIS_RFID + rfidAccpet.MachineCode));
                     //如果是带有栈板的机台，则只有一个放线盘，每当放线盘更改的时候都应该清空放线卡数据
-                    if (PalletDict.ContainsKey(dmesAction.MachineCode)) {
-                        if (!doingTask.StartAxisRfids.Contains(dmesAction.Rfid)) {
+                    if (PalletDict.ContainsKey(rfidAccpet.MachineCode)) {
+                        if (!doingTask.StartAxisRfids.Contains(rfidAccpet.Rfids)) {
                             doingTask.StartAxisRfids.Clear();
                         }
                     }
-                    doingTask.StartAxisRfids.Add(dmesAction.Rfid);
+                    rfidAccpet.RfidArr?.ForEach(rfid => doingTask.StartAxisRfids.Add(rfid));
+
                     //收线卡
-                } else if (dmesAction.RfidType == DMesActions.RfidType.EndAxis) {
-                    //清除跑马灯警告消息
-                    App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_END_AXIS_RFID + dmesAction.MachineCode));
+                } else if (rfidAccpet.RfidType == DMesActions.RfidType.EndAxis) {
+                    App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_SCAN_END_AXIS_RFID + rfidAccpet.MachineCode));
                     //收线盘只有一个
-                    if (!doingTask.EndAxisRfids.Contains(dmesAction.Rfid)) {
-                        //换盘了
-                        //if (doingTask.EndAxisRfids.Count > 0) {
-                        //    //任务已经开始，但是换盘了，则任务当前任务结束了
-                        //    if (SchTaskDoingDict[dmesAction.MachineCode].IsStarted) {
-                        //        App.Store.Dispatch(new DMesActions.CompletedSchAxis(dmesAction.MachineCode, SchTaskDoingDict[dmesAction.MachineCode]?.MqSchAxis?.axiscode));
-                        //    }
-                        //    //如果使用的是栈板，则清空栈板数据
-                        //    //包括放线盘，收线盘
-                        //    if (PalletDict.ContainsKey(dmesAction.MachineCode)) {
-                        //        PalletDict[dmesAction.MachineCode].AxisNum = 0;
-                        //        PalletDict[dmesAction.MachineCode].Rfid = dmesAction.Rfid;
-                        //        doingTask.StartAxisRfids.Clear();
-                        //    }
-                        //}
+                    if (!doingTask.EndAxisRfids.Contains(rfidAccpet.Rfids)) {
                         doingTask.EndAxisRfids.Clear();
-                        doingTask.EndAxisRfids.Add(dmesAction.Rfid);
+                        doingTask.EndAxisRfids.Add(rfidAccpet.Rfids);
                     }
+                    //更新栈板数据
+                    PalletDict[rfidAccpet.MachineCode].Rfids = string.Join(",", doingTask.EndAxisRfids);
+
                     //人员上机卡
-                } else if (dmesAction.RfidType == DMesActions.RfidType.EmpStartMachine) {
-                    var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
-                    doingTask.EmpRfids.Add(dmesAction.Rfid);
+                } else if (rfidAccpet.RfidType == DMesActions.RfidType.EmpStartMachine) {
+                    App.Store.Dispatch(
+                        new SysActions.DelMarqueeMessage(
+                            SysActions.MARQUEE_PUNCH_START_MACHINE + rfidAccpet.MachineCode));
+                    var mqEmpRfid = (MqEmpRfid)rfidAccpet.MqData;
+                    doingTask.EmpRfids.Add(rfidAccpet.Rfids);
                     //全局保存打卡信息
-                    var isPrinted = MqEmpRfidDict[dmesAction.MachineCode].Exists(s => s.employeeCode == mqEmpRfid.employeeCode);
+                    var isPrinted = MqEmpRfidDict[rfidAccpet.MachineCode].Exists(s => s.employeeCode == mqEmpRfid.employeeCode);
                     //如果没有打上机卡，则添加到全局保存
                     if (!isPrinted) {
-                        MqEmpRfidDict[dmesAction.MachineCode].Add(mqEmpRfid);
+                        MqEmpRfidDict[rfidAccpet.MachineCode].Add(mqEmpRfid);
                     }
                     //人员下机卡
-                } else if (dmesAction.RfidType == DMesActions.RfidType.EmpEndMachine) {
-                    doingTask.EmpRfids.Remove(dmesAction.Rfid);
-                    var mqEmpRfid = (MqEmpRfid)dmesAction.MqData;
-                    var removeItem = MqEmpRfidDict[dmesAction.MachineCode].FirstOrDefault(s => s.employeeCode == mqEmpRfid.employeeCode);
+                } else if (rfidAccpet.RfidType == DMesActions.RfidType.EmpEndMachine) {
+                    doingTask.EmpRfids.Remove(rfidAccpet.Rfids);
+                    var mqEmpRfid = (MqEmpRfid)rfidAccpet.MqData;
+                    var removeItem = MqEmpRfidDict[rfidAccpet.MachineCode].FirstOrDefault(s => s.employeeCode == mqEmpRfid.employeeCode);
                     //从全局打卡信息中移除
-                    MqEmpRfidDict[dmesAction.MachineCode].Remove(removeItem);
+                    MqEmpRfidDict[rfidAccpet.MachineCode].Remove(removeItem);
                 }
 
                 //更新 参数 界面上面的 Rfid 值
-                var employees = string.Join(",", (from c in MqEmpRfidDict[dmesAction.MachineCode] select c.name).ToList());
+                var employees = string.Join(",", (from c in MqEmpRfidDict[rfidAccpet.MachineCode] select c.name).ToList());
                 var startRfids = string.Join(",", doingTask.StartAxisRfids);
                 var endRfids = string.Join(",", doingTask.EndAxisRfids);
-                setCpmRfid(dmesAction.MachineCode, DefinedParamCode.EmpRfid, employees);
-                setCpmRfid(dmesAction.MachineCode, DefinedParamCode.StartAxisRfid, startRfids);
-                setCpmRfid(dmesAction.MachineCode, DefinedParamCode.EndAxisRfid, endRfids);
+                setCpmRfid(rfidAccpet.MachineCode, DefinedParamCode.EmpRfid, employees);
+                setCpmRfid(rfidAccpet.MachineCode, DefinedParamCode.StartAxisRfid, startRfids);
+                setCpmRfid(rfidAccpet.MachineCode, DefinedParamCode.EndAxisRfid, endRfids);
             }
         }
 

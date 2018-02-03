@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 
 namespace UnitTestPro.FuncTest {
     /// <summary>
@@ -287,6 +288,17 @@ namespace UnitTestPro.FuncTest {
             father2.PrintFather();
             father2.DoNormalMethod();
         }
+        [TestMethod]
+        public void JosnGenTest1() {
+            var rfid = new MqAxisRfid() {
+                axis_id = "TESTRFID",
+                macCode = "RF",
+                msgType = "收线",
+                rfids = "TEsTT"
+            };
+
+            Console.WriteLine(JsonConvert.SerializeObject(rfid));
+        }
 
         [TestMethod]
         public async Task LockDeadTest() {
@@ -362,6 +374,7 @@ namespace UnitTestPro.FuncTest {
         public void PrintFather() {
             Console.WriteLine($"Father: public:{PubField} ,private:{priField}");
         }
+
     }
 
     public class Son : Father {
@@ -386,6 +399,34 @@ namespace UnitTestPro.FuncTest {
         public void PrintSon() {
             Console.WriteLine($"Son: public:{PubField} ,private:{priField}");
         }
-    }
 
+
+    }
+    /// <summary>
+    /// 线盘卡
+    /// </summary>
+    public class MqAxisRfid {
+        //接收手持机端用
+        /**
+         * 接收手机传入的轴id
+         */
+        public string axis_id { get; set; }
+        /**
+         * 接收消息时间
+         */
+        public string date { get; set; }
+        /**
+         * 消息类型(axis_begin 代表上线   axis_end代表收线)
+         */
+        public string msg_type { get; set; }
+        public string machine_id { get; set; }
+        //发送给机台的参数
+        //多个以,号隔开
+        public string rfids { get; set; }
+        //手持机扫描时间
+        //取值：放线、收线
+        public string msgType { get; set; }
+        public string macCode { get; set; }
+
+    }
 }

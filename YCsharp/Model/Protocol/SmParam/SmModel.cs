@@ -267,9 +267,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                     val = BitConverter.ToSingle(data, 0);
                     //普通整形
                 } else if (DataType == (byte)EmsocketDataType.Int4321) {
-                    //转成"12d54f"
                     var str = BitConverter.ToString(Data, 0).Replace("-", "");
-                    //反转
                     val = Convert.ToInt32(str, 16);
                     //添加小数
                     if (FloatPlace > 0) {
@@ -283,7 +281,8 @@ namespace YCsharp.Model.Procotol.SmParam {
                     tmp = Data[1];
                     Data[1] = Data[2];
                     Data[2] = tmp;
-                    val = BitConverter.ToInt32(Data, 0);
+                    var str = BitConverter.ToString(Data, 0).Replace("-", "");
+                    val = Convert.ToInt32(str, 16);
                     if (FloatPlace > 0) {
                         val = (val / (Math.Pow(10, FloatPlace)));
                     }
@@ -295,7 +294,8 @@ namespace YCsharp.Model.Procotol.SmParam {
                     tmp = Data[2];
                     Data[2] = Data[3];
                     Data[3] = tmp;
-                    val = BitConverter.ToInt32(Data, 0);
+                    var str = BitConverter.ToString(Data, 0).Replace("-", "");
+                    val = Convert.ToInt32(str, 16);
                     if (FloatPlace > 0) {
                         val = (val / (Math.Pow(10, FloatPlace)));
                     }
