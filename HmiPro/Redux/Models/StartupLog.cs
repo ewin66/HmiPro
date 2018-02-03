@@ -12,7 +12,7 @@ namespace HmiPro.Redux.Models {
     /// <author>yhost</author>
     /// <date>2018-2-3</date>
     /// </summary>
-    public class StartupLog:MongoDoc {
+    public class StartupLog : MongoDoc {
         /// <summary>
         /// 自增 Id
         /// </summary>
@@ -50,5 +50,7 @@ namespace HmiPro.Redux.Models {
         /// 连续启动失败的次数
         /// </summary>
         public int ContinueFailedTimes { get; set; }
+
+        public static string MongoDbCollectionName = "StartupLogs";
     }
 }

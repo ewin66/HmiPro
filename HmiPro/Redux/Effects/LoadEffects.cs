@@ -177,8 +177,6 @@ namespace HmiPro.Redux.Effects {
             var sysEffects = UnityIocService.ResolveDepend<SysEffects>();
             var cpmEffects = UnityIocService.ResolveDepend<CpmEffects>();
             var mqEffects = UnityIocService.ResolveDepend<MqEffects>();
-            //restartAppAfterSec(10, 0.6, "连接服务器超时");
-            //return;
 
             updateLoadingMessage("正在连接服务器...", 0.55);
             var task = Task.Run(() => {
@@ -434,7 +432,7 @@ namespace HmiPro.Redux.Effects {
             //上传到 MongoDB
             var mongoClient = MongoHelper.GetMongoService();
             var db = string.IsNullOrEmpty(MachineConfig.HmiName) ? "Unknown" : MachineConfig.HmiName;
-            mongoClient.GetDatabase(db).GetCollection<StartupLog>(nameof(StartupLog) + "s").InsertOneAsync(App.StartupLog);
+            mongoClient.GetDatabase(db).GetCollection<StartupLog>(StartupLog.MongoDbCollectionName).InsertOneAsync(App.StartupLog);
         }
 
         /// <summary>
