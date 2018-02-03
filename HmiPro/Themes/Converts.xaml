@@ -17,5 +17,6 @@
     <converts:CoefConverter x:Key="ConverterCoef"/>
     <converts:ImageConvert x:Key="ImageConvert"></converts:ImageConvert>
     <converts:JavaTimeConvert x:Key="JavaTimeConvert"></converts:JavaTimeConvert>
+    <converts:StringFormatConvert x:Key="StringFormatConvert" />
 
 </ResourceDictionary>

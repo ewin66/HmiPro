@@ -48,7 +48,7 @@
                                 }">
                                     <Run Text="{Binding Path=Name}"/>
                                     <Run Text=":" />
-                                    <Run  Text="{Binding Path=Value,StringFormat=F2}"  Style="{StaticResource CpmInstantValue}" />
+                                    <Run  Text="{Binding Path=Value,Converter={StaticResource StringFormatConvert},ConverterParameter='F2'}"  Style="{StaticResource CpmInstantValue}" />
                                     <Run Text="{Binding Path=Unit}"/>
                                     </TextBlock>
                                 </DataTemplate>

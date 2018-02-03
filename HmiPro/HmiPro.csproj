@@ -192,6 +192,7 @@
     <Compile Include="Converts\JavaTimeConvert.cs" />
     <Compile Include="Converts\MultiParamsConvert.cs" />
     <Compile Include="Converts\PercentConvert.cs" />
+    <Compile Include="Converts\StringFormatConvert.cs" />
     <Compile Include="DxWindow.xaml.cs">
       <DependentUpon>DxWindow.xaml</DependentUpon>
     </Compile>
