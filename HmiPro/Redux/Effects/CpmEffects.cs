@@ -22,6 +22,10 @@ namespace HmiPro.Redux.Effects {
         /// 异步启动服务
         /// </summary>
         public readonly StorePro<AppState>.AsyncActionNeedsParam<CpmActions.StartServer,bool> StartServer;
+
+        /// <summary>
+        /// 主要是数据采集服务是在 CpmCore 中启动的
+        /// </summary>
         public readonly CpmCore CpmCore;
 
         public CpmEffects(StorePro<AppState> store, CpmCore cpmCore) {

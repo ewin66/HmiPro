@@ -27,12 +27,31 @@ namespace HmiPro.Redux.Effects {
     /// <author>ychost</author>
     /// </summary>
     public class SysEffects {
+        /// <summary>
+        /// 启动 Http 服务（命令解析）
+        /// </summary>
         public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StartHttpSystem, bool> StartHttpSystem;
+        /// <summary>
+        /// 定时关闭显示器（启动）
+        /// </summary>
         public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StartCloseScreenTimer> StartCloseScreenTimer;
+        /// <summary>
+        /// 定时关闭显示器（停止）
+        /// </summary>
         public readonly StorePro<AppState>.AsyncActionNeedsParam<SysActions.StopCloseScreenTimer> StopCloseScrenTimer;
+        /// <summary>
+        /// 日志
+        /// </summary>
         public readonly LoggerService Logger;
+        /// <summary>
+        /// 定时关闭显示器的定时器
+        /// </summary>
         public Timer CloseScrrenTimer;
 
+        /// <summary>
+        /// 初始化上面的 Effect
+        /// </summary>
+        /// <param name="sysService"></param>
         public SysEffects(SysService sysService) {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());

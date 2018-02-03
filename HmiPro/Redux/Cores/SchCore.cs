@@ -22,10 +22,24 @@ namespace HmiPro.Redux.Cores {
     /// <author>ychost</author>
     /// </summary>
     public class SchCore : Registry {
+        /// <summary>
+        /// 启动定时关闭显示器
+        /// </summary>
         private readonly SysEffects sysEffects;
+        /// <summary>
+        /// 定时上传采集参数到 Mq
+        /// </summary>
         private readonly MqEffects mqEffects;
+        /// <summary>
+        /// 日志
+        /// </summary>
         public readonly LoggerService Logger;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sysEffects"></param>
+        /// <param name="mqEffects"></param>
         public SchCore(SysEffects sysEffects, MqEffects mqEffects) {
             UnityIocService.AssertIsFirstInject(GetType());
             this.sysEffects = sysEffects;

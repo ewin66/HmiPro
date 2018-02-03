@@ -20,7 +20,7 @@ namespace HmiPro.Redux.Actions {
 
         //危险！！前方高能！！！前方高能！！！!不可恢复！！！！
         //直接毁掉程序，不到万不得已不要使用！！
-        //最后的底线，应该买个大按钮来执行此操作
+        //应该买个大按钮来执行此操作
         public static readonly string DANGER_DAMAGE_APP = "[Hook] Danger Damage App";
 
         /// <summary>

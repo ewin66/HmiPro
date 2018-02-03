@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
 using DevExpress.Mvvm;
 using DevExpress.Mvvm.UI;
@@ -491,9 +492,8 @@ namespace HmiPro.ViewModels {
                 IsDefault = true
             };
             var formViewModel = FormViewModel.Create(title, form);
-            var resultCmd = DialogService.ShowDialog(new List<UICommand>() { okCmd, cancelCmd }, title, nameof(FormView),
-                formViewModel);
-            //派发事件，可根据 FormCtrls 的 Type 来确定逻辑
+            var resultCmd = DialogService.ShowDialog(new List<UICommand>() { okCmd, cancelCmd }, title, nameof(FormView), formViewModel);
+            //派发事件，可根据 Form 的 Type 来确定逻辑
             if (resultCmd == okCmd) {
                 App.Store.Dispatch(new SysActions.FormViewPressedOk(title, formViewModel.Form));
                 formViewModel.Form.OnOkPressed?.Invoke(formViewModel.Form);

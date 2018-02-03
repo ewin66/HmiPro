@@ -34,12 +34,12 @@
     </dxmvvm:Interaction.Triggers>
 
     <dxmvvm:Interaction.Behaviors>
-        <dxmvvm:ApplicationJumpListService ShowFrequentCategory="True" ShowRecentCategory="True"/>
-        <dx:DialogService DialogWindowStartupLocation="CenterScreen">
+        <dxmvvm:ApplicationJumpListService ShowFrequentCategory="True" ShowRecentCategory="True" />
+        <dx:DialogService DialogWindowStartupLocation="CenterScreen" YieldToParent="True">
             <dx:DialogService.DialogStyle>
                 <Style TargetType="Window">
                     <Setter Property="SizeToContent" Value="WidthAndHeight" />
-                    <Setter Property="ResizeMode" Value="CanMinimize" />
+                    <Setter Property="ResizeMode" Value="CanResizeWithGrip" />
                 </Style>
             </dx:DialogService.DialogStyle>
         </dx:DialogService>

@@ -72,7 +72,7 @@ namespace HmiPro.Redux.Effects {
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenCmd, bool> StartListenCmd;
 
         /// <summary>
-        /// 
+        /// 初始化各个 Effect
         /// </summary>
         /// <param name="mqService"></param>
         public MqEffects(MqService mqService) {

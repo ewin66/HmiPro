@@ -31,6 +31,10 @@ namespace HmiPro.Redux.Cores {
         /// 事件处理器
         /// </summary>
         private readonly IDictionary<string, Action<AppState, IAction>> actionExecutors = new Dictionary<string, Action<AppState, IAction>>();
+
+        /// <summary>
+        /// 初始化 日志、事件处理器
+        /// </summary>
         public OeeCore() {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());

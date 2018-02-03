@@ -14,10 +14,9 @@
              d:DesignHeight="600" d:DesignWidth="800">
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
-        <dxmvvm:ApplicationJumpListService />
     </dxmvvm:Interaction.Behaviors>
     <Grid MinWidth="840" >
-        <dxlc:DataLayoutControl CurrentItem="{Binding Path=Form}">
+        <dxlc:DataLayoutControl CurrentItem="{Binding Path=Form}" Loaded="DataLayoutControl_Loaded">
 
         </dxlc:DataLayoutControl>
     </Grid>

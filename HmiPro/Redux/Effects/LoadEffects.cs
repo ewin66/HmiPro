@@ -29,9 +29,6 @@ namespace HmiPro.Redux.Effects {
     /// <date>2018-1-26</date>
     /// </summary>
     public class LoadEffects {
-
-
-
         /// <summary>
         /// 加载全局配置，GlobalConfig、各种Helper 等等
         /// </summary>
@@ -46,6 +43,9 @@ namespace HmiPro.Redux.Effects {
         /// </summary>
         public LoggerService Logger;
 
+        /// <summary>
+        ///初始化日志
+        /// </summary>
         public LoadEffects() {
             Logger = new LoggerService(HmiConfig.LogFolder) { DefaultLocation = GetType().ToString() };
             initLoadGlobalConfig();
