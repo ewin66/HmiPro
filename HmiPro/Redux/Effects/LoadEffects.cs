@@ -428,10 +428,11 @@ namespace HmiPro.Redux.Effects {
             //增加启动失败次数
             if (lastLog != null) {
                 App.StartupLog.ContinueFailedTimes = ++lastLog.ContinueFailedTimes;
+            } else {
+                App.StartupLog.ContinueFailedTimes = 1;
             }
             App.StartupLog.StartFailedReason = startFailedReason;
             Logger.Error(startFailedReason + " -->" + JsonConvert.SerializeObject(App.StartupLog));
-
 
             //保存到 Sqlite
             using (var ctx = SqliteHelper.CreateSqliteService()) {
@@ -440,7 +441,6 @@ namespace HmiPro.Redux.Effects {
             }
             //上传到 MongoDB
             var mongoClient = MongoHelper.GetMongoService();
-
             mongoClient.GetDatabase(MongoHelper.LogsDb).GetCollection<StartupLog>(MongoHelper.StartupLogsCollection).InsertOneAsync(App.StartupLog);
         }
 

@@ -405,13 +405,13 @@ namespace HmiPro.ViewModels {
         /// <param name="state"></param>
         /// <param name="action"></param>
         void doShowFormView(AppState state, IAction action) {
-            var sysAction = (SysActions.ShowFormView)action;
+            var formAction = (SysActions.ShowFormView)action;
             //弹出键盘
             if (!HmiConfig.IsDevUserEnv) {
                 YUtil.CallOskAsync();
             }
             DispatcherService.BeginInvoke(() => {
-                JumFormView(sysAction.Title, sysAction.Form);
+                JumFormView(formAction.Title, formAction.Form);
             });
         }
 

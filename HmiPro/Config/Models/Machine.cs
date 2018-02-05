@@ -25,7 +25,6 @@ namespace HmiPro.Config.Models {
         public IDictionary<int, CpmInfo> CodeToRelateCpmDict = new Dictionary<int, CpmInfo>();
         //编码：采集参数（直接获取）
         public IDictionary<int, CpmInfo> CodeToDirectCpmDict = new Dictionary<int, CpmInfo>();
-
         //编码：[算法参数编码]
         public IDictionary<int, List<int>> CodeMethodDict = new Dictionary<int, List<int>>();
 
@@ -54,9 +53,9 @@ namespace HmiPro.Config.Models {
             //cpms.Add(new CpmInfo() { Code = DefinedParamCode.MaterialRfid, Name = "物料卡" });
 
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.Oee, Name = "Oee" });
-            cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeTime, Name = "Oee-时间效率" });
-            cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeSpeed, Name = "Oee-速度效率" });
-            cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeQuality, Name = "Oee-质量效率" });
+            cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeTime, Name = "开机率" });
+            cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeSpeed, Name = "速度率" });
+            cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeQuality, Name = "质量率" });
             validUnique(cpms);
             cpms.ForEach(cpm => {
                 CpmNameToCodeDict[cpm.Name] = cpm.Code;

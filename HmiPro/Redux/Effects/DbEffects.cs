@@ -18,6 +18,7 @@ using YCsharp.Util;
 
 namespace HmiPro.Redux.Effects {
     /// <summary>
+    /// 封装对数据库的一些基础操作，主要是 InfluxDb 与 MongoDb
     /// <date>2017-12-19</date>
     /// <author>ychost</author>
     /// </summary>

@@ -151,20 +151,32 @@ namespace HmiPro {
             StartupLog.StartArgs = string.Join(",", e.Args);
             updateLoadingMessage("正在解析命令...", 0.01);
             Parser.Default.ParseArguments<CmdOptions>(e.Args).WithParsed(opt => {
+                //指定Hmi名称（调试的时候可用，方便启用某机台的配置）
                 opt.HmiName = opt.HmiName.ToUpper();
+                //Profiles 文件夹
                 opt.ProfilesFolder = YUtil.GetAbsolutePath(opt.ProfilesFolder);
+                //Profiles/Dev(Prod) 文件夹
                 var configFolder = opt.ProfilesFolder + "\\" + opt.Mode;
                 opt.ConfigFolder = configFolder;
+                //Profiles/Assets 文件夹
                 var assetsFolder = opt.ProfilesFolder + @"\Assets";
 
                 updateLoadingMessage("正在唤醒终端...", 0.01);
                 if (bool.Parse(opt.ShowConsole)) {
                     ConsoleHelper.Show();
                 }
-                Console.WriteLine("是否开机自启动: -" + opt.AutoSatrt);
+
+                Console.WriteLine("当前系统环境：-" + YUtil.GetOsVersion());
+                Console.WriteLine("开机自启动: -" + opt.AutoSatrt);
                 Console.WriteLine("配置文件夹：-" + opt.ProfilesFolder);
-                Console.WriteLine("显示 Splash -" + opt.ShowSplash);
                 Console.WriteLine("当前运行模式：-" + opt.Mode);
+                Console.WriteLine("当前程序版本：-" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
+                Console.WriteLine("启用mock：-" + opt.Mock);
+                Console.WriteLine("Sqlite数据库：-" + opt.SqlitePath);
+                Console.WriteLine("资源文件夹：-" + assetsFolder);
+                if (!string.IsNullOrEmpty(opt.HmiName)) {
+                    Console.WriteLine("指定 Hmi：-" + opt.HmiName);
+                }
 
                 updateLoadingMessage("配置开机自启...", 0.02);
                 YUtil.SetAppAutoStart(GetType().ToString(), bool.Parse(opt.AutoSatrt));
@@ -172,8 +184,6 @@ namespace HmiPro {
                 updateLoadingMessage("初始化Hmi配置...", 0.03);
                 var configFile = configFolder + $@"\Hmi.Config.{opt.Config}.json";
                 HmiConfig.Load(configFile);
-                Console.WriteLine($"初始化配置文件: -{configFile}");
-                Console.WriteLine("是否启用Mock数据：-" + bool.Parse(opt.Mock));
 
                 updateLoadingMessage("初始化工艺字典...", 0.04);
                 HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
@@ -187,6 +197,7 @@ namespace HmiPro {
                 updateLoadingMessage("初始化 Sqlite...", 0.08);
                 HmiConfig.SqlitePath = YUtil.GetAbsolutePath(opt.SqlitePath);
                 SqliteHelper.Init(YUtil.GetAbsolutePath(HmiConfig.SqlitePath));
+
                 //保留启动参数
                 CmdOptions.GlobalOptions = opt;
                 CmdOptions.StartupEventArgs = e;
