@@ -22,9 +22,9 @@ namespace HmiPro.Redux.Patches {
         /// <summary>
         /// 将日志内容写入Mongo当中去
         /// </summary>
-        public static void WriteToMogo(this LoggerService logger, LogDoc logDoc, string dbName, string collection = "log") {
+        public static void WriteToMogo(this LoggerService logger, LogDoc logDoc, string dbName, string collection) {
             var mongoClient = MongoHelper.GetMongoService();
-            mongoClient.GetDatabase(MachineConfig.HmiName).GetCollection<MongoDoc>(collection).InsertOneAsync(logDoc);
+            mongoClient.GetDatabase(dbName).GetCollection<MongoDoc>(collection).InsertOneAsync(logDoc);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace HmiPro.Redux.Patches {
         /// <param name="message"></param>
         /// <param name="dbName"></param>
         /// <param name="collection"></param>
-        public static void ErrorWithDb(this LoggerService logger, string message, string dbName, string collection = "log") {
+        public static void ErrorWithDb(this LoggerService logger, string message, string dbName, string collection) {
             logger.ErrorWithDb(message, null, dbName, collection);
         }
 
@@ -46,7 +46,7 @@ namespace HmiPro.Redux.Patches {
         /// <param name="e"></param>
         /// <param name="dbName"></param>
         /// <param name="collection"></param>
-        public static void ErrorWithDb(this LoggerService logger, string message, Exception e, string dbName, string collection = "log") {
+        public static void ErrorWithDb(this LoggerService logger, string message, Exception e, string dbName, string collection) {
             logger.Error(message, e);
             var doc = new LogDoc() {
                 Location = logger.DefaultLocation,
@@ -69,9 +69,12 @@ namespace HmiPro.Redux.Patches {
         public DateTime Time { get; set; }
         public string Level { get; set; }
         public Exception Exception { get; set; }
+        public string Hmi { get; set; }
 
         public LogDoc() {
-            Time = DateTime.Now;
+            Time = YUtil.DateTimeToUtcTime(DateTime.Now);
+            Hmi = MachineConfig.HmiName;
+
         }
     }
 }

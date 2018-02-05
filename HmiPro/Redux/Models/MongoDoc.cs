@@ -16,5 +16,7 @@ namespace HmiPro.Redux.Models {
         //数据要保存在mongo中，所以必须有id才可以
         [JsonIgnore]
         public ObjectId Id { get; set; }
+     
+
     }
 }

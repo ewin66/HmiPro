@@ -144,10 +144,10 @@ namespace HmiPro.Redux.Effects {
             try {
                 string hmiPath = "";
                 if (!string.IsNullOrEmpty(CmdOptions.GlobalOptions.HmiName)) {
-                    hmiPath = YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" +
-                                                        CmdOptions.GlobalOptions.HmiName + ".xls");
+                    hmiPath = YUtil.GetAbsolutePath(CmdOptions.GlobalOptions.ConfigFolder + "\\Machines\\" + CmdOptions.GlobalOptions.HmiName + ".xls");
                 }
                 MachineConfig.LoadFromGlobal(hmiPath);
+                App.StartupLog.HmiName = MachineConfig.HmiName;
                 checkConfig();
                 afterConfigLoaded();
             } catch (Exception e) {
@@ -417,6 +417,13 @@ namespace HmiPro.Redux.Effects {
         /// </summary>
         /// <param name="startFailedReason">启动失败原因</param>
         private void updateAppStartupLog(string startFailedReason) {
+            //设置 HmiName
+            var localIp = YUtil.GetAllIps().FirstOrDefault(ip => ip.Contains("188."));
+            var hmiName = !string.IsNullOrEmpty(MachineConfig.HmiName) ? MachineConfig.HmiName : localIp ?? "Unknowns";
+            if (!string.IsNullOrEmpty(App.StartupLog.HmiName)) {
+                App.StartupLog.HmiName = hmiName;
+            }
+
             var lastLog = getAppLatestStartupLog();
             //增加启动失败次数
             if (lastLog != null) {
@@ -424,6 +431,8 @@ namespace HmiPro.Redux.Effects {
             }
             App.StartupLog.StartFailedReason = startFailedReason;
             Logger.Error(startFailedReason + " -->" + JsonConvert.SerializeObject(App.StartupLog));
+
+
             //保存到 Sqlite
             using (var ctx = SqliteHelper.CreateSqliteService()) {
                 ctx.StartupLogs.Add(App.StartupLog);
@@ -431,8 +440,8 @@ namespace HmiPro.Redux.Effects {
             }
             //上传到 MongoDB
             var mongoClient = MongoHelper.GetMongoService();
-            var db = string.IsNullOrEmpty(MachineConfig.HmiName) ? "Unknown" : MachineConfig.HmiName;
-            mongoClient.GetDatabase(db).GetCollection<StartupLog>(StartupLog.MongoDbCollectionName).InsertOneAsync(App.StartupLog);
+
+            mongoClient.GetDatabase(MongoHelper.LogsDb).GetCollection<StartupLog>(MongoHelper.StartupLogsCollection).InsertOneAsync(App.StartupLog);
         }
 
         /// <summary>

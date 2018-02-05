@@ -37,5 +37,31 @@ namespace HmiPro.Helpers {
             return mongoClient;
         }
 
+        /// <summary>
+        /// 日志数据库
+        /// </summary>
+        public static readonly string LogsDb = "Logs";
+        /// <summary>
+        ///异常集合
+        /// </summary>
+        public static readonly string ExceptionCollection = "Excpetions";
+        /// <summary>
+        /// 启动日志集合（其 DB 可能为 HmiDb 或者 ExceptionDb）
+        /// </summary>
+        public static readonly string StartupLogsCollection = "StartupLogs";
+        /// <summary>
+        /// 未处理异常集合
+        /// </summary>
+        public static readonly string UnhandleExceptionCollection = "UnhandleExceptions";
+
+        /// <summary>
+        /// 程序正常运转时产生的数据
+        /// </summary>
+        public static readonly string DMesDb= "DMes";
+        /// <summary>
+        /// 报警集合
+        /// </summary>
+        public static readonly string AlarmsCollection = "Alarms";
+
     }
 }

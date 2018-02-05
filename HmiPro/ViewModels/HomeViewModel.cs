@@ -82,7 +82,7 @@ namespace HmiPro.ViewModels {
                 ctx.SaveChanges();
             });
             var dbEffects = UnityIocService.ResolveDepend<DbEffects>();
-            App.Store.Dispatch(dbEffects.UploadDocToMongo(new DbActions.UploadDocToMongo(MachineConfig.HmiName, StartupLog.MongoDbCollectionName, App.StartupLog)));
+            App.Store.Dispatch(dbEffects.UploadDocToMongo(new DbActions.UploadDocToMongo(MongoHelper.LogsDb,MongoHelper.StartupLogsCollection, App.StartupLog)));
             App.Store.Dispatch(new SysActions.CloseLoadingSplash());
             App.Store.Dispatch(new SysActions.ChangeWindowBackgroundImage(AssetsHelper.GetAssets().ImageBackground));
             //置位程序初始化完成

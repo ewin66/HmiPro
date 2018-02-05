@@ -136,6 +136,16 @@ namespace YCsharp.Util {
             return dt;
         }
 
+        /// <summary>
+        /// 普通的 DateTime 转 UtcTime
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        public static DateTime DateTimeToUtcTime(DateTime time) {
+            return DateTime.SpecifyKind(time, DateTimeKind.Utc);
+        }
+
+
 
         /// <summary>
         /// 时间戳，秒级别

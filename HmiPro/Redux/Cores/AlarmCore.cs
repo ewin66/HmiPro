@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using HmiPro.Config;
+using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Effects;
 using HmiPro.Redux.Models;
@@ -91,7 +92,7 @@ namespace HmiPro.Redux.Cores {
             //上传报警到Mq
             App.Store.Dispatch(mqEffects.UploadAlarm(new MqActions.UploadAlarmMq(HmiConfig.QueWebSrvException, alarmAdd)));
             //保存报警到Mongo
-            App.Store.Dispatch(dbEffects.UploadAlarmsMongo(new DbActions.UploadAlarmsMongo(machineCode, "Alarms", alarmAdd)));
+            App.Store.Dispatch(dbEffects.UploadDocToMongo( new DbActions.UploadDocToMongo(MongoHelper.DMesDb, MongoHelper.AlarmsCollection, alarmAdd)));
         }
 
         /// <summary>

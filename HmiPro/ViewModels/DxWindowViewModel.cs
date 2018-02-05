@@ -368,7 +368,7 @@ namespace HmiPro.ViewModels {
             var mBytes = bytes / (1024 * 1024);
             //日志文件超过了 500M 
             if (mBytes > 500) {
-                Logger.ErrorWithDb($"日志文件夹大小：{mBytes} M", MachineConfig.HmiName);
+                Logger.ErrorWithDb($"日志文件夹大小：{mBytes} M", MongoHelper.LogsDb, MongoHelper.ExceptionCollection);
                 App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_LOG_FOLDER_TOO_LARGE,
                     $"日志文件过大 {mBytes} M，请及时清理"));
             }

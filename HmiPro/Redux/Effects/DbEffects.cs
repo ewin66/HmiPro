@@ -27,10 +27,6 @@ namespace HmiPro.Redux.Effects {
         /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<DbActions.UploadCpmsInfluxDb> UploadCpmsInfluxDb;
         /// <summary>
-        /// 上传报警数据到MongoDb
-        /// </summary>
-        public StorePro<AppState>.AsyncActionNeedsParam<DbActions.UploadAlarmsMongo> UploadAlarmsMongo;
-        /// <summary>
         /// 上传普通的文档数据到MongoDb
         /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<DbActions.UploadDocToMongo> UploadDocToMongo;
@@ -48,7 +44,6 @@ namespace HmiPro.Redux.Effects {
             UnityIocService.AssertIsFirstInject(GetType());
             MongoService = MongoHelper.GetMongoService();
             initUploadCpmsInfluxDb();
-            initUploadAlarmsMongo();
             initUploadDocMongo();
             initUploadDocManyMongo();
         }
@@ -62,6 +57,7 @@ namespace HmiPro.Redux.Effects {
                     dispatch(instance);
                     await MongoService.GetDatabase(instance.DbName).GetCollection<MongoDoc>(instance.Collection)
                         .InsertManyAsync(instance.Docs);
+                    App.Store.Dispatch(new SimpleAction(DbActions.UPLOAD_DOC_MANY_TO_MONGO_SUCCESS));
                 });
         }
 
@@ -77,20 +73,6 @@ namespace HmiPro.Redux.Effects {
                 App.Store.Dispatch(new SimpleAction(DbActions.UPLOAD_DOC_TO_MONGO_SUCCESS));
             });
         }
-
-
-        /// <summary>
-        /// 保存报警数据
-        /// </summary>
-        void initUploadAlarmsMongo() {
-            UploadAlarmsMongo = App.Store.asyncActionVoid<DbActions.UploadAlarmsMongo>(
-                async (dispatch, getState, instance) => {
-                    dispatch(instance);
-                    await MongoHelper.GetMongoService().GetDatabase(instance.MachineCode).GetCollection<MqAlarm>(instance.Collection).InsertOneAsync(instance.MqAlarm);
-                    App.Store.Dispatch(new SimpleAction(DbActions.UPLOAD_ALARMS_MONGO_SUCCESS));
-                });
-        }
-
 
         /// <summary>
         /// cpm 缓存字典

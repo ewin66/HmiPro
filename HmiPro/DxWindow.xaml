@@ -32,10 +32,9 @@
     <dxmvvm:Interaction.Triggers>
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnViewLoadedCommand}" />
     </dxmvvm:Interaction.Triggers>
-
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:ApplicationJumpListService ShowFrequentCategory="True" ShowRecentCategory="True" />
-        <dx:DialogService DialogWindowStartupLocation="CenterScreen" YieldToParent="True">
+        <dx:DialogService DialogWindowStartupLocation="CenterOwner" YieldToParent="True">
             <dx:DialogService.DialogStyle>
                 <Style TargetType="Window">
                     <Setter Property="SizeToContent" Value="WidthAndHeight" />

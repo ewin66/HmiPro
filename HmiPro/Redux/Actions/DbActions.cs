@@ -21,11 +21,6 @@ namespace HmiPro.Redux.Actions {
         public static readonly string UPLOAD_CPMS_MONGO_SUCCESS = "[Db] Upload Cpms To Mongo Sucess";
         public static readonly string UPLOAD_CPMS_MONGO_FALIED = "[Db] Upload Cpms To Mongo Failed";
 
-        //上传报警到 Mongo
-        public static readonly string UPLOAD_ALARMS_MONGO = "[Db] Upload Alarms To Mongo";
-        public static readonly string UPLOAD_ALARMS_MONGO_SUCCESS = "[Db] Upload Alarms To Mongo Success";
-        public static readonly string UPLOAD_ALARMS_MONGO_FAILED = "[Db] Upload Alarms To Mongo Failed";
-
         //上传普通对象到 Mongo
         public static readonly string UPLOAD_DOC_TO_MONGO = "[Db] Upload Document To Mongo";
         public static readonly string UPLOAD_DOC_TO_MONGO_SUCCESS = "[Db] Upload Document To Mongo Success";
@@ -68,20 +63,6 @@ namespace HmiPro.Redux.Actions {
                 Docs = docs;
             }
         }
-
-        public struct UploadAlarmsMongo : IAction {
-            public string Type() => UPLOAD_ALARMS_MONGO;
-            public MqAlarm MqAlarm;
-            public string MachineCode;
-            public string Collection;
-
-            public UploadAlarmsMongo(string machineCode, string collection, MqAlarm mqAlarm) {
-                MachineCode = machineCode;
-                Collection = collection;
-                MqAlarm = mqAlarm;
-            }
-        }
-
 
         public struct UploadCpmsInfluxDb : IAction {
             public string Type() => UPLOAD_CPMS_INFLUXDB;

@@ -41,7 +41,7 @@ namespace HmiPro {
         /// 设置程序启动时间
         /// </summary>
         public App() {
-            StartupLog = new StartupLog() { StartTime = DateTime.Now, AppVersion = YUtil.GetAppVersion(Assembly.GetExecutingAssembly()) };
+            StartupLog = new StartupLog() { StartTime = DateTime.Now, AppVersion = YUtil.GetAppVersion(Assembly.GetExecutingAssembly()), SyncServerTime = DateTime.Now };
             AppState.ExectedActions["[App] Started"] = DateTime.Now;
         }
         /// <summary>
@@ -206,7 +206,7 @@ namespace HmiPro {
                 var logger = new LoggerService(HmiConfig.LogFolder) { DefaultLocation = "UnhandleExp" };
                 var message = $"程序崩溃：{ue.ExceptionObject}\r\n当前可用内存：{YUtil.GetAvaliableMemoryByte() / 1000000} M";
                 //将错误日志写入mongoDb
-                logger.ErrorWithDb(message, MachineConfig.HmiName);
+                logger.ErrorWithDb(message, MongoHelper.LogsDb, MongoHelper.UnhandleExceptionCollection);
                 //1 秒钟后重启程序
                 if (!HmiConfig.IsDevUserEnv) {
                     YUtil.SetTimeout(1000, Restart);

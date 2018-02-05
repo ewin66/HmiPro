@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YCsharp.Util;
 
 namespace HmiPro.Redux.Models {
     /// <summary>
@@ -26,14 +27,25 @@ namespace HmiPro.Redux.Models {
         /// 程序的版本
         /// </summary>
         public string AppVersion { get; set; }
+
+        private DateTime startTime;
         /// <summary>
         /// 启动时间点（本地时间）
+        /// 解决 MongoDb 时差
         /// </summary>
-        public DateTime StartTime { get; set; }
+        public DateTime StartTime {
+            get => YUtil.DateTimeToUtcTime(startTime);
+            set { startTime = value; }
+        }
+
+        private DateTime syncServerTime;
         /// <summary>
         /// 同步的时间（服务器时间）
         /// </summary>
-        public DateTime SyncServerTime { get; set; }
+        public DateTime SyncServerTime {
+            get => YUtil.DateTimeToUtcTime(startTime);
+            set { syncServerTime = value; }
+        }
         /// <summary>
         /// 是否启动成功
         /// </summary>
@@ -50,7 +62,9 @@ namespace HmiPro.Redux.Models {
         /// 连续启动失败的次数
         /// </summary>
         public int ContinueFailedTimes { get; set; }
-
-        public static string MongoDbCollectionName = "StartupLogs";
+        /// <summary>
+        /// 机台名字
+        /// </summary>
+        public string HmiName { get; set; }
     }
 }
