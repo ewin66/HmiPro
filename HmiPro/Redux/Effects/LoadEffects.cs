@@ -194,11 +194,13 @@ namespace HmiPro.Redux.Effects {
                     YUtil.ClearTimeout(updateTimer);
                 }
             });
-            isMqEffectsStarted = Task.WaitAll(new[] { task }, 10000);
-            if (!isMqEffectsStarted) {
+
+            if (await Task.WhenAny(task, Task.Delay(10000)) != task) {
                 updateLoadingMessage("连接服务器超时...", 0.6);
                 restartAppAfterSec(10, 0.6, "连接服务器超时");
                 return;
+            } else {
+                isMqEffectsStarted = true;
             }
 
             UnityIocService.ResolveDepend<DMesCore>().Init();
