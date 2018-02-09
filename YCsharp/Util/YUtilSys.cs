@@ -38,14 +38,19 @@ namespace YCsharp.Util {
         /// </summary>
         /// <param name="processName"></param>
         public static void KillProcess(string processName) {
-            try {
-                System.Diagnostics.Process[] ps = System.Diagnostics.Process.GetProcessesByName(processName);
-                foreach (System.Diagnostics.Process p in ps) {
-                    p.Kill();
-                }
-            } catch (Exception ex) {
-                Console.WriteLine("关闭进程失败" + ex);
+            System.Diagnostics.Process[] ps = System.Diagnostics.Process.GetProcessesByName(processName);
+            foreach (System.Diagnostics.Process p in ps) {
+                p.Kill();
             }
+        }
+
+        /// <summary>
+        /// 检查某进程是否存在
+        /// </summary>
+        /// <param name="processName"></param>
+        /// <returns></returns>
+        public static bool CheckProcessIsExist(string processName) {
+            return System.Diagnostics.Process.GetProcessesByName(processName).Length > 0;
         }
 
         #region 任务栏显示/隐藏

@@ -209,7 +209,7 @@ namespace YCsharp.Model.Tcp {
                 try {
                     stream.BeginRead(state.Buffer, 0, state.Buffer.Length, HandleDataReceived, state);
                 } catch (Exception e) {
-                    Logger.Error($"Tcp Begin Read [{state?.TcpClientIP}] 异常: ", e);
+                    Logger.Error($"Tcp Begin Read [{state?.TcpClientIP}] 异常: ", e,36000);
                 }
             }
         }

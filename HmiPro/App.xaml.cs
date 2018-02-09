@@ -82,6 +82,13 @@ namespace HmiPro {
             base.OnStartup(e);
             ReduxIoc.Init();
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+            if (!YUtil.CheckProcessIsExist(HmiConfig.AsylumProcessName)) {
+                string asylumnArgs = "";
+                if (HmiConfig.IsDevUserEnv) {
+                    asylumnArgs = "--autostart false --HmiPath " + YUtil.GetAbsolutePath(".\\HmiPro.exe");
+                }
+                YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylumn\Asylum.exe"), asylumnArgs);
+            }
 
             //异步初始化，直接进入 DxWindow
             Task.Run(() => {
@@ -184,6 +191,7 @@ namespace HmiPro {
                 updateLoadingMessage("初始化Hmi配置...", 0.03);
                 var configFile = configFolder + $@"\Hmi.Config.{opt.Config}.json";
                 HmiConfig.Load(configFile);
+                Console.WriteLine("指定配置文件：-" + configFile);
 
                 updateLoadingMessage("初始化工艺字典...", 0.04);
                 HmiConfig.InitCraftBomZhsDict(assetsFolder + @"\Dicts\工艺Bom.xls");
@@ -244,7 +252,11 @@ namespace HmiPro {
         public new static void Shutdown() {
             Current.Dispatcher.Invoke(() => {
                 ConsoleHelper.Hide();
-                YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
+                try {
+                    YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
+                } catch {
+
+                }
             });
         }
 
@@ -257,7 +269,11 @@ namespace HmiPro {
                 var startupParam = string.Join(" ", CmdOptions.StartupEventArgs.Args);
                 ConsoleHelper.Hide();
                 YUtil.Exec(AssetsHelper.GetAssets().BatStartApp, startupParam, ProcessWindowStyle.Hidden);
-                YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
+                try {
+                    YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
+                } catch {
+
+                }
             });
         }
 

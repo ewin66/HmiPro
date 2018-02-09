@@ -196,8 +196,9 @@ namespace HmiPro.Redux.Effects {
             });
             isMqEffectsStarted = Task.WaitAll(new[] { task }, 10000);
             if (!isMqEffectsStarted) {
-                updateLoadingMessage("连接服务器超时...", 0.6);
-                restartAppAfterSec(10, 0.6, "连接服务器超时");
+                updateLoadingMessage("连接 Mq 超时...", 0.6);
+                App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_CONECT_MQ_TIMEOUT, "Mq 连接超时"));
+                restartAppAfterSec(10, 0.6, "连接 Mq 超时");
                 return;
             }
 

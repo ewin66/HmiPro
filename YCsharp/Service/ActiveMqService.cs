@@ -26,7 +26,10 @@ namespace YCsharp.Service {
         private readonly TimeSpan requestTimeout;
         private IConnectionFactory poolFactory;
         private IConnection poolConnection;
-
+        /// <summary>
+        /// 是否启动了
+        /// </summary>
+        public bool IsStarted => poolConnection?.IsStarted ?? false;
 
         public ActiveMqService(string mqConn, string mqUserName, string mqUserPwd, TimeSpan requestTimeout) {
             this.mqConn = mqConn;
