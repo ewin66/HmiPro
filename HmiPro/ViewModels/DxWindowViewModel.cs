@@ -411,7 +411,7 @@ namespace HmiPro.ViewModels {
                 YUtil.CallOskAsync();
             }
             DispatcherService.BeginInvoke(() => {
-                JumFormView(formAction.Title, formAction.Form);
+                JumpFormView(formAction.Title, formAction.Form);
             });
         }
 
@@ -480,7 +480,7 @@ namespace HmiPro.ViewModels {
         /// </summary>
         /// <param name="title"></param>
         /// <param name="form"></param>
-        public void JumFormView(string title, BaseForm form) {
+        public void JumpFormView(string title, BaseForm form) {
             UICommand okCmd = new UICommand() {
                 Caption = "确定",
                 IsCancel = false,

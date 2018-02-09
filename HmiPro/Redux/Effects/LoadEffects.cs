@@ -158,9 +158,6 @@ namespace HmiPro.Redux.Effects {
             }
         }
 
-
-
-
         /// <summary>
         /// 配置文件加载成功之后执行的一些初始化
         /// </summary>

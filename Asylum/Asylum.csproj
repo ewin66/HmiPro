@@ -34,6 +34,9 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Colorful.Console, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Colorful.Console.1.2.2\lib\net461\Colorful.Console.dll</HintPath>
@@ -76,6 +79,9 @@
       <Project>{71A217DB-63FB-48B5-8FF4-4B77EC762502}</Project>
       <Name>YCsharp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="app.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

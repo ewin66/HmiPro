@@ -54,7 +54,7 @@ namespace Asylum.Services {
             response.AddHeader("Asylum", "Intelli Manu Pro Asylum");
             response.ContentType = "text/plain;charset=UTF-8";
             if (request.ContentType != null) {
-                Console.WriteLine("[HttpParse] Request 类型: {0}", request.ContentType);
+                Logger.Debug("[HttpParse] Request 类型: " + request.ContentType);
             }
             ExecRest rest = new ExecRest();
             var postData = new StreamReader(request.InputStream, request.ContentEncoding).ReadToEnd();
