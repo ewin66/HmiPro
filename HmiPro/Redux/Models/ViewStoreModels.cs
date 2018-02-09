@@ -185,11 +185,13 @@ namespace HmiPro.Redux.Models {
                     SelectedCpmChartSource = ChartCpmSourceDict[selectedCpm.Code];
                     SelectedMaxThreshold = MaxThresholdDict[selectedCpm.Code];
                     SelectedMinThreshold = MinThresholdDict[SelectedCpm.Code];
+                    SelectedCPK = CPKDict[selectedCpm.Code];
 
                     RaisePropertyChanged(nameof(SelectedCpm));
                     RaisePropertyChanged(nameof(SelectedCpmChartSource));
                     RaisePropertyChanged(nameof(SelectedMaxThreshold));
                     RaisePropertyChanged(nameof(SelectedMinThreshold));
+                    RaisePropertyChanged(nameof(SelectedCPK));
                     SelectedPointNums = "点数：" + SelectedCpmChartSource.Count;
                     SelectedVisualMax = DateTime.Now;
                 }
@@ -199,6 +201,16 @@ namespace HmiPro.Redux.Models {
         /// 选中曲线的最大值
         /// </summary>
         public ObservableCollection<CpmChartThreshold> SelectedMaxThreshold { get; set; }
+
+        /// <summary>
+        /// 当前选中的 CPK
+        /// </summary>
+        public ObservableCollection<CPK> SelectedCPK { get; set; }
+
+        /// <summary>
+        /// 所有的 CPK
+        /// </summary>
+        public IDictionary<int,ObservableCollection<CPK>> CPKDict { get; set; }
 
         /// <summary>
         /// 选中曲线的最小值
@@ -295,5 +307,15 @@ namespace HmiPro.Redux.Models {
         public CpmChartThreshold Clone() {
             return new CpmChartThreshold() { Value = this.Value, UpdateTime = this.UpdateTime };
         }
+    }
+
+    /// <summary>
+    /// CPK 图形属性
+    /// </summary>
+    public class CPK {
+        public double Value { get; set; }
+        public DateTime UpdateTime { get; set; } = DateTime.Now;
+
+        
     }
 }

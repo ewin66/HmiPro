@@ -35,9 +35,9 @@
                     <dxg:GridControl.Columns>
                         <dxg:GridColumn FieldName="Name" Width="1.5*"   Header="参数" />
                         <dxg:GridColumn FieldName="Value" Width="*" Header="值">
-                        <dxg:GridColumn.EditSettings>
-                        <dxe:TextEditSettings DisplayFormat="F2"></dxe:TextEditSettings>
-                        </dxg:GridColumn.EditSettings>
+                            <dxg:GridColumn.EditSettings>
+                                <dxe:TextEditSettings DisplayFormat="F2"></dxe:TextEditSettings>
+                            </dxg:GridColumn.EditSettings>
                         </dxg:GridColumn>
                         <!--<dxg:GridColumn FieldName="PickTime"  Width="1*" Header="时间"  >
                             <dxg:GridColumn.EditSettings>
@@ -87,6 +87,11 @@
                                 </dxc:AxisY2D.WholeRange>
                             </dxc:AxisY2D>
                         </dxc:XYDiagram2D.AxisY>
+                        <dxc:XYDiagram2D.SecondaryAxesY >
+                            <dxc:SecondaryAxisY2D  x:Name="CPK_AxisY">
+
+                            </dxc:SecondaryAxisY2D>
+                        </dxc:XYDiagram2D.SecondaryAxesY>
                         <dxc:SplineSeries2D
                         Brush="LightGreen"
                         DataSource="{Binding ViewStore.SelectedCpmChartSource}"
@@ -109,6 +114,20 @@
                         ArgumentScaleType="DateTime"
                             CrosshairLabelPattern="{}{S}：{V:F2}"  
                         DisplayName="最大值">
+                            <dxc:SplineSeries2D.LineStyle>
+                                <dxc:LineStyle
+                                Thickness="2" />
+                            </dxc:SplineSeries2D.LineStyle>
+                        </dxc:SplineSeries2D>
+                        <dxc:SplineSeries2D
+                           Brush="LightBlue"
+                        DataSource="{Binding ViewStore.SelectedCPK}"
+                            dxc:XYDiagram2D.SeriesAxisY="{Binding  ElementName=CPK_AxisY}"
+                        ArgumentDataMember="UpdateTime"
+                        ValueDataMember="Value"
+                        ArgumentScaleType="DateTime"
+                        CrosshairLabelPattern="{}{S}：{V:F2}"  
+                        DisplayName="CPK">
                             <dxc:SplineSeries2D.LineStyle>
                                 <dxc:LineStyle
                                 Thickness="2" />
