@@ -23,7 +23,7 @@ namespace YCsharp {
             }
             var cmd = new Cmd();
             cmd.Action = args[0];
-            cmd.Args = new { IsForced = true };
+            cmd.Args = new { };
 
             string[] hmi = new[] { "CA", "CB", "CC", "DA", "DB", "DE_DF", "DM", "ED", "EJ", "EL", "EP", "RC_RF", "RG", "SA", "SB_SD", "SI_SG_BB", "TA_RE", "TB_TG", "VA_VC", "VB_VG", "VD", "VE_VF", "VH_VI", "VJ_VK", "EB", "CD", "MB", "PB", "MA", "E2", "E1", "EC", "SC", "EK" };
             string[] ips = new[] { "192.168.130.66","192.168.131.66","192.168.132.66","192.168.200.66","192.168.201.66","192.168.110.66","192.168.202.66","192.168.180.66","192.168.183.66",

@@ -82,12 +82,16 @@ namespace HmiPro {
             base.OnStartup(e);
             ReduxIoc.Init();
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+            //启动监视进程
             if (!YUtil.CheckProcessIsExist(HmiConfig.AsylumProcessName)) {
                 string asylumnArgs = "";
                 if (HmiConfig.IsDevUserEnv) {
                     asylumnArgs = "--autostart false --HmiPath " + YUtil.GetAbsolutePath(".\\HmiPro.exe");
                 }
-                YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylumn\Asylum.exe"), asylumnArgs);
+                //开发环境就没必要启动了
+                if (!HmiConfig.IsDevUserEnv) {
+                    YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylumn\Asylum.exe"), asylumnArgs);
+                }
             }
 
             //异步初始化，直接进入 DxWindow

@@ -484,12 +484,12 @@ namespace HmiPro.ViewModels {
             UICommand okCmd = new UICommand() {
                 Caption = "确定",
                 IsCancel = false,
-                IsDefault = false
+                IsDefault = true
             };
             UICommand cancelCmd = new UICommand() {
                 Caption = "取消",
                 IsCancel = true,
-                IsDefault = true
+                IsDefault = false
             };
             var formViewModel = FormViewModel.Create(title, form);
             var resultCmd = DialogService.ShowDialog(new List<UICommand>() { okCmd, cancelCmd }, title, nameof(FormView), formViewModel);
