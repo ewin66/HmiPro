@@ -17,14 +17,33 @@ using YCsharp.Service;
 using YCsharp.Util;
 
 namespace HmiPro.Redux.Services {
+    /// <summary>
+    /// 一些系统方面的服务，主要是软件更新、Http命令解析等等
+    /// <author>ychost</author>
+    /// <date>2017-12-9</date>
+    /// </summary>
     public class SysService {
+        /// <summary>
+        /// 程序更新使用
+        /// </summary>
         public Updater AppUpdater;
+        /// <summary>
+        /// 日志
+        /// </summary>
         public readonly LoggerService Logger;
+        /// <summary>
+        /// Http 服务
+        /// </summary>
         public HttpListener HttpListener;
-
+        /// <summary>
+        /// Http命令解析器
+        /// </summary>
         public IDictionary<string, Action<HttpListenerResponse>> HttpSystemCmdDict =
             new ConcurrentDictionary<string, Action<HttpListenerResponse>>();
 
+        /// <summary>
+        /// 初始化命令解析器、日志
+        /// </summary>
         public SysService() {
             UnityIocService.AssertIsFirstInject(GetType());
             Logger = LoggerHelper.CreateLogger(GetType().ToString());

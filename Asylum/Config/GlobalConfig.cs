@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YCsharp.Util;
 
 namespace Asylum.Config {
     /// <summary>
@@ -13,6 +14,9 @@ namespace Asylum.Config {
     public static class GlobalConfig {
         public static StartupArgs StartupArgs;
 
+        public static readonly string HmiProcessName = "HmiPro";
+
+        public static bool IsDevEnv => YUtil.GetWindowsUserName().ToLower().Contains("ychost");
 
     }
 }

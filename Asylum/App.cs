@@ -5,8 +5,11 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Asylum.Config;
+using Asylum.Event;
 using Asylum.Services;
 using CommandLine;
+using YCsharp.Event;
+using YCsharp.Event.Models;
 using YCsharp.Service;
 using YCsharp.Util;
 using Console = Colorful.Console;
@@ -19,12 +22,19 @@ namespace Asylum {
     /// <author>ychost</author>
     /// <date>2018-2-9</date>
     /// </summary>
-    public class Program {
-        static void Main(string[] args) {
+    public class App {
+        public static YEventStore EventStore = new YEventStore();
+
+        public static void Main(string[] args) {
             parseStartupArgs(args);
             Console.WriteAscii("Asylum");
             Console.WriteLine("启动中...");
-            Init();
+            var task = Init();
+            Task.WaitAll(new Task[] { task });
+            //启动失败
+            if (!task.Result) {
+                return;
+            }
             YUtil.ExitWithQ();
         }
 
@@ -34,7 +44,7 @@ namespace Asylum {
         /// <param name="args"></param>
         static void parseStartupArgs(string[] args) {
             Parser.Default.ParseArguments<StartupArgs>(args).WithParsed(opt => {
-                Console.WriteLine("当前版本："+YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
+                Console.WriteLine("当前版本：" + YUtil.GetAppVersion(Assembly.GetExecutingAssembly()));
 
                 bool autoStart = bool.Parse(opt.IsAutoStart);
                 YUtil.SetAppAutoStart("Asylum", autoStart);
@@ -52,11 +62,19 @@ namespace Asylum {
         /// <summary>
         /// 初始化
         /// </summary>
-        static void Init() {
+        static async Task<bool> Init() {
             var cmdParse = new CmdParseService("HmiPro", GlobalConfig.StartupArgs.HmiProPath);
             UnityIocService.RegisterGlobalDepend(cmdParse);
             UnityIocService.RegisterGlobalDepend<HttpParse>();
-            UnityIocService.ResolveDepend<HttpParse>().Start("http://+:9988/");
+            UnityIocService.RegisterGlobalDepend<AsylumService>();
+
+            UnityIocService.ResolveDepend<AsylumService>().Init();
+            if (!await UnityIocService.ResolveDepend<HttpParse>().Start("http://+:9988/")) {
+                return false;
+            }
+            var pipeService = new PipeService("Asylum");
+            UnityIocService.RegisterGlobalDepend(pipeService);
+            return pipeService.Start();
         }
     }
 }

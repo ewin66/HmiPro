@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using CommandLine;
 using DevExpress.Xpf.Core;
+using DevExpress.Xpf.Grid.Native;
 using HmiPro.Config;
 using HmiPro.Config.Models;
 using HmiPro.Helpers;
@@ -82,18 +83,8 @@ namespace HmiPro {
             base.OnStartup(e);
             ReduxIoc.Init();
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
-            //启动监视进程
-            if (!YUtil.CheckProcessIsExist(HmiConfig.AsylumProcessName)) {
-                string asylumnArgs = "";
-                if (HmiConfig.IsDevUserEnv) {
-                    asylumnArgs = "--autostart false --HmiPath " + YUtil.GetAbsolutePath(".\\HmiPro.exe");
-                }
-                //开发环境就没必要启动了
-                if (!HmiConfig.IsDevUserEnv) {
-                    YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylumn\Asylum.exe"), asylumnArgs);
-                }
-            }
-
+            //守护进程保活
+            YUtil.SetInterval(60000, keepAsylumAlive, true);
             //异步初始化，直接进入 DxWindow
             Task.Run(() => {
                 hmiConfigInit(e);
@@ -101,6 +92,23 @@ namespace HmiPro {
                 //通知 DxWindow 初始化完毕
                 Store.Dispatch(new SysActions.AppXamlInited(e));
             });
+        }
+
+        /// <summary>
+        /// 与守护进程相互保活
+        /// </summary>
+        static void keepAsylumAlive() {
+            if (!YUtil.CheckProcessIsExist(HmiConfig.AsylumProcessName)) {
+                string asylumnArgs = "";
+                if (HmiConfig.IsDevUserEnv) {
+                    asylumnArgs = "--autostart false --HmiPath " + YUtil.GetAbsolutePath(".\\HmiPro.exe");
+                }
+                YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylum\Asylum.exe"), asylumnArgs);
+            } else {
+                var pipeEffects = UnityIocService.ResolveDepend<PipeEffects>();
+                //给守护进程发送心跳
+                App.Store.Dispatch( pipeEffects.WriteCmd(new PipeActions.WriteCmd(new PipeCmd() { Action = "Heartbeat" }, "Asylum")));
+            }
         }
 
         /// <summary>
@@ -221,7 +229,7 @@ namespace HmiPro {
                     msg += r.ToString();
                 });
                 logger.Error("解析命令参数异常:\r\n参数： " + string.Join(",", e.Args) + "\r\n内容：" + msg);
-                throw new Exception("启动参数异常" + err);
+                throw new Exception("启动参数异常" + msg);
             });
 
             //记录程序崩溃日志

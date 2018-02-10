@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
+using YCsharp.Util;
 
 namespace Asylum.Config {
     /// <summary>
@@ -21,5 +22,7 @@ namespace Asylum.Config {
         /// </summary>
         [Option(longName: "autostart", Default = "True")]
         public string IsAutoStart { get; set; }
+
+
     }
 }

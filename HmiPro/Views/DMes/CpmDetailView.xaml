@@ -120,7 +120,7 @@
                             </dxc:SplineSeries2D.LineStyle>
                         </dxc:SplineSeries2D>
                         <dxc:SplineSeries2D
-                           Brush="LightBlue"
+                           Brush="White"
                         DataSource="{Binding ViewStore.SelectedCPK}"
                             dxc:XYDiagram2D.SeriesAxisY="{Binding  ElementName=CPK_AxisY}"
                         ArgumentDataMember="UpdateTime"

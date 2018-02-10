@@ -394,7 +394,7 @@ namespace HmiPro.Redux.Effects {
                 waitMessage = $"{message}，将在 {wait} 秒后尝试重启";
                 updateLoadingMessage(waitMessage, percent, 0);
                 if (wait <= 0) {
-                    App.Restart();
+                    //App.Restart();
                 }
             }, totalSec);
         }

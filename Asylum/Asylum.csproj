@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\HmiPro\bin\Debug\Asylumn\</OutputPath>
+    <OutputPath>..\HmiPro\bin\Debug\Asylum\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -60,14 +60,17 @@
   <ItemGroup>
     <Compile Include="Config\GlobalConfig.cs" />
     <Compile Include="Config\StartupArgs.cs" />
+    <Compile Include="Event\PipeReceived.cs" />
     <Compile Include="Helpers\CmdActions.cs" />
     <Compile Include="Helpers\LoggerHelper.cs" />
     <Compile Include="Models\Cmd.cs" />
     <Compile Include="Models\ExecRest.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="App.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CmdParseService.cs" />
+    <Compile Include="Services\AsylumService.cs" />
     <Compile Include="Services\HttpParse.cs" />
+    <Compile Include="Services\PipeService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -13,18 +13,18 @@ namespace HmiPro.Redux.Actions {
     /// </summary>
     public static class PipeActions {
         //往管道里面写入字符串
-        public static readonly string WRITE_STRING = "[Pipe] Write String";
-        public static readonly string WRITE_STRING_SUCCESS = "[Pipe] Write String Success";
-        public static readonly string WRITE_STRING_FAILED = "[Pipe] Write String Failed";
+        public static readonly string WRITE_CMD = "[Pipe] Write Cmd";
+        public static readonly string WRITE_CMD_SUCCESS = "[Pipe] Write Cmd Success";
+        public static readonly string WRITE_CMD_FAILED = "[Pipe] Write Cmd Failed";
 
-        public struct WriteRest : IAction {
-            public string Type() => WRITE_STRING;
-            public PipeRest RestData;
+        public struct WriteCmd : IAction {
+            public string Type() => WRITE_CMD;
+            public PipeCmd Cmd;
             public string PipeName;
             public string PipeServerName;
 
-            public WriteRest(PipeRest restData, string pipeName, string pipeServerName = ".") {
-                RestData = restData;
+            public WriteCmd(PipeCmd cmd, string pipeName, string pipeServerName = ".") {
+                Cmd = cmd;
                 PipeName = pipeName;
                 PipeServerName = pipeServerName;
             }

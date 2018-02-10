@@ -35,7 +35,11 @@ namespace YCsharp.Util {
         /// </summary>
         /// <param name="interval"></param>
         /// <param name="action"></param>
-        public static Timer SetInterval(double interval, Action action) {
+        /// <param name="runImmediately">是否里面调用动作</param>
+        public static Timer SetInterval(double interval, Action action, bool runImmediately = false) {
+            if (runImmediately) {
+                action();
+            }
             System.Timers.Timer timer = new System.Timers.Timer(interval);
             timer.Elapsed += delegate (object sender, System.Timers.ElapsedEventArgs e) {
                 action();

@@ -20,7 +20,7 @@ namespace HmiPro.Redux.Effects {
         /// <author>ychost</author>
         /// <date>2018-1-22</date>
         /// </summary>
-        public StorePro<AppState>.AsyncActionNeedsParam<PipeActions.WriteRest, bool> WriteString;
+        public StorePro<AppState>.AsyncActionNeedsParam<PipeActions.WriteCmd, bool> WriteCmd;
 
         public readonly LoggerService Logger;
         public PipeEffects() {
@@ -35,28 +35,28 @@ namespace HmiPro.Redux.Effects {
                 using (var pipeStream = (NamedPipeClientStream)iar.AsyncState) {
                     pipeStream.EndWrite(iar);
                     pipeStream.Flush();
-                    App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_SUCCESS));
-                    Logger.Info("写入管道成功", true, ConsoleColor.White, 36000);
+                    App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_CMD_SUCCESS));
+                    Logger.Info("写入管道成功", true, ConsoleColor.White, 360000);
                 }
             } catch (Exception e) {
                 Logger.Error("往管道写入数据失败", e);
-                App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_FAILED, e));
+                App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_CMD_FAILED, e));
             }
         }
         private void initWriteStringAsync() {
-            WriteString = App.Store.asyncAction<PipeActions.WriteRest, bool>(
+            WriteCmd = App.Store.asyncAction<PipeActions.WriteCmd, bool>(
                 async (dispatch, getState, instance) => {
                     dispatch(instance);
                     return await Task.Run(() => {
                         try {
                             NamedPipeClientStream pipeStream = new NamedPipeClientStream(instance.PipeServerName, instance.PipeName, PipeDirection.Out, PipeOptions.Asynchronous);
                             pipeStream.Connect(3000);
-                            var str = JsonConvert.SerializeObject(instance.RestData);
+                            var str = JsonConvert.SerializeObject(instance.Cmd);
                             byte[] buffer = Encoding.UTF8.GetBytes(str);
                             pipeStream.BeginWrite(buffer, 0, buffer.Length, asyncSend, pipeStream);
                             return true;
                         } catch (Exception e) {
-                            App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_STRING_FAILED, e));
+                            App.Store.Dispatch(new SimpleAction(PipeActions.WRITE_CMD_FAILED, e));
                             Logger.Error("往管道写入数据失败", e);
                         }
                         return false;

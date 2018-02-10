@@ -208,7 +208,6 @@ namespace HmiPro.ViewModels {
         }
 
 
-
         /// <summary>
         /// 更改背景图片
         /// </summary>
