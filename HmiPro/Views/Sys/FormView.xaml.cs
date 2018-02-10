@@ -32,5 +32,7 @@ namespace HmiPro.Views.Sys {
         private void DataLayoutControl_Loaded(object sender, RoutedEventArgs e) {
             ((DataLayoutItem)LayoutHelper.FindElement(sender as FrameworkElement, elem => elem is DataLayoutItem)).Content.Focus();
         }
+
+     
     }
 }

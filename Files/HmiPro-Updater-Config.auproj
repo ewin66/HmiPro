@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<AuProject xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<AuProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <UpdateInfo>
     <AppName>HmiPro</AppName>
-    <AppVersion>3.2.1975.6607</AppVersion>
+    <AppVersion>3.2.2083.6614</AppVersion>
     <FileExecuteBefore />
     <FileExecuteAfter>HmiPro.exe</FileExecuteAfter>
     <ExecuteTimeout>0</ExecuteTimeout>
@@ -1309,9 +1309,14 @@
       <UpdateMethod>Ignore</UpdateMethod>
       <FileVerificationLevel>None</FileVerificationLevel>
     </ProjectItem>
+    <ProjectItem>
+      <Path>DevExpress.Xpo.v17.1.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
   </Files>
   <ApplicationDirectory>..\HmiPro\bin\Debug</ApplicationDirectory>
-  <DestinationDirectory>Z:\ks-hmi-wpf\HmiPro-Updater</DestinationDirectory>
+  <DestinationDirectory>..\..\updater</DestinationDirectory>
   <CreateCompatiblePackage>true</CreateCompatiblePackage>
   <CompressPackage>true</CompressPackage>
   <EnableIncreaseUpdate>true</EnableIncreaseUpdate>

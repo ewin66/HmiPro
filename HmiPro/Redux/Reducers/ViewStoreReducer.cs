@@ -12,6 +12,7 @@ using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using Reducto;
 using YCsharp.Model.Procotol.SmParam;
+using YCsharp.Util;
 
 namespace HmiPro.Redux.Reducers {
     /// <summary>
@@ -51,10 +52,12 @@ namespace HmiPro.Redux.Reducers {
                         state.CpmDetailViewDict[pair.Key].ChartCpmSourceDict = new Dictionary<int, ObservableCollection<Cpm>>();
                         state.CpmDetailViewDict[pair.Key].MaxThresholdDict = new Dictionary<int, ObservableCollection<CpmChartThreshold>>();
                         state.CpmDetailViewDict[pair.Key].MinThresholdDict = new Dictionary<int, ObservableCollection<CpmChartThreshold>>();
+                        state.CpmDetailViewDict[pair.Key].CPKDict = new Dictionary<int, ObservableCollection<CPK>>();
                         foreach (var cpmPair in pair.Value.CodeToAllCpmDict) {
                             state.CpmDetailViewDict[pair.Key].ChartCpmSourceDict[cpmPair.Key] = new ObservableCollection<Cpm>();
                             state.CpmDetailViewDict[pair.Key].MaxThresholdDict[cpmPair.Key] = new ObservableCollection<CpmChartThreshold>();
                             state.CpmDetailViewDict[pair.Key].MinThresholdDict[cpmPair.Key] = new ObservableCollection<CpmChartThreshold>();
+                            state.CpmDetailViewDict[pair.Key].CPKDict[cpmPair.Key] = new ObservableCollection<CPK>();
                         }
                     }
                     return state;
@@ -77,20 +80,21 @@ namespace HmiPro.Redux.Reducers {
                             continue;
                         }
                         var (maxThreshold, minThreshold) = getMaxMinThreshold(state, machineCode, cpm);
+                        var cpk = getCPK(cpm, maxThreshold, minThreshold);
                         //减少主线程调用次数
                         //只有更新的参数Id为选中的 && 当前处于曲线界面才唤起主线程 && 当前导航机台位参数机台
                         if (state.NavView.DMesSelectedMachineCode == action.MachineCode && cpm.Code == cpmDetail.SelectedCpm?.Code && isInChartView) {
                             Application.Current.Dispatcher.Invoke(() => {
                                 //有的机台会抛错，别问我为什么
                                 try {
-                                    updateChartView(cpmDetail, cpm, maxThreshold, minThreshold);
+                                    updateChartView(cpmDetail, cpm, maxThreshold, minThreshold, cpk);
                                 } catch {
                                 }
                             });
                         } else {
                             //防止多线程错误
                             try {
-                                updateChartView(cpmDetail, cpm, maxThreshold, minThreshold);
+                                updateChartView(cpmDetail, cpm, maxThreshold, minThreshold, cpk);
                             } catch {
                             }
                         }
@@ -171,31 +175,15 @@ namespace HmiPro.Redux.Reducers {
             return (maxThreshold, minThreshold);
         }
 
-        /// <summary>
-        /// 一个曲线图最多绘制的点数
-        /// </summary>
-        private static int maxChartPointNums = 200;
-        /// <summary>
-        /// 当点数超过 maxChartPointNums 之后移除的点数
-        /// </summary>
-        private static int removePointNums = 50;
+
 
         /// <summary>
         /// 更新曲线数据
         /// 该函数被多线程调用，所以给每个 Code 对应的 Chart 都上了一把锁
         /// </summary>
-        private static void updateChartView(CpmDetailViewStore cpmDetail, Cpm cpm, CpmChartThreshold maxThreshold, CpmChartThreshold minThreshold) {
+        private static void updateChartView(CpmDetailViewStore cpmDetail, Cpm cpm, CpmChartThreshold maxThreshold, CpmChartThreshold minThreshold, CPK cpk) {
             lock (cpmDetail.ChartCpmSourceDict[cpm.Code]) {
-                if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > maxChartPointNums) {
-                    cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, removePointNums);
-                }
-                if (cpmDetail.MaxThresholdDict[cpm.Code].Count > maxChartPointNums) {
-                    cpmDetail.MaxThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
-                }
-                if (cpmDetail.MinThresholdDict[cpm.Code].Count > maxChartPointNums) {
-                    cpmDetail.MinThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
-                }
-
+                AsureChartPointNums(cpmDetail, cpm);
                 if (cpm.ValueType == SmParamType.Signal) {
                     cpmDetail.ChartCpmSourceDict[cpm.Code].Add(cpm);
                     //同步最值和实时曲线的时间
@@ -207,6 +195,10 @@ namespace HmiPro.Redux.Reducers {
                         minThreshold.UpdateTime = cpm.PickTime;
                         cpmDetail.MinThresholdDict[cpm.Code].Add(minThreshold);
                     }
+                    if (cpk != null) {
+                        cpk.UpdateTime = cpm.PickTime;
+                        cpmDetail.CPKDict[cpm.Code].Add(cpk);
+                    }
                 }
                 if (cpm.Code == cpmDetail.SelectedCpm.Code) {
                     cpmDetail.SelectedPointNums = "点数：" + cpmDetail.SelectedCpmChartSource.Count;
@@ -214,6 +206,49 @@ namespace HmiPro.Redux.Reducers {
                     cpmDetail.SelectedVisualMax = DateTime.Now;
                 }
             }
+        }
+
+        /// <summary>
+        /// 一个曲线图最多绘制的点数
+        /// </summary>
+        private static int maxChartPointNums = 200;
+        /// <summary>
+        /// 当点数超过 maxChartPointNums 之后移除的点数
+        /// </summary>
+        private static int removePointNums = 50;
+
+        /// <summary>
+        /// 确保参数值的个数不会超限
+        /// </summary>
+        /// <param name="cpmDetail"></param>
+        /// <param name="cpm"></param>
+        private static void AsureChartPointNums(CpmDetailViewStore cpmDetail, Cpm cpm) {
+            if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > maxChartPointNums) {
+                cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, removePointNums);
+            }
+            if (cpmDetail.MaxThresholdDict[cpm.Code].Count > maxChartPointNums) {
+                cpmDetail.MaxThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
+            }
+            if (cpmDetail.MinThresholdDict[cpm.Code].Count > maxChartPointNums) {
+                cpmDetail.MinThresholdDict[cpm.Code].RemoveRange(0, removePointNums);
+            }
+            if (cpmDetail.CPKDict[cpm.Code].Count > maxChartPointNums) {
+                cpmDetail.CPKDict[cpm.Code].RemoveRange(0, removePointNums);
+            }
+        }
+
+        private static Func<double> randCpk = YUtil.GetRandomGen();
+        /// <summary>
+        /// <todo>计算 CPK</todo>
+        /// </summary>
+        /// <param name="cpm"></param>
+        /// <param name="maxThreshold"></param>
+        /// <param name="minThreshold"></param>
+        /// <returns></returns>
+        private static CPK getCPK(Cpm cpm, CpmChartThreshold maxThreshold, CpmChartThreshold minThreshold) {
+            CPK cpk = new CPK();
+            cpk.Value = randCpk() * 1.6;
+            return cpk;
         }
     }
 }

@@ -50,7 +50,7 @@
 
   //---------¡¨Ω”≈‰÷√---------
   "MongoConn": "mongodb://192.168.88.15:27017",
-  "MqConn": "failover:(tcp://192.168.88.15:61615,tcp://192.168.88.15:61616,tcp://192.168.88.15:61617,tcp://192.168.88.15:61618)?Randomize=false&amp;jms.prefetchPolicy.all=1&maxReconnectAttempts=1",
+  "MqConn": "tcp://192.168.88.15:61615?jms.prefetchPolicy.all=1",
   "MqUserName": "admin",
   "MqUserPwd": "admin",
   "MathRound": 3,

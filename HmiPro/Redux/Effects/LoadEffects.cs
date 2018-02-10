@@ -158,9 +158,6 @@ namespace HmiPro.Redux.Effects {
             }
         }
 
-
-
-
         /// <summary>
         /// 配置文件加载成功之后执行的一些初始化
         /// </summary>
@@ -194,13 +191,12 @@ namespace HmiPro.Redux.Effects {
                     YUtil.ClearTimeout(updateTimer);
                 }
             });
-
-            if (await Task.WhenAny(task, Task.Delay(10000)) != task) {
-                updateLoadingMessage("连接服务器超时...", 0.6);
-                restartAppAfterSec(10, 0.6, "连接服务器超时");
+            isMqEffectsStarted = Task.WaitAll(new[] { task }, 10000);
+            if (!isMqEffectsStarted) {
+                updateLoadingMessage("连接 Mq 超时...", 0.6);
+                App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_CONECT_MQ_TIMEOUT, "Mq 连接超时"));
+                restartAppAfterSec(10, 0.6, "连接 Mq 超时");
                 return;
-            } else {
-                isMqEffectsStarted = true;
             }
 
             UnityIocService.ResolveDepend<DMesCore>().Init();

@@ -61,6 +61,7 @@ namespace HmiPro.Redux.Actions {
         public static readonly string MARQUEE_PING_IP_FAILED = "[Marquee Id] Ping Ip Failed";
         public static readonly string MARQUEE_APP_START_TIMEOUT = "[Marquee Id] App Start Timeout";
         public static readonly string MARQUEE_LOG_FOLDER_TOO_LARGE = "[Marquee Id] Log Folder Too Large";
+        public static readonly string MARQUEE_CONECT_MQ_TIMEOUT = "[Marquee Id] Connect Mq Timeout";
 
         //Loading 界面
         public static readonly string SET_LOADING_MESSAGE = "[Sys] Set Loading Message";
@@ -93,6 +94,7 @@ namespace HmiPro.Redux.Actions {
 
         //设置程序启动的时候的加载界面的状态 显示/隐藏
         public static readonly string SET_LOADING_VIEW_STATE = "[Sys] Set Loading View State";
+
 
         public struct SetLoadingViewState : IAction {
             public Visibility Visibility;
