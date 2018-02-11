@@ -188,16 +188,17 @@ namespace HmiPro.ViewModels {
             if (CmdOptions.GlobalOptions.MockVal) {
                 dispatchMockActions();
             }
-            //每一分钟检查一次与服务器的连接
             YUtil.SetInterval(60000, () => {
+                //检查与服务器的连接
                 checkNetwork(HmiConfig.InfluxDbIp);
-            });
-            //软件启动的时候检查一次
-            checkLogFolderSize(HmiConfig.LogFolder);
-            //每个小时检查一下日志文件夹大小
+                //守护进程保活
+                keepAsylumAlive();
+            }, true);
             YUtil.SetInterval(3600000, () => {
-                checkLogFolderSize(HmiConfig.LogFolder);
-            });
+                //检查日志文件夹大小
+                checkLogFolderSize(HmiConfig.LogFolder, 500);
+            }, true);
+
             //隐藏加载界面
             App.Store.Dispatch(new SysActions.SetLoadingViewState(Visibility.Collapsed, 0, ""));
             //隐藏任务栏 + 桌面
@@ -207,6 +208,22 @@ namespace HmiPro.ViewModels {
             Navigate(nameof(HomeView));
         }
 
+        /// <summary>
+        /// 与守护进程相互保活
+        /// </summary>
+        void keepAsylumAlive() {
+            if (!YUtil.CheckProcessIsExist(HmiConfig.AsylumProcessName)) {
+                string asylumnArgs = "";
+                if (HmiConfig.IsDevUserEnv) {
+                    asylumnArgs = "--autostart false --HmiPath " + YUtil.GetAbsolutePath(".\\HmiPro.exe");
+                }
+                YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylum\Asylum.exe"), asylumnArgs);
+            } else {
+                var pipeEffects = UnityIocService.ResolveDepend<PipeEffects>();
+                //给守护进程发送心跳
+                App.Store.Dispatch(pipeEffects.WriteCmd(new PipeActions.WriteCmd(new PipeCmd() { Action = "Heartbeat" }, "Asylum")));
+            }
+        }
 
         /// <summary>
         /// 更改背景图片
@@ -361,12 +378,13 @@ namespace HmiPro.ViewModels {
         /// 检查日志文件夹大小
         /// </summary>
         /// <param name="logFolder"></param>
-        void checkLogFolderSize(string logFolder) {
+        /// <param name="maxMSize">最大多少 M</param>
+        void checkLogFolderSize(string logFolder, double maxMSize) {
             logFolder = YUtil.GetAbsolutePath(logFolder);
             var bytes = YUtil.GetDirectorySizeByte(logFolder);
             var mBytes = bytes / (1024 * 1024);
             //日志文件超过了 500M 
-            if (mBytes > 500) {
+            if (mBytes > maxMSize) {
                 Logger.ErrorWithDb($"日志文件夹大小：{mBytes} M", MongoHelper.LogsDb, MongoHelper.ExceptionCollection);
                 App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_LOG_FOLDER_TOO_LARGE,
                     $"日志文件过大 {mBytes} M，请及时清理"));

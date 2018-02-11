@@ -83,6 +83,7 @@ namespace Asylum.Services {
                 if (GlobalConfig.IsDevEnv) {
                     startupArgs = @"--console false --autostart false --splash false --config office --hmi DE_DF --mock true";
                 }
+                Logger.Debug("HmiPro.exe 路径："+GlobalConfig.StartupArgs.HmiProPath +" "+startupArgs);
                 YUtil.Exec(GlobalConfig.StartupArgs.HmiProPath, startupArgs);
             }
         }

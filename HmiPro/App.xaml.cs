@@ -82,34 +82,26 @@ namespace HmiPro {
         protected override void OnStartup(StartupEventArgs e) {
             base.OnStartup(e);
             ReduxIoc.Init();
-            Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
-            //守护进程保活
-            YUtil.SetInterval(60000, keepAsylumAlive, true);
-            //异步初始化，直接进入 DxWindow
-            Task.Run(() => {
-                hmiConfigInit(e);
-                initSubscribe();
-                //通知 DxWindow 初始化完毕
-                Store.Dispatch(new SysActions.AppXamlInited(e));
-            });
-        }
-
-        /// <summary>
-        /// 与守护进程相互保活
-        /// </summary>
-        static void keepAsylumAlive() {
             if (!YUtil.CheckProcessIsExist(HmiConfig.AsylumProcessName)) {
                 string asylumnArgs = "";
                 if (HmiConfig.IsDevUserEnv) {
                     asylumnArgs = "--autostart false --HmiPath " + YUtil.GetAbsolutePath(".\\HmiPro.exe");
                 }
                 YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylum\Asylum.exe"), asylumnArgs);
-            } else {
-                var pipeEffects = UnityIocService.ResolveDepend<PipeEffects>();
-                //给守护进程发送心跳
-                App.Store.Dispatch( pipeEffects.WriteCmd(new PipeActions.WriteCmd(new PipeCmd() { Action = "Heartbeat" }, "Asylum")));
             }
+
+            Store = UnityIocService.ResolveDepend<StorePro<AppState>>();
+            //异步初始化，直接进入 DxWindow
+            Task.Run(() => {
+                hmiConfigInit(e);
+
+                initSubscribe();
+                //通知 DxWindow 初始化完毕
+                Store.Dispatch(new SysActions.AppXamlInited(e));
+            });
         }
+
+
 
         /// <summary>
         /// 程序初始化完毕之后才订阅打印日志
