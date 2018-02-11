@@ -69,7 +69,11 @@ namespace Asylum.Services {
                 //再连接
                 server.BeginWaitForConnection(waitForConnectionCallBack, server);
             } catch (Exception e) {
-                Logger.Error("管道错误", e);
+                Logger.Error("管道数据处理错误", e);
+                if (pipeServer.IsConnected) {
+                    pipeServer.Disconnect();
+                }
+                pipeServer.BeginWaitForConnection(waitForConnectionCallBack, pipeServer);
             }
         }
     }

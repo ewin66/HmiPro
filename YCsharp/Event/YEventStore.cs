@@ -11,11 +11,10 @@ using YCsharp.Event.Models;
 
 namespace YCsharp.Event {
     public delegate void Unsubscibe();
-
     /// <summary>
     /// 事件总线模式的一种实现
     /// [x] 使用的是 WeakEvent ，支持（手动/自动）取消订阅
-    /// [x] 所有操作都是同步的，所以注意每个操作不要耗费太多事件
+    /// [x] 所有操作都是同步的，所以注意每个操作不要耗费太时间和死锁问题
     /// <author>ychost</author>
     /// <date>2018-2-10</date>
     /// </summary>

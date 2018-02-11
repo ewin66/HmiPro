@@ -15,6 +15,9 @@ using Console = Colorful.Console;
 namespace Asylum.Services {
     /// <summary>
     /// 处理所有派发的事件
+    /// Asylum 的核心服务
+    /// <author>ychost</author>
+    /// <date>2018-2-10</date>
     /// </summary>
     public class AsylumService {
         /// <summary>

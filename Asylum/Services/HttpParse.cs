@@ -51,7 +51,7 @@ namespace Asylum.Services {
             HttpListener.BeginGetContext(processHttpContext, null);
             var response = context.Response;
             var request = context.Request;
-            response.AddHeader("Asylum", "Intelli Manu Pro Asylum");
+            response.AddHeader("Asylum", "IntelliManu Pro Asylum");
             response.ContentType = "text/plain;charset=UTF-8";
             if (request.ContentType != null) {
                 Logger.Debug("[HttpParse] Request 类型: " + request.ContentType);
