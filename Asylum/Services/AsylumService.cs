@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Asylum.Config;
 using Asylum.Event;
 using Asylum.Helpers;
@@ -76,6 +73,7 @@ namespace Asylum.Services {
         /// HmiPro 软件保活
         /// </summary>
         void keepHmiAlive() {
+            Logger.Debug("HmiPro 保活");
             if ((DateTime.Now - HmiLastActiveTime).TotalMinutes > 3) {
                 HmiLastActiveTime = DateTime.Now;
                 var isExist = YUtil.CheckProcessIsExist(GlobalConfig.HmiProcessName);
@@ -88,6 +86,5 @@ namespace Asylum.Services {
                 YUtil.Exec(GlobalConfig.StartupArgs.HmiProPath, startupArgs);
             }
         }
-
     }
 }
