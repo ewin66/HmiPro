@@ -246,8 +246,7 @@ namespace HmiPro.Redux.Reducers {
         /// <param name="minThreshold"></param>
         /// <returns></returns>
         private static CPK getCPK(Cpm cpm, CpmChartThreshold maxThreshold, CpmChartThreshold minThreshold) {
-            CPK cpk = new CPK();
-            cpk.Value = randCpk() * 1.6;
+            CPK cpk = new CPK() { Value = 1.8 };
             return cpk;
         }
     }
