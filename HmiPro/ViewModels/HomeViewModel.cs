@@ -77,12 +77,13 @@ namespace HmiPro.ViewModels {
             }
             //更新启动日志
             App.StartupLog.IsStartSuccess = true;
+            App.StartupLog.StartDurationMs = (long)(DateTime.Now - App.StartupLog.StartTime).TotalMilliseconds;
             SqliteHelper.DoAsync(ctx => {
                 ctx.StartupLogs.Add(App.StartupLog);
                 ctx.SaveChanges();
             });
             var dbEffects = UnityIocService.ResolveDepend<DbEffects>();
-            App.Store.Dispatch(dbEffects.UploadDocToMongo(new DbActions.UploadDocToMongo(MongoHelper.LogsDb,MongoHelper.StartupLogsCollection, App.StartupLog)));
+            App.Store.Dispatch(dbEffects.UploadDocToMongo(new DbActions.UploadDocToMongo(MongoHelper.LogsDb, MongoHelper.StartupLogsCollection, App.StartupLog)));
             App.Store.Dispatch(new SysActions.CloseLoadingSplash());
             App.Store.Dispatch(new SysActions.ChangeWindowBackgroundImage(AssetsHelper.GetAssets().ImageBackground));
             //置位程序初始化完成

@@ -12,6 +12,7 @@ using WindowsInput;
 using DevExpress.Xpf.Core;
 using HmiPro.Config;
 using HmiPro.Helpers;
+using HmiPro.Properties;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Services;
@@ -129,7 +130,7 @@ namespace HmiPro.Redux.Reducers {
                          //DXSplashScreen.Show<LoadingWindow>();
                          //state.LoadingWindow.Show();
                      } catch {
-                         Console.WriteLine("显示加载框失败");
+                         Console.WriteLine(Resources.Show_Loading_View_Failed);
                      }
                  });
                  return state;

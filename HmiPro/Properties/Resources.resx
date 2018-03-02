@@ -120,4 +120,7 @@
   <data name="String1" xml:space="preserve">
     <value>haha</value>
   </data>
+  <data name="Show_Loading_View_Failed" xml:space="preserve">
+    <value>显示加载框失败</value>
+  </data>
 </root>

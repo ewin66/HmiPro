@@ -26,7 +26,7 @@ namespace HmiPro.Redux.Models {
         private float timeEff;
 
         public float TimeEff {
-            get { return timeEff; }
+            get => timeEff;
             set {
                 if (timeEff != value) {
                     timeEff = value;

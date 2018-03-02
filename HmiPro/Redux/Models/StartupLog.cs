@@ -35,7 +35,7 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public DateTime StartTime {
             get => YUtil.DateTimeToUtcTime(startTime);
-            set { startTime = value; }
+            set => startTime = value;
         }
 
         private DateTime syncServerTime;
@@ -44,7 +44,7 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public DateTime SyncServerTime {
             get => YUtil.DateTimeToUtcTime(startTime);
-            set { syncServerTime = value; }
+            set => syncServerTime = value;
         }
         /// <summary>
         /// 是否启动成功

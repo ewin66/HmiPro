@@ -54,19 +54,22 @@ namespace Asylum.Services {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         void whenPipeReceived(object sender, YEventArgs args) {
-            var json = (args.Payload as PipeReceived).Data;
-            Cmd cmd = null;
-            try {
-                cmd = JsonConvert.DeserializeObject<Cmd>(json);
-                if (cmd.SendTime.HasValue) {
-                    HmiLastActiveTime = YUtil.UtcTimestampToLocalTime(cmd.SendTime.Value);
-                    Logger.Debug("HmiPro 活动时间：" + HmiLastActiveTime);
+            var pipeReceived = args.Payload as PipeReceived;
+            if (pipeReceived != null) {
+                var json = pipeReceived.Data;
+                Cmd cmd = null;
+                try {
+                    cmd = JsonConvert.DeserializeObject<Cmd>(json);
+                    if (cmd.SendTime.HasValue) {
+                        HmiLastActiveTime = YUtil.UtcTimestampToLocalTime(cmd.SendTime.Value);
+                        Logger.Debug("HmiPro 活动时间：" + HmiLastActiveTime);
+                    }
+                } catch (Exception e) {
+                    Logger.Error("反序列化管道数据失败，数据：" + json, e);
+                    return;
                 }
-            } catch (Exception e) {
-                Logger.Error("反序列化管道数据失败，数据：" + json, e);
-                return;
+                cmd.Where = CmdWhere.FromPipe;
             }
-            cmd.Where = CmdWhere.FromPipe;
         }
 
         /// <summary>
@@ -83,7 +86,7 @@ namespace Asylum.Services {
                 if (GlobalConfig.IsDevEnv) {
                     startupArgs = @"--console false --autostart false --splash false --config office --hmi DE_DF --mock true";
                 }
-                Logger.Debug("HmiPro.exe 路径："+GlobalConfig.StartupArgs.HmiProPath +" "+startupArgs);
+                Logger.Debug("HmiPro.exe 路径：" + GlobalConfig.StartupArgs.HmiProPath + " " + startupArgs);
                 YUtil.Exec(GlobalConfig.StartupArgs.HmiProPath, startupArgs);
             }
         }

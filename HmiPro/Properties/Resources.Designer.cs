@@ -61,6 +61,15 @@ namespace HmiPro.Properties {
         }
         
         /// <summary>
+        ///   查找类似 显示加载框失败 的本地化字符串。
+        /// </summary>
+        internal static string Show_Loading_View_Failed {
+            get {
+                return ResourceManager.GetString("Show_Loading_View_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 haha 的本地化字符串。
         /// </summary>
         internal static string String1 {
