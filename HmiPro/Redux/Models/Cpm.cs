@@ -117,7 +117,7 @@ namespace HmiPro.Redux.Models {
             if (machine == null) {
                 return cpms;
             }
-            sm.SmParams?.ForEach(p => {
+            foreach (var p in sm?.SmParams) {
                 //过滤掉未配置的参数
                 if (machine.CodeToAllCpmDict.ContainsKey(p.ParamCode)) {
                     Cpm cpm = new Cpm();
@@ -131,7 +131,12 @@ namespace HmiPro.Redux.Models {
                     cpm.ValueType = p.ParamType;
                     //浮点参数
                     if (p.ParamType == SmParamType.Signal) {
-                        cpm.Value = p.GetSignalData(HmiConfig.MathRound);
+                        try {
+                            cpm.Value = p.GetSignalData();
+                        } catch (Exception e) {
+                            App.Logger.Error("GetSignalData 失败，buffer 数据: " + sm.GetBufferHexStr() + " 包类型：" + p.DataType, e);
+                            continue;
+                        }
                         //转义
                         if (machine.CodeToAllCpmDict[cpm.Code].MethodName == CpmInfoMethodName.Escape) {
                             //如果在转义字典里面找不到，就显示传过来的值
@@ -157,7 +162,7 @@ namespace HmiPro.Redux.Models {
                         cpms.Add(cpm);
                     }
                 }
-            });
+            }
 
             return cpms;
         }

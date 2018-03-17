@@ -28,6 +28,22 @@ namespace YCsharp.Service {
         static readonly IDictionary<string, DateTime> lastSaveFileTimeDict = new ConcurrentDictionary<string, DateTime>();
         static readonly IDictionary<string, DateTime> lastConsoleTimeDict = new ConcurrentDictionary<string, DateTime>();
 
+        static LoggerService() {
+            //定时清除超时的缓存
+            YUtil.SetTimeout(3600, () => {
+                foreach (var pair in lastSaveFileTimeDict) {
+                    if ((DateTime.Now - pair.Value).TotalHours > 10) {
+                        lastSaveFileTimeDict.Remove(pair.Key);
+                    }
+                }
+                foreach (var pair in lastConsoleTimeDict) {
+                    if ((DateTime.Now - pair.Value).TotalHours > 10) {
+                        lastConsoleTimeDict.Remove(pair.Key);
+                    }
+                }
+            });
+        }
+
         /// <summary>
         /// 日志文件夹
         /// </summary>

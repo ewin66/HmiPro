@@ -48,16 +48,26 @@ namespace HmiPro.Redux.Reducers {
                     state.CpmDetailViewDict = new Dictionary<string, CpmDetailViewStore>();
                     foreach (var pair in MachineConfig.MachineDict) {
                         state.DMewCoreViewDict[pair.Key] = new DMesCoreViewStore(pair.Key);
+
                         state.CpmDetailViewDict[pair.Key] = new CpmDetailViewStore(pair.Key);
-                        state.CpmDetailViewDict[pair.Key].ChartCpmSourceDict = new Dictionary<int, ObservableCollection<Cpm>>();
-                        state.CpmDetailViewDict[pair.Key].MaxThresholdDict = new Dictionary<int, ObservableCollection<CpmChartThreshold>>();
-                        state.CpmDetailViewDict[pair.Key].MinThresholdDict = new Dictionary<int, ObservableCollection<CpmChartThreshold>>();
-                        state.CpmDetailViewDict[pair.Key].CPKDict = new Dictionary<int, ObservableCollection<CPK>>();
+                        var cpmDetail = state.CpmDetailViewDict[pair.Key];
+
+                        cpmDetail.ChartCpmSourceDict = new Dictionary<int, ObservableCollection<Cpm>>();
+                        cpmDetail.MaxThresholdDict = new Dictionary<int, ObservableCollection<CpmChartThreshold>>();
+                        cpmDetail.MinThresholdDict = new Dictionary<int, ObservableCollection<CpmChartThreshold>>();
+                        cpmDetail.CPKDict = new Dictionary<int, ObservableCollection<CPK>>();
+                        cpmDetail.AvgDict = new Dictionary<int, ObservableCollection<CpmAvg>>();
+                        cpmDetail.Avgcalculator = new Dictionary<int, Func<double, double>>();
+                        cpmDetail.AvgLast = new Dictionary<int, double?>();
+
                         foreach (var cpmPair in pair.Value.CodeToAllCpmDict) {
-                            state.CpmDetailViewDict[pair.Key].ChartCpmSourceDict[cpmPair.Key] = new ObservableCollection<Cpm>();
-                            state.CpmDetailViewDict[pair.Key].MaxThresholdDict[cpmPair.Key] = new ObservableCollection<CpmChartThreshold>();
-                            state.CpmDetailViewDict[pair.Key].MinThresholdDict[cpmPair.Key] = new ObservableCollection<CpmChartThreshold>();
-                            state.CpmDetailViewDict[pair.Key].CPKDict[cpmPair.Key] = new ObservableCollection<CPK>();
+                            cpmDetail.ChartCpmSourceDict[cpmPair.Key] = new ObservableCollection<Cpm>();
+                            cpmDetail.MaxThresholdDict[cpmPair.Key] = new ObservableCollection<CpmChartThreshold>();
+                            cpmDetail.MinThresholdDict[cpmPair.Key] = new ObservableCollection<CpmChartThreshold>();
+                            cpmDetail.CPKDict[cpmPair.Key] = new ObservableCollection<CPK>();
+                            cpmDetail.AvgDict[cpmPair.Key] = new ObservableCollection<CpmAvg>();
+                            cpmDetail.Avgcalculator[cpmPair.Key] = YUtil.CreateExecAvgFunc();
+                            cpmDetail.AvgLast[cpmPair.Key] = null;
                         }
                     }
                     return state;
@@ -88,7 +98,8 @@ namespace HmiPro.Redux.Reducers {
                                 //有的机台会抛错，别问我为什么
                                 try {
                                     updateChartView(cpmDetail, cpm, maxThreshold, minThreshold, cpk);
-                                } catch {
+                                } catch (Exception e) {
+                                    App.Logger.Warn("更新曲线异常" + e, true);
                                 }
                             });
                         } else {
@@ -183,9 +194,17 @@ namespace HmiPro.Redux.Reducers {
         /// </summary>
         private static void updateChartView(CpmDetailViewStore cpmDetail, Cpm cpm, CpmChartThreshold maxThreshold, CpmChartThreshold minThreshold, CPK cpk) {
             lock (cpmDetail.ChartCpmSourceDict[cpm.Code]) {
-                AsureChartPointNums(cpmDetail, cpm);
                 if (cpm.ValueType == SmParamType.Signal) {
+                    AsureChartPointNums(cpmDetail, cpm);
                     cpmDetail.ChartCpmSourceDict[cpm.Code].Add(cpm);
+                    cpmDetail.Avgcalculator[cpm.Code](cpm.GetFloatVal());
+                    if (!cpmDetail.AvgLast[cpm.Code].HasValue) {
+                        cpmDetail.AvgLast[cpm.Code] = cpm.GetFloatVal();
+                    }
+                    cpmDetail.AvgDict[cpm.Code].Add(new CpmAvg() {
+                        Value = cpmDetail.AvgLast[cpm.Code].Value,
+                        UpdateTime = cpm.PickTime
+                    });
                     //同步最值和实时曲线的时间
                     if (maxThreshold != null) {
                         maxThreshold.UpdateTime = cpm.PickTime;
@@ -225,6 +244,9 @@ namespace HmiPro.Redux.Reducers {
         private static void AsureChartPointNums(CpmDetailViewStore cpmDetail, Cpm cpm) {
             if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > maxChartPointNums) {
                 cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, removePointNums);
+                //更新平均值计算器
+                cpmDetail.AvgLast[cpm.Code] = cpmDetail.Avgcalculator[cpm.Code](cpm.GetFloatVal());
+                cpmDetail.Avgcalculator[cpm.Code] = YUtil.CreateExecAvgFunc();
             }
             if (cpmDetail.MaxThresholdDict[cpm.Code].Count > maxChartPointNums) {
                 cpmDetail.MaxThresholdDict[cpm.Code].RemoveRange(0, removePointNums);

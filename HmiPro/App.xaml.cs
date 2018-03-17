@@ -30,6 +30,7 @@ using YCsharp.Service;
 using YCsharp.Util;
 
 namespace HmiPro {
+    /// <inheritdoc />
     /// <summary>
     /// App.xaml 的交互逻辑
     /// 解析命令、初始化 HmiConfig、初始化 Redux、打印所有的 Action、初始化 LoggerHelper、AssetsHelper、SqliteHelper 
@@ -38,7 +39,7 @@ namespace HmiPro {
     /// </summary>
     public partial class App : Application {
 
-        /// <summary>
+        /// <summary>s
         /// 设置程序启动时间
         /// </summary>
         public App() {
@@ -94,7 +95,6 @@ namespace HmiPro {
             //异步初始化，直接进入 DxWindow
             Task.Run(() => {
                 hmiConfigInit(e);
-
                 initSubscribe();
                 //通知 DxWindow 初始化完毕
                 Store.Dispatch(new SysActions.AppXamlInited(e));
@@ -259,7 +259,7 @@ namespace HmiPro {
                 try {
                     YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
                 } catch {
-
+                    // ignored
                 }
             });
         }
@@ -276,13 +276,12 @@ namespace HmiPro {
                 try {
                     YUtil.KillProcess(Process.GetCurrentProcess().ProcessName);
                 } catch {
-
+                    // ignored
                 }
             });
         }
-
-
     }
+
     /// <summary>
     /// 对频率较高的日志的打印频率进行抑制
     /// </summary>

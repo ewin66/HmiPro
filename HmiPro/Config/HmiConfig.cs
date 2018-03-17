@@ -173,6 +173,11 @@ namespace HmiPro.Config {
         /// 机台接受的命令
         /// </summary>
         public static string TopicCmdReceived = "Machine_Command";
+
+        /// <summary>
+        /// 进入「管理员」界面是否需要密码
+        /// </summary>
+        public static bool UsePwdToAdmin = false;
     }
 
 }

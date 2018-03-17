@@ -233,19 +233,23 @@ namespace HmiPro.ViewModels.Sys {
         /// <param name="title"></param>
         /// <param name="password"></param>
         public void ShowPasswordForm(Action pwdValidAction, string title = "请输入密码", string password = "0000") {
-            App.Store.Dispatch(new SysActions.ShowFormView(title, new PasswordForm() {
-                OnOkPressed = form => {
-                    var pForm = (PasswordForm)form;
-                    if (pForm.Password == password) {
-                        pwdValidAction?.Invoke();
-                    } else {
-                        App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                            Title = "警告",
-                            Content = "密码错误"
-                        }));
-                    }
-                },
-            }));
+            if (!HmiConfig.UsePwdToAdmin) {
+                pwdValidAction?.Invoke();
+            } else {
+                App.Store.Dispatch(new SysActions.ShowFormView(title, new PasswordForm() {
+                    OnOkPressed = form => {
+                        var pForm = (PasswordForm)form;
+                        if (pForm.Password == password) {
+                            pwdValidAction?.Invoke();
+                        } else {
+                            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                                Title = "警告",
+                                Content = "密码错误"
+                            }));
+                        }
+                    },
+                }));
+            }
         }
     }
 }

@@ -186,17 +186,25 @@ namespace HmiPro.Redux.Models {
                     SelectedMaxThreshold = MaxThresholdDict[selectedCpm.Code];
                     SelectedMinThreshold = MinThresholdDict[SelectedCpm.Code];
                     SelectedCPK = CPKDict[selectedCpm.Code];
+                    SelectedAvg = AvgDict[selectedCpm.Code];
 
                     RaisePropertyChanged(nameof(SelectedCpm));
                     RaisePropertyChanged(nameof(SelectedCpmChartSource));
                     RaisePropertyChanged(nameof(SelectedMaxThreshold));
                     RaisePropertyChanged(nameof(SelectedMinThreshold));
                     RaisePropertyChanged(nameof(SelectedCPK));
+                    RaisePropertyChanged(nameof(SelectedAvg));
+
                     SelectedPointNums = "点数：" + SelectedCpmChartSource.Count;
                     SelectedVisualMax = DateTime.Now;
                 }
             }
         }
+
+        /// <summary>
+        /// 选中取钱的平均值
+        /// </summary>
+        public ObservableCollection<CpmAvg> SelectedAvg { get; set; }
         /// <summary>
         /// 选中曲线的最大值
         /// </summary>
@@ -210,7 +218,12 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 所有的 CPK
         /// </summary>
-        public IDictionary<int,ObservableCollection<CPK>> CPKDict { get; set; }
+        public IDictionary<int, ObservableCollection<CPK>> CPKDict { get; set; }
+
+        /// <summary>
+        /// 参数的平均数
+        /// </summary>
+        public IDictionary<int, ObservableCollection<CpmAvg>> AvgDict { get; set; }
 
         /// <summary>
         /// 选中曲线的最小值
@@ -278,6 +291,18 @@ namespace HmiPro.Redux.Models {
         public IDictionary<int, ObservableCollection<Models.Cpm>> ChartCpmSourceDict { get; set; }
 
         /// <summary>
+        /// 平均值计算器
+        /// </summary>
+        public IDictionary<int, Func<double, double>> Avgcalculator { get; set; }
+
+        /// <summary>
+        /// 主要保存上次的平均值，平均值每次显示应该为一直线，而不能变动，故
+        /// 后 200 个点其实是显示前 200 个点的平均值
+        /// </summary>
+        public IDictionary<int, double?> AvgLast { get; set; }
+
+
+        /// <summary>
         /// 选择参数的历史数据
         /// </summary>
         public ObservableCollection<Cpm> SelectedCpmChartSource { get; set; }
@@ -316,6 +341,14 @@ namespace HmiPro.Redux.Models {
         public double Value { get; set; }
         public DateTime UpdateTime { get; set; } = DateTime.Now;
 
-        
+
+    }
+
+    /// <summary>
+    /// 每个参数的平均值
+    /// </summary>
+    public class CpmAvg {
+        public double Value { get; set; }
+        public DateTime UpdateTime { get; set; } = DateTime.Now;
     }
 }

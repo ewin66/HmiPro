@@ -119,7 +119,7 @@
                                 Thickness="2" />
                             </dxc:SplineSeries2D.LineStyle>
                         </dxc:SplineSeries2D>
-                        <dxc:SplineSeries2D
+                        <!--<dxc:SplineSeries2D
                            Brush="White"
                         DataSource="{Binding ViewStore.SelectedCPK}"
                             dxc:XYDiagram2D.SeriesAxisY="{Binding  ElementName=CPK_AxisY}"
@@ -132,8 +132,20 @@
                                 <dxc:LineStyle
                                 Thickness="2" />
                             </dxc:SplineSeries2D.LineStyle>
+                        </dxc:SplineSeries2D>-->
+                      <dxc:SplineSeries2D
+                           Brush="White"
+                           DataSource="{Binding ViewStore.SelectedAvg}"
+                        ArgumentDataMember="UpdateTime"
+                        ValueDataMember="Value"
+                        ArgumentScaleType="DateTime"
+                        CrosshairLabelPattern="{}{S}：{V:F2}"  
+                        DisplayName="平均值">
+                            <dxc:SplineSeries2D.LineStyle>
+                                <dxc:LineStyle
+                                Thickness="2" />
+                            </dxc:SplineSeries2D.LineStyle>
                         </dxc:SplineSeries2D>
-
                         <dxc:SplineSeries2D
                            Brush="yellow"
                         DataSource="{Binding ViewStore.SelectedMinThreshold}"

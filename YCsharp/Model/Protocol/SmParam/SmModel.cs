@@ -34,9 +34,39 @@ namespace YCsharp.Model.Procotol.SmParam {
         /// 参数内容
         public List<SmParam> SmParams { get; set; }
 
+        //原始的未解析的数据
+        public byte[] Buffer { get; set; }
+
+        /// <summary>
+        ///获取 Buffer 的16进制字符串，方便调试 
+        /// </summary>
+        /// <returns></returns>
+        public string GetBufferHexStr() {
+            if (Buffer == null) {
+                return string.Empty;
+            }
+
+            StringBuilder strB = new StringBuilder();
+            foreach (byte data in Buffer) {
+                strB.Append("0x" + data.ToString("X2") + ",");
+            }
+
+            //StringBuilder builder = new StringBuilder();
+            //string tmp = "";
+            //for (int i = 0; i < strB.Length; i++) {
+            //    if (i % 2 == 0) {
+            //        builder.Append(tmp);
+            //        tmp = "0x" + strB[i];
+            //    } else {
+            //        tmp += strB[i];
+            //        if (i != 0 && i != strB.Length - 1) {
+            //            tmp += ",";
+            //        }
+            //    }
+            //}
+            return strB.ToString();
+        }
     }
-
-
 
     /// <summary>
     /// 电科智联协议：底层->服务器：采集参数包
@@ -193,7 +223,7 @@ namespace YCsharp.Model.Procotol.SmParam {
         public string GetDataHexStr() {
             StringBuilder strB = new StringBuilder();
             for (int i = 0; i < Data.Length; i++) {
-                strB.Append("" + Data[i].ToString("X2"));
+                strB.Append("0x" + Data[i].ToString("X2") + ",");
             }
             return strB.ToString();
         }
@@ -250,7 +280,7 @@ namespace YCsharp.Model.Procotol.SmParam {
         /// 如果数据是浮点类型，则直接获取
         /// </summary>
         /// <returns></returns>
-        public Single GetSignalData(int mathRound = 4) {
+        public Single GetSignalData() {
             lock (this) {
                 if (!this.IsSignalData()) {
                     throw new Exception("数据类型不是浮点");
@@ -294,7 +324,7 @@ namespace YCsharp.Model.Procotol.SmParam {
                     tmp = Data[2];
                     Data[2] = Data[3];
                     Data[3] = tmp;
-                    val = BitConverter.ToInt32(Data,0);
+                    val = BitConverter.ToInt32(Data, 0);
                     if (FloatPlace > 0) {
                         val = (val / (Math.Pow(10, FloatPlace)));
                     }

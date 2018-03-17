@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<AuProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<AuProject xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <UpdateInfo>
     <AppName>HmiPro</AppName>
-    <AppVersion>3.2.2083.6614</AppVersion>
+    <AppVersion>3.2.2134.6650</AppVersion>
     <FileExecuteBefore />
     <FileExecuteAfter>HmiPro.exe</FileExecuteAfter>
     <ExecuteTimeout>0</ExecuteTimeout>
@@ -1314,9 +1314,149 @@
       <UpdateMethod>Ignore</UpdateMethod>
       <FileVerificationLevel>None</FileVerificationLevel>
     </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Unity.Container.pdb</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Unity.Container.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Unity.Abstractions.pdb</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Unity.Abstractions.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\System.ValueTuple.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\System.ValueTuple.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\NPOI.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\NPOI.OpenXmlFormats.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\NPOI.OpenXml4Net.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\NPOI.OOXML.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\NPOI.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Newtonsoft.Json.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Newtonsoft.Json.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\NeoSmart.AsyncLock.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\ICSharpCode.SharpZipLib.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\CommandLine.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\CommandLine.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Colorful.Console.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Apache.NMS.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Apache.NMS.pdb</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Apache.NMS.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Apache.NMS.ActiveMQ.xml</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Apache.NMS.ActiveMQ.pdb</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Asylum\Apache.NMS.ActiveMQ.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>Profiles\Global.xls</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>ja\DevExpress.Xpo.v17.1.resources.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>es\DevExpress.Xpo.v17.1.resources.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>de\DevExpress.Xpo.v17.1.resources.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
   </Files>
   <ApplicationDirectory>..\HmiPro\bin\Debug</ApplicationDirectory>
-  <DestinationDirectory>..\..\updater</DestinationDirectory>
+  <DestinationDirectory>Z:\ks-hmi-wpf\HmiPro-Updater</DestinationDirectory>
   <CreateCompatiblePackage>true</CreateCompatiblePackage>
   <CompressPackage>true</CompressPackage>
   <EnableIncreaseUpdate>true</EnableIncreaseUpdate>

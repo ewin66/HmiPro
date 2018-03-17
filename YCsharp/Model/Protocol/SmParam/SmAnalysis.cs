@@ -228,11 +228,12 @@ namespace YCsharp.Model.Procotol.SmParam {
         private SmModel processPackage(byte[] buffer, int offset, SmPackageType type) {
             List<byte> byList = buffer.ToList();
             byList = byList.GetRange(offset, byList.Count);
-            SmModel emSocket = new SmModel(type);
+            var emSocket = new SmModel(type);
             //解码
             emSocket.ModuleAddr = byList.GetRange(SmTool.GetSocketIndex(SmIndex.MachineAddrStart), (int)SmIndex.MacineAddrCount);
             emSocket.Cmd = byList[SmTool.GetSocketIndex(SmIndex.Cmd)];
             emSocket.AimType = byList[SmTool.GetSocketIndex(SmIndex.AimType)];
+            emSocket.Buffer = buffer;
             return emSocket;
         }
         /// <summary>
