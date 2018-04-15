@@ -56,7 +56,7 @@
   //电脑用户名，用于判断是不是在该用户电脑上面运行的该程序
   //方便区分环境
   "DevUser": "ychost,Somiar",
-  "NtpIp": "192.168.88.15",
-  "InfluxDbIp": "192.168.88.15",
-  "InfluxCpmDbName": "cpm"
+  "NtpIp": "192.168.0.15",
+  "InfluxDbIp": "192.168.0.15"
+  //"InfluxCpmDbName": "cpm"
 }

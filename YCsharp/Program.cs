@@ -22,7 +22,7 @@ namespace YCsharp {
 
         static void Main(string[] args) {
             if (args?.Length == 0) {
-                args = new string[] { "StartHmiPro" };
+                args = new string[] { "StartHmiPro", "update-app", "clear-task" };
             }
             var cmd = new Cmd();
             cmd.Action = args[0];
@@ -36,15 +36,23 @@ namespace YCsharp {
                 throw new Exception("Hmi和Ip长度不匹配");
             }
 
-            int port = 9988;
+            int asylumPort = 9988;
+            int hmiPort = 8899;
             for (var i = 0; i < ips.Length; i++) {
                 var des = ips[i].Split(new[] { "." }, StringSplitOptions.RemoveEmptyEntries)[2];
-                var url = $"http://192.168.{des}.66:{port}";
-                SendToAsylum(url, cmd, hmi[i]);
+                var hmiProUrl = $"http://192.168.{des}.66:{hmiPort}";
+                var asylumUrl = $"http://192.168.{des}.66:{asylumPort}";
+
+                //var url = asylumUrl;
+                //SendToAsylum(url, cmd, hmi[i]);
+
+                var url = hmiProUrl;
+                SendToHmiPro(url, args[2], hmi[i]);
             }
 
             YUtil.ExitWithQ();
         }
+
 
         static int recI = 0;
         private static int sendI = 0;

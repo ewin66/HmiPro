@@ -388,6 +388,8 @@ namespace HmiPro.ViewModels {
                 Logger.ErrorWithDb($"日志文件夹大小：{mBytes} M", MongoHelper.LogsDb, MongoHelper.ExceptionCollection);
                 App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_LOG_FOLDER_TOO_LARGE,
                     $"日志文件过大 {mBytes} M，请及时清理"));
+            } else {
+                App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_LOG_FOLDER_TOO_LARGE));
             }
         }
 

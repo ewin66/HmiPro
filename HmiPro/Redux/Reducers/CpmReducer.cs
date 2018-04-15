@@ -118,6 +118,14 @@ namespace HmiPro.Redux.Reducers {
                             ValueType = SmParamType.Unknown
                         };
                     }
+
+                    //几个时间保存
+                    cpmsDict[DefinedParamCode.DutyTime] = new Cpm() { Code = DefinedParamCode.DutyTime, ValueType = SmParamType.Signal, Value = 0f };
+                    cpmsDict[DefinedParamCode.RunTime] = new Cpm() { Code = DefinedParamCode.RunTime, ValueType = SmParamType.Signal, Value = 0f };
+                    cpmsDict[DefinedParamCode.StopTime] = new Cpm() { Code = DefinedParamCode.StopTime, ValueType = SmParamType.Signal, Value = 0f };
+                    cpmsDict[DefinedParamCode.Od] = new Cpm() { Code = DefinedParamCode.Od, Value = "暂无" };
+                    cpmsDict[DefinedParamCode.NoteMeter] = new Cpm() { Code = DefinedParamCode.NoteMeter, Value = "暂无" };
+
                     state.OnlineCpmsDict[machineCode] = cpmsDict;
                     state.MachineStateDict[machineCode] = new ObservableCollection<MachineState>();
                     state.StateSpeedDict[machineCode] = 0f;
@@ -127,11 +135,27 @@ namespace HmiPro.Redux.Reducers {
                     state.AlarmLightsStateDict[machineCode] = AlarmLightsState.Off;
                     state.MachineStateLockDict[machineCode] = new object();
                 }
+
                 //初始化所有ip的通讯状态为未知
                 foreach (var pair in MachineConfig.IpToMachineCodeDict) {
                     var ip = pair.Key;
                     state.Com485StatusDict[ip] = new Com485SingleStatus() { Status = SmSingleStatus.Ok, Time = DateTime.Now, Ip = ip };
                 }
+                //恢复485状态「最后正常」时间值
+                SqliteHelper.DoAsync(ctx => {
+                    try {
+                        var dict = ctx.Restore<IDictionary<string, Com485SingleStatus>>("com485");
+                        if (dict != null) {
+                            foreach (var pair in dict) {
+                                if (state.Com485StatusDict.TryGetValue(pair.Key, out var status)) {
+                                    status.LastSuccTime = pair.Value.LastSuccTime;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        App.Logger.Error("恢复 485 状态异常...", e);
+                    }
+                });
                 //一分钟ping一次模块的ip，更新其离线状态
                 updateCom485Interval(state, 60);
                 return state;
@@ -146,9 +170,11 @@ namespace HmiPro.Redux.Reducers {
                         && (DateTime.Now - state.Com485StatusDict[action.Ip].Time).TotalSeconds > 60
                     )) {
                     state.Com485StatusDict[action.Ip].Status = SmSingleStatus.Ok;
+                    state.Com485StatusDict[action.Ip].LastSuccTime = DateTime.Now;
                 }
                 state.Com485StatusDict[action.Ip].Time = DateTime.Now;
                 return state;
+                //某个ip激活，更新相应 ip 的状态
             }).When<CpmActions.UnregIpActived>((state, action) => {
                 if (!state.Com485StatusDict.ContainsKey(action.Ip)) {
                     state.Com485StatusDict[action.Ip] = new Com485SingleStatus() {
@@ -156,6 +182,7 @@ namespace HmiPro.Redux.Reducers {
                         Time = DateTime.Now,
                         Status = SmSingleStatus.Unregistered
                     };
+                    //该 ip 未注册 
                 } else {
                     state.Com485StatusDict[action.Ip].Status = SmSingleStatus.Unregistered;
                     state.Com485StatusDict[action.Ip].Time = DateTime.Now;
@@ -317,6 +344,22 @@ namespace HmiPro.Redux.Reducers {
             }
         }
         public string TimeStr => time.ToString("yyyy-MM-dd HH:mm:ss");
+
+        private DateTime lastSuccTime;
+
+        public DateTime LastSuccTime {
+            get => lastSuccTime;
+            set {
+                if (lastSuccTime != value) {
+                    lastSuccTime = value;
+                    OnPropertyChanged(nameof(LastSuccTimeStr));
+                }
+            }
+        }
+        /// <summary>
+        /// 最后正常时间
+        /// </summary>
+        public string LastSuccTimeStr => lastSuccTime.ToString("yyyy-MM-dd HH:mm:ss");
 
         public string Ip { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;

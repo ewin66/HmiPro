@@ -206,8 +206,6 @@ namespace HmiPro.Redux.Effects {
             UnityIocService.ResolveDepend<DpmCore>().Init();
             UnityIocService.ResolveDepend<HookCore>().Init();
 
-            updateLoadingMessage("正在启动调度器...", 0.65);
-            await UnityIocService.ResolveDepend<SchCore>().Init();
 
             //Http 命令解析
             updateLoadingMessage("正在启动Http服务...", 0.7);
@@ -313,6 +311,11 @@ namespace HmiPro.Redux.Effects {
                     }
                 }, 5);
             });
+
+            //update: 2018-3-28 
+            // 将调度器最后启用，这些调度器需要依赖比较多，但本身不提供依赖
+            updateLoadingMessage("正在启动调度器...", 0.98);
+            await UnityIocService.ResolveDepend<SchCore>().Init();
         }
         /// <summary>
         /// 与服务器同步时间

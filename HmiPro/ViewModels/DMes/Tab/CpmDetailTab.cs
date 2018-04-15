@@ -38,10 +38,22 @@ namespace HmiPro.ViewModels.DMes.Tab {
                 //忽略掉一些不需要绘图的参数
                 //比如自定义的 Oee、Rfid、火花值、转义参数等等
                 var cpmInfo = pair.Value;
-                if (cpmInfo.Code < 500 || cpmInfo.Code >= 1000 || cpmInfo.Name.Contains("火花") || (cpmInfo.MethodName.HasValue && cpmInfo.MethodName.Value == CpmInfoMethodName.Escape)) {
+                if (cpmInfo.MethodName.HasValue && cpmInfo.MethodName.Value == CpmInfoMethodName.Escape || cpmInfo.Code < 500) {
                     continue;
                 }
-                OnlineCpms.Add(sourceDict[pair.Key]);
+                string[] filters = { "火花", "米", "P", "I", "D", "方向", "长度", "报警", "系数", "率", "距离", "选择", "模", "RFID", "OEE","卡","设","比","最", };
+                var beFilted = false;
+                if (cpmInfo.Code >= 500) {
+                    foreach (var str in filters) {
+                        if (cpmInfo.Name.ToUpper().Contains(str)) {
+                            beFilted = true;
+                            break;
+                        }
+                    }
+                }
+                if (!beFilted) {
+                    OnlineCpms.Add(sourceDict[pair.Key]);
+                }
             }
         }
     }

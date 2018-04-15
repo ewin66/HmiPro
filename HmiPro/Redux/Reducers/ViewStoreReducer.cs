@@ -99,7 +99,7 @@ namespace HmiPro.Redux.Reducers {
                                 try {
                                     updateChartView(cpmDetail, cpm, maxThreshold, minThreshold, cpk);
                                 } catch (Exception e) {
-                                    App.Logger.Warn("更新曲线异常" + e, true);
+                                    //App.Logger.Warn("更新曲线异常" + e, true);
                                 }
                             });
                         } else {
@@ -244,6 +244,7 @@ namespace HmiPro.Redux.Reducers {
         private static void AsureChartPointNums(CpmDetailViewStore cpmDetail, Cpm cpm) {
             if (cpmDetail.ChartCpmSourceDict[cpm.Code].Count > maxChartPointNums) {
                 cpmDetail.ChartCpmSourceDict[cpm.Code].RemoveRange(0, removePointNums);
+                cpmDetail.AvgDict[cpm.Code].RemoveRange(0, removePointNums);
                 //更新平均值计算器
                 cpmDetail.AvgLast[cpm.Code] = cpmDetail.Avgcalculator[cpm.Code](cpm.GetFloatVal());
                 cpmDetail.Avgcalculator[cpm.Code] = YUtil.CreateExecAvgFunc();

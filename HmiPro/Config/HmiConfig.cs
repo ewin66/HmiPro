@@ -98,6 +98,7 @@ namespace HmiPro.Config {
 
         //上传电能
         [Required] public static string QueUploadPowerElec;
+
         //采集参数超时，超过该时间未有采集参数则清空实时数据表
         [Required] public static int CpmTimeout;
 
@@ -142,7 +143,7 @@ namespace HmiPro.Config {
         //InfluxDb地址
         [Required] public static string InfluxDbIp;
         //InfluxDb采集参数数据库名称
-        [Required] public static string InfluxCpmDbName;
+        [Required] public static string InfluxCpmDbName = "cpm2";
 
         [Required] public static int CloseScreenInterval;
         //Mq发送消息超时
@@ -178,6 +179,13 @@ namespace HmiPro.Config {
         /// 进入「管理员」界面是否需要密码
         /// </summary>
         public static bool UsePwdToAdmin = false;
+
+        /// <summary>
+        /// 是否上传「485异常」
+        /// </summary>
+        public static bool IsUpload485Err = false;
+
+        public static string UpdateGrafanaUrl = "http://192.168.88.14:8080/mes/rest/mauGrafShowManageAction/saveOrUpdate";
     }
 
 }

@@ -31,8 +31,11 @@ namespace HmiPro.Redux.Services {
         /// <param name="json"></param>
         public void CmdAccept(string json) {
             try {
-                var mqCmd = JsonConvert.DeserializeObject<AppCmd>(json);
-
+                var mqCmds = JsonConvert.DeserializeObject<List<AppCmd>>(json);
+                var mqCmd = mqCmds.FirstOrDefault(m => MachineConfig.MachineDict.Keys.Contains(m.machineCode.ToUpper()));
+                if (mqCmd == null) {
+                    return;
+                }
                 //机台过滤
                 if (MachineConfig.MachineDict.Keys.Contains(mqCmd.machineCode.ToUpper())) {
                     mqCmd.machineCode = mqCmd.machineCode.ToUpper();
@@ -40,7 +43,8 @@ namespace HmiPro.Redux.Services {
                     if (mqCmd.execTime.HasValue) {
                         var execTime = YUtil.UtcTimestampToLocalTime(mqCmd.execTime.Value);
                         Console.WriteLine($"任务将在 {execTime.ToString("G")} 执行");
-                        JobManager.AddJob(() => { App.Store.Dispatch(new MqActions.CmdAccept(mqCmd.machineCode, mqCmd));
+                        JobManager.AddJob(() => {
+                            App.Store.Dispatch(new MqActions.CmdAccept(mqCmd.machineCode, mqCmd));
                         }, (s) => s.ToRunOnceAt(execTime));
                     } else {
                         App.Store.Dispatch(new MqActions.CmdAccept(mqCmd.machineCode, mqCmd));

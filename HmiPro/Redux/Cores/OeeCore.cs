@@ -86,8 +86,15 @@ namespace HmiPro.Redux.Cores {
             if (runTimeSec < 0) {
                 Logger.Error($"计算时间效率失败，有效时间 {runTimeSec} < 0 ");
             } else {
+
+                var cpms = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode];
+                cpms[DefinedParamCode.RunTime].Value = TimeSpan.FromSeconds(runTimeSec - debugTimeSec).TotalHours;
+                cpms[DefinedParamCode.DutyTime].Value = (DateTime.Now - workTime).TotalHours;
+                cpms[DefinedParamCode.StopTime].Value = (double)cpms[DefinedParamCode.DutyTime].Value - (double)cpms[DefinedParamCode.RunTime].Value;
                 timeEff = (float)((runTimeSec - debugTimeSec) / (DateTime.Now - workTime).TotalSeconds);
-                Logger.Debug($"当班时间：{(DateTime.Now - workTime).TotalHours} 小时，机台运行时间 {(float)runTimeSec / 3600f} 小时");
+
+
+                Logger.Debug($"当班时间：{(DateTime.Now - workTime).TotalHours} 小时，机台运行时间 {cpms[DefinedParamCode.RunTime].Value} 小时");
             }
             return timeEff;
         }

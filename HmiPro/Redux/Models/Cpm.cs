@@ -30,6 +30,16 @@ namespace HmiPro.Redux.Models {
         public static readonly int OeeSpeed = -101;
         public static readonly int OeeTime = -102;
         public static readonly int OeeQuality = -103;
+        //机台运行时间
+        public static readonly int RunTime = -104;
+        //机台停机时间
+        public static readonly int StopTime = -105;
+        //当班时间
+        public static readonly int DutyTime = -106;
+        //Od值
+        public static readonly int Od = -107;
+        //记米
+        public static readonly int NoteMeter = -108;
 
         public static bool IsRfidParam(int paramCode) {
             return paramCode == StartAxisRfid || paramCode == EndAxisRfid || paramCode == EmpRfid;
@@ -50,7 +60,7 @@ namespace HmiPro.Redux.Models {
         public SmParamType ValueType { get; set; } = SmParamType.Unknown;
 
         private object value;
-        //兼容性好
+        /// 兼容性好
         public object Value {
             get => value;
             set {
@@ -60,6 +70,17 @@ namespace HmiPro.Redux.Models {
                 }
             }
         }
+
+        private string ip;
+
+        /// <summary>
+        /// 这个包的来源 ip
+        /// </summary>
+        public string Ip {
+            get { return ip; }
+            set { ip = value; }
+        }
+
 
         public float FloatValue => GetFloatVal();
         /// <summary>
@@ -111,7 +132,7 @@ namespace HmiPro.Redux.Models {
             this.PickTime = pickTime;
         }
 
-        public static List<Cpm> ConvertBySmModel(string code, SmModel sm) {
+        public static List<Cpm> ConvertBySmModel(string code, SmModel sm, string ip) {
             List<Cpm> cpms = new List<Cpm>();
             var machine = MachineConfig.MachineDict[code];
             if (machine == null) {
@@ -134,7 +155,6 @@ namespace HmiPro.Redux.Models {
                         try {
                             cpm.Value = p.GetSignalData();
                         } catch (Exception e) {
-                            App.Logger.Error("GetSignalData 失败，buffer 数据: " + sm.GetBufferHexStr() + " 包类型：" + p.DataType, e);
                             continue;
                         }
                         //转义
@@ -159,6 +179,7 @@ namespace HmiPro.Redux.Models {
                     }
                     //暂时对如下数据类型不做处理
                     if (cpm.ValueType != SmParamType.MultiComStatus && cpm.ValueType != SmParamType.Unknown) {
+                        cpm.Ip = ip;
                         cpms.Add(cpm);
                     }
                 }

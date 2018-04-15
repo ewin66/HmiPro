@@ -45,6 +45,7 @@ namespace HmiPro.ViewModels.DMes {
         public virtual Com485Tab Com485Tab { get; set; } = new Com485Tab() { Header = "通讯" };
         public virtual DpmsTab DpmsTab { get; set; } = new DpmsTab() { Header = "设置" };
         public virtual CpmDetailTab CpmDetailTab { get; set; } = new CpmDetailTab() { Header = "曲线" };
+        //public virtual WireOdPieTab WireOdPieTab { get; set; } = new WireOdPieTab() { Header = "线径" };
         private Unsubscribe unsubscribe;
         readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
         public virtual string Header { get; set; }
@@ -62,6 +63,7 @@ namespace HmiPro.ViewModels.DMes {
             ViewSource.Add(Com485Tab);
             ViewSource.Add(DpmsTab);
             ViewSource.Add(CpmDetailTab);
+            //ViewSource.Add(WireOdPieTab);
 
             actionExecDict[DMesActions.RFID_ACCPET] = whenRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccpet;

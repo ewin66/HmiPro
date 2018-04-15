@@ -72,7 +72,7 @@ namespace HmiPro.Helpers {
                 //fixed:不能插入时间
                 postData += YUtil.GetUtcTimestampMs(dateTime.Value) + "000000";
             }
-            postData = postData.Replace("/", string.Empty).Replace("\\",string.Empty);
+            postData = postData.Replace("/", string.Empty).Replace("\\", string.Empty);
             var httpUri = $"{DbAddr}/write?db={DbName}";
             try {
                 using (var webClient = new WebClient()) {
@@ -90,13 +90,14 @@ namespace HmiPro.Helpers {
         /// <param name="data">measurement,tag value=val [timestampNs]</param>
         /// <returns></returns>
         public byte[] WriteMulti(params string[] data) {
-            var postData = string.Join("\n", data);
+            var postData = new StringBuilder(string.Join("\n", data));
             //fixed：字符异常
-            postData = postData.Replace("/", string.Empty).Replace("\\",string.Empty);
-            var httpUri = $"{DbAddr}/write?db={DbName}";
+            postData = postData.Replace("/", string.Empty).Replace("\\", string.Empty);
+            var httpUri = $"{DbAddr}/write?db=cpm";
             try {
                 using (var webClient = new WebClient()) {
-                    var result = webClient.UploadData(httpUri, Encoding.UTF8.GetBytes(postData));
+                    var result = webClient.UploadData(httpUri, Encoding.UTF8.GetBytes(postData.ToString()));
+                    postData.Length = 0;
                     return result;
                 }
             } catch (WebException ex) {
@@ -105,10 +106,48 @@ namespace HmiPro.Helpers {
         }
 
         /// <summary>
+        /// 一次性写入大量的行数据
+        /// </summary>
+        /// <param name="builders"></param>
+        /// <returns></returns>
+        public bool WriteMultiString(params StringBuilder[] builders) {
+            StringBuilder writeBuilder = new StringBuilder();
+            foreach (var builder in builders) {
+                if (builder.Length > 0) {
+                    writeBuilder.Append(builder.ToString() + "\n");
+                }
+            }
+            if (writeBuilder.Length == 0) {
+                return true;
+            }
+            writeBuilder.Remove(writeBuilder.Length - 1, 1);
+            var httpUri = $"{DbAddr}/write?db={DbName}";
+            try {
+                using (var webClient = new WebClient()) {
+                    webClient.UploadData(httpUri, Encoding.UTF8.GetBytes(writeBuilder.ToString()));
+                    return true;
+                }
+            } catch (WebException ex) {
+                Console.WriteLine(ex.Message);
+
+            } finally {
+                //清空内存
+                writeBuilder.Length = 0;
+                foreach (var builder in builders) {
+                    builder.Length = 0;
+                }
+
+            }
+            return false;
+        }
+
+
+        /// <summary>
         /// 写入大量的采集参数到influxDb
         /// </summary>
         /// <param name="measurement"></param>
         /// <param name="cpms"></param>
+        [Obsolete("请使用 WriteCpms2")]
         public bool WriteCpms(string measurement, params Cpm[] cpms) {
             List<string> paramList = new List<string>();
             foreach (var cpm in cpms) {
@@ -129,11 +168,68 @@ namespace HmiPro.Helpers {
             return true;
         }
 
+
+
+
+        /// <summary>
+        /// 获取写入 InfluxDb 的字符串
+        /// 使用 StringBuilder 为了防止内存溢出
+        /// </summary>
+        /// <param name="measurement"></param>
+        /// <param name="cpms"></param>
+        /// <param name="pickTime"></param>
+        /// <returns></returns>
+        public StringBuilder GetCpms2WriteString(string measurement, List<Cpm> cpms, DateTime pickTime) {
+            StringBuilder builder = new StringBuilder();
+            builder.Append($"{measurement},tag=采集参数 ");
+            var timestamp = YUtil.GetUtcTimestampMs(pickTime) + "000000";
+            bool valid = false;
+            foreach (var cpm in cpms) {
+                if (cpm.ValueType != SmParamType.Signal) {
+                    continue;
+                }
+                //fix: 由于名字空格不能插入的情况
+                builder.Append($"{cpm.Name.Replace(" ", "")}={cpm.Value},");
+                valid = true;
+            }
+            //无有效参数的时候返回空的 sb
+            if (valid == false) {
+                builder.Clear();
+                return builder;
+            }
+
+            builder.Remove(builder.Length - 1, 1);
+            builder.Append($" {timestamp}");
+            builder = builder.Replace("/", string.Empty).Replace("\\", string.Empty);
+            return builder;
+        }
+
+        /// <summary>
+        /// 2018-3-25 更新，通过将一个机台的所有参数放入同一 tag 的 不同 value
+        /// </summary>
+        /// <param name="measurement"></param>
+        /// <param name="cpms"></param>
+        /// <param name="pickTime"></param>
+        /// <returns></returns>
+        public bool WriteCpms2(string measurement, List<Cpm> cpms, DateTime pickTime) {
+            StringBuilder builder = GetCpms2WriteString(measurement, cpms, pickTime);
+            var httpUri = $"{DbAddr}/write?db={DbName}";
+            try {
+                using (var webClient = new WebClient()) {
+                    webClient.UploadData(httpUri, Encoding.UTF8.GetBytes(builder.ToString()));
+                    return true;
+                }
+            } catch {
+            }
+            return false;
+        }
+
         /// <summary>
         /// 写入大量的采集参数到influxDb
         /// </summary>
         /// <param name="measurement"></param>
         /// <param name="cpms"></param>
+        [Obsolete("请使用 WriteCpms2")]
         public bool WriteCpms(string measurement, Cpm[] cpms, int offset, int count) {
             if (offset + count >= cpms.Length) {
                 return false;
@@ -147,7 +243,7 @@ namespace HmiPro.Helpers {
                 var timeStamp = "";
                 //fixed:不能插入时间
                 timeStamp = YUtil.GetUtcTimestampMs(cpm.PickTime) + "000000";
-                var param = $"{measurement},param={cpm.Name} value={cpm.Value} {timeStamp}";
+                var param = $"{measurement},param={cpm.Name.Replace(" ","")} value={cpm.Value} {timeStamp}";
                 paramList.Add(param);
             }
             var resp = WriteMulti(paramList.ToArray());

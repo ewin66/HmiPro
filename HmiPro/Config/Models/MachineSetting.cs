@@ -73,6 +73,11 @@ namespace HmiPro.Config.Models {
         /// Od值
         /// </summary>
         public string Od { get; set; } = "";
+
+        /// <summary>
+        /// 总电能
+        /// </summary>
+        public string totalPower { get; set; } = "总电能";
         /// <summary>
         /// 放线盘的数量
         /// </summary>

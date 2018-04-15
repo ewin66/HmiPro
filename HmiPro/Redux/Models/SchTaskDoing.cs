@@ -13,7 +13,12 @@ namespace HmiPro.Redux.Models {
     /// <author>ychost</author>
     /// <date>2018-1-31</date>
     /// </summary>
-    public class SchTaskDoing : INotifyPropertyChanged {
+    public class SchTaskDoing : INotifyPropertyChanged
+    {
+        /// <summary>
+        /// 开始电能
+        /// </summary>
+        public float StartElecPower;
         /// <summary>
         /// 工单任务
         /// </summary>

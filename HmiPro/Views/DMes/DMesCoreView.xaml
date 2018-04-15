@@ -109,6 +109,7 @@
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"></RowDefinition>
+                                    <RowDefinition Height="Auto" ></RowDefinition>
                                     <RowDefinition Height="*"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <StackPanel Grid.Row="0" Orientation="Horizontal" Height="Auto">
@@ -120,8 +121,9 @@
                                     </TextBlock>
                                     <Button Visibility="{Binding Path=PalletVisibility}" Content="叉走栈板" Command="{Binding ShowPalletViewCommand}"></Button>
                                 </StackPanel>
+                                <TextBlock Grid.Row ="1" Text="{Binding Path=SelectedTask.remarks}" />
 
-                                <dx:DXTabControl  Grid.Row="1" ItemsSource="{Binding Path=MqSchTaskDetails}" SelectedIndex="{Binding Path=ViewStore.TaskTabSelectedIndex}" ItemHeaderTemplate="{StaticResource TabHeader}" >
+                                <dx:DXTabControl  Grid.Row="2" ItemsSource="{Binding Path=MqSchTaskDetails}" SelectedIndex="{Binding Path=ViewStore.TaskTabSelectedIndex}" ItemHeaderTemplate="{StaticResource TabHeader}" >
                                     <dx:DXTabControl.Resources>
                                         <DataTemplate DataType="{x:Type dMes1:SchTaskAxisViewModel}">
                                             <dMes:SchTaskAxisView DataContext="{Binding Path=.}"/>
@@ -232,14 +234,21 @@
                                 <dxg:GridControl.Columns>
                                     <dxg:GridColumn Width="2*"  Header="Ip" FieldName="Ip"/>
                                     <dxg:GridColumn Width="3*" Header="状态" FieldName="StatusStr"/>
-                                    <dxg:GridColumn Width="2*"  Header="时间" FieldName="TimeStr" />
+                                    <dxg:GridColumn Width="2*"  Header="更新时间" FieldName="TimeStr" />
+                                    <dxg:GridColumn Width="2*"  Header="最后正常时间" FieldName="LastSuccTimeStr" />
                                 </dxg:GridControl.Columns>
                             </dxg:GridControl>
                         </Grid>
                     </DataTemplate>
+                    <!--曲线图-->
                     <DataTemplate DataType="{x:Type Model:CpmDetailTab}">
                         <dMes:CpmDetailView DataContext="{Binding Path=.}" />
                     </DataTemplate>
+                    <!--od圈圈图-->
+                    <DataTemplate DataType="{x:Type Model:WireOdPieTab}">
+                        <dMes:WireOdPie DataContext="{Binding Path=.}"></dMes:WireOdPie>
+                    </DataTemplate>
+
                     <!--</dx:DXTabControl.Resources>
             </dx:DXTabControl>-->
                 </dxwui:PageView.Resources>

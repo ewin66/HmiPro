@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="FuncTest\ReflectTest.cs" />
     <Compile Include="FuncTest\SysFuncTest.cs" />
+    <Compile Include="Helpers\HttpHelperTests.cs" />
     <Compile Include="Model\Protocol\SmParam\SmAnalysisTests.cs" />
     <Compile Include="TestClass.cs" />
     <Compile Include="UnitTest1.cs" />
@@ -64,6 +65,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\HmiPro\HmiPro.csproj">
+      <Project>{20A4B0A4-D3EB-4D29-B3E3-1919C43F1DDF}</Project>
+      <Name>HmiPro</Name>
+    </ProjectReference>
     <ProjectReference Include="..\YCsharp\YCsharp.csproj">
       <Project>{71a217db-63fb-48b5-8ff4-4b77ec762502}</Project>
       <Name>YCsharp</Name>

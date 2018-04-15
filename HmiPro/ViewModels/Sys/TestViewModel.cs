@@ -13,6 +13,7 @@ using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Services;
 using HmiPro.ViewModels.Sys.Form;
+using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
 using YCsharp.Util;
 
@@ -226,6 +227,44 @@ namespace HmiPro.ViewModels.Sys {
                 App.Store.Dispatch(new HookActions.DangerDamageApp("莫生气"));
             }, "请输入密码，该操作相当危险", "123456");
         }
+
+        [Command(Name = "HideDesktopCommand")]
+        public void HideDesktop() {
+            YUtil.HideDesktop(AssetsHelper.GetAssets().ExeNirCmd);
+        }
+
+        [Command(Name = "ShowDesktopCommand")]
+        public void ShowDesktop() {
+            YUtil.ShowDesktop(AssetsHelper.GetAssets().ExeNirCmd);
+        }
+
+        [Command(Name = "ShowElecPowerCommand")]
+        public void ShowElecPower() {
+            foreach (var pair in MachineConfig.MachineDict) {
+                var elec = getElecPower(pair.Key);
+                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                    Title = pair.Key + " 总电能",
+                    Content = elec.ToString("0.00"),
+                    Level = NotifyLevel.Info
+                }));
+            }
+        }
+
+        float getElecPower(String machineCode) {
+            var cpmNameToCodeDict = MachineConfig.MachineDict[machineCode].CpmNameToCodeDict;
+            var setting = GlobalConfig.MachineSettingDict[machineCode];
+            //update:2018-4-13，添加总电能
+            if (cpmNameToCodeDict.ContainsKey(setting.totalPower)) {
+                if (App.Store.GetState().CpmState.OnlineCpmsDict[machineCode]
+                    .TryGetValue(cpmNameToCodeDict[setting.totalPower], out var tp)) {
+                    if (tp.ValueType == SmParamType.Signal) {
+                        return tp.GetFloatVal();
+                    }
+                }
+            }
+            return 0;
+        }
+
         /// <summary>
         /// 显示密码输入框的
         /// </summary>

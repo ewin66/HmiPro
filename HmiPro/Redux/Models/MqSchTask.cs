@@ -181,6 +181,8 @@ namespace HmiPro.Redux.Models {
             }
         }
 
+        public string remarks { get; set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]

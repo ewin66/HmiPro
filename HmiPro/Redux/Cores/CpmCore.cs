@@ -195,7 +195,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="sm">单个参数数据包，一个数据包含多个 Cpm</param>
         /// <param name="ip"></param>
         void updateMachieCpms(string machineCode, SmModel sm, string ip) {
-            var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm);
+            var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm,ip);
             var cpms = new List<Cpm>();
             IDictionary<int, Cpm> updatedCpmsDiffDict = new Dictionary<int, Cpm>();
             //计算出功率因数、最大值、最小值，这些参数
@@ -216,14 +216,13 @@ namespace HmiPro.Redux.Cores {
                     Logger.Error($"参数 {cpm.Code} 未注册", 36000);
                 }
             }
-
             //差异更新，使用linq 2017-11-13
             (from c in cpms
              where (
                  (c.Value != null && !string.IsNullOrEmpty(c.Value?.ToString()))
-                 && (!OnlineCpmDict[machineCode].ContainsKey(c.Code)
+                     && (!OnlineCpmDict[machineCode].ContainsKey(c.Code)
                      || OnlineCpmDict[machineCode][c.Code].Value.ToString() != c.Value.ToString())
-             )
+                 )
              select c
             ).ForEach(cpm => {
                 cpm.PickTime = pickTime;
@@ -247,6 +246,26 @@ namespace HmiPro.Redux.Cores {
             dispatchCheckBomAlarm(machineCode, cpms);
             //检查Plc上下限报警
             dispatchCheckPlcAlarm(machineCode, cpms);
+        }
+
+        /// <summary>
+        /// 将 oee 数据添加到 cpms 里面
+        /// </summary>
+        /// <param name="machineCode">机台编码</param>
+        /// <param name="cpms">待添加的参数集合</param>
+        private void fillOee(string machineCode, List<Cpm> cpms) {
+            if (OnlineCpmDict[machineCode].TryGetValue(DefinedParamCode.Oee, out var oee)) {
+                cpms.Add(oee);
+            }
+            if (OnlineCpmDict[machineCode].TryGetValue(DefinedParamCode.OeeTime, out var time)) {
+                cpms.Add(time);
+            }
+            if (OnlineCpmDict[machineCode].TryGetValue(DefinedParamCode.OeeQuality, out var quality)) {
+                cpms.Add(quality);
+            }
+            if (OnlineCpmDict[machineCode].TryGetValue(DefinedParamCode.OeeSpeed, out var speed)) {
+                cpms.Add(speed);
+            }
         }
 
         /// <summary>
@@ -324,6 +343,9 @@ namespace HmiPro.Redux.Cores {
                     if (pair.Value.ValueType != SmParamType.Signal && pair.Value.ValueType != SmParamType.String) {
                         continue;
                     }
+                    if (pair.Value.Code < 0) {
+                        continue;
+                    }
                     var msDiff = (DateTime.Now - pair.Value.PickTime).TotalMilliseconds;
                     if (msDiff > timeoutMs) {
                         pair.Value.Update("暂无", SmParamType.Timeout, DateTime.Now);
@@ -382,10 +404,12 @@ namespace HmiPro.Redux.Cores {
                 }
                 if (setting.NoteMeter == cpm.Name) {
                     App.Store.Dispatch(new CpmActions.NoteMeterAccept(machineCode, cpm.GetFloatVal()));
+                    OnlineCpmDict[machineCode][DefinedParamCode.NoteMeter] = cpm;
                 }
 
                 if (setting.Od == cpm.Name) {
                     App.Store.Dispatch(new CpmActions.OdAccept(machineCode, cpm.GetFloatVal()));
+                    OnlineCpmDict[machineCode][DefinedParamCode.Od] = cpm;
                 }
             }
         }

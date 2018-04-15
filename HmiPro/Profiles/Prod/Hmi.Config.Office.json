@@ -59,6 +59,6 @@
   //方便区分环境
   "DevUser": "ychost,somiar",
   "NtpIp": "192.168.0.15",
-  "InfluxDbIp": "192.168.0.15",
-  "InfluxCpmDbName": "cpm"
+  "InfluxDbIp": "192.168.0.15"
+  //"InfluxCpmDbName": "cpm"
 }

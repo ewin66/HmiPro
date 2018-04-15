@@ -20,15 +20,19 @@ namespace HmiPro.Views.DMes {
     public partial class GrafanaView : UserControl {
         public GrafanaView() {
             InitializeComponent();
-            var preUrl = $"http://{HmiConfig.InfluxDbIp}:3000";
+            var preUrl = $"http://{HmiConfig.InfluxDbIp}:3001";
             //刷新频率同上传频率
             var refresh = $"{HmiConfig.UploadWebBoardInterval}ms";
             //var dbUpperName = HmiDynamicConfig.DbName.ToUpper();
-            var viewName = MachineConfig.HmiName;
+            var viewName = MachineConfig.MachineDict.FirstOrDefault().Key.ToLower();
             var placeholder = "machine_placeholder";
-            var suffixUrl = $"/dashboard/db/{placeholder}?refresh={refresh}&orgId=1&kiosk";
+            var suffixUrl = $"/dashboard/db/{placeholder}?orgId=1&kiosk";
             suffixUrl = suffixUrl.Replace(placeholder, viewName);
             this.WebBrowser.Navigate(preUrl + suffixUrl);
+        }
+
+        private void UserControl_Unloaded(object sender, RoutedEventArgs e) {
+            this.WebBrowser.Dispose();
         }
     }
 }

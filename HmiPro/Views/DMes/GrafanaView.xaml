@@ -8,7 +8,7 @@
              xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
              mc:Ignorable="d"
              DataContext="{dxmvvm:ViewModelSource Type=dMes:GrafanaViewModel}"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="300" Unloaded="UserControl_Unloaded">
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:DispatcherService />
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>

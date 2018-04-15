@@ -2,7 +2,7 @@
 <AuProject xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <UpdateInfo>
     <AppName>HmiPro</AppName>
-    <AppVersion>3.2.2134.6650</AppVersion>
+    <AppVersion>3.2.2211.6671</AppVersion>
     <FileExecuteBefore />
     <FileExecuteAfter>HmiPro.exe</FileExecuteAfter>
     <ExecuteTimeout>0</ExecuteTimeout>
@@ -1436,7 +1436,7 @@
     </ProjectItem>
     <ProjectItem>
       <Path>Profiles\Global.xls</Path>
-      <UpdateMethod>Ignore</UpdateMethod>
+      <UpdateMethod>Always</UpdateMethod>
       <FileVerificationLevel>None</FileVerificationLevel>
     </ProjectItem>
     <ProjectItem>
@@ -1456,7 +1456,7 @@
     </ProjectItem>
   </Files>
   <ApplicationDirectory>..\HmiPro\bin\Debug</ApplicationDirectory>
-  <DestinationDirectory>Z:\ks-hmi-wpf\HmiPro-Updater</DestinationDirectory>
+  <DestinationDirectory>Z:\HmiPro-Updater</DestinationDirectory>
   <CreateCompatiblePackage>true</CreateCompatiblePackage>
   <CompressPackage>true</CompressPackage>
   <EnableIncreaseUpdate>true</EnableIncreaseUpdate>

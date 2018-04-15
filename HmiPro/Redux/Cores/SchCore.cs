@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
 using FluentScheduler;
 using HmiPro.Config;
 using HmiPro.Config.Models;
@@ -10,7 +11,9 @@ using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Effects;
 using HmiPro.Redux.Models;
+using Newtonsoft.Json;
 using Reducto;
+using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
 using YCsharp.Util;
 
@@ -59,25 +62,76 @@ namespace HmiPro.Redux.Cores {
             await App.Store.Dispatch(sysEffects.StartCloseScreenTimer(new SysActions.StartCloseScreenTimer(HmiConfig.CloseScreenInterval)));
             //启动定时上传Cpms到Mq定时器
             await App.Store.Dispatch(mqEffects.StartUploadCpmsInterval(new MqActions.StartUploadCpmsInterval(HmiConfig.QueUpdateWebBoard, HmiConfig.UploadWebBoardInterval)));
+
+            //定义完成一些额外的任务
+            //YUtil.SetInterval(HmiConfig.UploadWebBoardInterval, () => {
+            //    updateGrafana();
+            //});
+
+            //一小时缓存一次485状态
+            YUtil.SetInterval(3600000, () => {
+                persistCom485State();
+            });
+
             //每天8点打开显示器
             Schedule(() => {
                 App.Store.Dispatch(new SysActions.OpenScreen());
+                App.Logger.Info("8 点开启显示器");
             }).ToRunEvery(1).Days().At(8, 0);
 
-         
             JobManager.Initialize(this);
         }
 
+        /// <summary>
+        /// 将485状态持久化到 Sqlite 中去
+        /// </summary>
+        void persistCom485State() {
+            SqliteHelper.DoAsync(ctx => {
+                ctx.SavePersist(new Persist("com485", JsonConvert.SerializeObject(App.Store.GetState().CpmState.Com485StatusDict)));
+            });
+        }
 
-        void FluentSchTest() {
-            Schedule(() => {
-                App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
-                    Title = "测试Fluent Schedule Task",
-                    Content = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-                }));
-                Logger.Debug("测试Flunt Schedule");
-            }).ToRunEvery(1).Days().At(10, 40);
+        /// <summary>
+        /// 更新 Grafana 所需要的实时数据
+        /// </summary>
+        void updateGrafana() {
+            foreach (var pair in MachineConfig.MachineDict) {
+                IDictionary<string, string> dict = new Dictionary<string, string>();
+                string machineCode = pair.Key;
+                var onlineCpms = App.Store.GetState().CpmState.OnlineCpmsDict[machineCode];
+                updateGrafanaDict(dict, onlineCpms, DefinedParamCode.OeeTime, "oee_or");
+                updateGrafanaDict(dict, onlineCpms, DefinedParamCode.OeeSpeed, "oee_pr");
+                updateGrafanaDict(dict, onlineCpms, DefinedParamCode.OeeQuality, "oee_qr");
+                updateGrafanaDict(dict, onlineCpms, DefinedParamCode.Oee, "oee");
+                updateGrafanaDict(dict, onlineCpms, DefinedParamCode.StopTime, "stop_time");
+                updateGrafanaDict(dict, onlineCpms, DefinedParamCode.RunTime, "run_time");
+                updateGrafanaDict(dict, onlineCpms, DefinedParamCode.DutyTime, "total_time");
+                updateGrafanaDict(dict, onlineCpms, DefinedParamCode.Od, "fact_diameter");
+                updateGrafanaDict(dict, onlineCpms, DefinedParamCode.NoteMeter, "pro_length");
 
+                Task.Run(() => {
+                    HttpHelper.UpdateGrafana(dict, machineCode);
+                });
+            }
+        }
+
+        /// <summary>
+        /// 更新 Grafana 字典
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <param name="onlieCpms"></param>
+        /// <param name="cpmCode"></param>
+        /// <param name="key"></param>
+        /// <param name="defaultval"></param>
+        void updateGrafanaDict(IDictionary<string, string> dict, IDictionary<int, Cpm> onlieCpms, int cpmCode,
+            string key, string defaultval = "未知") {
+            if (onlieCpms.TryGetValue(cpmCode, out var cpm)) {
+                if (cpm.ValueType == SmParamType.Signal) {
+                    dict[key] = cpm.GetFloatVal().ToString("0.00");
+                } else {
+                    dict[key] = defaultval;
+                }
+            }
         }
     }
 }

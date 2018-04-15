@@ -300,13 +300,15 @@ namespace HmiPro.Redux.Cores {
         /// <param name="state">程序状态</param>
         /// <param name="action">485异常数据</param>
         void whenCom485SingleError(AppState state, IAction action) {
-            var alarmAction = (AlarmActions.Com485SingleError)action;
-            var mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName,
-                $"ip {alarmAction.Ip} 485故障");
-            //1小时记录一次485故障到文件
-            Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障", 36000);
-            //485故障暂时不考虑上报
-            //App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm));
+            if (HmiConfig.IsUpload485Err) {
+                var alarmAction = (AlarmActions.Com485SingleError)action;
+                var mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName,
+                    $"ip {alarmAction.Ip} 485故障");
+                //1小时记录一次485故障到文件
+                Logger.Error($"ip {alarmAction.Ip}，参数：{alarmAction.CpmName} 485故障", 36000);
+                //485故障暂时不考虑上报
+                App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm));
+            }
         }
 
         /// <summary>
@@ -330,6 +332,7 @@ namespace HmiPro.Redux.Cores {
                     employees = SchTaskDoingDict[machineCode]?.EmpRfids,
                     endRfids = SchTaskDoingDict[machineCode]?.EndAxisRfids,
                     startRfids = SchTaskDoingDict[machineCode]?.StartAxisRfids,
+                    workCode = SchTaskDoingDict[machineCode]?.WorkCode,
                     meter = meter,
                     time = YUtil.GetUtcTimestampMs(DateTime.Now),
                 };
@@ -350,8 +353,8 @@ namespace HmiPro.Redux.Cores {
                 return;
             }
             MqAlarm mqAlarm = createMqAlarmAnyway(alarmAction.MachineCode, alarmAction.CpmCode, alarmAction.CpmName, alarmAction.Message);
-            //Cpm 参数报警 10 秒触发一次
-            App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm, 10));
+            //Cpm 参数报警 5 分钟触发一次
+            App.Store.Dispatch(new AlarmActions.GenerateOneAlarm(alarmAction.MachineCode, mqAlarm, 300));
         }
 
         /// <summary>
@@ -403,7 +406,8 @@ namespace HmiPro.Redux.Cores {
         /// 检查当前任务可否完成，还是调试完毕
         /// </summary>
         /// <param name="machineCode">机台编码</param>
-        private bool isCompleteOrDebugEnd(string machineCode) {
+        private bool canAutoCompleteAxis(string machineCode) {
+            Logger.Warn("尝试去检查任务能否自动完成...");
             lock (SchTaskDoingLocks[machineCode]) {
                 var taskDoing = SchTaskDoingDict[machineCode];
                 if (!taskDoing.IsStarted) {
@@ -411,6 +415,7 @@ namespace HmiPro.Redux.Cores {
                 }
                 // 完成率满足一定条件才行
                 if (taskDoing.AxisCompleteRate >= 0.90) {
+                    Logger.Warn("自动检查结果：没有完成。当前完成率: " + taskDoing.AxisCompleteRate);
                     return true;
                 }
                 return false;
@@ -748,6 +753,7 @@ namespace HmiPro.Redux.Cores {
                             MinGapSec = 600,
                             LogDetail = logDetail
                         }));
+                        Logger.Error(logDetail, 600);
                         return;
                     }
                 }
@@ -763,8 +769,7 @@ namespace HmiPro.Redux.Cores {
                     }
                     var cpmVal = (float)checkAlarm.Cpm.Value;
                     if ((cpmVal > max && max > 0) || (cpmVal < min && min > 0)) {
-                        MqAlarm mqAlarm = createMqAlarmMustInTask(machineCode, checkAlarm.Cpm.PickTimeStampMs,
-                            checkAlarm.Cpm.Name, AlarmType.CpmErr);
+                        MqAlarm mqAlarm = createMqAlarmMustInTask(machineCode, checkAlarm.Cpm.PickTimeStampMs, checkAlarm.Cpm.Name, AlarmType.CpmErr);
                         dispatchAlarmAction(machineCode, mqAlarm);
                     }
                 } else {
@@ -785,20 +790,30 @@ namespace HmiPro.Redux.Cores {
                 var taskDoing = SchTaskDoingDict[machineCode];
                 if (SchTaskDoingDict[machineCode].IsStarted) {
                     //记米数减小了，则去检查任务是否达完成条件
-                    if (noteMeter < taskDoing.MeterWork && noteMeter < 5) {
-                        if (isCompleteOrDebugEnd(machineCode)) {
+                    if (noteMeter < taskDoing.MeterWork && noteMeter < 30) {
+                        if (canAutoCompleteAxis(machineCode)) {
                             App.Store.Dispatch(new DMesActions.CompletedSchAxis(machineCode, taskDoing?.MqSchAxis?.axiscode));
                         } else {
                             debugOneAxisEnd(machineCode, taskDoing?.MqSchAxis?.axiscode);
+                            setTaskCompleteRate(taskDoing, noteMeter);
                         }
                         //任务已经完成
                     } else {
-                        taskDoing.MeterWork = noteMeter;
-                        var rate = noteMeter / taskDoing.MeterPlan;
-                        taskDoing.AxisCompleteRate = rate;
+                        setTaskCompleteRate(taskDoing, noteMeter);
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 设置任务的完成率
+        /// </summary>
+        /// <param name="taskDoing"></param>
+        /// <param name="noteMeter"></param>
+        void setTaskCompleteRate(SchTaskDoing taskDoing, float noteMeter) {
+            taskDoing.MeterWork = noteMeter;
+            var rate = noteMeter / taskDoing.MeterPlan;
+            taskDoing.AxisCompleteRate = rate;
         }
 
         /// <summary>
@@ -1003,6 +1018,9 @@ namespace HmiPro.Redux.Cores {
             axis.IsStarted = true;
             axis.State = MqSchTaskAxisState.Doing;
             axis.StartTime = DateTime.Now;
+            if (taskDoing.StartElecPower <= 1) {
+                taskDoing.StartElecPower = getElecPower(axis.maccode.ToUpper());
+            }
         }
 
         /// <summary>
@@ -1066,7 +1084,7 @@ namespace HmiPro.Redux.Cores {
                 taskDoing.MqSchTask.CompletedRate = (float)completedAxis / taskDoing.MqSchTask.axisParam.Count;
                 //一个工单任务完成
                 if (taskDoing.MqSchTask.CompletedRate >= 1) {
-                    completeOneSchTask(machineCode, taskDoing.TaskId);
+                    completeOneSchTask(machineCode, taskDoing.TaskId, taskDoing);
                 }
                 uManu = new MqUploadManu() {
                     actualBeginTime = YUtil.GetUtcTimestampMs(taskDoing.StartTime),
@@ -1133,14 +1151,41 @@ namespace HmiPro.Redux.Cores {
             }
         }
 
+        float getElecPower(String machineCode) {
+            var cpmNameToCodeDict = MachineConfig.MachineDict[machineCode].CpmNameToCodeDict;
+            var setting = GlobalConfig.MachineSettingDict[machineCode];
+            //update:2018-4-13，添加总电能
+            if (cpmNameToCodeDict.ContainsKey(setting.totalPower)) {
+                if (App.Store.GetState().CpmState.OnlineCpmsDict[machineCode]
+                    .TryGetValue(cpmNameToCodeDict[setting.totalPower], out var tp)) {
+                    if (tp.ValueType == SmParamType.Signal) {
+                        return tp.GetFloatVal();
+                    }
+                }
+            }
+            return 0;
+        }
+
         /// <summary>
         /// 完成某个工单
         /// </summary>
         /// <param name="machineCode">机台编码</param>
         /// <param name="taskId">任务关键字</param>
-        void completeOneSchTask(string machineCode, string taskId) {
+        void completeOneSchTask(string machineCode, string taskId, SchTaskDoing taskdoing) {
             var mqTasks = MqSchTasksDict[machineCode];
             var removeTask = mqTasks.FirstOrDefault(t => t.taskId == taskId);
+
+            float elec = getElecPower(machineCode) - taskdoing.StartElecPower;
+            var uploadElec = new MqUploadElec() {
+                machinecode = machineCode,
+                workcoder = removeTask.workcode,
+                employees = string.Join(",", taskdoing.EmpRfids),
+                elec = elec
+            };
+            //回传总电能
+            App.Store.Dispatch(mqEffects.UploadElecPower(new MqActions.UploadElecPower(uploadElec)));
+            taskdoing.StartElecPower = 0f;
+
             //移除已经完成的某个工单任务
             //fixed: 2018-01-14
             // mqTasks 是界面数据，所以要用 Dispatcher

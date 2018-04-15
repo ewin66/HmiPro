@@ -51,6 +51,11 @@ namespace HmiPro.Redux.Effects {
         /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadSchTaskManu, bool> UploadSchTaskManu;
         /// <summary>
+        /// 回传电能数据
+        /// </summary>
+        public StorePro<AppState>.AsyncActionNeedsParam<MqActions.UploadElecPower, bool> UploadElecPower;
+
+        /// <summary>
         /// 监听人员卡
         /// </summary>
         public StorePro<AppState>.AsyncActionNeedsParam<MqActions.StartListenEmpRfid, bool> StartListenEmpRfid;
@@ -92,8 +97,29 @@ namespace HmiPro.Redux.Effects {
             initUploadDpms();
             initCallSystem();
             initStartListenCmd();
+            initUploadElecPower();
         }
 
+
+        /// <summary>
+        /// 上传能耗
+        /// </summary>
+        void initUploadElecPower() {
+            UploadElecPower = App.Store.asyncAction<MqActions.UploadElecPower, bool>(
+                async (dispatch, getState, instance) => {
+                    return await Task.Run(() => {
+                        try {
+                            String str = JsonConvert.SerializeObject(instance.elec);
+                            App.Logger.Info("回传总电能：" + str);
+                            activeMq.SendP2POneMessage(HmiConfig.QueUploadPowerElec, str);
+                            return true;
+                        } catch (Exception e) {
+                            App.Logger.Error("上传能耗失败", e);
+                        }
+                        return false;
+                    });
+                });
+        }
 
         void initStartListenCmd() {
             StartListenCmd = App.Store.asyncAction<MqActions.StartListenCmd, bool>(
@@ -301,6 +327,14 @@ namespace HmiPro.Redux.Effects {
                                 uCpms.diameter = od.Value.ToString();
                             }
                         }
+                        //update:2018-4-13，添加总电能
+                        if (cpmNameToCodeDict.ContainsKey(setting.totalPower)) {
+                            if (getState().CpmState.OnlineCpmsDict[machineCode]
+                                .TryGetValue(cpmNameToCodeDict[setting.totalPower], out var tp)) {
+                                uCpms.totalPower = tp.Value.ToString();
+                            }
+                        }
+
                         uCpms.TimeEff = getState().OeeState.OeeDict[machineCode].TimeEff.ToString("0.00");
                         uCpms.SpeedEff = getState().OeeState.OeeDict[machineCode].SpeedEff.ToString("0.00");
                         uCpms.QualityEff = getState().OeeState.OeeDict[machineCode].QualityEff.ToString("0.00");

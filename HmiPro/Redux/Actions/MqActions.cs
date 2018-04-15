@@ -70,6 +70,18 @@ namespace HmiPro.Redux.Actions {
         public static readonly string CALL_SYSTEM_SUCCESS = "[Call] Call System Success";
         public static readonly string CALL_SYSTEM_FAILED = "[Call] Call System Failed";
 
+        //回传电能
+        public static readonly string UPLOAD_ELEC_POWER = "Upload Elec Power";
+
+
+        public struct UploadElecPower : IAction {
+            public string Type() => UPLOAD_ELEC_POWER;
+            public MqUploadElec elec;
+
+            public UploadElecPower(MqUploadElec elec) {
+                this.elec = elec;
+            }
+        }
 
         public struct CmdAccept : IAction {
             public string Type() => CMD_ACCEPT;

@@ -102,6 +102,20 @@ namespace YCsharp.Util {
         }
         #endregion
 
+        #region  显示/隐藏桌面
+        public static void HideDesktop(string nirCmdPath) {
+            Task.Run(() => {
+                Exec(nirCmdPath, "win hide class progman");
+            }).Wait(1000);
+        }
+
+        public static void ShowDesktop(string nirCmdPath) {
+            Task.Run(() => {
+                Exec(nirCmdPath, "win show class progman");
+            }).Wait(1000);
+        }
+        #endregion
+
         #region 显示器开启/熄灭
         /// <summary>
         /// 通过 NirCmd调用的方式关闭显示器
@@ -119,6 +133,7 @@ namespace YCsharp.Util {
             //1秒超时，之前有卡死的bug，目前这样修复
             task.Wait(1000);
         }
+
 
         /// <summary>
         /// 通过NirCmd调用的方式打开显示器

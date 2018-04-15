@@ -26,15 +26,17 @@
                 <Button Content="关闭显示器" Height="50" Width="200" Command="{Binding Path=CloseScreenCommand}"></Button>
                 <Button Content="打开显示器" Height="50" Width="200" Command="{Binding Path=OpenScreenCommand}"></Button>
                 <Button Content="关闭显示器 5s" Height="50" Width="200" Command="{Binding Path=CloseScreenCommand}"  CommandParameter="5"></Button>
-                <Button Content="显示通知" Height="50" Width="200" Command="{Binding Path=ShowNotificationCommand}"  ></Button>
+                <Button Content="显示总电能" Height="50" Width="200" Command="{Binding Path=ShowElecPowerCommand}"  ></Button>
                 <Button Content="显示键盘" Height="50" Width="200" Command="{Binding Path=OskCommand}"  ></Button>
-                <Button Content="显示桌面" Height="50" Width="200" Command="{Binding Path=ReturnDesktopCommand}"  ></Button>
+                <Button Content="返回桌面" Height="50" Width="200" Command="{Binding Path=ReturnDesktopCommand}"  ></Button>
                 <Button Content="隐藏任务栏" Height="50" Width="200" Command="{Binding Path=HideTaskBarCommand}"  ></Button>
                 <Button Content="显示任务栏" Height="50" Width="200" Command="{Binding Path=ShowTaskBarCommand}"  ></Button>
                 <Button Content="弹出任务管理器" Height="50" Width="200" Command="{Binding Path=ShowTaskMgmrCommand}"  ></Button>
                 <Button Content="弹出日志文件夹" Height="50" Width="200" Command="{Binding Path=ShowLogFolerCommand}"  ></Button>
                 <Button Content="关闭Loading1" Height="50" Width="200" Command="{Binding Path=CloseLoadingSplashCommand1}"  ></Button>
                 <Button Content="关闭Loading2" Height="50" Width="200" Command="{Binding Path=CloseLoadingSplashCommand2}"  ></Button>
+                <Button Content="隐藏桌面" Height="50" Width="200" Command="{Binding Path=HideDesktopCommand}"  ></Button>
+                <Button Content="显示桌面" Height="50" Width="200" Command="{Binding Path=ShowDesktopCommand}"  ></Button>
                 <Button Content="关闭软件" Height="50" Width="200" Command="{Binding Path=CloseAppCommand}"  ></Button>
                 <Button Content="关闭电脑" Height="50" Width="200" Command="{Binding Path=ClosePcCommand}"  ></Button>
                 <Button Content="删除程序！！危险" Height="50" Width="200" Command="{Binding Path=DeleteAppCommand}"  ></Button>
