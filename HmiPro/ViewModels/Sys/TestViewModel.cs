@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
+using DevExpress.Utils.Text.Internal;
 using DevExpress.Xpf.Core;
 using HmiPro.Config;
 using HmiPro.Helpers;
@@ -12,6 +15,7 @@ using HmiPro.Mocks;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Services;
+using HmiPro.ViewModels.DMes.Form;
 using HmiPro.ViewModels.Sys.Form;
 using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
@@ -37,9 +41,15 @@ namespace HmiPro.ViewModels.Sys {
         /// <param name="ms">响铃毫秒数</param>
         [Command(Name = "OpenAlarmCommand")]
         public void OpenAlarm(int ms) {
-            var machineCode = MachineConfig.MachineDict.FirstOrDefault().Key;
-            App.Store.Dispatch(new AlarmActions.OpenAlarmLights(machineCode, ms));
-
+            StringBuilder builder = new StringBuilder();
+            foreach (var pair in MachineConfig.MachineDict) {
+                App.Store.Dispatch(new AlarmActions.OpenAlarmLights(pair.Key, ms));
+                builder.Append(pair.Key).Append(" ");
+            }
+            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                Title = "执行完毕",
+                Content = "已发送打开报警灯指令给 " + builder.ToString()
+            }));
         }
 
         /// <summary>
@@ -47,8 +57,15 @@ namespace HmiPro.ViewModels.Sys {
         /// </summary>
         [Command(Name = "CloseAlarmCommand")]
         public void CloseAlarm() {
-            var machineCode = MachineConfig.MachineDict.FirstOrDefault().Key;
-            App.Store.Dispatch(new AlarmActions.CloseAlarmLights(machineCode));
+            StringBuilder builder = new StringBuilder();
+            foreach (var pair in MachineConfig.MachineDict) {
+                builder.Append(pair.Key).Append(" ");
+                App.Store.Dispatch(new AlarmActions.CloseAlarmLights(pair.Key));
+            }
+            App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                Title = "执行完毕",
+                Content = "已发送关闭报警灯指令给 " + builder.ToString()
+            }));
         }
 
         /// <summary>
@@ -216,6 +233,30 @@ namespace HmiPro.ViewModels.Sys {
         [Command(Name = "ClosePcCommand")]
         public void ClosePc() {
             ShowPasswordForm(YUtil.ShutdownPc);
+        }
+
+        [Command(Name = "ShowConfirmFormCommand")]
+        public void ShowConfirmForm() {
+            var frm = new CompleteAxisForm() {
+                OnOkPressed = f => {
+                    CompleteAxisForm cf = f as CompleteAxisForm;
+
+
+                    var display = cf.CompleteStatus.GetAttribute<DisplayAttribute>();
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Content = "您点击了确认，且选择了 " + display?.Name
+                    }));
+                },
+                OnCancelPressed = f => {
+                    CompleteAxisForm cf = f as CompleteAxisForm;
+                    var display = cf.CompleteStatus.GetAttribute<DisplayAttribute>();
+
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Content = "您点击了取消，且选择了 " + display?.Name
+                    }));
+                }
+            };
+            App.Store.Dispatch(new SysActions.ShowFormView("确认完成该轴", frm));
         }
 
         /// <summary>

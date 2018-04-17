@@ -154,9 +154,14 @@ namespace HmiPro.Redux.Actions {
             public string MachineCode;
             public string AxisCode;
 
-            public CompletedSchAxis(string machineCode, string axisCode) {
+            /// <summary>
+            /// 完成原因
+            /// </summary>
+            public string Status;
+            public CompletedSchAxis(string machineCode, string axisCode, string status = "正常结束") {
                 MachineCode = machineCode;
                 AxisCode = axisCode;
+                Status = status;
             }
 
 

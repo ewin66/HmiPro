@@ -46,6 +46,7 @@ namespace HmiPro.Config {
         public string IconQualityControl => ImagesFolder + "\\quality-control.ico";
         public string IconAnalysis2 => ImagesFolder + "\\analysis2.ico";
         public string IconCallUp => ImagesFolder + "\\call-up.ico";
+        public string IconRepair => ImagesFolder + "\\repair.png";
         public string IconDataMonitor => ImagesFolder + "\\data-monitor.ico";
         public string IconAppBuild => ImagesFolder + "\\app-build.ico";
         public string IconAdd => ImagesFolder + "\\add.ico";
@@ -63,6 +64,9 @@ namespace HmiPro.Config {
         public string IconTest => ImagesFolder + "\\test.ico";
         public string IconPrivacy => ImagesFolder + "\\privacy.ico";
         public string IconMonitor2 => ImagesFolder + "\\monitor2.ico";
+        public string IconV => ImagesFolder + "\\v.ico";
+        public string IconForklift => ImagesFolder + "\\forklift.ico";
+        public string IconWorker => ImagesFolder + "\\worker.ico";
 
         //一些图片
         public string ImageBackground => ImagesFolder + "\\background.jpg";

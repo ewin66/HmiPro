@@ -46,6 +46,7 @@ namespace HmiPro.Redux.Models {
     public static class MqCallType {
         public static readonly string Forklift = "叉车";
         public static readonly string Repair = "维修";
+        public static readonly string RepairComplete = "维修完成";
     }
 
 }

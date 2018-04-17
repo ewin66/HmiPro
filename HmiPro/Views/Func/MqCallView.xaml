@@ -22,7 +22,7 @@
                     <dxlc:FlowLayoutControl Margin="0,0,0,20" HorizontalAlignment="Center" ItemsSource="{Binding Path=Value,Mode=OneWay}" Orientation="Horizontal">
                         <dxlc:FlowLayoutControl.ItemTemplate>
                             <DataTemplate>
-                                <Button>
+                                <Button Margin="30">
                                     <Button.Template>
                                         <ControlTemplate>
                                             <Grid>

@@ -16,7 +16,6 @@ namespace HmiPro.Redux.Models {
         public string macCode { get; set; } // 机台编码
         //人名
         public string name { get; set; }
-
         public DateTime PrintTime { get; set; }
     }
 

@@ -27,6 +27,7 @@
                 <Button Content="打开显示器" Height="50" Width="200" Command="{Binding Path=OpenScreenCommand}"></Button>
                 <Button Content="关闭显示器 5s" Height="50" Width="200" Command="{Binding Path=CloseScreenCommand}"  CommandParameter="5"></Button>
                 <Button Content="显示总电能" Height="50" Width="200" Command="{Binding Path=ShowElecPowerCommand}"  ></Button>
+                <Button Content="弹出确认表单" Height="50" Width="200" Command="{Binding Path=ShowConfirmFormCommand}"  ></Button>
                 <Button Content="显示键盘" Height="50" Width="200" Command="{Binding Path=OskCommand}"  ></Button>
                 <Button Content="返回桌面" Height="50" Width="200" Command="{Binding Path=ReturnDesktopCommand}"  ></Button>
                 <Button Content="隐藏任务栏" Height="50" Width="200" Command="{Binding Path=HideTaskBarCommand}"  ></Button>

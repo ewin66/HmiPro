@@ -70,6 +70,8 @@ namespace HmiPro.ViewModels.Func {
         //质检
         QualityCheck,
         //维修
-        Repair
+        Repair,
+        //维修完成
+        RepairComplete
     }
 }

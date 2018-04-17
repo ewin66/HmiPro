@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Newtonsoft.Json;
+using NPOI.SS.Formula.Functions;
 
 namespace YCsharp.Util {
     /// <summary>
@@ -245,5 +247,19 @@ namespace YCsharp.Util {
             }
             return types;
         }
+
+        /// <summary>
+        /// 获取枚举类型的注解值
+        /// </summary>
+        /// <typeparam name="TAttribute"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static TAttribute GetAttribute<TAttribute>(this Enum value)
+            where TAttribute : Attribute {
+            var enumType = value.GetType();
+            var name = Enum.GetName(enumType, value);
+            return enumType.GetField(name).GetCustomAttributes(false).OfType<TAttribute>().FirstOrDefault();
+        }
+
     }
 }

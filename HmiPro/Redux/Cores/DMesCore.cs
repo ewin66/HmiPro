@@ -24,7 +24,6 @@ using HmiPro.ViewModels.DMes.Form;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using NeoSmart.AsyncLock;
 using Newtonsoft.Json;
 using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
@@ -281,7 +280,7 @@ namespace HmiPro.Redux.Cores {
         void doCompleteSchAxis(AppState state, IAction action) {
             var dmesAction = (DMesActions.CompletedSchAxis)action;
             //完成一轴任务
-            completeOneAxis(dmesAction.MachineCode, dmesAction.AxisCode);
+            completeOneAxis(dmesAction.MachineCode, dmesAction.AxisCode, dmesAction.Status);
             //自动开始下一轴任务
             lock (SchTaskDoingLocks[dmesAction.MachineCode]) {
                 var nextAxis = SchTaskDoingDict[dmesAction.MachineCode]?.MqSchTask?.axisParam?.FirstOrDefault(s => s.IsCompleted == false);
@@ -1061,7 +1060,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="machineCode">机台编码</param>
         /// <param name="axisCode">轴号</param>
         /// </summary>
-        async void completeOneAxis(string machineCode, string axisCode) {
+        async void completeOneAxis(string machineCode, string axisCode, string reason) {
             var taskDoing = SchTaskDoingDict[machineCode];
             MqUploadManu uManu = null;
             lock (SchTaskDoingLocks[machineCode]) {
@@ -1103,7 +1102,7 @@ namespace HmiPro.Redux.Cores {
                     testTime = taskDoing.DebugTimestampMs,
                     speed = taskDoing.SpeedAvg,
                     seqCode = taskDoing.MqSchAxis.seqcode,
-                    status = "正常结束",
+                    status = reason,
                 };
 
                 //重新初始化

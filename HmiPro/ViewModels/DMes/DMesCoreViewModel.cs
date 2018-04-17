@@ -61,7 +61,7 @@ namespace HmiPro.ViewModels.DMes {
             ViewSource.Add(AlarmTab);
             ViewSource.Add(ScanMaterialTab);
             ViewSource.Add(Com485Tab);
-            ViewSource.Add(DpmsTab);
+            //ViewSource.Add(DpmsTab);
             ViewSource.Add(CpmDetailTab);
             //ViewSource.Add(WireOdPieTab);
 
@@ -103,10 +103,10 @@ namespace HmiPro.ViewModels.DMes {
             Com485Tab.BindSource(MachineCode, status);
 
             //回填参数
-            var dpms = App.Store.GetState().DpmStore.DpmsDict;
-            DpmsTab.BindSource(dpms[MachineCode]);
+            //var dpms = App.Store.GetState().DpmStore.DpmsDict;
+            //DpmsTab.BindSource(dpms[MachineCode]);
 
-            //绑定曲线参数界面
+            ////绑定曲线参数界面
             CpmDetailTab.BindSource(MachineCode, onlineCpmsDict[MachineCode]);
 
             //绑定选中的tab
