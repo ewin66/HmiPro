@@ -12,6 +12,10 @@ namespace HmiPro.Redux.Models {
     /// </summary>
     public class Employee {
         /// <summary>
+        /// 人员关联的 Rfid
+        /// </summary>
+        public string Rfid { get; set; }
+        /// <summary>
         /// 姓名
         /// </summary>
         public string Name { get; set; }
@@ -19,6 +23,10 @@ namespace HmiPro.Redux.Models {
         /// 手机
         /// </summary>
         public string Phone { get; set; }
+        /// <summary>
+        /// 打卡机台
+        /// </summary>
+        public string MachineCode { get; set; }
         /// <summary>
         /// 招聘
         /// </summary>

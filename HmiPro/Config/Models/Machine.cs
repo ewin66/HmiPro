@@ -56,7 +56,8 @@ namespace HmiPro.Config.Models {
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeSpeed, Name = "速度率" });
             cpms.Add(new CpmInfo() { Code = DefinedParamCode.OeeQuality, Name = "质量率" });
             validUnique(cpms);
-            cpms.ForEach(cpm => {
+            foreach (var cpm in cpms) {
+             
                 CpmNameToCodeDict[cpm.Name] = cpm.Code;
                 //所有参数
                 if (CodeToAllCpmDict.ContainsKey(cpm.Code)) {
@@ -106,7 +107,7 @@ namespace HmiPro.Config.Models {
                         Min = min
                     };
                 }
-            });
+            }
             //更新Plc报警参数
             foreach (var pair in CodeToPlcAlarmDict) {
                 var plcAlarm = pair.Value;

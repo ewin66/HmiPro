@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Config;
 
 namespace HmiPro.Redux.Models {
     /// <summary>
@@ -16,6 +17,7 @@ namespace HmiPro.Redux.Models {
         public string macCode { get; set; } // 机台编码
         //人名
         public string name { get; set; }
+
         public DateTime PrintTime { get; set; }
     }
 

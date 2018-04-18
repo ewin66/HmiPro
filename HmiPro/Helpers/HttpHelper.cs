@@ -47,6 +47,22 @@ namespace HmiPro.Helpers {
         }
 
 
+        public static Task<string> Get(string url, IDictionary<string, string> paramDict) {
+            return Task.Run(() => {
+                WebClient webClient = new WebClient();
+                paramDict["requestType"] = "portal";
+                foreach (var pair in paramDict) {
+                    webClient.QueryString.Add(pair.Key, pair.Value);
+                }
+                try {
+                    string result = webClient.DownloadString(url);
+                    return result;
+                } catch (Exception e) {
+                }
+                return "Error";
+            });
+        }
+
         /// <summary>
         /// 更新 grafana 的在线数据，比如 Oee，完成率之类的
         /// </summary>

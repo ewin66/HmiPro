@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -111,6 +112,7 @@ namespace HmiPro.Redux.Cores {
             actionExecutors[MqActions.CMD_ACCEPT] = whenCmdAccept;
             actionExecutors[DMesActions.DEL_TASK] = doDelTask;
             actionExecutors[CpmActions.OD_ACCPET] = whenOdAccept;
+            actionExecutors[CpmActions.RFID_READ] = whenReadRfid;
 
             App.Store.Subscribe(actionExecutors);
 
@@ -127,6 +129,27 @@ namespace HmiPro.Redux.Cores {
             //恢复任务
             if (!CmdOptions.GlobalOptions.MockVal) {
                 restoreTask();
+            }
+        }
+
+        /// <summary>
+        /// 从底层读取到 Rfid
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenReadRfid(AppState state, IAction action) {
+            var readRfid = (CpmActions.RfidRead)action;
+            if (readRfid.RfidType == DMesActions.RfidType.EmpStartMachine) {
+                //请求服务器相关 Rfid 的信息
+                //服务器会自动通知
+                IDictionary<string, string> dict = new Dictionary<string, string>();
+                dict["rfid"] = readRfid.Rfid;
+                dict["type"] = MqRfidType.EmpStartMachine;
+                dict["macCode"] = readRfid.MachineCode;
+                HttpHelper.Get(HmiConfig.WebUrl + "/mes/rest/mauEmployeeManageAction/saveMauEmployeeRecord", dict);
+            } else {
+                var mqRfid = new DMesActions.RfidAccpet(readRfid.MachineCode, readRfid.Rfid, DMesActions.RfidWhere.FromCpm, readRfid.RfidType);
+                App.Store.Dispatch(mqRfid);
             }
         }
 

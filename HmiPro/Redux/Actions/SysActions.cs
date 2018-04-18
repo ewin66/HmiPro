@@ -233,11 +233,13 @@ namespace HmiPro.Redux.Actions {
         public struct ShowFormView : IAction {
             public string Type() => SHOW_FORM_VIEW;
             public BaseForm Form;
+            public bool ShowKeyBoard;
             public string Title;
 
-            public ShowFormView(string title, BaseForm form) {
+            public ShowFormView(string title, BaseForm form, bool showKeyBoard = true) {
                 Title = title;
                 Form = form;
+                ShowKeyBoard = showKeyBoard;
             }
         }
 

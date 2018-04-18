@@ -27,7 +27,7 @@ namespace HmiPro.Redux.Reducers {
             public IDictionary<string, MqScanMaterial> MqScanMaterialDict;
             public string MachineCode;
             //人员卡信息
-            public IDictionary<string, List<MqEmpRfid>> MqEmpRfidDict;
+            public IDictionary<string,List<MqEmpRfid>> MqEmpRfidDict;
 
             /// <summary>
             /// 栈板目前存放的数量
@@ -43,7 +43,7 @@ namespace HmiPro.Redux.Reducers {
                     state.SchTaskDoingDict = new ConcurrentDictionary<string, SchTaskDoing>();
                     state.MqSchTasksDict = new ConcurrentDictionary<string, ObservableCollection<MqSchTask>>();
                     state.MqScanMaterialDict = new ConcurrentDictionary<string, MqScanMaterial>();
-                    state.MqEmpRfidDict = new ConcurrentDictionary<string, List<MqEmpRfid>>();
+                    state.MqEmpRfidDict = new ConcurrentDictionary<string,List<MqEmpRfid>>();
                     state.PalletDict = new ConcurrentDictionary<string, Pallet>();
                     foreach (var pair in MachineConfig.MachineDict) {
                         state.SchTaskDoingDict[pair.Key] = new SchTaskDoing();

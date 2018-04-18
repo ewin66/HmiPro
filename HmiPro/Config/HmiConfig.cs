@@ -186,6 +186,14 @@ namespace HmiPro.Config {
         public static bool IsUpload485Err = false;
 
         public static string UpdateGrafanaUrl = "http://192.168.88.14:8080/mes/rest/mauGrafShowManageAction/saveOrUpdate";
+
+        //http 请求的 Url 路径
+        public static string WebUrl;
+
+        /// <summary>
+        /// 静态文件服务器
+        /// </summary>
+        [Required]public static string StaticServerUrl;
     }
 
 }

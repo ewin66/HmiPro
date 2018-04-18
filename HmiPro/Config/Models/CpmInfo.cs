@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Redux.Models;
 using YCsharp.Service;
 using YCsharp.Util;
 
@@ -85,7 +86,7 @@ namespace HmiPro.Config.Models {
             /// 采集频率比普通频率快，那么就要消除抖
             /// 这是记录抖动次数，即为 0 的次数
             /// </summary>
-            public int JitterTimes;
+            public int ZeroTimes;
 
         }
 
@@ -257,25 +258,24 @@ namespace HmiPro.Config.Models {
             }
             var diffVal = curVal - derByTime.LastValue.Value;
             var diffSec = (curTime - derByTime.LastTime).TotalSeconds;
-            //更新历史值
-            derByTime.LastValue = codeToValDict[paramCodes[0]];
-            derByTime.LastTime = curTime;
+
             //对于负数目前舍去
             if (diffSec > 0 && diffVal >= 0) {
                 var derVal = (float)(diffVal / diffSec);
                 //突然降为 0 需要消抖
-                //两次之间变化太小也需要消抖
-                //两次之间变化太大也需要消抖
-                if (derVal <= 0.001 || Math.Abs(derByTime.LastDer - derVal) < 0.01 || Math.Abs(derByTime.LastDer - derVal) >= 10) {
-                    if (++derByTime.JitterTimes <= 10) {
+                if (derVal <= 0.01) {
+                    if (++derByTime.ZeroTimes <= 10) {
                         return derByTime.LastDer;
                     }
                 }
-                derByTime.JitterTimes = 0;
-                //消除异常
-                if (derVal > 10) {
+                derByTime.ZeroTimes = 0;
+                //消除异常数据和普通抖动数据
+                if (derVal > 10 || Math.Abs(derByTime.LastDer - derVal) < 0.05) {
                     return derByTime.LastDer;
                 }
+                //更新历史值
+                derByTime.LastValue = codeToValDict[paramCodes[0]];
+                derByTime.LastTime = curTime;
                 derByTime.LastDer = derVal;
                 return derVal;
             }
@@ -392,6 +392,7 @@ namespace HmiPro.Config.Models {
                         continue;
                     }
                     CpmInfo cpmInfo = new CpmInfo();
+
                     var cpmStr = CpmLoaderOp.Load(row);
                     if (string.IsNullOrEmpty(cpmStr.Name)) {
                         continue;
@@ -400,6 +401,9 @@ namespace HmiPro.Config.Models {
                     cpmInfo.Name = cpmStr.Name;
                     //编码
                     cpmInfo.Code = int.Parse(cpmStr.Code.Trim());
+                    if (DefinedParamCode.IsRfidParam(cpmInfo.Code)) {
+                        continue;
+                    }
                     //单位
                     cpmInfo.Unit = cpmStr.Unit;
                     //算法

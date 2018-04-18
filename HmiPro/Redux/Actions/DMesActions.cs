@@ -31,6 +31,7 @@ namespace HmiPro.Redux.Actions {
         public static readonly string COMPLETED_SCH_AXIS_SUCESS = "[DMes] Completed Schedule Axis Success";
         public static readonly string COMPLETED_SCH_AXIS_FAILED = "[DMes] Completed Schedule Axis Failed";
 
+
         //清空任务
         public static readonly string CLEAR_SCH_TASKS = "[DMes] Clear Sch Tasks";
 

@@ -133,7 +133,7 @@
                                 Thickness="2" />
                             </dxc:SplineSeries2D.LineStyle>
                         </dxc:SplineSeries2D>-->
-                      <dxc:SplineSeries2D
+                      <!--<dxc:SplineSeries2D
                            Brush="White"
                            DataSource="{Binding ViewStore.SelectedAvg}"
                         ArgumentDataMember="UpdateTime"
@@ -145,7 +145,7 @@
                                 <dxc:LineStyle
                                 Thickness="2" />
                             </dxc:SplineSeries2D.LineStyle>
-                        </dxc:SplineSeries2D>
+                        </dxc:SplineSeries2D>-->
                         <dxc:SplineSeries2D
                            Brush="yellow"
                         DataSource="{Binding ViewStore.SelectedMinThreshold}"
@@ -172,13 +172,8 @@
                             </dxc:SplineSeries2D.LineStyle>
                         </dxc:SplineSeries2D>
                     </dxc:XYDiagram2D>
-
-
                 </dxc:ChartControl>
             </dxdo:LayoutPanel>
         </dxdo:LayoutGroup>
     </dxdo:DockLayoutManager>
-
-
-
 </UserControl>

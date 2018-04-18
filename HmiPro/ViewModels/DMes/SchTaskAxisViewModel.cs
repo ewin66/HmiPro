@@ -57,7 +57,7 @@ namespace HmiPro.ViewModels.DMes {
                     }));
                 }
             };
-            App.Store.Dispatch(new SysActions.ShowFormView("确认完成该轴", frm));
+            App.Store.Dispatch(new SysActions.ShowFormView("确认完成该轴", frm,false));
         }
 
         public static SchTaskAxisViewModel Create(string machineCode, string workCode, IList<MqTaskAxis> taskAxisList) {

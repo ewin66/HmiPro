@@ -426,7 +426,7 @@ namespace HmiPro.ViewModels {
         void doShowFormView(AppState state, IAction action) {
             var formAction = (SysActions.ShowFormView)action;
             //弹出键盘
-            if (!HmiConfig.IsDevUserEnv) {
+            if (!HmiConfig.IsDevUserEnv && formAction.ShowKeyBoard) {
                 YUtil.CallOskAsync();
             }
             DispatcherService.BeginInvoke(() => {

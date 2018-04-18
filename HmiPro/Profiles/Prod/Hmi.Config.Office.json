@@ -59,6 +59,8 @@
   //方便区分环境
   "DevUser": "ychost,somiar",
   "NtpIp": "192.168.0.15",
-  "InfluxDbIp": "192.168.0.15"
+  "InfluxDbIp": "192.168.0.15",
+  "WebUrl": "http://192.168.0.14:8080",
+  "StaticServerUrl": "http://192.168.0.15:9898"  
   //"InfluxCpmDbName": "cpm"
 }

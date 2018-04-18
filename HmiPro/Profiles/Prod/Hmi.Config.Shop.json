@@ -58,6 +58,8 @@
   //方便区分环境
   "DevUser": "ychost,Somiar",
   "NtpIp": "192.168.88.15",
-  "InfluxDbIp": "192.168.88.15"
+  "InfluxDbIp": "192.168.88.15",
+  "WebUrl": "http://192.168.88.14:8080",
+  "StaticServerUrl": "http://192.168.88.15:9898"
   //"InfluxCpmDbName": "cpm"
 }

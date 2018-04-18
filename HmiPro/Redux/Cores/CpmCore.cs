@@ -12,15 +12,11 @@ using HmiPro.Config;
 using HmiPro.Helpers;
 using HmiPro.Redux.Actions;
 using HmiPro.Redux.Models;
-using HmiPro.Redux.Patches;
 using HmiPro.Redux.Reducers;
-using Reducto;
 using YCsharp.Model.Procotol;
 using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
 using DevExpress.XtraPrinting.Native;
-using HmiPro.Config.Models;
-using HmiPro.Redux.Effects;
 using YCsharp.Util;
 
 namespace HmiPro.Redux.Cores {
@@ -195,7 +191,7 @@ namespace HmiPro.Redux.Cores {
         /// <param name="sm">单个参数数据包，一个数据包含多个 Cpm</param>
         /// <param name="ip"></param>
         void updateMachieCpms(string machineCode, SmModel sm, string ip) {
-            var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm,ip);
+            var cpmsDirect = Cpm.ConvertBySmModel(machineCode, sm, ip);
             var cpms = new List<Cpm>();
             IDictionary<int, Cpm> updatedCpmsDiffDict = new Dictionary<int, Cpm>();
             //计算出功率因数、最大值、最小值，这些参数
@@ -286,10 +282,12 @@ namespace HmiPro.Redux.Cores {
                     cpmsRelate.AddRange(relateCpms);
                     //Rfid卡
                 } else if (cpm.ValueType == SmParamType.StrRfid) {
-                    var rfidAccept = createRfid(machineCode, cpm);
-                    if (rfidAccept.RfidType != DMesActions.RfidType.Unknown) {
-                        App.Store.Dispatch(rfidAccept);
-                    }
+                    var rfid = rfidRead(machineCode, cpm);
+                    App.Store.Dispatch(rfid);
+                    //var rfidAccept = createRfid(machineCode, cpm);
+                    //if (rfidAccept.RfidType != DMesActions.RfidType.Unknown) {
+                    //    App.Store.Dispatch(rfidAccept);
+                    //}
                     //485通讯状态
                 } else if (cpm.ValueType == SmParamType.SingleComStatus) {
                     App.Store.Dispatch(
@@ -302,6 +300,22 @@ namespace HmiPro.Redux.Cores {
             return cpmsRelate;
         }
 
+
+        private CpmActions.RfidRead rfidRead(string machineCode, Cpm cpm) {
+            var rfid = new CpmActions.RfidRead() {
+                MachineCode = machineCode,
+                Rfid = cpm.Value?.ToString(),
+            };
+            if (DefinedParamCode.StartAxisRfid == cpm.Code) {
+                rfid.RfidType = DMesActions.RfidType.StartAxis;
+            } else if (DefinedParamCode.EndAxisRfid == cpm.Code) {
+                rfid.RfidType = DMesActions.RfidType.EndAxis;
+            } else if (DefinedParamCode.EmpRfid == cpm.Code) {
+                rfid.RfidType = DMesActions.RfidType.EmpStartMachine;
+            }
+            return rfid;
+        }
+
         /// <summary>
         /// 为接受到的Rfid卡分类，有人员卡、收线卡、放线卡等等
         /// </summary>
@@ -310,6 +324,7 @@ namespace HmiPro.Redux.Cores {
         private DMesActions.RfidAccpet createRfid(string machineCode, Cpm cpm) {
             DMesActions.RfidAccpet rfidAccept = new DMesActions.RfidAccpet(machineCode, cpm.Value.ToString(),
                 DMesActions.RfidWhere.FromCpm, DMesActions.RfidType.Unknown);
+
             //放线卡
             if (DefinedParamCode.StartAxisRfid == cpm.Code) {
                 rfidAccept.RfidType = DMesActions.RfidType.StartAxis;

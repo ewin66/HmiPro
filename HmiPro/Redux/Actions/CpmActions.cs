@@ -54,8 +54,20 @@ namespace HmiPro.Redux.Actions {
         //外径
         public static readonly string OD_ACCPET = "[Cpm] Od Accept";
 
+        public static readonly string RFID_READ = "[Cpm] Rfid Read";
+
         //485串口状态更新
         public static readonly string COM_485_SINGLE_STATUS_ACCEPT = "[Cpm] Communication 485 Single  Status Accept";
+
+        /// <summary>
+        /// 读取到rfid
+        /// </summary>
+        public struct RfidRead : IAction {
+            public string Type() => RFID_READ;
+            public string MachineCode;
+            public string Rfid;
+            public DMesActions.RfidType RfidType;
+        }
 
 
         public struct Com485SingleStatusAccept : IAction {
