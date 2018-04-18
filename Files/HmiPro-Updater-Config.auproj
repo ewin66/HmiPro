@@ -2,7 +2,7 @@
 <AuProject xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <UpdateInfo>
     <AppName>HmiPro</AppName>
-    <AppVersion>3.2.2211.6671</AppVersion>
+    <AppVersion>3.2.2356.6682</AppVersion>
     <FileExecuteBefore />
     <FileExecuteAfter>HmiPro.exe</FileExecuteAfter>
     <ExecuteTimeout>0</ExecuteTimeout>
@@ -1285,11 +1285,6 @@
       <FileVerificationLevel>None</FileVerificationLevel>
     </ProjectItem>
     <ProjectItem>
-      <Path>DevExpress.Xpf.Themes.HmiPro.v17.1.dll</Path>
-      <UpdateMethod>Ignore</UpdateMethod>
-      <FileVerificationLevel>None</FileVerificationLevel>
-    </ProjectItem>
-    <ProjectItem>
       <Path>DevExpress.Xpf.Themes.HmiPro.v17.1.pdb</Path>
       <UpdateMethod>Ignore</UpdateMethod>
       <FileVerificationLevel>None</FileVerificationLevel>
@@ -1451,6 +1446,11 @@
     </ProjectItem>
     <ProjectItem>
       <Path>de\DevExpress.Xpo.v17.1.resources.dll</Path>
+      <UpdateMethod>Ignore</UpdateMethod>
+      <FileVerificationLevel>None</FileVerificationLevel>
+    </ProjectItem>
+    <ProjectItem>
+      <Path>DevExpress.Xpf.Themes.HmiPro.v17.1.dll</Path>
       <UpdateMethod>Ignore</UpdateMethod>
       <FileVerificationLevel>None</FileVerificationLevel>
     </ProjectItem>

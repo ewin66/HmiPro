@@ -33,6 +33,11 @@ namespace HmiPro.Config {
         public static string[] PalletMachineCodes = new string[0];
 
         /// <summary>
+        /// 某些机台必须重启才能正常更新
+        /// </summary>
+        public static string[] UpdateMustReartHmiNames = new string[0];
+
+        /// <summary>
         /// 加载 Globa.xls 配置文件
         /// </summary>
         /// <param name="path"></param>
@@ -99,6 +104,8 @@ namespace HmiPro.Config {
                     //即它们的收线盘的 Rfid 就是栈板的 Rfid，多个收线盘共用一个 Rfid
                     if (name == "栈板机台") {
                         PalletMachineCodes = value.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+                    } else if (name == "重启机台") {
+                        UpdateMustReartHmiNames = value.Split(new[] {"|"}, StringSplitOptions.RemoveEmptyEntries);
                     }
 
                 }

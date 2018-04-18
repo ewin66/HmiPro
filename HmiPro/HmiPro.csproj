@@ -234,6 +234,7 @@
     <Compile Include="Redux\Models\MqUploadRest.cs" />
     <Compile Include="Redux\Models\MqUploadDpm.cs" />
     <Compile Include="Redux\Models\PipeCmd.cs" />
+    <Compile Include="Redux\Models\ProdProp.cs" />
     <Compile Include="Redux\Models\StartupLog.cs" />
     <Compile Include="Redux\Models\ViewStoreModels.cs" />
     <Compile Include="Redux\Models\MachineState.cs" />
@@ -823,7 +824,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>

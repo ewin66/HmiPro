@@ -75,8 +75,18 @@ namespace HmiPro.Config.Models {
         struct CalcDerByTime {
             //上次的值
             public float? LastValue;
+            /// <summary>
+            /// 上一次算出的导数值
+            /// </summary>
+            public float LastDer;
             //上次的时间
             public DateTime LastTime;
+            /// <summary>
+            /// 采集频率比普通频率快，那么就要消除抖
+            /// 这是记录抖动次数，即为 0 的次数
+            /// </summary>
+            public int JitterTimes;
+
         }
 
         public float? ExecCalc(IDictionary<int, float> codeToValDict, int updateCode) {
@@ -250,11 +260,26 @@ namespace HmiPro.Config.Models {
             //更新历史值
             derByTime.LastValue = codeToValDict[paramCodes[0]];
             derByTime.LastTime = curTime;
-            //只计算正数，对于负数目前舍去
-            if (diffSec > 0 && diffVal > 0) {
-                return (float)(diffVal / diffSec);
+            //对于负数目前舍去
+            if (diffSec > 0 && diffVal >= 0) {
+                var derVal = (float)(diffVal / diffSec);
+                //突然降为 0 需要消抖
+                //两次之间变化太小也需要消抖
+                //两次之间变化太大也需要消抖
+                if (derVal <= 0.001 || Math.Abs(derByTime.LastDer - derVal) < 0.01 || Math.Abs(derByTime.LastDer - derVal) >= 10) {
+                    if (++derByTime.JitterTimes <= 10) {
+                        return derByTime.LastDer;
+                    }
+                }
+                derByTime.JitterTimes = 0;
+                //消除异常
+                if (derVal > 10) {
+                    return derByTime.LastDer;
+                }
+                derByTime.LastDer = derVal;
+                return derVal;
             }
-            return null;
+            return derByTime.LastDer;
         }
 
 

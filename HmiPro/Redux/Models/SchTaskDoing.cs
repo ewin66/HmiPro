@@ -13,8 +13,7 @@ namespace HmiPro.Redux.Models {
     /// <author>ychost</author>
     /// <date>2018-1-31</date>
     /// </summary>
-    public class SchTaskDoing : INotifyPropertyChanged
-    {
+    public class SchTaskDoing : INotifyPropertyChanged {
         /// <summary>
         /// 开始电能
         /// </summary>
@@ -112,9 +111,25 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public Func<double, double> CalcAvgSpeed;
         /// <summary>
+        /// 计算平均线径
+        /// </summary>
+        public Func<double, double> CalcOdAvg;
+        /// <summary>
         /// 一轴的平均速度
         /// </summary>
         public float SpeedAvg;
+        /// <summary>
+        /// 一轴的平均线径
+        /// </summary>
+        public float OdAvg;
+        /// <summary>
+        /// 一轴的最大线径
+        /// </summary>
+        public float OdMax;
+        /// <summary>
+        /// 一轴的最小线径
+        /// </summary>
+        public float OdMin;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -135,12 +150,16 @@ namespace HmiPro.Redux.Models {
             WorkCode = null;
             Step = -1;
             CalcAvgSpeed = null;
-            SpeedAvg = -1;
-            MeterPlan = -1;
-            MeterDebug = -1;
-            MeterWork = -1;
+            CalcOdAvg = null;
+            SpeedAvg = 0;
+            MeterPlan = 0;
+            MeterDebug = 0;
+            MeterWork = 0;
             DebugTimestampMs = 0;
-            MqSchAxisIndex = -1;
+            MqSchAxisIndex = 0;
+            OdAvg = 0;
+            OdMax = 0;
+            OdMin = 0;
             //StartAxisRfids.Clear();
             //EndAxisRfids.Clear();
             //EmpRfids.Clear();

@@ -56,5 +56,11 @@ namespace HmiPro.Redux.Models {
         public String proGgxh { get; set; }
         //落轴：yes，非落轴：no
         public string mqType { get; set; }
+        //平均线径
+        public float avgOd { get; set; }
+        //最大线径
+        public float maxOd { get; set; }
+        //最小线径
+        public float minOd { get; set; }
     }
 }

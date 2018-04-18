@@ -110,6 +110,7 @@ namespace HmiPro.Redux.Cores {
             actionExecutors[SysActions.FORM_VIEW_PRESSED_OK] = doFormViewPressedOk;
             actionExecutors[MqActions.CMD_ACCEPT] = whenCmdAccept;
             actionExecutors[DMesActions.DEL_TASK] = doDelTask;
+            actionExecutors[CpmActions.OD_ACCPET] = whenOdAccept;
 
             App.Store.Subscribe(actionExecutors);
 
@@ -126,6 +127,26 @@ namespace HmiPro.Redux.Cores {
             //恢复任务
             if (!CmdOptions.GlobalOptions.MockVal) {
                 restoreTask();
+            }
+        }
+
+        /// <summary>
+        /// 计算每个任务的平均 Od 值
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
+        void whenOdAccept(AppState state, IAction action) {
+            var odAction = (CpmActions.OdAccept)action;
+            if (odAction.Od == 0) {
+                return;
+            }
+            lock (SchTaskDoingLocks[odAction.MachineCode]) {
+                var taskDoing = SchTaskDoingDict[odAction.MachineCode];
+                if (taskDoing.IsStarted && taskDoing.CalcAvgSpeed != null) {
+                    taskDoing.OdAvg = (float)taskDoing.CalcOdAvg(odAction.Od);
+                    taskDoing.OdMax = Math.Max(odAction.Od, taskDoing.OdMax);
+                    taskDoing.OdMin = Math.Min(odAction.Od, taskDoing.OdMin);
+                }
             }
         }
 
@@ -935,6 +956,9 @@ namespace HmiPro.Redux.Cores {
                     testLen = taskDoing.MeterDebug,
                     testTime = taskDoing.DebugTimestampMs,
                     speed = taskDoing.SpeedAvg,
+                    avgOd = taskDoing.OdAvg,
+                    maxOd = taskDoing.OdMax,
+                    minOd = taskDoing.OdMin,
                     seqCode = taskDoing.MqSchAxis.seqcode,
                     status = "开始生产",
                 };
@@ -1013,6 +1037,7 @@ namespace HmiPro.Redux.Cores {
             taskDoing.MeterPlan = axis.length;
             taskDoing.StartTime = DateTime.Now;
             taskDoing.CalcAvgSpeed = YUtil.CreateExecAvgFunc();
+            taskDoing.CalcOdAvg = YUtil.CreateExecAvgFunc();
             taskDoing.TaskId = axis.taskId;
             axis.IsStarted = true;
             axis.State = MqSchTaskAxisState.Doing;
@@ -1101,6 +1126,9 @@ namespace HmiPro.Redux.Cores {
                     testLen = taskDoing.MeterDebug,
                     testTime = taskDoing.DebugTimestampMs,
                     speed = taskDoing.SpeedAvg,
+                    avgOd = taskDoing.OdAvg,
+                    maxOd = taskDoing.OdMax,
+                    minOd = taskDoing.OdMin,
                     seqCode = taskDoing.MqSchAxis.seqcode,
                     status = reason,
                 };

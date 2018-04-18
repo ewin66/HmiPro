@@ -182,10 +182,22 @@ namespace HmiPro.Redux.Services {
         /// 执行更新
         /// </summary>
         public void StartUpdate() {
-            //关闭监视进程
-            YUtil.StopWinService(HmiConfig.DaemonServiceName);
-            YUtil.KillProcess(HmiConfig.AsylumProcessName);
-            AppUpdater.StartExternalUpdater();
+            bool needRestart = false;
+            StringBuilder sb = new StringBuilder();
+            foreach (var name in GlobalConfig.UpdateMustReartHmiNames) {
+                if (MachineConfig.HmiName.Contains(name)) {
+                    needRestart = true;
+                }
+                sb.Append(name).Append(",");
+            }
+            if (!needRestart) {
+                //关闭监视进程
+                YUtil.StopWinService(HmiConfig.DaemonServiceName);
+                YUtil.KillProcess(HmiConfig.AsylumProcessName);
+                AppUpdater.StartExternalUpdater();
+            } else {
+                YUtil.RestartPC();
+            }
         }
     }
 }
