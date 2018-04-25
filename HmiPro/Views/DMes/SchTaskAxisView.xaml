@@ -28,6 +28,7 @@
             <dxg:GridColumn Width="0.5*" Header="序号" FieldName="Index"/>
             <dxg:GridColumn Width="*" Header="长度" FieldName="length"/>
             <dxg:GridColumn Width="*" Header="颜色" FieldName="color" />
+            <dxg:GridColumn Width="0.5*" Header="位置" FieldName="Level" />
             <dxg:GridColumn Width="*" Header="完成率" FieldName="CompletedRate"  >
                 <dxg:GridColumn.EditSettings>
                     <dxe:ProgressBarEditSettings  ContentDisplayMode="Value" DisplayFormat="{}{0:P}"  Orientation="Horizontal" Maximum="1" SmallStep="0.01" LargeStep="0.05" >

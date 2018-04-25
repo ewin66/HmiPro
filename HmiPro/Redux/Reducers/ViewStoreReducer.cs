@@ -78,7 +78,7 @@ namespace HmiPro.Redux.Reducers {
                     var cpmDetail = state.CpmDetailViewDict[action.MachineCode];
                     //当前是否处于曲线界面
                     //这个 6 表示为曲线界面 PageView 的 Index 为 6
-                    var isInChartView = state.DMewCoreViewDict[action.MachineCode].TabSelectedIndex == 6;
+                    var isInChartView = state.DMewCoreViewDict[action.MachineCode].TabSelectedIndex == 5;
                     var machineCode = action.MachineCode;
                     foreach (var cpm in action.Cpms) {
                         if (cpm.ValueType != SmParamType.Signal) {

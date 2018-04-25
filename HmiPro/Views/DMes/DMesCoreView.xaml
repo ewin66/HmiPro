@@ -244,6 +244,47 @@
                     <DataTemplate DataType="{x:Type Model:CpmDetailTab}">
                         <dMes:CpmDetailView DataContext="{Binding Path=.}" />
                     </DataTemplate>
+                    <!--制程质检-->
+                    <DataTemplate DataType="{x:Type Model:ProcessQiTab}">
+                        <!--<StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                            <Grid HorizontalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Button Grid.Column="0" Background="Transparent"  Content="显示键盘" Width="200" Command="{Binding RelativeSource={RelativeSource Mode=FindAncestor,AncestorType=UserControl},Path=DataContext.CallOskCommand}"></Button>
+                                <Button Grid.Column="1" Content="提交" Width="200" ></Button>
+                            </Grid>
+                            <dxlc:DataLayoutControl CurrentItem="{Binding Path=Form}"  Width="600" >
+
+                            </dxlc:DataLayoutControl>
+                        </StackPanel>-->
+                        <!--<dxlc:LayoutControl>
+                            <dxlc:LayoutGroup Orientation="Vertical" HorizontalAlignment="Center" Width="300" >
+                                <dxlc:LayoutItem Label="测试项目1" IsRequired="True" >
+                                    <dxe:TextEdit />
+                                </dxlc:LayoutItem>
+                                <dxlc:LayoutItem Label="测试项目2" IsRequired="True">
+                                    <dxe:ComboBoxEdit
+                                    VerticalAlignment="Center" 
+                                    ShowSizeGrip="False"
+                                    SelectedIndex="0"
+                                    IsTextEditable="False"
+                                    AutoComplete="true">
+                                        <dxe:ComboBoxEdit.StyleSettings>
+                                            <dxe:ComboBoxStyleSettings />
+                                        </dxe:ComboBoxEdit.StyleSettings>
+                                        <dxe:ComboBoxEditItem Content="Item1"/>
+                                        <dxe:ComboBoxEditItem Content="Item2"/>
+                                        <dxe:ComboBoxEditItem Content="Item3"/>
+                                    </dxe:ComboBoxEdit>
+                                </dxlc:LayoutItem>
+                                <dxlc:LayoutItem Label="测试项目1" IsRequired="True">
+                                    <dxe:TextEdit />
+                                </dxlc:LayoutItem>
+                            </dxlc:LayoutGroup>
+                        </dxlc:LayoutControl>-->
+                    </DataTemplate>
                     <!--od圈圈图-->
                     <DataTemplate DataType="{x:Type Model:WireOdPieTab}">
                         <dMes:WireOdPie DataContext="{Binding Path=.}"></dMes:WireOdPie>

@@ -16,7 +16,7 @@
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
     </dxmvvm:Interaction.Behaviors>
-    <Grid MinWidth="840" >
+    <Grid MinWidth="600" >
         <dxlc:DataLayoutControl CurrentItem="{Binding Path=Form}" Loaded="DataLayoutControl_Loaded">
 
         </dxlc:DataLayoutControl>

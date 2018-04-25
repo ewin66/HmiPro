@@ -121,6 +121,7 @@ namespace HmiPro.Redux.Cores {
             MqSchTasksDict = App.Store.GetState().DMesState.MqSchTasksDict;
             MqScanMaterialDict = App.Store.GetState().DMesState.MqScanMaterialDict;
             MqEmpRfidDict = App.Store.GetState().DMesState.MqEmpRfidDict;
+
             PalletDict = App.Store.GetState().DMesState.PalletDict;
 
             foreach (var pair in MachineConfig.MachineDict) {
@@ -130,6 +131,18 @@ namespace HmiPro.Redux.Cores {
             if (!CmdOptions.GlobalOptions.MockVal) {
                 restoreTask();
             }
+            //恢复人员打卡信息
+            foreach (var pair in MqEmpRfidDict) {
+                var names = (from e in pair.Value select e.name).ToList();
+                var rfids = (from e in pair.Value select e.employeeCode).ToList();
+                if (names == null || names.Count == 0) {
+                    continue;
+                }
+                setCpmRfid(pair.Key, DefinedParamCode.EmpRfid, string.Join("，", names));
+                foreach (var rfid in rfids) {
+                    SchTaskDoingDict[pair.Key].EmpRfids.Add(rfid);
+                }
+            }
         }
 
         /// <summary>
@@ -137,7 +150,7 @@ namespace HmiPro.Redux.Cores {
         /// </summary>
         /// <param name="state"></param>
         /// <param name="action"></param>
-        void whenReadRfid(AppState state, IAction action) {
+        async void whenReadRfid(AppState state, IAction action) {
             var readRfid = (CpmActions.RfidRead)action;
             if (readRfid.RfidType == DMesActions.RfidType.EmpStartMachine) {
                 //请求服务器相关 Rfid 的信息
@@ -146,7 +159,18 @@ namespace HmiPro.Redux.Cores {
                 dict["rfid"] = readRfid.Rfid;
                 dict["type"] = MqRfidType.EmpStartMachine;
                 dict["macCode"] = readRfid.MachineCode;
-                HttpHelper.Get(HmiConfig.WebUrl + "/mes/rest/mauEmployeeManageAction/saveMauEmployeeRecord", dict);
+                var result = await HttpHelper.Get(HmiConfig.WebUrl + "/mes/rest/mauEmployeeManageAction/saveMauEmployeeRecord", dict);
+                if (result.Contains("Error")) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "警告",
+                        Content = "打卡失败，网络或者服务器故障，请联系管理员"
+                    }));
+                } else if (!result.Contains("\"success\":true")) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "警告",
+                        Content = "请勿重复打卡，已经在该机台打卡"
+                    }));
+                }
             } else {
                 var mqRfid = new DMesActions.RfidAccpet(readRfid.MachineCode, readRfid.Rfid, DMesActions.RfidWhere.FromCpm, readRfid.RfidType);
                 App.Store.Dispatch(mqRfid);
@@ -483,9 +507,7 @@ namespace HmiPro.Redux.Cores {
                     }));
                     //打了上机卡，清除未打上机卡警告
                     if (mqEmpRfid.type == MqRfidType.EmpStartMachine) {
-                        App.Store.Dispatch(
-                            new SysActions.DelMarqueeMessage(
-                                SysActions.MARQUEE_PUNCH_START_MACHINE + rfidAccpet.MachineCode));
+                        App.Store.Dispatch(new SysActions.DelMarqueeMessage(SysActions.MARQUEE_PUNCH_START_MACHINE + rfidAccpet.MachineCode));
                     }
                 } else if (rfidAccpet.RfidWhere == DMesActions.RfidWhere.FromMq) {
                     App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
@@ -539,6 +561,10 @@ namespace HmiPro.Redux.Cores {
                         if (!isPrinted) {
                             MqEmpRfidDict[rfidAccpet.MachineCode].Add(mqEmpRfid);
                         }
+                        App.Store.Dispatch(new SysActions.OpenScreen());
+                        SqliteHelper.DoAsync(ctx => {
+                            ctx.SavePersist(new Persist("employees", JsonConvert.SerializeObject(MqEmpRfidDict)));
+                        });
                         //人员下机卡
                     } else if (rfidAccpet.RfidType == DMesActions.RfidType.EmpEndMachine) {
                         doingTask.EmpRfids.Remove(rfidAccpet.Rfids);
@@ -547,13 +573,17 @@ namespace HmiPro.Redux.Cores {
                             .FirstOrDefault(s => s.employeeCode == mqEmpRfid.employeeCode);
                         //从全局打卡信息中移除
                         MqEmpRfidDict[rfidAccpet.MachineCode].Remove(removeItem);
+                        App.Store.Dispatch(new SysActions.OpenScreen());
+                        SqliteHelper.DoAsync(ctx => {
+                            ctx.SavePersist(new Persist("employees", JsonConvert.SerializeObject(MqEmpRfidDict)));
+                        });
                     }
-
                     //更新 参数 界面上面的 Rfid 值
                     var employees = string.Join(",",
                         (from c in MqEmpRfidDict[rfidAccpet.MachineCode] select c.name).ToList());
                     var startRfids = string.Join(",", doingTask.StartAxisRfids);
                     var endRfids = string.Join(",", doingTask.EndAxisRfids);
+
                     setCpmRfid(rfidAccpet.MachineCode, DefinedParamCode.EmpRfid, employees);
                     setCpmRfid(rfidAccpet.MachineCode, DefinedParamCode.StartAxisRfid, startRfids);
                     setCpmRfid(rfidAccpet.MachineCode, DefinedParamCode.EndAxisRfid, endRfids);
@@ -599,6 +629,8 @@ namespace HmiPro.Redux.Cores {
             var machineCode = mqAction.MqSchTask.maccode;
             var allTasks = MqSchTasksDict[machineCode];
             var taskAccept = mqAction.MqSchTask;
+            taskAccept.remarks = taskAccept?.remarks?.Replace("\r\n", "\t");
+            taskAccept.remarks = taskAccept?.remarks?.Replace("\n", "\t");
             MqSchTask taskRemove = null;
             //容易卡死 UI ，这里让它运行在异步里面
             Task.Run(() => {
@@ -657,6 +689,8 @@ namespace HmiPro.Redux.Cores {
                         HashSet<string> allTaskIds = new HashSet<string>();
                         HashSet<MqSchTask> delTasks = new HashSet<MqSchTask>();
                         foreach (var task in tasks) {
+                            task.remarks = task?.remarks?.Replace("\r\n", "\t");
+                            task.remarks = task?.remarks?.Replace("\n", "\t");
                             //重复工单
                             if (!allTaskIds.Add(task.taskId)) {
                                 delTasks.Add(task);
@@ -986,7 +1020,7 @@ namespace HmiPro.Redux.Cores {
                     status = "开始生产",
                 };
             }
-            Logger.Info("通知服务器开始任务：" + JsonConvert.SerializeObject(uManu));
+            Logger.Info("通知服务器开始任务: " + uManu.axisName);
             App.Store.Dispatch(mqEffects.UploadSchTaskManu(new MqActions.UploadSchTaskManu(HmiConfig.QueWebSrvPropSave, uManu)));
         }
 

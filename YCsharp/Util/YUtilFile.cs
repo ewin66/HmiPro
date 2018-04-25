@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -242,6 +243,30 @@ namespace YCsharp.Util {
                 }
             }
             return len;
+        }
+
+        /// <summary>
+        /// 检查 url 对应的文件是否存在
+        /// 比如 "http://192.168.0.15:9898/images/test.jpg"
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static Task<bool> CheckHttpFileExist(string url) {
+            return Task.Run(() => {
+                HttpWebResponse response = null;
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "HEAD";
+                try {
+                    response = (HttpWebResponse)request.GetResponse();
+                } catch (WebException ex) {
+                    return false;
+                } finally {
+                    if (response != null) {
+                        response.Close();
+                    }
+                }
+                return (response?.StatusCode == HttpStatusCode.OK);
+            });
         }
     }
 }

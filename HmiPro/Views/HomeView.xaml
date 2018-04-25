@@ -11,7 +11,7 @@
              x:Class="HmiPro.Views.Dx.HomeView"
              mc:Ignorable="d"
              DataContext="{dxmvvm:ViewModelSource Type={x:Type viewModels:HomeViewModel}}"
-             d:DesignHeight="600" d:DesignWidth="800">
+             d:DesignHeight="600" d:DesignWidth="1200">
     <dxmvvm:Interaction.Behaviors>
         <dxmvvm:ApplicationJumpListService ShowFrequentCategory="True" ShowRecentCategory="True"/>
         <dx:DialogService DialogWindowStartupLocation="CenterScreen">
@@ -52,6 +52,9 @@
                 </dxlc:Tile>
                 <dxlc:Tile Header="系统管理"  Style="{StaticResource HorizontalTile}"  Background="#087688"  Command="{Binding NavigateCommand}" CommandParameter="TestView">
                     <BitmapImage UriSource="{Binding Assets.IconPrivacy}" />
+                </dxlc:Tile>
+                <dxlc:Tile Header="日志管理"  Style="{StaticResource HorizontalTile}"  Background="#088655"  Command="{Binding NavigateCommand}" CommandParameter="LogView">
+                    <BitmapImage UriSource="{Binding Assets.IconDoc}" />
                 </dxlc:Tile>
             </dxlc:TileLayoutControl>
         </Grid>

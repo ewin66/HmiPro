@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using HmiPro.Annotations;
 
 namespace HmiPro.Redux.Models {
     /// <summary>
@@ -10,7 +13,7 @@ namespace HmiPro.Redux.Models {
     /// <author>ychost</author>
     /// <date>2018-4-17</date>
     /// </summary>
-    public class Employee {
+    public class Employee : INotifyPropertyChanged {
         /// <summary>
         /// 人员关联的 Rfid
         /// </summary>
@@ -27,13 +30,31 @@ namespace HmiPro.Redux.Models {
         /// 打卡机台
         /// </summary>
         public string MachineCode { get; set; }
+
+        private string photo;
         /// <summary>
-        /// 招聘
+        /// 照片
         /// </summary>
-        public string Photo { get; set; }
+        public string Photo {
+            get => photo;
+
+            set {
+                if (photo != value) {
+                    photo = value;
+                    OnPropertyChanged(nameof(Photo));
+                }
+            }
+        }
         /// <summary>
         /// 打卡时间
         /// </summary>
         public DateTime PrintCardTime { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

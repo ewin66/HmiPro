@@ -39,9 +39,7 @@ namespace HmiPro.Helpers {
                 var sr = new StreamReader(stream);
                 var content = sr.ReadToEnd();
                 return content;
-            } catch (Exception e) {
-                //App.Logger.Error("http请求错误", e);
-                Console.WriteLine();
+            } catch {
             }
             return "Error";
         }
@@ -58,6 +56,8 @@ namespace HmiPro.Helpers {
                     string result = webClient.DownloadString(url);
                     return result;
                 } catch (Exception e) {
+                } finally {
+                    webClient.Dispose();
                 }
                 return "Error";
             });

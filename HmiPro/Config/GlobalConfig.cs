@@ -80,6 +80,7 @@ namespace HmiPro.Config {
                     setting.Od = row["Od"].ToString();
                     setting.CpmModuleIps = row["CpmModuleIps"].ToString().Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
                     setting.DPms = row["Dpms"].ToString().Split(new string[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
+                    setting.ProcessName = row["Process"]?.ToString();
                     //setting.StartTrayNum = int.Parse(row["StartTrayNum"].ToString());
                     MachineSettingDict[setting.Code] = setting;
                 }
@@ -105,7 +106,7 @@ namespace HmiPro.Config {
                     if (name == "栈板机台") {
                         PalletMachineCodes = value.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
                     } else if (name == "重启机台") {
-                        UpdateMustReartHmiNames = value.Split(new[] {"|"}, StringSplitOptions.RemoveEmptyEntries);
+                        UpdateMustReartHmiNames = value.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries);
                     }
 
                 }

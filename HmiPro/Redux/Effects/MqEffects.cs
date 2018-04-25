@@ -13,6 +13,7 @@ using HmiPro.Redux.Reducers;
 using HmiPro.Redux.Services;
 using Newtonsoft.Json;
 using Reducto;
+using YCsharp.Model.Procotol.SmParam;
 using YCsharp.Service;
 using YCsharp.Util;
 
@@ -352,8 +353,13 @@ namespace HmiPro.Redux.Effects {
                         }
                         uCpms.machineState = state;
                         uCpms.paramInfoList = new List<UploadParamInfo>();
+                        //如果底层没有采集到数据则不上传
+                        bool canUpload = false;
                         foreach (var cpmPair in machineCpms) {
                             var cpm = cpmPair.Value;
+                            if (cpm.ValueType == SmParamType.Signal && cpm.Code >= 500 && cpm.Code < 1000) {
+                                canUpload = true;
+                            }
                             var uInfo = new UploadParamInfo() {
                                 paramCode = cpm.Code.ToString(),
                                 paramName = cpm.Name,
@@ -364,8 +370,11 @@ namespace HmiPro.Redux.Effects {
                             uCpms.paramInfoList.Add(uInfo);
                         }
                         try {
-                            //Console.WriteLine($"上传Mq：Speed {uCpms.macSpeed} Timeff: {uCpms.TimeEff},SpeedEff：{uCpms.SpeedEff},QualityEff：{uCpms.QualityEff}");
-                            activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(uCpms));
+                            if (canUpload) {
+                                activeMq.SendP2POneMessage(instance.QueueName, JsonConvert.SerializeObject(uCpms));
+                            } else {
+                                App.Logger.Info("所有数据为空，不上传 Mq",false,ConsoleColor.White);
+                            }
                             App.Store.Dispatch(new MqActions.UploadCpmsSuccess());
                         } catch (Exception e) {
                             App.Store.Dispatch(new MqActions.UploadCpmsFailed() { Exp = e });

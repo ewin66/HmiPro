@@ -193,7 +193,9 @@ namespace HmiPro.Config {
         /// <summary>
         /// 静态文件服务器
         /// </summary>
-        [Required]public static string StaticServerUrl;
+        [Required] public static string StaticServerUrl;
+
+        [Required] public static string VerifyUrl = "http://192.168.88.14:8899/verify.txt";
     }
 
 }

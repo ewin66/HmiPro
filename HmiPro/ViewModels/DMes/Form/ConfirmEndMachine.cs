@@ -13,7 +13,11 @@ namespace HmiPro.ViewModels.DMes.Form {
     ///<date>2018-4-18</date>
     /// </summary>
     public class ConfirmEndMachine : BaseForm {
+        public ConfirmEndMachine(string message) {
+            this.Message = message;
+        }
         [Display(Name = "信息")]
-        public string Message { get; } = "确认打下机卡？";
+        public string Message { get; private set; } = "确认打下机卡？";
+
     }
 }

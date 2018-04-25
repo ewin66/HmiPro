@@ -26,6 +26,9 @@ namespace YCsharp {
             if (args?.Length == 0) {
                 args = new string[] { "StartHmiPro", "update-app", "clear-task" };
             }
+            var (s, d) = YUtil.CreateDynamic();
+            s.hello = "world";
+            Console.WriteLine(d["hello"]);
             var cmd = new Cmd();
             cmd.Action = args[0];
             cmd.Args = new { IsForced = true };

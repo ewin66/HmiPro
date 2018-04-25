@@ -1,0 +1,33 @@
+﻿<UserControl x:Class="HmiPro.Views.Sys.LogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             xmlns:sys="clr-namespace:HmiPro.ViewModels.Sys"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxwui="http://schemas.devexpress.com/winfx/2008/xaml/windowsui"
+             mc:Ignorable="d"
+             DataContext="{dxmvvm:ViewModelSource Type=sys:LogViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300">
+    <dxmvvm:Interaction.Behaviors>
+        <dxmvvm:DispatcherService />
+        <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
+    </dxmvvm:Interaction.Behaviors>
+    <dxwui:PageAdornerControl  Header="日志管理" ShowBackButton="True">
+        <dx:GroupFrame Header="程序日志" Margin="0,30,0,0">
+            <dxe:ListBoxEdit ItemsSource="{Binding EventsLog}"  IsReadOnly="True"  Focusable="False" ShowBorder="False" >
+                <dxe:ListBoxEdit.ItemContainerStyle>
+                    <Style TargetType="dxe:ListBoxEditItem" BasedOn="{StaticResource ResourceKey={x:Type dxe:ListBoxEditItem}}">
+                    </Style>
+                </dxe:ListBoxEdit.ItemContainerStyle>
+                <dxe:ListBoxEdit.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=.}" FontSize="10" Margin="0,0,0,0" Height="15" Padding="0,0,0,0" />
+                    </DataTemplate>
+                </dxe:ListBoxEdit.ItemTemplate>
+            </dxe:ListBoxEdit>
+        </dx:GroupFrame>
+    </dxwui:PageAdornerControl>
+</UserControl>

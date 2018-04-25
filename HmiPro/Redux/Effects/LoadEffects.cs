@@ -184,14 +184,17 @@ namespace HmiPro.Redux.Effects {
             bool isMqEffectsStarted = false;
             Timer updateTimer = null;
             updateTimer = YUtil.SetInterval(500, () => {
-                p += 0.01;
-                updateLoadingMessage("正在连接服务器...", p, 0);
-                Logger.Debug("正在连接服务器..." + p.ToString("P1"));
+                if (!isMqEffectsStarted) {
+                    p += 0.01;
+                    updateLoadingMessage("正在连接服务器...", p, 0);
+                    Logger.Debug("正在连接服务器..." + p.ToString("P1"));
+                }
                 if (isMqEffectsStarted || p > 0.64) {
                     YUtil.ClearTimeout(updateTimer);
                 }
             });
             isMqEffectsStarted = Task.WaitAll(new[] { task }, 10000);
+            YUtil.ClearTimeout(updateTimer);
             if (!isMqEffectsStarted) {
                 updateLoadingMessage("连接 Mq 超时...", 0.6);
                 App.Store.Dispatch(new SysActions.AddMarqueeMessage(SysActions.MARQUEE_CONECT_MQ_TIMEOUT, "Mq 连接超时"));
@@ -199,6 +202,12 @@ namespace HmiPro.Redux.Effects {
                 return;
             }
 
+            updateLoadingMessage("正在注册程序...", 0.65);
+            if (!await YUtil.CheckHttpFileExist(HmiConfig.StaticServerUrl + "/verify.txt")) {
+                updateLoadingMessage("程序启动失败，请联系管理员", 0.66);
+                restartAppAfterSec(10, 0.66, "程序启动失败，请联系管理员");
+                return;
+            }
             UnityIocService.ResolveDepend<DMesCore>().Init();
             UnityIocService.ResolveDepend<AlarmCore>().Init();
             UnityIocService.ResolveDepend<CpmCore>().Init();

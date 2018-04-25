@@ -228,6 +228,21 @@ namespace YCsharp.Service {
             if (OutConsole) {
                 Console.Write(content);
             }
+            logoutAction?.Invoke(content);
+        }
+
+        private static Action<string> logoutAction;
+
+        /// <summary>
+        /// 订阅日志输出动作，每个日志输出都会受到消息通知
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public static Action Subscribe(Action<string> action) {
+            logoutAction += action;
+            return () => {
+                logoutAction -= action;
+            };
         }
 
         public static readonly object FileOutLock = new object();

@@ -2,7 +2,7 @@
 <AuProject xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <UpdateInfo>
     <AppName>HmiPro</AppName>
-    <AppVersion>3.2.2356.6682</AppVersion>
+    <AppVersion>3.2.2527.6689</AppVersion>
     <FileExecuteBefore />
     <FileExecuteAfter>HmiPro.exe</FileExecuteAfter>
     <ExecuteTimeout>0</ExecuteTimeout>
@@ -1463,6 +1463,6 @@
   <VersionUpdateSrc>..\HmiPro\bin\Debug\HmiPro.exe</VersionUpdateSrc>
   <PackageExtension>zip</PackageExtension>
   <UseRandomPackageNaming>true</UseRandomPackageNaming>
-  <CleanBeforeBuild>false</CleanBeforeBuild>
+  <CleanBeforeBuild>true</CleanBeforeBuild>
   <ComponentFlags />
 </AuProject>

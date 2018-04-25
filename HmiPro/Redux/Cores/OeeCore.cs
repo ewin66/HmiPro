@@ -94,7 +94,7 @@ namespace HmiPro.Redux.Cores {
                 timeEff = (float)((runTimeSec - debugTimeSec) / (DateTime.Now - workTime).TotalSeconds);
 
 
-                Logger.Debug($"当班时间：{(DateTime.Now - workTime).TotalHours} 小时，机台运行时间 {cpms[DefinedParamCode.RunTime].Value} 小时");
+                Logger.Debug($"当班时间：{(DateTime.Now - workTime).TotalHours.ToString("0.00")} 小时，机台运行时间 {cpms[DefinedParamCode.RunTime].GetFloatVal().ToString("0.00")} 小时");
             }
             return timeEff;
         }

@@ -19,7 +19,7 @@
         <dxmvvm:EventToCommand EventName="Loaded" Command="{Binding OnLoadedCommand}"/>
     </dxmvvm:Interaction.Behaviors>
     <dxwui:PageAdornerControl  Header="系统管理" ShowBackButton="True">
-        <Grid>
+        <Grid Margin="0,35,0,0">
             <dxlc:FlowLayoutControl BreakFlowToFit="True" HorizontalAlignment="Center" >
                 <Button Height="50" Width="200" Content="打开报警灯 2s" Command="{Binding Path=OpenAlarmCommand}" CommandParameter="2000"></Button>
                 <Button Content="关闭报警灯" Height="50" Width="200" Command="{Binding Path=CloseAlarmCommand}"></Button>
@@ -38,6 +38,7 @@
                 <Button Content="关闭Loading2" Height="50" Width="200" Command="{Binding Path=CloseLoadingSplashCommand2}"  ></Button>
                 <Button Content="隐藏桌面" Height="50" Width="200" Command="{Binding Path=HideDesktopCommand}"  ></Button>
                 <Button Content="显示桌面" Height="50" Width="200" Command="{Binding Path=ShowDesktopCommand}"  ></Button>
+                <Button Content="同时时间" Height="50" Width="200" Command="{Binding Path=SyncTimeCommand}"  ></Button>
                 <Button Content="关闭软件" Height="50" Width="200" Command="{Binding Path=CloseAppCommand}"  ></Button>
                 <Button Content="关闭电脑" Height="50" Width="200" Command="{Binding Path=ClosePcCommand}"  ></Button>
                 <Button Content="删除程序！！危险" Height="50" Width="200" Command="{Binding Path=DeleteAppCommand}"  ></Button>

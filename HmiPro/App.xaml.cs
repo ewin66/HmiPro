@@ -87,7 +87,7 @@ namespace HmiPro {
                 if (HmiConfig.IsDevUserEnv) {
                     asylumnArgs = "--autostart false --HmiPath " + YUtil.GetAbsolutePath(".\\HmiPro.exe");
                 }
-                YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylum\Asylum.exe"), asylumnArgs);
+                //YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylum\Asylum.exe"), asylumnArgs);
             }
 
             Store = UnityIocService.ResolveDepend<StorePro<AppState>>();

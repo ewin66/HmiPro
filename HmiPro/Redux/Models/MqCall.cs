@@ -24,9 +24,9 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public string callAction { get; set; }
         /// <summary>
-        /// 呼叫参数，暂时没有使用
+        /// 呼叫参数
         /// </summary>
-        public object callArgs{ get; set; }
+        public object callArgs { get; set; }
         /// <summary>
         /// 呼叫Id
         /// </summary>
@@ -38,6 +38,8 @@ namespace HmiPro.Redux.Models {
     /// </summary>
     public static class MqCallAction {
         public static readonly string MovePallet = "叉走栈板";
+        public static readonly string ProcessCheck = "制程质检";
+
     }
 
     /// <summary>
@@ -47,6 +49,7 @@ namespace HmiPro.Redux.Models {
         public static readonly string Forklift = "叉车";
         public static readonly string Repair = "维修";
         public static readonly string RepairComplete = "维修完成";
+        public static readonly string QualityCheck = "质检";
     }
 
 }

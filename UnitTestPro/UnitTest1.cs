@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics.Tracing;
 using System.Windows;
+using HmiPro.Redux.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 
 namespace UnitTestPro {
     [TestClass]
@@ -11,7 +13,14 @@ namespace UnitTestPro {
             var source = new Subscriber2();
             source.Test();
         }
-
+        [TestMethod()]
+        public void testJson() {
+            MqProcessCheckResult pr = new MqProcessCheckResult() {
+                detectionItem = "hehe",
+                pass = "合格"
+            };
+            Console.WriteLine(JsonConvert.SerializeObject(pr));
+        }
 
     }
     public class Subscriber1 {
@@ -98,7 +107,10 @@ namespace UnitTestPro {
                 Console.WriteLine(args?.Data?.ToString());
             }
         }
+
     }
+
+
 
 }
 

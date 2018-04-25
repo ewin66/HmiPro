@@ -42,7 +42,7 @@ namespace HmiPro.Redux.Models {
         public static readonly int NoteMeter = -108;
 
         public static bool IsRfidParam(int paramCode) {
-            return paramCode == StartAxisRfid || paramCode == EndAxisRfid || paramCode == EmpRfid;
+            return paramCode == StartAxisRfid || paramCode == EndAxisRfid || paramCode == EmpRfid || paramCode == 1002;
         }
     }
 

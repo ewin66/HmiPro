@@ -82,5 +82,26 @@ namespace HmiPro.Config.Models {
         /// 放线盘的数量
         /// </summary>
         public int StartTrayNum { get; set; } = 1;
+
+        /// <summary>
+        /// 所属工序名称，制程质检会用到
+        /// </summary>
+        public string ProcessName { get; set; }
+    }
+
+    /// <summary>
+    /// 制程质检
+    /// </summary>
+    public class ProcessQi {
+        public ProcessQiType Type;
+        public string Value;
+    }
+
+    /// <summary>
+    /// 制程质检类型，输入或者选择
+    /// </summary>
+    public enum ProcessQiType {
+        Slect,
+        Input
     }
 }

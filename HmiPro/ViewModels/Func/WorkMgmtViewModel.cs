@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows;
 using DevExpress.Mvvm.DataAnnotations;
 using DevExpress.Mvvm;
 using HmiPro.Config;
@@ -12,6 +13,7 @@ using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
 using HmiPro.ViewModels.DMes.Form;
 using Reducto;
+using YCsharp.Util;
 
 namespace HmiPro.ViewModels.Func {
     [POCOViewModel]
@@ -28,7 +30,7 @@ namespace HmiPro.ViewModels.Func {
                         MachineCode = mqEmpRfid.macCode,
                         Rfid = mqEmpRfid.employeeCode,
                         Name = mqEmpRfid.name,
-                        Photo = $"{HmiConfig.StaticServerUrl}/images/{mqEmpRfid.name}.jpg",
+                        Photo = $"{HmiConfig.StaticServerUrl}/images/{mqEmpRfid.name}.png",
                         PrintCardTime = mqEmpRfid.PrintTime
                     };
                     Employees.Add(emp);
@@ -45,8 +47,11 @@ namespace HmiPro.ViewModels.Func {
         /// <param name="action"></param>
         void whenRfidAccept(AppState state, IAction action) {
             var mqRfid = (DMesActions.RfidAccpet)action;
-            App.Current.Dispatcher.Invoke(() => {
-
+            if (mqRfid.RfidType != DMesActions.RfidType.EmpStartMachine &&
+                mqRfid.RfidType != DMesActions.RfidType.EmpEndMachine) {
+                return;
+            }
+            Application.Current.Dispatcher.Invoke(() => {
                 if (mqRfid.RfidType == DMesActions.RfidType.EmpStartMachine && mqRfid.MqData != null) {
                     var mqData = (MqEmpRfid)mqRfid.MqData;
                     //重复打卡无效
@@ -56,7 +61,7 @@ namespace HmiPro.ViewModels.Func {
                     Employee emp = new Employee() {
                         MachineCode = mqData.macCode,
                         Name = mqData.name,
-                        Photo = $"{HmiConfig.StaticServerUrl}/images/{mqData.name}.jpg",
+                        Photo = $"{HmiConfig.StaticServerUrl}/images/{mqData.name}.png",
                         Rfid = mqData.employeeCode,
                         PrintCardTime = mqData.PrintTime
                     };
@@ -72,13 +77,30 @@ namespace HmiPro.ViewModels.Func {
             });
         }
 
+        async void updatePhoto() {
+            foreach (var employee in this.Employees) {
+                var url = $"{HmiConfig.StaticServerUrl}/images/{employee.Name}.png";
+                var isExist = await YUtil.CheckHttpFileExist(url);
+                Application.Current.Dispatcher.Invoke(() => {
+                    if (isExist) {
+                        employee.Photo = url;
+                    } else {
+                        employee.Photo = null;
+                    }
+                });
+            }
+        }
+
         /// <summary>
         /// 双击头像，确认更新员工上下班状态
         /// </summary>
         [Command(Name = "ConfirmEmpStatusCommand")]
         public void ConfirmEmpStatus(object data) {
+            if (data == null) {
+                return;
+            }
             var emp = data as Employee;
-            var frm = new ConfirmEndMachine() {
+            var frm = new ConfirmEndMachine(emp.Name + $" 确认打机台 {emp.MachineCode} 下机卡？") {
                 OnOkPressed = async (f) => {
                     //请求服务器相关 Rfid 的信息
                     //服务器会自动通知

@@ -15,6 +15,7 @@ using HmiPro.Redux.Cores;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
 using HmiPro.ViewModels.DMes.Form;
+using HmiPro.ViewModels.DMes.Form.ProcessQi;
 using HmiPro.ViewModels.DMes.Tab;
 using HmiPro.ViewModels.Sys;
 using HmiPro.Views.DMes;
@@ -45,6 +46,7 @@ namespace HmiPro.ViewModels.DMes {
         public virtual Com485Tab Com485Tab { get; set; } = new Com485Tab() { Header = "通讯" };
         public virtual DpmsTab DpmsTab { get; set; } = new DpmsTab() { Header = "设置" };
         public virtual CpmDetailTab CpmDetailTab { get; set; } = new CpmDetailTab() { Header = "曲线" };
+        public virtual ProcessQiTab ProcessQiTab { get; set; } = new ProcessQiTab() { Header = "制程" };
         //public virtual WireOdPieTab WireOdPieTab { get; set; } = new WireOdPieTab() { Header = "线径" };
         private Unsubscribe unsubscribe;
         readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
@@ -64,15 +66,17 @@ namespace HmiPro.ViewModels.DMes {
             //ViewSource.Add(DpmsTab);
             ViewSource.Add(CpmDetailTab);
             //ViewSource.Add(WireOdPieTab);
+            ViewSource.Add(ProcessQiTab);
 
             actionExecDict[DMesActions.RFID_ACCPET] = whenRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccpet;
             actionExecDict[DMesActions.CLEAR_SCH_TASKS] = clearSchTask;
             actionExecDict[CpmActions.UNREGISTERED_IP_ACTIVE] = unRegIpActived;
             actionExecDict[MqActions.SCH_TASK_REPLACED] = whenSchTaskReplaced;
+
         }
 
-
+        private ProcessLs pls = new ProcessLs();
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
             //绑定实时参数
@@ -108,6 +112,9 @@ namespace HmiPro.ViewModels.DMes {
 
             ////绑定曲线参数界面
             CpmDetailTab.BindSource(MachineCode, onlineCpmsDict[MachineCode]);
+ 
+
+            ProcessQiTab.BindSource(pls);
 
             //绑定选中的tab
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[MachineCode];

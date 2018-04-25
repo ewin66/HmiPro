@@ -36,6 +36,33 @@ namespace HmiPro.ViewModels.Sys {
         }
 
         /// <summary>
+        /// 同步时间
+        /// </summary>
+        [Command(Name = "SyncTimeCommand")]
+        public void SyncTime() {
+            Task.Run(() => {
+                try {
+                    //获取服务器时间
+                    var ntpTime = YUtil.GetNtpTime(HmiConfig.NtpIp);
+                    App.StartupLog.SyncServerTime = ntpTime;
+                    //时间差超过10秒才同步时间
+                    if (Math.Abs((DateTime.Now - ntpTime).TotalSeconds) > 10) {
+                        YUtil.SetLoadTimeByDateTime(ntpTime);
+                    }
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "通知",
+                        Content = "同步时间成功"
+                    }));
+                } catch (Exception e) {
+                    App.Store.Dispatch(new SysActions.ShowNotification(new SysNotificationMsg() {
+                        Title = "警告",
+                        Content = "同步时间失败"
+                    }));
+                }
+            });
+        }
+
+        /// <summary>
         /// 打开物理报警灯
         /// </summary>
         /// <param name="ms">响铃毫秒数</param>

@@ -162,7 +162,7 @@ namespace HmiPro.ViewModels.Func {
                     }
                 }
             };
-            App.Store.Dispatch(new SysActions.ShowFormView("选择故障类型", frm));
+            App.Store.Dispatch(new SysActions.ShowFormView("选择故障类型", frm, false));
         }
     }
 }

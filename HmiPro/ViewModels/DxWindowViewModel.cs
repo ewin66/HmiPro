@@ -174,6 +174,8 @@ namespace HmiPro.ViewModels {
             actionExecutors[SysActions.SET_LOADING_MESSAGE] = doSetLoadingMessage;
             actionExecutors[SysActions.CHANGE_WINDOW_BACKGROUND_IMAGE] = doChangeBackground;
             actionExecutors[SysActions.SET_LOADING_VIEW_STATE] = doSetLoadingViewState;
+            actionExecutors[MqActions.UPLOAD_CPMS_FAILED] = whenMqUploadFailed;
+            actionExecutors[MqActions.UPLOAD_CPMS_SUCCESS] = whenMqUploadSuccess;
             Store.Subscribe(actionExecutors);
         }
 
@@ -208,6 +210,14 @@ namespace HmiPro.ViewModels {
             Navigate(nameof(HomeView));
         }
 
+        void whenMqUploadFailed(AppState stata, IAction action) {
+            App.Store.Dispatch(new SysActions.AddMarqueeMessage(MqActions.UPLOAD_CPMS_FAILED, "Mq连接超时"));
+        }
+
+        void whenMqUploadSuccess(AppState state, IAction action) {
+            App.Store.Dispatch(new SysActions.DelMarqueeMessage(MqActions.UPLOAD_CPMS_FAILED));
+        }
+
         /// <summary>
         /// 与守护进程相互保活
         /// </summary>
@@ -217,7 +227,7 @@ namespace HmiPro.ViewModels {
                 if (HmiConfig.IsDevUserEnv) {
                     asylumnArgs = "--autostart false --HmiPath " + YUtil.GetAbsolutePath(".\\HmiPro.exe");
                 }
-                YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylum\Asylum.exe"), asylumnArgs);
+                YUtil.Exec(YUtil.GetAbsolutePath(@".\Asylum\Asylum.exe"), asylumnArgs, ProcessWindowStyle.Minimized);
             } else {
                 var pipeEffects = UnityIocService.ResolveDepend<PipeEffects>();
                 //给守护进程发送心跳

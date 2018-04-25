@@ -67,6 +67,7 @@ namespace HmiPro.Config {
         public string IconV => ImagesFolder + "\\v.ico";
         public string IconForklift => ImagesFolder + "\\forklift.ico";
         public string IconWorker => ImagesFolder + "\\worker.ico";
+        public string IconDoc => ImagesFolder + "\\doc.ico";
 
         //一些图片
         public string ImageBackground => ImagesFolder + "\\background.jpg";

@@ -21,7 +21,10 @@ namespace HmiPro.Redux.Models {
         /// </summary>
         public string taskId { get; set; }
         public static readonly string DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
-
+        /// <summary>
+        /// 制程质检
+        /// </summary>
+        public List<MqProcessCheck> iqcList { get; set; }
         /// <summary>
         /// 当前任务序号
         /// </summary>
@@ -329,6 +332,23 @@ namespace HmiPro.Redux.Models {
         /// 
         /// </summary>
         public string axiscode { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int level { get; set; }
+
+        public string Level {
+            get {
+                if (level != 0) {
+                    return level.ToString();
+                }
+                return "/";
+            }
+            set {
+
+            }
+        }
         /// <summary>
         /// 任务 Id
         /// </summary>
@@ -457,6 +477,38 @@ namespace HmiPro.Redux.Models {
         public static readonly string Doing = "正在生产...";
         public static readonly string Completed = "完成生产";
         public static readonly string WaitDoing = "等待生产";
+    }
+
+    public class ProcessCheck {
+        /// <summary>
+        /// 项目名称
+        /// </summary>
+        public string itemName { get; set; }
+        /// <summary>
+        /// 检验类型
+        /// </summary>
+        public string checkType { get; set; }
+        /// <summary>
+        /// 如果检查类型为 select 则该项不为空
+        /// </summary>
+        public string[] selectTypes { get; set; }
+        /// <summary>
+        /// 标准值
+        /// </summary>
+        public float? stdValue { get; set; }
+        /// <summary>
+        /// 最大值
+        /// </summary>
+        public float? maxValue { get; set; }
+        /// <summary>
+        /// 最小值
+        /// </summary>
+        public float? minValue { get; set; }
+    }
+
+    public static class ProcessCheckTypes {
+        public static string select = "select";
+        public static string input = "input";
     }
 
 }

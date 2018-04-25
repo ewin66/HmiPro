@@ -15,6 +15,9 @@ namespace YCsharp.Util {
     /// <author>ychost</author>
     /// </summary>
     public static partial class YUtil {
+        static YUtil() {
+
+        }
 
         /// <summary>
         /// 获取系统环境变量
@@ -86,7 +89,7 @@ namespace YCsharp.Util {
             };
         }
 
-   
+
 
 
         /// <summary>
@@ -125,6 +128,6 @@ namespace YCsharp.Util {
             return (expando, expandoDict);
         }
 
-     
+
     }
 }
