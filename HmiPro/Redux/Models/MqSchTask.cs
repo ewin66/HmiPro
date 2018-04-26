@@ -148,22 +148,11 @@ namespace HmiPro.Redux.Models {
 
         public string PdTimeStr { get; set; }
 
-        /// <summary>
-        /// 实际开始时间
-        /// </summary>
-        public string fdtime { get; set; }
-        /// <summary>
-        /// 实际结束时间
-        /// </summary>
-        public string fstime { get; set; }
+      
         /// <summary>
         /// 
         /// </summary>
         public int step { get; set; }
-        /// <summary>
-        /// 
-        /// </summary>
-        public int fspeed { get; set; }
         /// <summary>
         /// 机台编码
         /// </summary>
@@ -477,38 +466,6 @@ namespace HmiPro.Redux.Models {
         public static readonly string Doing = "正在生产...";
         public static readonly string Completed = "完成生产";
         public static readonly string WaitDoing = "等待生产";
-    }
-
-    public class ProcessCheck {
-        /// <summary>
-        /// 项目名称
-        /// </summary>
-        public string itemName { get; set; }
-        /// <summary>
-        /// 检验类型
-        /// </summary>
-        public string checkType { get; set; }
-        /// <summary>
-        /// 如果检查类型为 select 则该项不为空
-        /// </summary>
-        public string[] selectTypes { get; set; }
-        /// <summary>
-        /// 标准值
-        /// </summary>
-        public float? stdValue { get; set; }
-        /// <summary>
-        /// 最大值
-        /// </summary>
-        public float? maxValue { get; set; }
-        /// <summary>
-        /// 最小值
-        /// </summary>
-        public float? minValue { get; set; }
-    }
-
-    public static class ProcessCheckTypes {
-        public static string select = "select";
-        public static string input = "input";
     }
 
 }

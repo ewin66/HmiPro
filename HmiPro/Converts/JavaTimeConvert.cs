@@ -21,7 +21,7 @@ namespace HmiPro.Converts {
             }
             try {
                 var time = (JavaTime)value;
-                var dateTime = YUtil.TimestampToUtcTime(time.time);
+                var dateTime = YUtil.UtcTimestampToLocalTime(time.time);
                 var format = "yyyy-MM-dd HH:mm:ss";
                 if (parameter != null && parameter is string formatParam) {
                     format = formatParam;

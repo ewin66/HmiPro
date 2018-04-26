@@ -18,5 +18,6 @@
     <converts:ImageConvert x:Key="ImageConvert"></converts:ImageConvert>
     <converts:JavaTimeConvert x:Key="JavaTimeConvert"></converts:JavaTimeConvert>
     <converts:StringFormatConvert x:Key="StringFormatConvert" />
+    <converts:StringEqualsConvert x:Key="StringEqualsConvert"></converts:StringEqualsConvert>
 
 </ResourceDictionary>

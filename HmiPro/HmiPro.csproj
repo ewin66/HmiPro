@@ -181,6 +181,7 @@
     <Compile Include="Converts\MultiParamsConvert.cs" />
     <Compile Include="Converts\PercentConvert.cs" />
     <Compile Include="Converts\PictureConvert.cs" />
+    <Compile Include="Converts\StringEqualsConvert.cs" />
     <Compile Include="Converts\StringFormatConvert.cs" />
     <Compile Include="DxWindow.xaml.cs">
       <DependentUpon>DxWindow.xaml</DependentUpon>
@@ -276,14 +277,13 @@
     <Compile Include="ViewModels\DMes\Form\CompleteAxisForm.cs" />
     <Compile Include="ViewModels\DMes\Form\ConfirmEndMachine.cs" />
     <Compile Include="ViewModels\DMes\Form\PalletConfirmForm.cs" />
-    <Compile Include="ViewModels\DMes\Form\ProcessQi\ProcessLs.cs" />
     <Compile Include="ViewModels\DMes\Tab\AlarmTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\BaseTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\Com485Tab.cs" />
     <Compile Include="ViewModels\DMes\Tab\CpmDetailTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\CpmsTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\DpmsTab.cs" />
-    <Compile Include="ViewModels\DMes\Tab\ProcessQiTab.cs" />
+    <Compile Include="ViewModels\DMes\Tab\ProcessCheckTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\ScanMaterialTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\SchTaskTab.cs" />
     <Compile Include="ViewModels\DMes\Tab\WireOdPieTab.cs" />
@@ -307,6 +307,10 @@
       <DependentUpon>CraftBomView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\DMes\CraftBomViewModel.cs" />
+    <Compile Include="Views\DMes\ProcessCheckView.xaml.cs">
+      <DependentUpon>ProcessCheckView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\DMes\ProcessCheckViewModel.cs" />
     <Compile Include="Views\DMes\SchTaskAxisView.xaml.cs">
       <DependentUpon>SchTaskAxisView.xaml</DependentUpon>
     </Compile>
@@ -403,6 +407,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DMes\CraftBomView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DMes\ProcessCheckView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -844,7 +852,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_DetectChanges="False" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.Increment.DeltaBaseDateInDays" BuildVersion_UpdateAssemblyVersion="True" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" BuildVersion_AssemblyInfoFilename="Properties\AssemblyInfo.cs" BuildVersion_DetectChanges="False" />
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>

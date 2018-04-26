@@ -116,7 +116,7 @@ namespace HmiPro.ViewModels {
             if (viewName == nameof(DMesCoreView)) {
                 var vm = DMesCoreViewModel.Create(App.Store.GetState().ViewStoreState.NavView.DMesSelectedMachineCode);
                 NavigationSerivce.Navigate(nameof(DMesCoreView), vm, null, this, true);
-            } else if (viewName == nameof(TestView)) {
+            } else if (viewName == nameof(TestView) && !MachineConfig.HmiName.Contains("DA")) {
                 App.Store.Dispatch(new SysActions.ShowFormView("请输入密码", new PasswordForm() { OnOkPressed = tryJumpToTestView }));
             } else {
                 NavigationSerivce.Navigate(viewName, null, this, true);

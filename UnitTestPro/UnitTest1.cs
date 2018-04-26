@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Tracing;
 using System.Windows;
 using HmiPro.Redux.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using YCsharp.Util;
 
 namespace UnitTestPro {
     [TestClass]
@@ -14,15 +17,19 @@ namespace UnitTestPro {
             source.Test();
         }
         [TestMethod()]
-        public void testJson() {
-            MqProcessCheckResult pr = new MqProcessCheckResult() {
-                detectionItem = "hehe",
-                pass = "合格"
-            };
-            Console.WriteLine(JsonConvert.SerializeObject(pr));
+        public void javaTimeTest() {
+            Console.WriteLine(YUtil.UtcTimestampToLocalTime(1524712304000));
         }
 
+        [TestMethod()]
+        public void desJsonTest()
+        {
+            string json = "";
+            var pcs = JsonConvert.DeserializeObject<ObservableCollection<MqSchTask>>(json);
+            Console.WriteLine(pcs.Count);
+        }
     }
+
     public class Subscriber1 {
         public Action<string> actions;
 

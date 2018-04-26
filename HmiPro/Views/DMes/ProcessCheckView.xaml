@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="HmiPro.Views.DMes.ProcessCheckView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+             xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="1080">
+    <UserControl.Resources>
+        <dxmvvm:ObjectToObjectConverter x:Key="selectStyle" DefaultTarget="Collapsed">
+            <dxmvvm:MapItem Source="select" Target="Visible"/>
+        </dxmvvm:ObjectToObjectConverter>
+        <dxmvvm:ObjectToObjectConverter x:Key="inputStyle" DefaultTarget="Collapsed">
+            <dxmvvm:MapItem Source="input" Target="Visible"/>
+        </dxmvvm:ObjectToObjectConverter>
+    </UserControl.Resources>
+    <Grid>
+        <dxlc:LayoutControl Orientation="Vertical">
+            <dxlc:LayoutGroup Orientation="Vertical" HorizontalAlignment="Center" Header="工单"  Width="300" >
+                <dxlc:LayoutItem Label="工单" AddColonToLabel="True">
+                    <dxe:ComboBoxEdit IsReadOnly="false" IsTextEditable="False" ItemsSource="{Binding Path=Workcodes}" SelectedIndex="{Binding Path=SelectedIndex}"></dxe:ComboBoxEdit>
+                </dxlc:LayoutItem>
+            </dxlc:LayoutGroup>
+            <dxlc:LayoutGroup Header="检测项">
+                <dxg:GridControl Background="Transparent"  ItemsSource="{Binding Path=ProcessCheckItems}"  >
+                    <dxg:GridControl.View>
+                        <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False"  />
+                    </dxg:GridControl.View>
+                    <dxg:GridControl.Columns >
+                        <dxg:GridColumn Width="*"  Header="检测项目" FieldName="detectionItem"/>
+                        <dxg:GridColumn Width="*" Header="要求" FieldName="produceCod">
+                            <dxg:GridColumn.DisplayTemplate>
+                                <ControlTemplate>
+                                    <dxe:TextEdit Text="{Binding Path=RowData.Row.produceCod}" />
+                                </ControlTemplate>
+                            </dxg:GridColumn.DisplayTemplate>
+                        </dxg:GridColumn>
+                        <dxg:GridColumn Width="*" Header="检测值" >
+                            <dxg:GridColumn.DisplayTemplate>
+                                <ControlTemplate>
+                                    <Grid>
+                                        <dxe:TextEdit Text="{Binding Path=RowData.Row.produceResult}" Visibility="{Binding Path=RowData.Row.produceType,Converter={StaticResource inputStyle}}"/>
+                                        <dxe:ComboBoxEdit IsTextEditable="False" Visibility="{Binding Path=RowData.Row.produceType,Converter={StaticResource selectStyle}}" ItemsSource="{Binding Path=RowData.Row.selectParamArr}" SelectedIndex="{Binding Path=RowData.Row.selectIndex}"></dxe:ComboBoxEdit>
+                                    </Grid>
+                                </ControlTemplate>
+                            </dxg:GridColumn.DisplayTemplate>
+                        </dxg:GridColumn>
+                        <dxg:GridColumn Width="*" Header="单位" FieldName="unit" />
+                        <dxg:GridColumn Width="*" Header="合格" FieldName="passSelect">
+                            <dxg:GridColumn.DisplayTemplate>
+                                <ControlTemplate>
+                                    <dxe:ComboBoxEdit IsTextEditable="False" ItemsSource="{Binding Path=RowData.Row.passSelect}"
+                                        SelectedIndex="{Binding Path=RowData.Row.passSelectIndex}"></dxe:ComboBoxEdit>
+                                </ControlTemplate>
+                            </dxg:GridColumn.DisplayTemplate>
+                        </dxg:GridColumn>
+                    </dxg:GridControl.Columns>
+                </dxg:GridControl>
+            </dxlc:LayoutGroup>
+        </dxlc:LayoutControl>
+    </Grid>
+</UserControl>

@@ -1,5 +1,10 @@
 ﻿
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using DevExpress.Mvvm;
+using HmiPro.Annotations;
 
 namespace HmiPro.Redux.Models {
     /// <summary>
@@ -7,34 +12,136 @@ namespace HmiPro.Redux.Models {
     /// <author>ychost</author>
     /// <date>2018-4-25</date>
     /// </summary>
-    public class MqProcessCheck {
-        public string seqCode { get; set; } // 工序编号
-        public string seqName { get; set; } // 工序名称
-        public string proGgxh { get; set; } // 规格型号
-        public string detectionItem { get; set; } // 检测项
-        public string produceCod { get; set; } // 检测标准
-        public string produceType { get; set; } // 格式 input:select
-        public string selectParam { get; set; } // select的参数 以";"分隔
-        public string unit { get; set; } // 单位
-        public string[] selectParamArr { get; set; } // select参数数组
+    public class MqProcessCheck : INotifyPropertyChanged {
+        /// <summary>
+        /// 工序编号
+        /// </summary>
+        public string seqCode {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 工序名称
+        /// </summary>
+        public string seqName { get; set; }
+
+        /// <summary>
+        /// 规格型号
+        /// </summary>
+        public string proGgxh { get; set; }
+
+        /// <summary>
+        /// 检查项
+        /// </summary>
+        public string detectionItem { get; set; }
+
+        /// <summary>
+        /// 检测标准
+        /// </summary>
+        public string produceCod {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 格式，input/select
+        /// </summary>
+        public string produceType { get; set; }
+
+        /// <summary>
+        /// select 参数以 ',' 隔开
+        /// </summary>
+        public string selectParam { get; set; }
+        /// <summary>
+        /// 检测结果
+        /// </summary>
+        public string produceResult {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 单位
+        /// </summary>
+        public string unit {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// select 选项数组
+        /// </summary>
+        public string[] selectParamArr { get; set; }
+
+        private int _selectIndex;
+        /// <summary>
+        /// 用户选择
+        /// </summary>
+        public int selectIndex {
+            get => _selectIndex;
+            set {
+                if (_selectIndex != value) {
+                    _selectIndex = value;
+                    RaisePropertyChanged(nameof(selectIndex));
+                    if (_selectIndex < 0 || _selectIndex >= selectParamArr.Length) {
+                        return;
+                    }
+                    produceResult = selectParamArr[_selectIndex];
+                }
+            }
+        }
+
+        //--------------回传---------------
+        /// <summary>
+        /// 
+        /// </summary>
+        public string macCode { get; set; }
+        /// <summary>
+        /// 班次，白班，夜班
+        /// </summary>
+        public string classType { get; set; }
+        /// <summary>
+        /// 工单
+        /// </summary>
+        public string workCode {
+            get;
+            set;
+        }
+        /// <summary>
+        /// 是否合格，合格/不合格
+        /// </summary>
+        public string pass { get; set; }
+
+        private int _passSelectIndex = 0;
+
+        public int passSelectIndex {
+            get => _passSelectIndex;
+            set {
+                if (_passSelectIndex != value) {
+                    _passSelectIndex = value;
+                    if (_passSelectIndex < 0 || _passSelectIndex >= passSelect.Length) {
+                        return;
+                    }
+                    pass = passSelect[passSelectIndex];
+                    RaisePropertyChanged(nameof(passSelectIndex));
+                }
+            }
+        }
+        public string[] passSelect { get; set; }
+
+        public MqProcessCheck() {
+            passSelect = new[] { "合格", "不合格" };
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
-    /// <summary>
-    /// 制程质检 回传
-    /// <author>ychost</author>
-    /// <date>2018-4-25</date>
-    /// </summary>
-    public class MqProcessCheckResult {
-        public string workCode; // 工单
-        public string macCode; // 机台编号
-        public string classType; // 班次
-        public string seqCode;// 工序编码
-        public string seqName; // 工序名称
-        public string proGgxh; // 规格型号
-        public string detectionItem; // 检测项
-        public string produceCod; // 检测标准
-        public string produceResult; // 检测实际值
-        public string pass; // 是否合格 合格:不合格
-        public string unit; // 单位
-    }
+
+
 }

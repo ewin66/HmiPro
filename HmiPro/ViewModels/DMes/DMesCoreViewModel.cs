@@ -15,7 +15,6 @@ using HmiPro.Redux.Cores;
 using HmiPro.Redux.Models;
 using HmiPro.Redux.Reducers;
 using HmiPro.ViewModels.DMes.Form;
-using HmiPro.ViewModels.DMes.Form.ProcessQi;
 using HmiPro.ViewModels.DMes.Tab;
 using HmiPro.ViewModels.Sys;
 using HmiPro.Views.DMes;
@@ -46,7 +45,7 @@ namespace HmiPro.ViewModels.DMes {
         public virtual Com485Tab Com485Tab { get; set; } = new Com485Tab() { Header = "通讯" };
         public virtual DpmsTab DpmsTab { get; set; } = new DpmsTab() { Header = "设置" };
         public virtual CpmDetailTab CpmDetailTab { get; set; } = new CpmDetailTab() { Header = "曲线" };
-        public virtual ProcessQiTab ProcessQiTab { get; set; } = new ProcessQiTab() { Header = "制程" };
+        public virtual ProcessCheckTab ProcessCheckTab { get; set; } = new ProcessCheckTab() { Header = "制程" };
         //public virtual WireOdPieTab WireOdPieTab { get; set; } = new WireOdPieTab() { Header = "线径" };
         private Unsubscribe unsubscribe;
         readonly IDictionary<string, Action<AppState, IAction>> actionExecDict = new Dictionary<string, Action<AppState, IAction>>();
@@ -66,7 +65,7 @@ namespace HmiPro.ViewModels.DMes {
             //ViewSource.Add(DpmsTab);
             ViewSource.Add(CpmDetailTab);
             //ViewSource.Add(WireOdPieTab);
-            ViewSource.Add(ProcessQiTab);
+            ViewSource.Add(ProcessCheckTab);
 
             actionExecDict[DMesActions.RFID_ACCPET] = whenRfidAccept;
             actionExecDict[MqActions.SCAN_MATERIAL_ACCEPT] = whenScanMaterialAccpet;
@@ -76,7 +75,6 @@ namespace HmiPro.ViewModels.DMes {
 
         }
 
-        private ProcessLs pls = new ProcessLs();
         [Command(Name = "OnLoadedCommand")]
         public void OnLoaded() {
             //绑定实时参数
@@ -110,16 +108,18 @@ namespace HmiPro.ViewModels.DMes {
             //var dpms = App.Store.GetState().DpmStore.DpmsDict;
             //DpmsTab.BindSource(dpms[MachineCode]);
 
+            //绑定制程质检
+            unsubscribe += ProcessCheckTab.BindSource(MachineCode);
+
             ////绑定曲线参数界面
             CpmDetailTab.BindSource(MachineCode, onlineCpmsDict[MachineCode]);
- 
 
-            ProcessQiTab.BindSource(pls);
+
 
             //绑定选中的tab
             ViewStore = App.Store.GetState().ViewStoreState.DMewCoreViewDict[MachineCode];
 
-            unsubscribe = App.Store.Subscribe(actionExecDict, false);
+            unsubscribe += App.Store.Subscribe(actionExecDict, false);
             App.Store.Dispatch(new SysActions.CloseLoadingSplash());
         }
 

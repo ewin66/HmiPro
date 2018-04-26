@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using HmiPro.Controls;
+using Newtonsoft.Json;
 
 namespace HmiPro.Views.DMes {
     /// <summary>
@@ -34,5 +35,10 @@ namespace HmiPro.Views.DMes {
         //private void Button_Click_3(object sender, RoutedEventArgs e) {
         //    source.RemoveAt(3);
         //}
+
+        private void Control_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            Console.WriteLine(sender);
+        }
     }
 }

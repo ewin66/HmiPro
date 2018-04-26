@@ -24,7 +24,7 @@
                 </dxe:ListBoxEdit.ItemContainerStyle>
                 <dxe:ListBoxEdit.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Path=.}" FontSize="10" Margin="0,0,0,0" Height="15" Padding="0,0,0,0" />
+                        <TextBlock Text="{Binding Path=.}" FontSize="9" Margin="0,0,0,0" Height="14" Padding="0,0,0,0" />
                     </DataTemplate>
                 </dxe:ListBoxEdit.ItemTemplate>
             </dxe:ListBoxEdit>

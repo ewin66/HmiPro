@@ -190,12 +190,14 @@ namespace HmiPro.ViewModels {
             if (CmdOptions.GlobalOptions.MockVal) {
                 dispatchMockActions();
             }
-            YUtil.SetInterval(60000, () => {
-                //检查与服务器的连接
-                checkNetwork(HmiConfig.InfluxDbIp);
-                //守护进程保活
-                keepAsylumAlive();
-            }, true);
+            if (!HmiConfig.IsDevUserEnv) {
+                YUtil.SetInterval(60000, () => {
+                    //检查与服务器的连接
+                    checkNetwork(HmiConfig.InfluxDbIp);
+                    //守护进程保活
+                    keepAsylumAlive();
+                }, true);
+            }
             YUtil.SetInterval(3600000, () => {
                 //检查日志文件夹大小
                 checkLogFolderSize(HmiConfig.LogFolder, 500);

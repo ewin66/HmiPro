@@ -28,7 +28,7 @@ namespace HmiPro.ViewModels.Sys {
             unsubscribe = LoggerService.Subscribe(content => {
                 DispatcherService.BeginInvoke(() => {
                     EventsLog.Add(content.Replace("\r\n", ""));
-                    if (EventsLog.Count > 30)
+                    if (EventsLog.Count > 25)
                         EventsLog.RemoveAt(0);
                 });
 
