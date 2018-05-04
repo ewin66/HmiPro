@@ -90,7 +90,8 @@ namespace HmiPro.ViewModels {
         /// <summary>
         /// 页面加载事件命令
         /// </summary>
-        ICommand onViewLoadedCommand; public ICommand OnViewLoadedCommand {
+        ICommand onViewLoadedCommand;
+        public ICommand OnViewLoadedCommand {
             get {
                 if (onViewLoadedCommand == null)
                     onViewLoadedCommand = new DelegateCommand(OnViewLoaded);

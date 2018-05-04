@@ -30,7 +30,7 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 呼叫Id
         /// </summary>
-        public int CallId { get; set; }
+        public long CallId { get; set; }
     }
 
     /// <summary>

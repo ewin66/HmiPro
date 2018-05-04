@@ -16,10 +16,7 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 工序编号
         /// </summary>
-        public string seqCode {
-            get;
-            set;
-        }
+        public string seqCode { get; set; }
 
         /// <summary>
         /// 工序名称
@@ -39,10 +36,7 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 检测标准
         /// </summary>
-        public string produceCod {
-            get;
-            set;
-        }
+        public string produceCod { get; set; }
 
         /// <summary>
         /// 格式，input/select
@@ -53,48 +47,26 @@ namespace HmiPro.Redux.Models {
         /// select 参数以 ',' 隔开
         /// </summary>
         public string selectParam { get; set; }
-        /// <summary>
-        /// 检测结果
-        /// </summary>
-        public string produceResult {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// 单位
-        /// </summary>
-        public string unit {
-            get;
-            set;
-        }
 
         /// <summary>
         /// select 选项数组
         /// </summary>
         public string[] selectParamArr { get; set; }
 
-        private int _selectIndex;
         /// <summary>
-        /// 用户选择
+        /// 检测结果
         /// </summary>
-        public int selectIndex {
-            get => _selectIndex;
-            set {
-                if (_selectIndex != value) {
-                    _selectIndex = value;
-                    RaisePropertyChanged(nameof(selectIndex));
-                    if (_selectIndex < 0 || _selectIndex >= selectParamArr.Length) {
-                        return;
-                    }
-                    produceResult = selectParamArr[_selectIndex];
-                }
-            }
-        }
+        public string produceResult { get; set; }
+
+        /// <summary>
+        /// 单位
+        /// </summary>
+        public string unit { get; set; }
+
 
         //--------------回传---------------
         /// <summary>
-        /// 
+        /// 机台编号
         /// </summary>
         public string macCode { get; set; }
         /// <summary>
@@ -104,34 +76,24 @@ namespace HmiPro.Redux.Models {
         /// <summary>
         /// 工单
         /// </summary>
-        public string workCode {
-            get;
-            set;
-        }
+        public string workCode { get; set; }
         /// <summary>
         /// 是否合格，合格/不合格
         /// </summary>
         public string pass { get; set; }
 
-        private int _passSelectIndex = 0;
+        public int checkTimes { get; set; } = 1;
 
-        public int passSelectIndex {
-            get => _passSelectIndex;
-            set {
-                if (_passSelectIndex != value) {
-                    _passSelectIndex = value;
-                    if (_passSelectIndex < 0 || _passSelectIndex >= passSelect.Length) {
-                        return;
-                    }
-                    pass = passSelect[passSelectIndex];
-                    RaisePropertyChanged(nameof(passSelectIndex));
-                }
-            }
-        }
+
         public string[] passSelect { get; set; }
 
         public MqProcessCheck() {
             passSelect = new[] { "合格", "不合格" };
+            //    pass = passSelect[0];
+            //    if (selectParamArr?.Length > 0) {
+            //        produceResult = selectParamArr[0];
+            //    }
+            //}
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

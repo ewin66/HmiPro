@@ -75,40 +75,48 @@ namespace HmiPro.Redux.Reducers {
                     state.NavView.DMesSelectedMachineCode = action.MachineCode;
                     return state;
                 }).When<CpmActions.CpmUpdatedAll>((state, action) => {
-                    var cpmDetail = state.CpmDetailViewDict[action.MachineCode];
-                    //当前是否处于曲线界面
-                    //这个 6 表示为曲线界面 PageView 的 Index 为 6
-                    var isInChartView = state.DMewCoreViewDict[action.MachineCode].TabSelectedIndex == 5;
-                    var machineCode = action.MachineCode;
-                    foreach (var cpm in action.Cpms) {
-                        if (cpm.ValueType != SmParamType.Signal) {
-                            continue;
-                        }
-                        //过滤掉时间有问题的点
-                        var lastTime = cpmDetail.ChartCpmSourceDict[cpm.Code].LastOrDefault()?.PickTime;
-                        if (lastTime.HasValue && lastTime.Value >= cpm.PickTime) {
-                            continue;
-                        }
-                        var (maxThreshold, minThreshold) = getMaxMinThreshold(state, machineCode, cpm);
-                        var cpk = getCPK(cpm, maxThreshold, minThreshold);
-                        //减少主线程调用次数
-                        //只有更新的参数Id为选中的 && 当前处于曲线界面才唤起主线程 && 当前导航机台位参数机台
-                        if (state.NavView.DMesSelectedMachineCode == action.MachineCode && cpm.Code == cpmDetail.SelectedCpm?.Code && isInChartView) {
-                            Application.Current.Dispatcher.Invoke(() => {
-                                //有的机台会抛错，别问我为什么
+                    try {
+                        var cpmDetail = state.CpmDetailViewDict[action.MachineCode];
+                        //当前是否处于曲线界面
+                        //这个 6 表示为曲线界面 PageView 的 Index 为 6
+                        var isInChartView = state.DMewCoreViewDict[action.MachineCode].TabSelectedIndex == 5;
+                        var machineCode = action.MachineCode;
+                        foreach (var cpm in action.Cpms) {
+                            if (cpm.ValueType != SmParamType.Signal) {
+                                continue;
+                            }
+                            //过滤掉时间有问题的点
+                            var lastTime = cpmDetail.ChartCpmSourceDict[cpm.Code].LastOrDefault()?.PickTime;
+                            if (lastTime.HasValue && lastTime.Value >= cpm.PickTime) {
+                                continue;
+                            }
+                            var (maxThreshold, minThreshold) = getMaxMinThreshold(state, machineCode, cpm);
+                            var cpk = getCPK(cpm, maxThreshold, minThreshold);
+                            //减少主线程调用次数
+                            //只有更新的参数Id为选中的 && 当前处于曲线界面才唤起主线程 && 当前导航机台位参数机台
+                            if (state.NavView.DMesSelectedMachineCode == action.MachineCode &&
+                                cpm.Code == cpmDetail.SelectedCpm?.Code && isInChartView) {
+                                Application.Current.Dispatcher.Invoke(() => {
+                                    //有的机台会抛错，别问我为什么
+                                    try {
+                                        updateChartView(cpmDetail, cpm, maxThreshold, minThreshold, cpk);
+                                    }
+                                    catch (Exception e) {
+                                        //App.Logger.Warn("更新曲线异常" + e, true);
+                                    }
+                                });
+                            }
+                            else {
+                                //防止多线程错误
                                 try {
                                     updateChartView(cpmDetail, cpm, maxThreshold, minThreshold, cpk);
-                                } catch (Exception e) {
-                                    //App.Logger.Warn("更新曲线异常" + e, true);
                                 }
-                            });
-                        } else {
-                            //防止多线程错误
-                            try {
-                                updateChartView(cpmDetail, cpm, maxThreshold, minThreshold, cpk);
-                            } catch {
+                                catch { }
                             }
                         }
+                    }
+                    catch (Exception e) {
+                        App.Logger.Error("实时曲线异常",e);
                     }
                     return state;
                 });

@@ -17,49 +17,63 @@
             <dxmvvm:MapItem Source="input" Target="Visible"/>
         </dxmvvm:ObjectToObjectConverter>
     </UserControl.Resources>
-    <Grid>
-        <dxlc:LayoutControl Orientation="Vertical">
-            <dxlc:LayoutGroup Orientation="Vertical" HorizontalAlignment="Center" Header="工单"  Width="300" >
-                <dxlc:LayoutItem Label="工单" AddColonToLabel="True">
-                    <dxe:ComboBoxEdit IsReadOnly="false" IsTextEditable="False" ItemsSource="{Binding Path=Workcodes}" SelectedIndex="{Binding Path=SelectedIndex}"></dxe:ComboBoxEdit>
-                </dxlc:LayoutItem>
-            </dxlc:LayoutGroup>
-            <dxlc:LayoutGroup Header="检测项">
-                <dxg:GridControl Background="Transparent"  ItemsSource="{Binding Path=ProcessCheckItems}"  >
-                    <dxg:GridControl.View>
-                        <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False"  />
-                    </dxg:GridControl.View>
-                    <dxg:GridControl.Columns >
-                        <dxg:GridColumn Width="*"  Header="检测项目" FieldName="detectionItem"/>
-                        <dxg:GridColumn Width="*" Header="要求" FieldName="produceCod">
-                            <dxg:GridColumn.DisplayTemplate>
-                                <ControlTemplate>
-                                    <dxe:TextEdit Text="{Binding Path=RowData.Row.produceCod}" />
-                                </ControlTemplate>
-                            </dxg:GridColumn.DisplayTemplate>
-                        </dxg:GridColumn>
-                        <dxg:GridColumn Width="*" Header="检测值" >
-                            <dxg:GridColumn.DisplayTemplate>
-                                <ControlTemplate>
-                                    <Grid>
-                                        <dxe:TextEdit Text="{Binding Path=RowData.Row.produceResult}" Visibility="{Binding Path=RowData.Row.produceType,Converter={StaticResource inputStyle}}"/>
-                                        <dxe:ComboBoxEdit IsTextEditable="False" Visibility="{Binding Path=RowData.Row.produceType,Converter={StaticResource selectStyle}}" ItemsSource="{Binding Path=RowData.Row.selectParamArr}" SelectedIndex="{Binding Path=RowData.Row.selectIndex}"></dxe:ComboBoxEdit>
-                                    </Grid>
-                                </ControlTemplate>
-                            </dxg:GridColumn.DisplayTemplate>
-                        </dxg:GridColumn>
-                        <dxg:GridColumn Width="*" Header="单位" FieldName="unit" />
-                        <dxg:GridColumn Width="*" Header="合格" FieldName="passSelect">
-                            <dxg:GridColumn.DisplayTemplate>
-                                <ControlTemplate>
-                                    <dxe:ComboBoxEdit IsTextEditable="False" ItemsSource="{Binding Path=RowData.Row.passSelect}"
-                                        SelectedIndex="{Binding Path=RowData.Row.passSelectIndex}"></dxe:ComboBoxEdit>
-                                </ControlTemplate>
-                            </dxg:GridColumn.DisplayTemplate>
-                        </dxg:GridColumn>
-                    </dxg:GridControl.Columns>
-                </dxg:GridControl>
-            </dxlc:LayoutGroup>
-        </dxlc:LayoutControl>
-    </Grid>
+        <Grid>
+            <dxlc:LayoutControl Orientation="Vertical">
+                <dxlc:LayoutGroup Orientation="Horizontal" HorizontalAlignment="Center" Header="工单"  Width="600" >
+                    <dxlc:LayoutItem Label="工单" AddColonToLabel="True" >
+                        <dxe:ComboBoxEdit IsReadOnly="false" IsTextEditable="False" ItemsSource="{Binding Path=Workcodes}" SelectedIndex="{Binding Path=SelectedWorkCodeIndex}"></dxe:ComboBoxEdit>
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                        <dxe:ComboBoxEdit IsTextEditable="False" ItemsSource="{Binding Path=ClassType}" SelectedItem="{Binding Path=SelectedClassType}" ></dxe:ComboBoxEdit>
+                    </dxlc:LayoutItem>
+                    <dxlc:LayoutItem>
+                    <Button Content="提交" IsEnabled="{Binding Path=CanSubmit}" Command="{Binding Path=SubmitCommand}"></Button>
+                    </dxlc:LayoutItem>
+                </dxlc:LayoutGroup>
+                <dxlc:LayoutGroup Header="检测项">
+                    <dxg:GridControl Background="Transparent"  ItemsSource="{Binding Path=ProcessCheckItems}"  >
+                        <dxg:GridControl.View>
+                            <dxg:TableView   ShowGroupPanel="False" AllowEditing="False" AllowSorting="False" AllowBandMoving="False" AllowColumnFiltering="False"  AllowBandResizing="False"  />
+                        </dxg:GridControl.View>
+                        <dxg:GridControl.Columns >
+                            <dxg:GridColumn Width="*"  Header="检测项目" FieldName="detectionItem"/>
+                            <dxg:GridColumn Width="*" Header="要求" FieldName="produceCod">
+                                <dxg:GridColumn.DisplayTemplate>
+                                    <ControlTemplate>
+                                        <dxe:TextEdit Text="{Binding Path=RowData.Row.produceCod}" />
+                                    </ControlTemplate>
+                                </dxg:GridColumn.DisplayTemplate>
+                            </dxg:GridColumn>
+                            <dxg:GridColumn Width="*" Header="检测值" >
+                                <dxg:GridColumn.DisplayTemplate>
+                                    <ControlTemplate>
+                                        <Grid>
+                                            <dxe:TextEdit Text="{Binding Path=RowData.Row.produceResult}" Visibility="{Binding Path=RowData.Row.produceType,Converter={StaticResource inputStyle}}"/>
+                                            <dxe:ComboBoxEdit IsTextEditable="False" Visibility="{Binding Path=RowData.Row.produceType,Converter={StaticResource selectStyle}}" ItemsSource="{Binding Path=RowData.Row.selectParamArr}" SelectedItem="{Binding Path=RowData.Row.produceResult}"></dxe:ComboBoxEdit>
+
+                                        </Grid>
+                                    </ControlTemplate>
+                                </dxg:GridColumn.DisplayTemplate>
+                            </dxg:GridColumn>
+                            <dxg:GridColumn Width="0.5*" Header="单位" FieldName="unit" />
+                            <dxg:GridColumn Width="0.5*" Header="次数" FieldName="checkTimes">
+                                <dxg:GridColumn.DisplayTemplate>
+                                    <ControlTemplate>
+                                        <dxe:TextEdit Text="{Binding Path=RowData.Row.checkTimes}" />
+                                    </ControlTemplate>
+                                </dxg:GridColumn.DisplayTemplate>
+                            </dxg:GridColumn>
+                            <dxg:GridColumn Width="0.5*" Header="合格" FieldName="passSelect">
+                                <dxg:GridColumn.DisplayTemplate>
+                                    <ControlTemplate>
+                                        <dxe:ComboBoxEdit IsTextEditable="False" ItemsSource="{Binding Path=RowData.Row.passSelect}"
+                                        SelectedItem="{Binding Path=RowData.Row.pass}"></dxe:ComboBoxEdit>
+                                    </ControlTemplate>
+                                </dxg:GridColumn.DisplayTemplate>
+                            </dxg:GridColumn>
+                        </dxg:GridControl.Columns>
+                    </dxg:GridControl>
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutControl>
+        </Grid>
 </UserControl>
